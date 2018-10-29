@@ -9,14 +9,13 @@ def test_hungarian_translation():
     Y = np.roll(X, 10, axis=0)
     hu = Hungarian()
     hu.fit(X, Y)
-    assert_array_almost_equal(hu.transform(X) Y)
+    assert_array_almost_equal(hu.transform(X), Y)
 
     X = np.random.rand(20, 100)
     Y = np.roll(X, 10, axis=1)
     hu = Hungarian()
     hu.fit(X, Y)
-    X_permutated =
-    assert_array_almost_equal(hu.transform(X) Y)
+    assert_array_almost_equal(hu.transform(X), Y)
 
 
 def test_optimal_permutation_3Drotation():
