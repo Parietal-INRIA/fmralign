@@ -92,44 +92,105 @@ class Alignment(BaseEstimator, TransformerMixin):
 
 
 class Identity(Alignment):
+    """The simplest kind of alignment to be used as a baseline for benchmarks. RX = X
+    """
+
     def transform(self, X):
+        """returns X"""
         return X
 
 
 class ScaledOrthogonalAlignment(Alignment):
+    """Compute a mixing matrix R and a scaling sc such that
+    frobenius norm ||sc RX - Y||^2 is minimized and
+    R is an orthogonal matrix
+
+    Parameters
+    ---------
+    scaling : boolean, optional
+    Determines whether a scaling parameter is applied to improve transform.
+    R : optimal transform
+    """
+
     def init(self, scaling=True):
         self.scaling = scaling
         self.scale = None
 
     def fit(self, X, Y):
+        """ Fit orthogonal R s.t. ||sc RX - Y||^2
+        ----------
+        X: (n_timeframes, n_features) nd array
+            source data
+        Y: (n_timeframes, n_features) nd array
+            target data
+        """
         R, sc = scaled_procrustes(X, Y, scaling=self.scaling)
         self.scale = sc
         self.R = sc * R
         return self
 
     def transform(self, X):
+        """Transform X using optimal transform computed during fit.
+        """
         return self.sc * self.R.dot(X)
 
 
 class RidgeAlignment(Alignment):
+    """ Compute a mixing matrix R such that
+    frobenius norm || XR - Y ||^2 + alpha ||R||^2 is minimized with built-in cross-validation
+
+    Parameters
+    ----------
+    alpha : numpy array of shape [n_alphas]
+        Array of alpha values to try. Regularization strength; must be a positive float. Regularization
+        improves the conditioning of the problem and reduces the variance of
+        the estimates. Larger values specify stronger regularization.
+        Alpha corresponds to ``C^-1`` in other linear models.
+    cv : int, cross-validation generator or an iterable, optional
+    Determines the cross-validation splitting strategy. Possible inputs for cv are:
+    -None, to use the efficient Leave-One-Out cross-validation
+    - integer, to specify the number of folds.
+    - An object to be used as a cross-validation generator.
+    - An iterable yielding train/test splits.
+    """
+
     def init(self, alphas=[0.1, 1.0, 10.0, 100, 1000], cv=4):
         self.alphas = alphas
         self.cv = cv
 
     def fit(self, X, Y):
+        """ Fit R s.t. || XR - Y ||^2 + alpha ||R||^2 is minimized and choose best alpha through cross-validation
+        ----------
+        X: (n_timeframes, n_features) nd array
+            source data
+        Y: (n_timeframes, n_features) nd array
+            target data
+        """
         self.R = RidgeCV(alphas=self.alphas, fit_intercept=True,
                          normalize=False, scoring=None, cv=self.cv)
         self.R.fit(X, Y)
         return self
 
     def transform(self, X):
+        """Transform X using optimal transform computed during fit.
+        """
         return self.R.predict(X)
 
 
 class Hungarian(Alignment):
+    '''Compute the optmal permutation matrix of X toward Y'''
+
     def fit(self, X, Y):
+        '''Parameters
+        ----------
+        X: (n_timeframes, n_features) nd array
+            source data
+        Y: (n_timeframes, n_features) nd array
+            target data'''
         self.R = optimal_permutation(X, Y)
         return self
 
     def transform(self, X):
+        """Transform X using optimal permutation computed during fit.
+        """
         return self.R.dot(X)
