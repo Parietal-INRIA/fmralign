@@ -8,14 +8,14 @@ def test_scaled_procrustes_primal_dual():
     n, p = 100, 20
     X = np.random.randn(n, p)
     Y = np.random.randn(n, p)
-    R1, s1 = scaled_procrustes(X, Y, scale=True, primal=True)
-    R2, s2 = scaled_procrustes(X, Y, scale=True, primal=False)
+    R1, s1 = scaled_procrustes(X, Y, scaling=True, primal=True)
+    R2, s2 = scaled_procrustes(X, Y, scaling=True, primal=False)
     assert_array_almost_equal(R1, R2)
     n, p = 20, 100
     X = np.random.randn(n, p)
     Y = np.random.randn(n, p)
-    R1, s1 = scaled_procrustes(X, Y, scale=True, primal=True)
-    R2, s2 = scaled_procrustes(X, Y, scale=True, primal=False)
+    R1, s1 = scaled_procrustes(X, Y, scaling=True, primal=True)
+    R2, s2 = scaled_procrustes(X, Y, scaling=True, primal=False)
     assert_array_almost_equal(R1, R2)
 
 
@@ -61,8 +61,8 @@ def test_scaled_procrustes_multiplication():
     Y = Y - Y.mean(axis=1, keepdims=True)
 
     assert_array_almost_equal(
-        scaled_procrustes(X, Y, scale=True)[0], np.eye(3))
-    assert_array_almost_equal(scaled_procrustes(X, Y, scale=True)[1], 2)
+        scaled_procrustes(X, Y, scaling=True)[0], np.eye(3))
+    assert_array_almost_equal(scaled_procrustes(X, Y, scaling=True)[1], 2)
 
 
 def test_scaled_procrustes_basis_orthogonal():
@@ -96,7 +96,7 @@ def test_Scaled_Orthogonal_Alignment_transform():
         Y_ = np.random.rand(3, 4)
         Y.append(Y_)
 
-    ortho_al = ScaledOrthogonalAlignment(scale=True)
+    ortho_al = ScaledOrthogonalAlignment(scaling=True)
     ortho_al.fit(X)
     res = ortho_al.transform(Y)
     res_inv = ortho_al.inverse_transform(res)
