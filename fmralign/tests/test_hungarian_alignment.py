@@ -9,7 +9,6 @@ def test_hungarian_translation():
     Y = np.roll(X, 10, axis=0)
     hu = Hungarian()
     hu.fit(X, Y)
-    X_permutated =
     assert_array_almost_equal(hu.transform(X) Y)
 
     X = np.random.rand(20, 100)
