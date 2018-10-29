@@ -94,12 +94,12 @@ def _import_module_with_version_check(
     return module
 
 
-def _check_module_dependencies(is_FMRALIGN_installing=False):
-    """Throw an exception if FMRALIGN dependencies are not installed.
+def _check_module_dependencies(is_fmralign_installing=False):
+    """Throw an exception if fmralign dependencies are not installed.
 
     Parameters
     ----------
-    is_FMRALIGN_installing: boolean
+    is_fmralign_installing: boolean
         if True, only error on missing packages that cannot be auto-installed.
         if False, error on any missing package.
 
@@ -109,7 +109,7 @@ def _check_module_dependencies(is_FMRALIGN_installing=False):
     """
 
     for (module_name, module_metadata) in REQUIRED_MODULE_METADATA:
-        if not is_FMRALIGN_installing:
+        if not is_fmralign_installing:
             _import_module_with_version_check(
                 module_name=module_name,
                 minimum_version=module_metadata['min_version'],

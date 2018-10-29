@@ -1,0 +1,7 @@
+README.md
+fmralign.egg-info/PKG-INFO
+fmralign.egg-info/SOURCES.txt
+fmralign.egg-info/dependency_links.txt
+fmralign.egg-info/not-zip-safe
+fmralign.egg-info/requires.txt
+fmralign.egg-info/top_level.txt

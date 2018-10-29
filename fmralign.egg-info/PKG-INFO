@@ -1,0 +1,35 @@
+Metadata-Version: 1.2
+Name: fmralign
+Version: 0.0.1a0
+Summary: Functional alignment of fMRI data in Python
+Home-page: UNKNOWN
+Maintainer: Bertrand Thirion, Thomas Bazeille, Hugo Richard
+Maintainer-email: bertrand.thirion@inria.fr
+License: new BSD
+Description: # fmralign
+        Functional alignment and template estimation library for functional Magnetic Resonance Imaging (fMRI) data
+        
+        This library is meant to be a light-weight Python library that handles functional alignment tasks. It is compatible with and inspired from Nilearn (http://nilearn.github.io).
+        
+        Alternative implementations of these ideas can be found in the pymvpa (http://www.pymvpa.org) or brainiak (http://brainiak.org) packages.
+        
+        
+        
+Platform: UNKNOWN
+Classifier: Intended Audience :: Science/Research
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved
+Classifier: Programming Language :: C
+Classifier: Programming Language :: Python
+Classifier: Topic :: Software Development
+Classifier: Topic :: Scientific/Engineering
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: POSIX
+Classifier: Operating System :: Unix
+Classifier: Operating System :: MacOS
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3.3
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6

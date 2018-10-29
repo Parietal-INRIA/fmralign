@@ -32,10 +32,10 @@ def is_installing():
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 _VERSION_GLOBALS = load_version()
-DISTNAME = 'functional_alignment'
+DISTNAME = 'fmralign'
 DESCRIPTION = 'Functional alignment of fMRI data in Python'
-LONG_DESCRIPTION = open('README.rst').read()
-MAINTAINER = 'Bertrand Thirion, Thomas Bazeilles, Hugo Richard'
+LONG_DESCRIPTION = open('README.md').read()
+MAINTAINER = 'Bertrand Thirion, Thomas Bazeille, Hugo Richard'
 MAINTAINER_EMAIL = 'bertrand.thirion@inria.fr'
 URL = ''
 LICENSE = 'new BSD'
@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
     if is_installing():
         module_check_fn = _VERSION_GLOBALS['_check_module_dependencies']
-        module_check_fn(is_nistats_installing=True)
+        module_check_fn(is_fmralign_installing=True)
 
     install_requires = \
         ['%s>=%s' % (meta.get('pypi_name', mod), meta['min_version'])

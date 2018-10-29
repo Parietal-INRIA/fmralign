@@ -1,0 +1,7 @@
+README.md
+functional_alignment.egg-info/PKG-INFO
+functional_alignment.egg-info/SOURCES.txt
+functional_alignment.egg-info/dependency_links.txt
+functional_alignment.egg-info/not-zip-safe
+functional_alignment.egg-info/requires.txt
+functional_alignment.egg-info/top_level.txt
