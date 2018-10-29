@@ -1,11 +1,7 @@
 import numpy as np
 from sklearn.utils.testing import assert_array_almost_equal
 from fmralign.alignment_methods import scaled_procrustes, ScaledOrthogonalAlignment
-from scipy import linalg
 from scipy.linalg import orthogonal_procrustes
-# X / Y: (n_features, n_timeframes) ; R (n_features,n_features)
-from sklearn.metrics.pairwise import pairwise_distances
-from sklearn.utils.linear_assignment_ import linear_assignment
 
 
 def test_scaled_procrustes_primal_dual():
@@ -82,11 +78,15 @@ def test_scaled_procrustes_basis_orthogonal():
 
 
 def test_scaled_procrustes_scipy_orthogonal_procrustes():
+    X = np.random.rand(4, 4)
+    Y = np.random.rand(4, 4)
 
-    scaled_procrustes
+    R, _ = scaled_procrustes(X, Y)
+    R_s, _ = orthogonal_procrustes(Y, X)
+    assert_array_almost_equal(R, R_s)
 
 
-def test_scaled_procrustes_transform_inverse_transform():
+def test_Scaled_Orthogonal_Alignment_transform():
     X = []
     Y = []
 
