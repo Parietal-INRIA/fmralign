@@ -4,34 +4,24 @@ from fmralign.alignment_methods import optimal_permutation, Hungarian
 
 
 def test_hungarian_translation():
-    X = np.random.rand(100, 20)
+    X = np.array([[1., 4., 10], [1.5, 5, 10], [1, 5, 11], [1, 5.5, 8]]).T
+
     # translate the data matrix along one axis
-    Y = np.roll(X, 10, axis=0)
+    Y = np.roll(X, 2, axis=0)
+
+    opt = optimal_permutation(X, Y).toarray()
+    assert_array_almost_equal(opt.dot(X), Y)
+
     hu = Hungarian()
     hu.fit(X, Y)
     assert_array_almost_equal(hu.transform(X), Y)
 
-    X = np.random.rand(20, 100)
-    Y = np.roll(X, 10, axis=1)
+    U = np.vstack([X, 2 * X])
+    V = np.roll(U, 4, axis=0)
+
+    opt = optimal_permutation(U, V).toarray()
+    assert_array_almost_equal(opt.dot(U), V)
+
     hu = Hungarian()
-    hu.fit(X, Y)
-    assert_array_almost_equal(hu.transform(X), Y)
-
-
-def test_optimal_permutation_3Drotation():
-    R = np.array([[1., 0., 0.], [0., np.cos(1), -np.sin(1)],
-                  [0., np.sin(1), np.cos(1)]])
-    X = np.random.rand(3, 4)
-    X = X - X.mean(axis=1, keepdims=True)
-    Y = R.dot(X)
-
-    R_test = optimal_permutation(X, Y)
-    assert_array_almost_equal(
-        R.dot(np.array([0., 1., 0.])),
-        np.array([0., np.cos(1), np.sin(1)])
-    )
-    assert_array_almost_equal(
-        R.dot(np.array([0., 0., 1.])),
-        np.array([0., -np.sin(1), np.cos(1)])
-    )
-    assert_array_almost_equal(R, R_test)
+    hu.fit(U, V)
+    assert_array_almost_equal(hu.transform(U), V)
