@@ -1,13 +1,15 @@
 import numpy as np
 from sklearn.utils.testing import assert_array_almost_equal
-from fmralign.alignment_methods import RidgeAlignment
+from sklearn.utils.testing import assert_greater
+from fmralign.alignment_methods import RidgeAlignment, Identity
 
 
-n_samples = 40
-n_features = 100
-
-X = np.random.rand(n_samples, n_features)
-Y = np.random.rand(n_samples, n_features)
+def test_Identity():
+    X = np.random.randn(10, 20)
+    Y = np.random.randn(30, 20)
+    id = Identity()
+    id.fit(X, Y)
+    assert_array_almost_equal(X, id.transform(X))
 
 
 def test_parameters():
@@ -18,11 +20,15 @@ def test_parameters():
     assert(rh.cv == test_cv)
 
 
-def test_shapes():
+def test_RidgeAlignment():
+    n_samples, n_features = 6, 6
+    Y = np.random.randn(n_samples // 2, n_features)
+    Y = np.concatenate((Y, Y))
+    X = np.random.randn(n_samples // 2, n_features)
+    X = np.concatenate((X, X), axis=0)
     rh = RidgeAlignment()
     rh.alphas
     rh.fit(X, Y)
-    assert X.shape == (n_samples, n_features)
-    assert Y.shape == (n_samples, n_features)
-    assert rh.transform(X).shape == (n_samples, n_features)
-    assert_array_almost_equal(rh.transform(X), Y)
+    assert_greater(rh.R.score(X, Y), 0.9)
+    rh.R.score(X, Y)
+    assert_array_almost_equal(rh.transform(X), Y, decimal=1)

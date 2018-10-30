@@ -132,7 +132,7 @@ class ScaledOrthogonalAlignment(Alignment):
     def transform(self, X):
         """Transform X using optimal transform computed during fit.
         """
-        return self.sc * self.R.dot(X)
+        return self.scale * self.R.dot(X)
 
 
 class RidgeAlignment(Alignment):
@@ -161,9 +161,9 @@ class RidgeAlignment(Alignment):
     def fit(self, X, Y):
         """ Fit R s.t. || XR - Y ||^2 + alpha ||R||^2 is minimized and choose best alpha through cross-validation
         ----------
-        X: (n_timeframes, n_features) nd array
+        X: (n_samples, n_features) nd array
             source data
-        Y: (n_timeframes, n_features) nd array
+        Y: (n_samples, n_features) nd array
             target data
         """
         self.R = RidgeCV(alphas=self.alphas, fit_intercept=True,
