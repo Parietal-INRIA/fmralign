@@ -10,8 +10,17 @@ X = np.random.rand(n_samples, n_features)
 Y = np.random.rand(n_samples, n_features)
 
 
+def test_parameters():
+    test_alphas = [1, 2, 3]
+    test_cv = 6
+    rh = RidgeAlignment(alphas=test_alphas, cv=test_cv)
+    assert(rh.alphas == test_alphas)
+    assert(rh.cv == test_cv)
+
+
 def test_shapes():
     rh = RidgeAlignment()
+    rh.alphas
     rh.fit(X, Y)
     assert X.shape == (n_samples, n_features)
     assert Y.shape == (n_samples, n_features)

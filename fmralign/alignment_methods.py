@@ -63,9 +63,9 @@ def optimal_permutation(X, Y):
     """Compute the optmal permutation matrix of X toward Y
     Parameters
     ----------
-    X: (n_timeframes, n_features) nd array
+    X: (n_features, n_samples) nd array
         source data
-    Y: (n_timeframes, n_features) nd array
+    Y: (n_features, n_samples) nd array
         target data
 
     Returns
@@ -112,7 +112,7 @@ class ScaledOrthogonalAlignment(Alignment):
     R : optimal transform
     """
 
-    def init(self, scaling=True):
+    def __init__(self, scaling=True):
         self.scaling = scaling
         self.scale = None
 
@@ -154,8 +154,8 @@ class RidgeAlignment(Alignment):
     - An iterable yielding train/test splits.
     """
 
-    def init(self, alphas=[0.1, 1.0, 10.0, 100, 1000], cv=4):
-        self.alphas = alphas
+    def __init__(self, alphas=[0.1, 1.0, 10.0, 100, 1000], cv=4):
+        self.alphas = [alpha for alpha in alphas]
         self.cv = cv
 
     def fit(self, X, Y):
@@ -193,4 +193,4 @@ class Hungarian(Alignment):
     def transform(self, X):
         """Transform X using optimal permutation computed during fit.
         """
-        return self.R.dot(X)
+        return self.R.toarray().dot(X)
