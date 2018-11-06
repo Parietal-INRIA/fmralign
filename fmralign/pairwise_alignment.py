@@ -10,9 +10,8 @@ from sklearn.externals.joblib import Memory
 from sklearn.model_selection import ShuffleSplit
 from nilearn.input_data.masker_validation import check_embedded_nifti_masker
 
-from functional_alignment.alignment_methods import ScaledOrthogonalAlignment, RidgeAlignment, Identity, Hungarian
-from functional_alignment._utils import hierarchical_k_means, piecewise_transform
-from functional_alignment.utils import load_img
+from fmralign.alignment_methods import ScaledOrthogonalAlignment, RidgeAlignment, Identity, Hungarian
+from fmralign._utils import hierarchical_k_means, piecewise_transform, load_img
 
 
 def make_parcellation(X, mask, n_pieces, clustering_method='k_means', memory=Memory(cachedir=None)):
@@ -131,7 +130,7 @@ def fit_one_parcellation(X_, Y_, alignment_method, mask, n_pieces, clustering_me
         labels = make_parcellation(clustering_data, mask,
                                    n_pieces, clustering_method, memory=mem)
     else:
-        labels = np.zeros(mask.sum())
+        labels = np.zeros(int(mask.sum()), dtype=np.int8)
 
     fit = Parallel(n_jobs, backend="threading", verbose=verbose)(
         delayed(fit_one_piece)(
@@ -258,17 +257,8 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
             self.masker_.fit([X])
         else:
             self.masker_.fit()
-        self.mask_img_ = load_img(self.masker_.mask_img)
-
-        X_ = self.masker_.transform(X)
-        if type(X_) == list:
-            X_ = np.concatenate(X_, axis=0)
-        X_ = X_.T
-
-        Y_ = self.masker_.transform(Y)
-        if type(Y_) == list:
-            Y_ = np.concatenate(Y_, axis=0)
-        Y_ = Y_.T
+        X_, _ = load_img(self.masker_, X)
+        Y_, _ = load_img(self.masker_, Y)
 
         if self.perturbation:
             Y_ = Y_ - X_
