@@ -15,9 +15,9 @@ def test_Identity():
 def test_parameters():
     test_alphas = [1, 2, 3]
     test_cv = 6
-    rh = RidgeAlignment(alphas=test_alphas, cv=test_cv)
+    rh = RidgeAlignment(alphas=test_alphas, gcv=test_cv)
     assert(rh.alphas == test_alphas)
-    assert(rh.cv == test_cv)
+    assert(rh.gcv == test_cv)
 
 
 def test_RidgeAlignment():

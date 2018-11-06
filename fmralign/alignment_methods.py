@@ -146,7 +146,7 @@ class RidgeAlignment(Alignment):
         improves the conditioning of the problem and reduces the variance of
         the estimates. Larger values specify stronger regularization.
         Alpha corresponds to ``C^-1`` in other linear models.
-    cv : int, cross-validation generator or an iterable, optional
+    gcv : int, cross-validation generator or an iterable, optional
     Determines the cross-validation splitting strategy. Possible inputs for cv are:
     -None, to use the efficient Leave-One-Out cross-validation
     - integer, to specify the number of folds.
@@ -154,9 +154,9 @@ class RidgeAlignment(Alignment):
     - An iterable yielding train/test splits.
     """
 
-    def __init__(self, alphas=[0.1, 1.0, 10.0, 100, 1000], cv=4):
+    def __init__(self, alphas=[0.1, 1.0, 10.0, 100, 1000], gcv=4):
         self.alphas = [alpha for alpha in alphas]
-        self.cv = cv
+        self.gcv = gcv
 
     def fit(self, X, Y):
         """ Fit R s.t. || XR - Y ||^2 + alpha ||R||^2 is minimized and choose best alpha through cross-validation
@@ -167,7 +167,7 @@ class RidgeAlignment(Alignment):
             target data
         """
         self.R = RidgeCV(alphas=self.alphas, fit_intercept=True,
-                         normalize=False, scoring=None, cv=self.cv)
+                         normalize=False, scoring=None, cv=self.gcv)
         self.R.fit(X, Y)
         return self
 
