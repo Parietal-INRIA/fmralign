@@ -14,9 +14,9 @@ def scaled_procrustes(X, Y, scaling=False, primal=None):
     R is an orthogonal matrix
     Parameters
     ----------
-    X: (n_timeframes, n_features) nd array
+    X: (n_samples, n_features) nd array
         source data
-    Y: (n_timeframes, n_features) nd array
+    Y: (n_samples, n_features) nd array
         target data
     scaling: bool
         If scaling is true, computes a floating scaling parameter sc such that:
@@ -63,9 +63,9 @@ def optimal_permutation(X, Y):
     """Compute the optmal permutation matrix of X toward Y
     Parameters
     ----------
-    X: (n_features, n_samples) nd array
+    X: (n_samples, n_features) nd array
         source data
-    Y: (n_features, n_samples) nd array
+    Y: (n_samples, n_features) nd array
         target data
 
     Returns
@@ -73,10 +73,10 @@ def optimal_permutation(X, Y):
     permutation : (n_features, n_features) nd array
         transformation matrix
     """
-    dist = pairwise_distances(X, Y)
+    dist = pairwise_distances(X.T, Y.T)
     u = linear_assignment(dist)
     permutation = scipy.sparse.csr_matrix(
-        (np.ones(X.shape[0]), (u[:, 0], u[:, 1]))).T
+        (np.ones(X.shape[1]), (u[:, 0], u[:, 1]))).T
     return permutation
 
 
@@ -119,9 +119,9 @@ class ScaledOrthogonalAlignment(Alignment):
     def fit(self, X, Y):
         """ Fit orthogonal R s.t. ||sc RX - Y||^2
         ----------
-        X: (n_timeframes, n_features) nd array
+        X: (n_samples, n_features) nd array
             source data
-        Y: (n_timeframes, n_features) nd array
+        Y: (n_samples, n_features) nd array
             target data
         """
         R, sc = scaled_procrustes(X, Y, scaling=self.scaling)
@@ -183,9 +183,9 @@ class Hungarian(Alignment):
     def fit(self, X, Y):
         '''Parameters
         ----------
-        X: (n_timeframes, n_features) nd array
+        X: (n_samples, n_features) nd array
             source data
-        Y: (n_timeframes, n_features) nd array
+        Y: (n_samples, n_features) nd array
             target data'''
         self.R = optimal_permutation(X, Y)
         return self
@@ -193,4 +193,4 @@ class Hungarian(Alignment):
     def transform(self, X):
         """Transform X using optimal permutation computed during fit.
         """
-        return self.R.toarray().dot(X)
+        return self.R.toarray().dot(X.T).T
