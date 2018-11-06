@@ -1,7 +1,10 @@
 import numpy as np
 from sklearn.utils.testing import assert_array_almost_equal
 from fmralign.alignment_methods import scaled_procrustes, ScaledOrthogonalAlignment
+from fmralign.pairwise_alignment import PairwiseAlignment
 from scipy.linalg import orthogonal_procrustes
+from fmralign.tests.utils import _test_algo
+import nibabel
 
 
 def test_procrustes_null_input():
@@ -107,3 +110,52 @@ def test_scaled_procrustes_scipy_orthogonal_procrustes():
     R, _ = scaled_procrustes(X, Y)
     R_s, _ = orthogonal_procrustes(Y, X)
     assert_array_almost_equal(R, R_s)
+
+
+def test_pairwise_scaled_orthogonal_3Drotation():
+    R = np.array([[1., 0., 0.], [0., np.cos(1), -np.sin(1)],
+                  [0., np.sin(1), np.cos(1)]])
+    X = np.random.rand(3, 4)
+    X = X - X.mean(axis=1, keepdims=True)
+    Y = R.dot(X)
+
+    X = X[:, :, np.newaxis]
+    img1_3d = nibabel.Nifti1Image(X, np.eye(4))
+    Y = Y[:, :, np.newaxis]
+    img2_3d = nibabel.Nifti1Image(Y, np.eye(4))
+
+    mask_img = nibabel.Nifti1Image(np.ones(X.shape, dtype=np.int8), np.eye(4))
+    mask_img.shape
+    # With mask :
+    scaled_orthogonal_with_mask = PairwiseAlignment(
+        alignment_method='scaled_orthogonal', mask=mask_img)
+    _test_algo(scaled_orthogonal_with_mask,
+               img1_3d, img2_3d, mask=mask_img)
+
+    img1_4d = nibabel.Nifti1Image(np.stack([X, X]), np.eye(4))
+    img2_4d = nibabel.Nifti1Image(np.stack([Y, Y]), np.eye(4))
+    scaled_orthogonal_with_mask = PairwiseAlignment(
+        alignment_method='scaled_orthogonal', mask=mask_img)
+    _test_algo(scaled_orthogonal_with_mask,
+               img1_4d, img2_4d, mask=mask_img)
+
+
+def test_bagged_pairwise_scaled_orthogonal_3Drotation():
+    R = np.array([[1., 0., 0.], [0., np.cos(1), -np.sin(1)],
+                  [0., np.sin(1), np.cos(1)]])
+    X = np.random.rand(3, 4)
+    X = X - X.mean(axis=1, keepdims=True)
+    Y = R.dot(X)
+
+    X = X[:, :, np.newaxis]
+    Y = Y[:, :, np.newaxis]
+
+    mask_img = nibabel.Nifti1Image(np.ones(X.shape, dtype=np.int8), np.eye(4))
+    mask_img.shape
+
+    img1_4d = nibabel.Nifti1Image(np.stack([X, X]), np.eye(4))
+    img2_4d = nibabel.Nifti1Image(np.stack([Y, Y]), np.eye(4))
+    scaled_orthogonal_with_mask = PairwiseAlignment(
+        alignment_method='scaled_orthogonal', n_bags=2, mask=mask_img)
+    _test_algo(scaled_orthogonal_with_mask,
+               img1_4d, img2_4d, mask=mask_img)
