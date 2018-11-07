@@ -1,15 +1,7 @@
 import numpy as np
 from sklearn.utils.testing import assert_array_almost_equal
 from sklearn.utils.testing import assert_greater
-from fmralign.alignment_methods import RidgeAlignment, Identity
-
-
-def test_Identity():
-    X = np.random.randn(10, 20)
-    Y = np.random.randn(30, 20)
-    id = Identity()
-    id.fit(X, Y)
-    assert_array_almost_equal(X, id.transform(X))
+from fmralign.alignment_methods import RidgeAlignment
 
 
 def test_parameters():
