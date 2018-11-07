@@ -157,5 +157,52 @@ def test_bagged_pairwise_scaled_orthogonal_3Drotation():
     img2_4d = nibabel.Nifti1Image(np.stack([Y, Y]), np.eye(4))
     scaled_orthogonal_with_mask = PairwiseAlignment(
         alignment_method='scaled_orthogonal', n_bags=2, mask=mask_img)
+
+    _test_algo(scaled_orthogonal_with_mask,
+               img1_4d, img2_4d, mask=mask_img)
+
+
+def test_bagged_pairwise_scaled_orthogonal_3Drotation_2jobs():
+    R = np.array([[1., 0., 0.], [0., np.cos(1), -np.sin(1)],
+                  [0., np.sin(1), np.cos(1)]])
+    X = np.random.rand(3, 4)
+    X = X - X.mean(axis=1, keepdims=True)
+    Y = R.dot(X)
+
+    X = X[:, :, np.newaxis]
+    Y = Y[:, :, np.newaxis]
+
+    mask_img = nibabel.Nifti1Image(np.ones(X.shape, dtype=np.int8), np.eye(4))
+    mask_img.shape
+
+    img1_4d = nibabel.Nifti1Image(np.stack([X, X]), np.eye(4))
+    img2_4d = nibabel.Nifti1Image(np.stack([Y, Y]), np.eye(4))
+    scaled_orthogonal_with_mask = PairwiseAlignment(
+        alignment_method='scaled_orthogonal', n_bags=2, mask=mask_img, n_jobs=2)
+
+    _test_algo(scaled_orthogonal_with_mask,
+               img1_4d, img2_4d, mask=mask_img)
+
+
+def test_piecewise_scaled_orthogonal_3Drotation():
+    R = np.array([[1., 0., 0.], [0., np.cos(1), -np.sin(1)],
+                  [0., np.sin(1), np.cos(1)]])
+    X = np.random.rand(3, 4)
+    X = X - X.mean(axis=1, keepdims=True)
+    Y = R.dot(X)
+    X.shape
+
+    X = np.hstack([X, X])
+    Y = np.hstack([Y, Y])
+    X = X[:, :, np.newaxis]
+
+    Y = Y[:, :, np.newaxis]
+    mask_img = nibabel.Nifti1Image(np.ones(X.shape, dtype=np.int8), np.eye(4))
+
+    img1_4d = nibabel.Nifti1Image(np.stack([X, X]), np.eye(4))
+    img2_4d = nibabel.Nifti1Image(np.stack([Y, Y]), np.eye(4))
+    scaled_orthogonal_with_mask = PairwiseAlignment(
+        alignment_method='scaled_orthogonal', n_pieces=20, mask=mask_img)
+
     _test_algo(scaled_orthogonal_with_mask,
                img1_4d, img2_4d, mask=mask_img)
