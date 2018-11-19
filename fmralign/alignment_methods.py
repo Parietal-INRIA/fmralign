@@ -108,8 +108,9 @@ class ScaledOrthogonalAlignment(Alignment):
     Parameters
     ---------
     scaling : boolean, optional
-    Determines whether a scaling parameter is applied to improve transform.
-    R : optimal transform
+        Determines whether a scaling parameter is applied to improve transform.
+    R : ndarray (n_features, n_features)
+        Optimal orthogonal transform
     """
 
     def __init__(self, scaling=True):
@@ -136,27 +137,28 @@ class ScaledOrthogonalAlignment(Alignment):
 
 
 class RidgeAlignment(Alignment):
-    """ Compute a mixing matrix R such that
-    frobenius norm || XR - Y ||^2 + alpha ||R||^2 is minimized with built-in cross-validation
+    """ Compute an scikit-estimator R using a mixing matrix M such that
+    frobenius norm || XM - Y ||^2 + alpha ||M||^2 is minimized with built-in cross-validation
 
     Parameters
     ----------
+    R : scikit-estimator from sklearn.linear_model.RidgeCV with method fit, predict
     alpha : numpy array of shape [n_alphas]
         Array of alpha values to try. Regularization strength; must be a positive float. Regularization
         improves the conditioning of the problem and reduces the variance of
         the estimates. Larger values specify stronger regularization.
         Alpha corresponds to ``C^-1`` in other linear models.
-    gcv : int, cross-validation generator or an iterable, optional
-    Determines the cross-validation splitting strategy. Possible inputs for cv are:
-    -None, to use the efficient Leave-One-Out cross-validation
-    - integer, to specify the number of folds.
-    - An object to be used as a cross-validation generator.
-    - An iterable yielding train/test splits.
+    cv : int, cross-validation generator or an iterable, optional
+        Determines the cross-validation splitting strategy. Possible inputs for cv are:
+        -None, to use the efficient Leave-One-Out cross-validation
+        - integer, to specify the number of folds.
+        - An object to be used as a cross-validation generator.
+        - An iterable yielding train/test splits.
     """
 
-    def __init__(self, alphas=[0.1, 1.0, 10.0, 100, 1000], gcv=4):
+    def __init__(self, alphas=[0.1, 1.0, 10.0, 100, 1000], cv=4):
         self.alphas = [alpha for alpha in alphas]
-        self.gcv = gcv
+        self.cv = cv
 
     def fit(self, X, Y):
         """ Fit R s.t. || XR - Y ||^2 + alpha ||R||^2 is minimized and choose best alpha through cross-validation
@@ -167,7 +169,7 @@ class RidgeAlignment(Alignment):
             target data
         """
         self.R = RidgeCV(alphas=self.alphas, fit_intercept=True,
-                         normalize=False, scoring=None, cv=self.gcv)
+                         normalize=False, scoring=None, cv=self.cv)
         self.R.fit(X, Y)
         return self
 
@@ -178,7 +180,13 @@ class RidgeAlignment(Alignment):
 
 
 class Hungarian(Alignment):
-    '''Compute the optmal permutation matrix of X toward Y'''
+    '''Compute the optmal permutation matrix of X toward Y
+
+    Parameters
+    ----------
+    R : scipy.sparse.csr_matrix
+        Mixing matrix containing the optimal permutation
+    '''
 
     def fit(self, X, Y):
         '''Parameters
