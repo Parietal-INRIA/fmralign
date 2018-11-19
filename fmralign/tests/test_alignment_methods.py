@@ -1,5 +1,14 @@
 import numpy as np
 from sklearn.utils.testing import assert_array_almost_equal
+from fmralign.alignment_methods import Identity, optimal_permutation, Hungarian
+from fmralign.pairwise_alignment import PairwiseAlignment
+from fmralign.tests.utils import assert_algo_transform_almost_exactly, random_nifti
+
+
+# Test Scaled procrustes
+
+import numpy as np
+from sklearn.utils.testing import assert_array_almost_equal
 from fmralign.alignment_methods import scaled_procrustes, ScaledOrthogonalAlignment
 from scipy.linalg import orthogonal_procrustes
 
@@ -44,21 +53,6 @@ def test_scaled_procrustes_3Drotation():
         np.array([0., -np.sin(1), np.cos(1)])
     )
     assert_array_almost_equal(R, R_test)
-
-
-def test_Scaled_Orthogonal_Alignment_3Drotation():
-    R = np.array([[1., 0., 0.], [0., np.cos(1), -np.sin(1)],
-                  [0., np.sin(1), np.cos(1)]])
-    X = np.random.rand(3, 4)
-    X = X - X.mean(axis=1, keepdims=True)
-    Y = R.dot(X)
-
-    ortho_al = ScaledOrthogonalAlignment(scaling=False)
-    ortho_al.fit(X.T, Y.T)
-
-    assert_array_almost_equal(
-        ortho_al.transform(X),
-        Y)
 
 
 def test_scaled_procrustes_orthogonalmatrix():
@@ -107,3 +101,63 @@ def test_scaled_procrustes_scipy_orthogonal_procrustes():
     R, _ = scaled_procrustes(X, Y)
     R_s, _ = orthogonal_procrustes(Y, X)
     assert_array_almost_equal(R, R_s)
+
+
+def test_hungarian_translation():
+    X = np.array([[1., 4., 10], [1.5, 5, 10], [1, 5, 11], [1, 5.5, 8]])
+
+    # translate the data matrix along features axis (voxels are permutated)
+    Y = np.roll(X, 2, axis=1)
+
+    opt = optimal_permutation(X, Y).toarray()
+    assert_array_almost_equal(opt.dot(X.T).T, Y)
+
+    U = np.vstack([X.T, 2 * X.T])
+    V = np.roll(U, 4, axis=1)
+
+    opt = optimal_permutation(U, V).toarray()
+    assert_array_almost_equal(opt.dot(U.T).T, V)
+
+
+def test_identity_class():
+    X = np.random.randn(10, 20)
+    Y = np.random.randn(30, 20)
+    id = Identity()
+    id.fit(X, Y)
+    assert_array_almost_equal(X, id.transform(X))
+
+
+def test_Scaled_Orthogonal_Alignment_3Drotation():
+    R = np.array([[1., 0., 0.], [0., np.cos(1), -np.sin(1)],
+                  [0., np.sin(1), np.cos(1)]])
+    X = np.random.rand(3, 4)
+    X = X - X.mean(axis=1, keepdims=True)
+    Y = R.dot(X)
+
+    ortho_al = ScaledOrthogonalAlignment(scaling=False)
+    ortho_al.fit(X.T, Y.T)
+
+    assert_array_almost_equal(
+        ortho_al.transform(X),
+        Y)
+
+
+def test_parameters():
+    test_alphas = [1, 2, 3]
+    test_cv = 6
+    rh = RidgeAlignment(alphas=test_alphas, gcv=test_cv)
+    assert(rh.alphas == test_alphas)
+    assert(rh.gcv == test_cv)
+
+
+def test_RidgeAlignment():
+    n_samples, n_features = 6, 6
+    Y = np.random.randn(n_samples // 2, n_features)
+    Y = np.concatenate((Y, Y))
+    X = np.random.randn(n_samples // 2, n_features)
+    X = np.concatenate((X, X), axis=0)
+    rh = RidgeAlignment()
+    rh.alphas
+    rh.fit(X, Y)
+    assert_greater(rh.R.score(X, Y), 0.9)
+    assert_array_almost_equal(rh.transform(X), Y, decimal=1)
