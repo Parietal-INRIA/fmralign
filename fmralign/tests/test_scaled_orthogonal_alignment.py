@@ -3,7 +3,7 @@ from sklearn.utils.testing import assert_array_almost_equal
 from fmralign.alignment_methods import scaled_procrustes, ScaledOrthogonalAlignment
 from fmralign.pairwise_alignment import PairwiseAlignment
 from scipy.linalg import orthogonal_procrustes
-from fmralign.tests.utils import _test_algo
+from fmralign.tests.utils import assert_algo_transform_almost_exactly
 import nibabel
 
 
@@ -129,15 +129,15 @@ def test_pairwise_scaled_orthogonal_3Drotation():
     # With mask :
     scaled_orthogonal_with_mask = PairwiseAlignment(
         alignment_method='scaled_orthogonal', mask=mask_img)
-    _test_algo(scaled_orthogonal_with_mask,
-               img1_3d, img2_3d, mask=mask_img)
+    assert_algo_transform_almost_exactly(scaled_orthogonal_with_mask,
+                                         img1_3d, img2_3d, mask=mask_img)
 
     img1_4d = nibabel.Nifti1Image(np.stack([X, X]), np.eye(4))
     img2_4d = nibabel.Nifti1Image(np.stack([Y, Y]), np.eye(4))
     scaled_orthogonal_with_mask = PairwiseAlignment(
         alignment_method='scaled_orthogonal', mask=mask_img)
-    _test_algo(scaled_orthogonal_with_mask,
-               img1_4d, img2_4d, mask=mask_img)
+    assert_algo_transform_almost_exactly(scaled_orthogonal_with_mask,
+                                         img1_4d, img2_4d, mask=mask_img)
 
 
 def test_bagged_pairwise_scaled_orthogonal_3Drotation():
@@ -158,8 +158,8 @@ def test_bagged_pairwise_scaled_orthogonal_3Drotation():
     scaled_orthogonal_with_mask = PairwiseAlignment(
         alignment_method='scaled_orthogonal', n_bags=2, mask=mask_img)
 
-    _test_algo(scaled_orthogonal_with_mask,
-               img1_4d, img2_4d, mask=mask_img)
+    assert_algo_transform_almost_exactly(scaled_orthogonal_with_mask,
+                                         img1_4d, img2_4d, mask=mask_img)
 
 
 def test_bagged_pairwise_scaled_orthogonal_3Drotation_2jobs():
@@ -180,8 +180,8 @@ def test_bagged_pairwise_scaled_orthogonal_3Drotation_2jobs():
     scaled_orthogonal_with_mask = PairwiseAlignment(
         alignment_method='scaled_orthogonal', n_bags=2, mask=mask_img, n_jobs=2)
 
-    _test_algo(scaled_orthogonal_with_mask,
-               img1_4d, img2_4d, mask=mask_img)
+    assert_algo_transform_almost_exactly(scaled_orthogonal_with_mask,
+                                         img1_4d, img2_4d, mask=mask_img)
 
 
 def test_piecewise_scaled_orthogonal_3Drotation():
@@ -190,19 +190,15 @@ def test_piecewise_scaled_orthogonal_3Drotation():
     X = np.random.rand(3, 4)
     X = X - X.mean(axis=1, keepdims=True)
     Y = R.dot(X)
-    X.shape
 
-    X = np.hstack([X, X])
-    Y = np.hstack([Y, Y])
-    X = X[:, :, np.newaxis]
-
-    Y = Y[:, :, np.newaxis]
+    X = np.stack([X, X])
+    Y = np.stack([Y, Y])
     mask_img = nibabel.Nifti1Image(np.ones(X.shape, dtype=np.int8), np.eye(4))
 
-    img1_4d = nibabel.Nifti1Image(np.stack([X, X]), np.eye(4))
-    img2_4d = nibabel.Nifti1Image(np.stack([Y, Y]), np.eye(4))
+    img1_4d = nibabel.Nifti1Image(np.stack([X, X, X, X, X, X]), np.eye(4))
+    img2_4d = nibabel.Nifti1Image(np.stack([Y, Y, Y, Y, Y, Y]), np.eye(4))
     scaled_orthogonal_with_mask = PairwiseAlignment(
-        alignment_method='scaled_orthogonal', n_pieces=20, mask=mask_img)
+        alignment_method='scaled_orthogonal', n_pieces=2, n_bags=20, mask=mask_img)
 
-    _test_algo(scaled_orthogonal_with_mask,
-               img1_4d, img2_4d, mask=mask_img)
+    assert_algo_transform_almost_exactly(scaled_orthogonal_with_mask,
+                                         img1_4d, img2_4d, mask=mask_img)

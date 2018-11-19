@@ -291,11 +291,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
            See http://nilearn.github.io/manipulating_images/input_output.html
            predicted data
         """
-
-        X_ = self.masker_.transform(X)
-        if type(X_) == list:
-            X_ = np.concatenate(X_, axis=0)
-        X_ = X_.T
+        X_, _ = load_img(self.masker_, X)
 
         X_transform = np.zeros_like(X_)
         for i in range(self.n_bags):
