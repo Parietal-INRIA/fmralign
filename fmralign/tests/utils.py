@@ -5,7 +5,7 @@ import numpy as np
 import nibabel
 
 
-def class_align_better_than_identity(algo, X, Y):
+def assert_class_align_better_than_identity(algo, X, Y):
     """ Tests that the given algorithm align ndarrays X into Y better than identity. This alignment is measured through r2 score.
     """
     algo.fit(X, Y)
