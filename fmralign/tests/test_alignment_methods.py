@@ -121,8 +121,8 @@ def test_Scaled_Orthogonal_Alignment_3Drotation():
     ortho_al.fit(X.T, Y.T)
 
     assert_array_almost_equal(
-        ortho_al.transform(X),
-        Y)
+        ortho_al.transform(X.T),
+        Y.T)
 
 
 def test_RidgeAlignment():
@@ -147,9 +147,14 @@ def test_all_classes_better_than_identity():
     id = Identity()
     id.fit(X, Y)
     assert_array_almost_equal(X, id.transform(X))
-
-    for algo in [ScaledOrthogonalAlignment(), RidgeAlignment(), Hungarian()]:
-        assert_class_align_better_than_identity(algo, X, Y)
+    from sklearn.metrics import r2_score
+    for algo in [RidgeAlignment(), Hungarian(), ScaledOrthogonalAlignment()]:
+        print algo
+        algo.fit(X, Y)
+        identity_baseline_score = r2_score(
+            Y, X)
+        algo_score = r2_score(Y, algo.transform(X))
+        assert_greater(algo_score, identity_baseline_score)
 
     n_samples, n_features = 20, 100
     X = np.random.randn(n_samples, n_features)
