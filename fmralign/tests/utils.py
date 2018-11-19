@@ -8,7 +8,9 @@ import nibabel
 def assert_class_align_better_than_identity(algo, X, Y):
     """ Tests that the given algorithm align ndarrays X into Y better than identity. This alignment is measured through r2 score.
     """
+    print algo
     algo.fit(X, Y)
+    print algo.R.shape
     identity_baseline_score = r2_score(
         Y, X)
     algo_score = r2_score(Y, algo.transform(X))
