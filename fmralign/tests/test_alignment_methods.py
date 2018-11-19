@@ -13,15 +13,15 @@ from fmralign.alignment_methods import scaled_procrustes, ScaledOrthogonalAlignm
 from scipy.linalg import orthogonal_procrustes
 
 
-def test_procrustes_null_input():
+def test_scaled_procrustes_algorithmic():
+    # Test with null inputs
     X = np.random.randn(10, 20)
     Y = np.zeros_like(X)
     R = np.eye(X.shape[1])
     R_test, _ = scaled_procrustes(X, Y)
     assert_array_almost_equal(R, R_test.toarray())
 
-
-def test_scaled_procrustes_primal_dual():
+    # Test that primal and dual give same results
     n, p = 100, 20
     X = np.random.randn(n, p)
     Y = np.random.randn(n, p)
@@ -35,8 +35,28 @@ def test_scaled_procrustes_primal_dual():
     R2, s2 = scaled_procrustes(X, Y, scaling=True, primal=False)
     assert_array_almost_equal(R1.dot(X.T), R2.dot(X.T))
 
+    # Test if scaled_procrustes basis is
+    X = np.random.rand(3, 4)
+    X = X - X.mean(axis=1, keepdims=True)
 
-def test_scaled_procrustes_3Drotation():
+    Y = np.random.rand(3, 4)
+    Y = Y - Y.mean(axis=1, keepdims=True)
+
+    R, _ = scaled_procrustes(X.T, Y.T)
+    assert_array_almost_equal(R.dot(R.T), np.eye(R.shape[0]))
+    assert_array_almost_equal(R.T.dot(R), np.eye(R.shape[0]))
+
+    # Test if it sticks to scipy scaled procrustes in a simple case
+    X = np.random.rand(4, 4)
+    Y = np.random.rand(4, 4)
+
+    R, _ = scaled_procrustes(X, Y)
+    R_s, _ = orthogonal_procrustes(Y, X)
+    assert_array_almost_equal(R, R_s)
+
+
+def test_scaled_procrustes_on_simple_exact_cases():
+    # 3D Rotation
     R = np.array([[1., 0., 0.], [0., np.cos(1), -np.sin(1)],
                   [0., np.sin(1), np.cos(1)]])
     X = np.random.rand(3, 4)
@@ -54,8 +74,7 @@ def test_scaled_procrustes_3Drotation():
     )
     assert_array_almost_equal(R, R_test)
 
-
-def test_scaled_procrustes_orthogonalmatrix():
+    # Orthogonal Matrix
     v = 10
     k = 10
     rnd_matrix = np.random.rand(v, k)
@@ -66,8 +85,7 @@ def test_scaled_procrustes_orthogonalmatrix():
     R_test, _ = scaled_procrustes(X.T, Y.T)
     assert_array_almost_equal(R_test, R)
 
-
-def test_scaled_procrustes_multiplication():
+    # Scale diff
     X = np.array([[1., 2., 3., 4.],
                   [5., 3., 4., 6.],
                   [7., 8., -5., -2.]])
@@ -82,28 +100,7 @@ def test_scaled_procrustes_multiplication():
     assert_array_almost_equal(scaled_procrustes(X.T, Y.T, scaling=True)[1], 2)
 
 
-def test_scaled_procrustes_basis_orthogonal():
-    X = np.random.rand(3, 4)
-    X = X - X.mean(axis=1, keepdims=True)
-
-    Y = np.random.rand(3, 4)
-    Y = Y - Y.mean(axis=1, keepdims=True)
-
-    R, _ = scaled_procrustes(X.T, Y.T)
-    assert_array_almost_equal(R.dot(R.T), np.eye(R.shape[0]))
-    assert_array_almost_equal(R.T.dot(R), np.eye(R.shape[0]))
-
-
-def test_scaled_procrustes_scipy_orthogonal_procrustes():
-    X = np.random.rand(4, 4)
-    Y = np.random.rand(4, 4)
-
-    R, _ = scaled_procrustes(X, Y)
-    R_s, _ = orthogonal_procrustes(Y, X)
-    assert_array_almost_equal(R, R_s)
-
-
-def test_hungarian_translation():
+def test_hungarian_on_translation_case():
     X = np.array([[1., 4., 10], [1.5, 5, 10], [1, 5, 11], [1, 5.5, 8]])
 
     # translate the data matrix along features axis (voxels are permutated)
@@ -120,6 +117,9 @@ def test_hungarian_translation():
 
 
 def test_identity_class():
+
+
+def test_all_classes_better_than_identity():
     X = np.random.randn(10, 20)
     Y = np.random.randn(30, 20)
     id = Identity()
