@@ -1,27 +1,19 @@
 import numpy as np
-from sklearn.utils.testing import assert_array_almost_equal
-from fmralign.alignment_methods import Identity, optimal_permutation, Hungarian
-from fmralign.pairwise_alignment import PairwiseAlignment
-from fmralign.tests.utils import assert_algo_transform_almost_exactly, random_nifti
-
-
-# Test Scaled procrustes
-
-import numpy as np
-from sklearn.utils.testing import assert_array_almost_equal
-from fmralign.alignment_methods import scaled_procrustes, ScaledOrthogonalAlignment
+from sklearn.utils.testing import assert_array_almost_equal, assert_greater
 from scipy.linalg import orthogonal_procrustes
+from fmralign.alignment_methods import scaled_procrustes, optimal_permutation, Identity, ScaledOrthogonalAlignment, Hungarian, RidgeAlignment
+from fmralign.tests.utils import assert_class_align_better_than_identity
 
 
 def test_scaled_procrustes_algorithmic():
-    # Test with null inputs
+    '''Test Scaled procrustes'''
     X = np.random.randn(10, 20)
     Y = np.zeros_like(X)
     R = np.eye(X.shape[1])
     R_test, _ = scaled_procrustes(X, Y)
     assert_array_almost_equal(R, R_test.toarray())
 
-    # Test that primal and dual give same results
+    '''Test that primal and dual give same results'''
     n, p = 100, 20
     X = np.random.randn(n, p)
     Y = np.random.randn(n, p)
@@ -35,7 +27,7 @@ def test_scaled_procrustes_algorithmic():
     R2, s2 = scaled_procrustes(X, Y, scaling=True, primal=False)
     assert_array_almost_equal(R1.dot(X.T), R2.dot(X.T))
 
-    # Test if scaled_procrustes basis is
+    '''Test if scaled_procrustes basis is'''
     X = np.random.rand(3, 4)
     X = X - X.mean(axis=1, keepdims=True)
 
@@ -46,7 +38,7 @@ def test_scaled_procrustes_algorithmic():
     assert_array_almost_equal(R.dot(R.T), np.eye(R.shape[0]))
     assert_array_almost_equal(R.T.dot(R), np.eye(R.shape[0]))
 
-    # Test if it sticks to scipy scaled procrustes in a simple case
+    ''' Test if it sticks to scipy scaled procrustes in a simple case'''
     X = np.random.rand(4, 4)
     Y = np.random.rand(4, 4)
 
@@ -56,7 +48,7 @@ def test_scaled_procrustes_algorithmic():
 
 
 def test_scaled_procrustes_on_simple_exact_cases():
-    # 3D Rotation
+    '''3D Rotation'''
     R = np.array([[1., 0., 0.], [0., np.cos(1), -np.sin(1)],
                   [0., np.sin(1), np.cos(1)]])
     X = np.random.rand(3, 4)
@@ -74,7 +66,7 @@ def test_scaled_procrustes_on_simple_exact_cases():
     )
     assert_array_almost_equal(R, R_test)
 
-    # Orthogonal Matrix
+    '''Orthogonal Matrix'''
     v = 10
     k = 10
     rnd_matrix = np.random.rand(v, k)
@@ -85,7 +77,7 @@ def test_scaled_procrustes_on_simple_exact_cases():
     R_test, _ = scaled_procrustes(X.T, Y.T)
     assert_array_almost_equal(R_test, R)
 
-    # Scale diff
+    '''Scaled Matrix'''
     X = np.array([[1., 2., 3., 4.],
                   [5., 3., 4., 6.],
                   [7., 8., -5., -2.]])
@@ -100,8 +92,9 @@ def test_scaled_procrustes_on_simple_exact_cases():
     assert_array_almost_equal(scaled_procrustes(X.T, Y.T, scaling=True)[1], 2)
 
 
-def test_hungarian_on_translation_case():
-    X = np.array([[1., 4., 10], [1.5, 5, 10], [1, 5, 11], [1, 5.5, 8]])
+def test_optimal_permutation_on_translation_case():
+    ''' Test optimal permutation method'''
+    X = np.array([[1., 4., 10], [1.5, 5, 10], [1, 5, 11], [1, 5.5, 8]]).T
 
     # translate the data matrix along features axis (voxels are permutated)
     Y = np.roll(X, 2, axis=1)
@@ -116,18 +109,8 @@ def test_hungarian_on_translation_case():
     assert_array_almost_equal(opt.dot(U.T).T, V)
 
 
-def test_identity_class():
-
-
-def test_all_classes_better_than_identity():
-    X = np.random.randn(10, 20)
-    Y = np.random.randn(30, 20)
-    id = Identity()
-    id.fit(X, Y)
-    assert_array_almost_equal(X, id.transform(X))
-
-
 def test_Scaled_Orthogonal_Alignment_3Drotation():
+    '''Test Scaled_Orthogonal_Alignment on an exact case'''
     R = np.array([[1., 0., 0.], [0., np.cos(1), -np.sin(1)],
                   [0., np.sin(1), np.cos(1)]])
     X = np.random.rand(3, 4)
@@ -142,15 +125,8 @@ def test_Scaled_Orthogonal_Alignment_3Drotation():
         Y)
 
 
-def test_parameters():
-    test_alphas = [1, 2, 3]
-    test_cv = 6
-    rh = RidgeAlignment(alphas=test_alphas, gcv=test_cv)
-    assert(rh.alphas == test_alphas)
-    assert(rh.gcv == test_cv)
-
-
 def test_RidgeAlignment():
+    ''' Test Ridge Alignment on a simple case'''
     n_samples, n_features = 6, 6
     Y = np.random.randn(n_samples // 2, n_features)
     Y = np.concatenate((Y, Y))
@@ -161,3 +137,23 @@ def test_RidgeAlignment():
     rh.fit(X, Y)
     assert_greater(rh.R.score(X, Y), 0.9)
     assert_array_almost_equal(rh.transform(X), Y, decimal=1)
+
+
+def test_all_classes_better_than_identity():
+    '''Test all classes on random case'''
+    n_samples, n_features = 100, 20
+    X = np.random.randn(n_samples, n_features)
+    Y = np.random.randn(n_samples, n_features)
+    id = Identity()
+    id.fit(X, Y)
+    assert_array_almost_equal(X, id.transform(X))
+
+    for algo in [ScaledOrthogonalAlignment(), RidgeAlignment(), Hungarian()]:
+        assert_class_align_better_than_identity(algo, X, Y)
+
+    n_samples, n_features = 20, 100
+    X = np.random.randn(n_samples, n_features)
+    Y = np.random.randn(n_samples, n_features)
+
+    for algo in [ScaledOrthogonalAlignment(), RidgeAlignment(), Hungarian()]:
+        assert_class_align_better_than_identity(algo, X, Y)
