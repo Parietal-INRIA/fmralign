@@ -56,7 +56,7 @@ def scaled_procrustes(X, Y, scaling=False, primal=None):
         sc = s.sum() / (np.linalg.norm(X) ** 2)
     else:
         sc = 1
-    return R, sc
+    return R.T, sc
 
 
 def optimal_permutation(X, Y):
@@ -118,7 +118,7 @@ class ScaledOrthogonalAlignment(Alignment):
         self.scale = None
 
     def fit(self, X, Y):
-        """ Fit orthogonal R s.t. ||sc RX - Y||^2
+        """ Fit orthogonal R s.t. ||sc XR - Y||^2
         ----------
         X: (n_timeframes, n_features) nd array
             source data
@@ -133,7 +133,7 @@ class ScaledOrthogonalAlignment(Alignment):
     def transform(self, X):
         """Transform X using optimal transform computed during fit.
         """
-        return self.scale * self.R.dot(X)
+        return self.scale * X.dot(self.R)
 
 
 class RidgeAlignment(Alignment):
@@ -201,4 +201,4 @@ class Hungarian(Alignment):
     def transform(self, X):
         """Transform X using optimal permutation computed during fit.
         """
-        return self.R.toarray().dot(X)
+        return X.dot(self.R.toarray())
