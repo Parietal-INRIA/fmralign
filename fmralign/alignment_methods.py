@@ -63,9 +63,9 @@ def optimal_permutation(X, Y):
     """Compute the optmal permutation matrix of X toward Y
     Parameters
     ----------
-    X: (n_features, n_samples) nd array
+    X: (n_samples, n_features) nd array
         source data
-    Y: (n_features, n_samples) nd array
+    Y: (n_samples, n_features) nd array
         target data
 
     Returns
@@ -73,10 +73,10 @@ def optimal_permutation(X, Y):
     permutation : (n_features, n_features) nd array
         transformation matrix
     """
-    dist = pairwise_distances(X, Y)
+    dist = pairwise_distances(X.T, Y.T)
     u = linear_assignment(dist)
     permutation = scipy.sparse.csr_matrix(
-        (np.ones(X.shape[0]), (u[:, 0], u[:, 1]))).T
+        (np.ones(X.shape[1]), (u[:, 0], u[:, 1]))).T
     return permutation
 
 
