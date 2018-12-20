@@ -53,6 +53,7 @@ REQUIRED_MODULE_METADATA = (
         'min_version': '0.5.0',
         'required_at_installation': True,
         'install_info': _FMRALIGN_INSTALL_MSG})
+)
 
 
 def _import_module_with_version_check(
@@ -64,9 +65,9 @@ def _import_module_with_version_check(
     from distutils.version import LooseVersion
 
     try:
-        module=__import__(module_name)
+        module = __import__(module_name)
     except ImportError as exc:
-        user_friendly_info=('Module "{0}" could not be found. {1}').format(
+        user_friendly_info = ('Module "{0}" could not be found. {1}').format(
             module_name,
             install_info or 'Please install it properly to use FMRALIGN.')
         exc.args += (user_friendly_info,)
@@ -78,13 +79,13 @@ def _import_module_with_version_check(
         raise
 
     # Avoid choking on modules with no __version__ attribute
-    module_version=getattr(module, '__version__', '0.0.0')
+    module_version = getattr(module, '__version__', '0.0.0')
 
-    version_too_old=(not LooseVersion(module_version) >=
+    version_too_old = (not LooseVersion(module_version) >=
                        LooseVersion(minimum_version))
 
     if version_too_old:
-        message=(
+        message = (
             'A {module_name} version of at least {minimum_version} '
             'is required to use FMRALIGN. {module_version} was found. '
             'Please upgrade {module_name}').format(
