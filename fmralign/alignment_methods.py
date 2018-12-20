@@ -6,6 +6,8 @@ from sklearn.metrics.pairwise import pairwise_distances
 from sklearn.linear_model import RidgeCV
 from scipy import linalg
 from scipy.sparse import diags
+import ot
+from scipy.spatial.distance import cdist
 
 
 def scaled_procrustes(X, Y, scaling=False, primal=None):
@@ -202,3 +204,49 @@ class Hungarian(Alignment):
         """Transform X using optimal permutation computed during fit.
         """
         return X.dot(self.R.toarray())
+
+
+class OptimalTransportAlignment(Alignment):
+    '''Compute the optmal coupling between X and Y with entropic regularization
+
+    Parameters
+    ----------
+    R : scipy.sparse.csr_matrix
+        Mixing matrix containing the optimal permutation
+    solver : str (optional)
+        solver from OT called to find optimal coupling 'sinkhorn', 'greenkhorn', 'sinkhorn_stabilized','sinkhorn_epsilon_scaling', 'exact' see POT/ot/bregman on github for source code of solvers
+    metric : str(optional)
+        metric used to create transport cost matrix, see full list in scipy.spatial.distance.cdist doc
+    reg : int (optional)
+        level of entropic regularization
+    '''
+
+    def __init__(self, solver='sinkhorn_epsilon_scaling', metric='euclidean', reg=1):
+        self.solver = solver
+        self.metric = metric
+        self.reg = reg
+
+    def fit(self, X, Y):
+        '''Parameters
+        ----------
+        X: (n_samples, n_features) nd array
+            source data
+        Y: (n_samples, n_features) nd array
+            target data'''
+        n = len(X)
+        a = np.ones(n) * 1 / n
+        b = np.ones(n) * 1 / n
+
+        M = cdist(X, Y, metric=self.metric)
+
+        if self.solver == 'exact':
+            self.R = ot.lp.emd(a, b, M) * n
+        else:
+            self.R = ot.sinkhorn(
+                a, b, M, self.reg, method=self.solver) * n
+        return self
+
+    def transform(self, X):
+        """Transform X using optimal coupling computed during fit.
+        """
+        return self.R.dot(X)
