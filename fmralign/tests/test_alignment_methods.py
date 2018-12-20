@@ -149,7 +149,7 @@ def test_all_classes_better_than_identity():
     assert_array_almost_equal(X, id.transform(X))
     from sklearn.metrics import r2_score
     for algo in [RidgeAlignment(), Hungarian(), ScaledOrthogonalAlignment()]:
-        print algo
+        print(algo)
         algo.fit(X, Y)
         identity_baseline_score = r2_score(
             Y, X)
