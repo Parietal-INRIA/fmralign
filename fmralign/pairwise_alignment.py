@@ -10,7 +10,7 @@ from sklearn.externals.joblib import Memory
 from sklearn.model_selection import ShuffleSplit
 from nilearn.input_data.masker_validation import check_embedded_nifti_masker
 
-from fmralign.alignment_methods import ScaledOrthogonalAlignment, RidgeAlignment, Identity, Hungarian
+from fmralign.alignment_methods import ScaledOrthogonalAlignment, RidgeAlignment, Identity, Hungarian, OptimalTransportAlignment
 from fmralign._utils import hierarchical_k_means, piecewise_transform, load_img
 
 
@@ -87,7 +87,9 @@ def fit_one_piece(X_i, Y_i, alignment_method):
         alignment_algo = RidgeAlignment()
     elif alignment_method == 'permutation':
         alignment_algo = Hungarian()
-    elif isinstance(alignment_method, (Identity, ScaledOrthogonalAlignment, RidgeAlignment, Hungarian)):
+    elif alignment_method == 'optimal_transport':
+        alignment_algo = OptimalTransportAlignment()
+    elif isinstance(alignment_method, (Identity, ScaledOrthogonalAlignment, RidgeAlignment, Hungarian, OptimalTransportAlignment)):
         alignment_algo = copy.deepcopy(alignment_method)
     alignment_algo.fit(X_i.T, Y_i.T)
 
@@ -157,7 +159,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         ----------
         alignment_method: string
         algorithm used to perform alignment between regions
-        'identity', 'scaled_orthogonal', 'ridge_cv', 'permutation' or an instance of one of alignment classes provided in functional_alignment.alignment_methods
+        'identity', 'scaled_orthogonal', 'ridge_cv', 'permutation', 'optimal_transport' or an instance of one of alignment classes provided in functional_alignment.alignment_methods
         n_pieces: int, optional
             number of regions in which the data is parcellated for alignment
             if 1 the alignment is done on full scale data, if >1, the voxels are clustered and alignment is performed on each cluster applied to X and Y.
