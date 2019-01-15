@@ -6,6 +6,8 @@ from sklearn.metrics.pairwise import pairwise_distances
 from sklearn.linear_model import RidgeCV
 from scipy import linalg
 from scipy.sparse import diags
+import ot
+from scipy.spatial.distance import cdist
 
 
 def scaled_procrustes(X, Y, scaling=False, primal=None):
@@ -56,7 +58,7 @@ def scaled_procrustes(X, Y, scaling=False, primal=None):
         sc = s.sum() / (np.linalg.norm(X) ** 2)
     else:
         sc = 1
-    return R, sc
+    return R.T, sc
 
 
 def optimal_permutation(X, Y):
@@ -108,8 +110,9 @@ class ScaledOrthogonalAlignment(Alignment):
     Parameters
     ---------
     scaling : boolean, optional
-    Determines whether a scaling parameter is applied to improve transform.
-    R : optimal transform
+        Determines whether a scaling parameter is applied to improve transform.
+    R : ndarray (n_features, n_features)
+        Optimal orthogonal transform
     """
 
     def __init__(self, scaling=True):
@@ -117,7 +120,7 @@ class ScaledOrthogonalAlignment(Alignment):
         self.scale = None
 
     def fit(self, X, Y):
-        """ Fit orthogonal R s.t. ||sc RX - Y||^2
+        """ Fit orthogonal R s.t. ||sc XR - Y||^2
         ----------
         X: (n_samples, n_features) nd array
             source data
@@ -132,31 +135,32 @@ class ScaledOrthogonalAlignment(Alignment):
     def transform(self, X):
         """Transform X using optimal transform computed during fit.
         """
-        return self.scale * self.R.dot(X)
+        return self.scale * X.dot(self.R)
 
 
 class RidgeAlignment(Alignment):
-    """ Compute a mixing matrix R such that
-    frobenius norm || XR - Y ||^2 + alpha ||R||^2 is minimized with built-in cross-validation
+    """ Compute an scikit-estimator R using a mixing matrix M such that
+    frobenius norm || XM - Y ||^2 + alpha ||M||^2 is minimized with built-in cross-validation
 
     Parameters
     ----------
+    R : scikit-estimator from sklearn.linear_model.RidgeCV with method fit, predict
     alpha : numpy array of shape [n_alphas]
         Array of alpha values to try. Regularization strength; must be a positive float. Regularization
         improves the conditioning of the problem and reduces the variance of
         the estimates. Larger values specify stronger regularization.
         Alpha corresponds to ``C^-1`` in other linear models.
-    gcv : int, cross-validation generator or an iterable, optional
-    Determines the cross-validation splitting strategy. Possible inputs for cv are:
-    -None, to use the efficient Leave-One-Out cross-validation
-    - integer, to specify the number of folds.
-    - An object to be used as a cross-validation generator.
-    - An iterable yielding train/test splits.
+    cv : int, cross-validation generator or an iterable, optional
+        Determines the cross-validation splitting strategy. Possible inputs for cv are:
+        -None, to use the efficient Leave-One-Out cross-validation
+        - integer, to specify the number of folds.
+        - An object to be used as a cross-validation generator.
+        - An iterable yielding train/test splits.
     """
 
-    def __init__(self, alphas=[0.1, 1.0, 10.0, 100, 1000], gcv=4):
+    def __init__(self, alphas=[0.1, 1.0, 10.0, 100, 1000], cv=4):
         self.alphas = [alpha for alpha in alphas]
-        self.gcv = gcv
+        self.cv = cv
 
     def fit(self, X, Y):
         """ Fit R s.t. || XR - Y ||^2 + alpha ||R||^2 is minimized and choose best alpha through cross-validation
@@ -167,7 +171,7 @@ class RidgeAlignment(Alignment):
             target data
         """
         self.R = RidgeCV(alphas=self.alphas, fit_intercept=True,
-                         normalize=False, scoring=None, cv=self.gcv)
+                         normalize=False, scoring=None, cv=self.cv)
         self.R.fit(X, Y)
         return self
 
@@ -178,7 +182,13 @@ class RidgeAlignment(Alignment):
 
 
 class Hungarian(Alignment):
-    '''Compute the optmal permutation matrix of X toward Y'''
+    '''Compute the optmal permutation matrix of X toward Y
+
+    Parameters
+    ----------
+    R : scipy.sparse.csr_matrix
+        Mixing matrix containing the optimal permutation
+    '''
 
     def fit(self, X, Y):
         '''Parameters
@@ -193,4 +203,54 @@ class Hungarian(Alignment):
     def transform(self, X):
         """Transform X using optimal permutation computed during fit.
         """
+<<<<<<< HEAD
         return self.R.toarray().dot(X.T).T
+=======
+        return X.dot(self.R.toarray())
+
+
+class OptimalTransportAlignment(Alignment):
+    '''Compute the optmal coupling between X and Y with entropic regularization
+
+    Parameters
+    ----------
+    R : scipy.sparse.csr_matrix
+        Mixing matrix containing the optimal permutation
+    solver : str (optional)
+        solver from OT called to find optimal coupling 'sinkhorn', 'greenkhorn', 'sinkhorn_stabilized','sinkhorn_epsilon_scaling', 'exact' see POT/ot/bregman on github for source code of solvers
+    metric : str(optional)
+        metric used to create transport cost matrix, see full list in scipy.spatial.distance.cdist doc
+    reg : int (optional)
+        level of entropic regularization
+    '''
+
+    def __init__(self, solver='sinkhorn_epsilon_scaling', metric='euclidean', reg=1):
+        self.solver = solver
+        self.metric = metric
+        self.reg = reg
+
+    def fit(self, X, Y):
+        '''Parameters
+        ----------
+        X: (n_samples, n_features) nd array
+            source data
+        Y: (n_samples, n_features) nd array
+            target data'''
+        n = len(X)
+        a = np.ones(n) * 1 / n
+        b = np.ones(n) * 1 / n
+
+        M = cdist(X, Y, metric=self.metric)
+
+        if self.solver == 'exact':
+            self.R = ot.lp.emd(a, b, M) * n
+        else:
+            self.R = ot.sinkhorn(
+                a, b, M, self.reg, method=self.solver) * n
+        return self
+
+    def transform(self, X):
+        """Transform X using optimal coupling computed during fit.
+        """
+        return self.R.dot(X)
+>>>>>>> alignment_methods_tests
