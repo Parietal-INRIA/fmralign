@@ -27,7 +27,7 @@ def assert_algo_transform_almost_exactly(algo, img1, img2, mask=None):
         img2), masker.transform(imtest), decimal=6)
 
 
-def random_nifti(shape):
+def random_niimg(shape):
     """ Produces a random nifti image of shape (shape) and the appropriate mask to use it.
     """
     im = nibabel.Nifti1Image(np.random.random_sample(shape), np.eye(4))
