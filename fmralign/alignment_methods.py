@@ -203,9 +203,6 @@ class Hungarian(Alignment):
     def transform(self, X):
         """Transform X using optimal permutation computed during fit.
         """
-<<<<<<< HEAD
-        return self.R.toarray().dot(X.T).T
-=======
         return X.dot(self.R.toarray())
 
 
@@ -253,4 +250,3 @@ class OptimalTransportAlignment(Alignment):
         """Transform X using optimal coupling computed during fit.
         """
         return self.R.dot(X)
->>>>>>> alignment_methods_tests
