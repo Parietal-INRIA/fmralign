@@ -119,20 +119,6 @@ def test_optimal_permutation_on_translation_case():
     assert_array_almost_equal(opt.dot(U.T).T, V)
 
 
-def test_RidgeAlignment():
-    ''' Test Ridge Alignment on a simple case'''
-    n_samples, n_features = 6, 6
-    Y = np.random.randn(n_samples // 2, n_features)
-    Y = np.concatenate((Y, Y))
-    X = np.random.randn(n_samples // 2, n_features)
-    X = np.concatenate((X, X), axis=0)
-    rh = RidgeAlignment()
-    rh.alphas
-    rh.fit(X, Y)
-    assert_greater(rh.R.score(X, Y), 0.9)
-    assert_array_almost_equal(rh.transform(X), Y, decimal=1)
-
-
 def test_all_classes_better_than_identity():
     '''Test all classes on random case'''
     n_samples, n_features = 100, 20
