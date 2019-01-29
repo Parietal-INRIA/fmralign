@@ -49,6 +49,10 @@ REQUIRED_MODULE_METADATA = (
     ('matplotlib', {
         'min_version': '1.5.0',
         'install_info': _FMRALIGN_INSTALL_MSG})
+    ('POT', {
+        'min_version': '0.5.0',
+        'required_at_installation': True,
+        'install_info': _FMRALIGN_INSTALL_MSG})
 )
 
 
@@ -114,4 +118,3 @@ def _check_module_dependencies(is_fmralign_installing=False):
                 module_name=module_name,
                 minimum_version=module_metadata['min_version'],
                 install_info=module_metadata.get('install_info'))
-
