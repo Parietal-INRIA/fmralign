@@ -1,8 +1,10 @@
+import time
 import numpy as np
 import nibabel
-from sklearn.utils.testing import assert_array_almost_equal
+from sklearn.utils.testing import assert_array_almost_equal, assert_greater
+from nilearn.input_data import NiftiMasker
 from fmralign.pairwise_alignment import PairwiseAlignment
-from fmralign.tests.utils import assert_algo_transform_almost_exactly, random_niimg, assert_model_align_better_than_identity
+from fmralign.tests.utils import assert_algo_transform_almost_exactly, random_niimg, assert_model_align_better_than_identity, zero_mean_coefficient_determination
 from fmralign.alignment_methods import optimal_permutation, Hungarian
 
 
@@ -17,39 +19,39 @@ def test_pairwise_identity():
                      'n_bags': 10, 'mask': mask_img, 'n_jobs': 2}
                  ]
     for args in args_list:
+        start = time.time()
         algo = PairwiseAlignment(**args)
         assert_algo_transform_almost_exactly(
             algo, img1, img1, mask=mask_img)
+        print(time.time() - start)
 
 
 def test_models_against_identity():
     img1, mask_img = random_niimg((14, 12, 10, 5))
     img2, _ = random_niimg((14, 12, 10, 5))
-    import numpy as np
-    algo = PairwiseAlignment(
-        alignment_method="optimal_transport", mask=mask_img, n_pieces=2, n_bags=1, n_jobs=1)
-    algo.fit(img1, img2)
-    for alignment_method in ['optimal_transport', 'scaled_orthogonal', 'permutation',  'ridge_cv']:
+    masker = NiftiMasker(mask_img=mask_img)
+    masker.fit()
+    ground_truth = masker.transform(img2)
+    identity_baseline_score = zero_mean_coefficient_determination(
+        ground_truth, masker.transform(img1))
+    for alignment_method in ['permutation',  'ridge_cv', 'scaled_orthogonal', 'optimal_transport']:
         algo = PairwiseAlignment(
             alignment_method=alignment_method, mask=mask_img, n_pieces=2, n_bags=1, n_jobs=1)
         algo.fit(img1, img2)
         print(algo.labels_[0].shape)
-        print(algo.fit_[0][0].R.shape)
-        print(algo.fit_[0][1].R.shape)
-    algo.labels_.shape
-    algo.fit_[0][1].R
-    algo.fit_[0][0].R.shape
-    algo.labels_[0].shape
+        if alignment_method != 'ridge_cv':
+            print(algo.labels_[0].shape)
+            print(algo.fit_[0][0].R.shape)
+            print(algo.fit_[0][1].R.shape)
+        im_test = algo.transform(img1)
+        algo_score = zero_mean_coefficient_determination(ground_truth, masker.transform(
+            im_test))
+        assert_greater(algo_score, identity_baseline_score)
+    '''
+
     for label in np.unique(algo.labels_[0]):
         X_transform[labels == i] = estimators[i].transform(X[labels == i])
-
-    im_test = algo.transform(img1)
-    for alignment_method in ['scaled_orthogonal', 'permutation',  'ridge_cv', 'optimal_transport']:
-        algo = PairwiseAlignment(
-            alignment_method=alignment_method, mask=mask_img, n_pieces=2, n_bags=1, n_jobs=1)
-        print(alignment_method)
-        assert_model_align_better_than_identity(
-            algo, img1, img2, mask_img)
+    '''
 
 
 def test_hungarian_pairwise_alignment():
