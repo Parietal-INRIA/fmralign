@@ -135,7 +135,7 @@ class ScaledOrthogonalAlignment(Alignment):
     def transform(self, X):
         """Transform X using optimal transform computed during fit.
         """
-        return self.scale * X.dot(self.R)
+        return X.dot(self.R)
 
 
 class RidgeAlignment(Alignment):
@@ -197,7 +197,7 @@ class Hungarian(Alignment):
             source data
         Y: (n_samples, n_features) nd array
             target data'''
-        self.R = optimal_permutation(X, Y)
+        self.R = optimal_permutation(X, Y).T
         return self
 
     def transform(self, X):
@@ -214,7 +214,7 @@ class OptimalTransportAlignment(Alignment):
     R : scipy.sparse.csr_matrix
         Mixing matrix containing the optimal permutation
     solver : str (optional)
-        solver from OT called to find optimal coupling 'sinkhorn', 'greenkhorn', 'sinkhorn_stabilized','sinkhorn_epsilon_scaling', 'exact' see POT/ot/bregman on github for source code of solvers
+        solver from POT called to find optimal coupling 'sinkhorn', 'greenkhorn', 'sinkhorn_stabilized','sinkhorn_epsilon_scaling', 'exact' see POT/ot/bregman on github for source code of solvers
     metric : str(optional)
         metric used to create transport cost matrix, see full list in scipy.spatial.distance.cdist doc
     reg : int (optional)
@@ -233,11 +233,11 @@ class OptimalTransportAlignment(Alignment):
             source data
         Y: (n_samples, n_features) nd array
             target data'''
-        n = len(X)
+        n = len(X.T)
         a = np.ones(n) * 1 / n
         b = np.ones(n) * 1 / n
 
-        M = cdist(X, Y, metric=self.metric)
+        M = cdist(X.T, Y.T, metric=self.metric)
 
         if self.solver == 'exact':
             self.R = ot.lp.emd(a, b, M) * n
@@ -249,4 +249,4 @@ class OptimalTransportAlignment(Alignment):
     def transform(self, X):
         """Transform X using optimal coupling computed during fit.
         """
-        return self.R.dot(X)
+        return X.dot(self.R)
