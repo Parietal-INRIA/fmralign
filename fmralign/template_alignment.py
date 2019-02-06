@@ -4,7 +4,7 @@ import copy
 from joblib import Parallel, delayed
 from sklearn.externals.joblib import Memory
 from nilearn.image import mean_img, index_img
-from functional_alignment.pairwise_alignment import PairwiseAlignment
+from fmralign.pairwise_alignment import PairwiseAlignment
 from nilearn.input_data import NiftiMasker
 from sklearn.linear_model import LinearRegression
 
@@ -51,7 +51,8 @@ def align_template_to_images(template, imgs, method_alignment, n_pieces, n_bags,
     deformation_operators = []
     for img in imgs:
         template_copy = copy.copy(template)
-        piecewise_estimator = PairwiseAlignment(n_pieces=n_pieces, alignment_method=method_alignment, mask=masker clustering_method='k_means', joint_clustering=False, n_bags=n_bags, n_jobs=n_jobs)
+        piecewise_estimator = PairwiseAlignment(n_pieces=n_pieces, alignment_method=method_alignment,
+                                                mask=masker, clustering_method='k_means', joint_clustering=False, n_bags=n_bags, n_jobs=n_jobs)
         piecewise_estimator.fit(template_copy, img)
         deformation_operators.append(piecewise_estimator)
         # data_csr = sparse.csr_matrix(data)
@@ -114,7 +115,8 @@ def align_images_to_template(imgs, template, method_alignment, n_pieces, n_bags,
     '''
     aligned_imgs = []
     for img in imgs:
-        piecewise_estimator = PairwiseAlignment(n_pieces=n_pieces, alignment_method=method_alignment, mask=masker clustering_method='k_means', joint_clustering=False, n_bags=n_bags, n_jobs=n_jobs)
+        piecewise_estimator = PairwiseAlignment(n_pieces=n_pieces, alignment_method=method_alignment,
+                                                mask=masker, clustering_method='k_means', joint_clustering=False, n_bags=n_bags, n_jobs=n_jobs)
         piecewise_estimator.fit(img, template)
         aligned_imgs.append(piecewise_estimator.transform(img))
     return aligned_imgs
@@ -153,7 +155,8 @@ def map_template_to_image(img, train_index, template, n_pieces, method_alignment
     '''
 
     mapping_image = index_img(img, train_index)
-    mapping = PairwiseAlignment(n_pieces=n_pieces, alignment_method=method_alignment, mask=masker clustering_method='k_means', joint_clustering=False, n_bags=n_bags, n_jobs=n_jobs)
+    mapping = PairwiseAlignment(n_pieces=n_pieces, alignment_method=method_alignment, mask=masker,
+                                clustering_method='k_means', joint_clustering=False, n_bags=n_bags, n_jobs=n_jobs)
     mapping.fit(mapping_image, img)
     return mapping
 
