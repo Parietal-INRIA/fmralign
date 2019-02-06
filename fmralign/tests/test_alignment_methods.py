@@ -119,25 +119,31 @@ def test_optimal_permutation_on_translation_case():
     assert_array_almost_equal(opt.dot(U.T).T, V)
 
 
-def test_all_classes_better_than_identity():
+def test_all_classes_R_and_pred_shape_and_better_than_identity():
+    from scipy.sparse.csc import csc_matrix
     '''Test all classes on random case'''
-    n_samples, n_features = 100, 20
-    X = np.random.randn(n_samples, n_features)
-    Y = np.random.randn(n_samples, n_features)
-    id = Identity()
-    id.fit(X, Y)
-    assert_array_almost_equal(X, id.transform(X))
-    for algo in [RidgeAlignment(), ScaledOrthogonalAlignment(), OptimalTransportAlignment(), Hungarian()]:
-        print(algo)
-        algo.fit(X, Y)
+
+    for n_samples, n_features in [(100, 20), (20, 100)]:
+        X = np.random.randn(n_samples, n_features)
+        Y = np.random.randn(n_samples, n_features)
+        id = Identity()
+        id.fit(X, Y)
+        assert_array_almost_equal(X, id.transform(X))
         identity_baseline_score = zero_mean_coefficient_determination(
             Y, X)
-        algo_score = zero_mean_coefficient_determination(Y, algo.transform(X))
-        assert_greater(algo_score, identity_baseline_score)
-
-    n_samples, n_features = 20, 100
-    X = np.random.randn(n_samples, n_features)
-    Y = np.random.randn(n_samples, n_features)
-
-    for algo in [ScaledOrthogonalAlignment(), RidgeAlignment(), OptimalTransportAlignment(), Hungarian()]:
-        assert_class_align_better_than_identity(algo, X, Y)
+        for algo in [RidgeAlignment(), ScaledOrthogonalAlignment(), OptimalTransportAlignment(), Hungarian()]:
+            print(algo)
+            algo.fit(X, Y)
+            # test that permutation matrix is of shape (20, 20) except for Ridge
+            if type(algo.R) == csc_matrix:
+                R = algo.R.toarray()
+                assert(R.shape == (n_features, n_features))
+            elif type(algo) != RidgeAlignment:
+                R = algo.R
+                assert(R.shape == (n_features, n_features))
+            # test pred shape and loss improvement compared to identity
+            X_pred = algo.transform(X)
+            assert(X_pred.shape == X.shape)
+            algo_score = zero_mean_coefficient_determination(
+                Y, X_pred)
+            assert_greater(algo_score, identity_baseline_score)
