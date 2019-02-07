@@ -250,6 +250,8 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         Returns
         -------
         self
+
+        TODO: for now, load_img make transposition that is useless for alignment methods and so we have to transpose to fit() or transform() masked nifti. We could remove it but it would need to make modifications in most functions that use or act on X / Y : utils.piecewise_transform, utils.load_img, fit_one_parcellation, fit_one_piece, generate_Xi_Yi and make_parcellation.
         """
         self.masker_ = check_embedded_nifti_masker(self)
         self.masker_.n_jobs = 1  # self.n_jobs
