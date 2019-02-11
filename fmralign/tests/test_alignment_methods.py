@@ -132,7 +132,6 @@ def test_all_classes_R_and_pred_shape_and_better_than_identity():
         identity_baseline_score = zero_mean_coefficient_determination(
             Y, X)
         for algo in [RidgeAlignment(), ScaledOrthogonalAlignment(), OptimalTransportAlignment(), Hungarian()]:
-            print(algo)
             algo.fit(X, Y)
             # test that permutation matrix is of shape (20, 20) except for Ridge
             if type(algo.R) == csc_matrix:

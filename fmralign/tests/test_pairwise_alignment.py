@@ -19,11 +19,9 @@ def test_pairwise_identity():
                      'n_bags': 10, 'mask': mask_img, 'n_jobs': 2}
                  ]
     for args in args_list:
-        start = time.time()
         algo = PairwiseAlignment(**args)
         assert_algo_transform_almost_exactly(
             algo, img1, img1, mask=mask_img)
-        print(time.time() - start)
 
 
 def test_models_against_identity():
