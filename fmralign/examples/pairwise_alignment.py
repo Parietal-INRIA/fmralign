@@ -1,5 +1,5 @@
 from nilearn.datasets import fetch_neurovault, neurovault, fetch_neurovault_ids
-from .fetch_example_data import fetch_subjects
+from fmralign.fetch_example_data import fetch_ibc_subjects_contrasts
 from fmralign.pairwise_alignment import PairwiseAlignment
 
 im_1_train, im_2_train(RL), LR
