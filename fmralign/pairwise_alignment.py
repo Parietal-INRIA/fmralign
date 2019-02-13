@@ -82,7 +82,7 @@ def fit_one_piece(X_i, Y_i, alignment_method):
     return alignment_algo
 
 
-def fit_one_parcellation(X_, Y_, alignment_method, mask, n_pieces, clustering_method, joint_clustering, clustering_index, mem,
+def fit_one_parcellation(X_, Y_, alignment_method, mask, n_pieces, clustering_method, clustering_index, mem,
                          n_jobs=1, verbose=0):
     """ Create one parcellation of n_pieces and align each source and target data in one piece i, X_i and Y_i, using alignment method and learn transformation to map X to Y.
 
@@ -98,8 +98,6 @@ def fit_one_parcellation(X_, Y_, alignment_method, mask, n_pieces, clustering_me
         Mask to be used on data.
     clustering_method : string
         method used to perform parcellation of data
-    joint_clustering : boolean
-        If True, clustering of voxels is performed jointly using X_ and Y_ signal. If false, it's performed only on X_
     clustering_index : list of integers
         Clustering is performed on a 20% subset of the data chosen randomly in timeframes. This index carry this subset.
 
@@ -109,11 +107,7 @@ def fit_one_parcellation(X_, Y_, alignment_method, mask, n_pieces, clustering_me
         Instance of alignment estimator class fitted for X_i, Y_i
     """
     if n_pieces > 1:
-        if joint_clustering:
-            clustering_data = np.hstack(
-                X_[:, clustering_index], Y_[:, clustering_index])
-        else:
-            clustering_data = X_[:, clustering_index]
+        clustering_data = X_[:, clustering_index]
         labels = make_parcellation(clustering_data, mask,
                                    n_pieces, clustering_method, memory=mem)
     else:
@@ -134,7 +128,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
      Use alignment algorithms to align source and target regions independantly.
     """
 
-    def __init__(self, alignment_method, n_pieces=1, clustering_method='k_means', joint_clustering=False, n_bags=1, perturbation=False, mask=None, smoothing_fwhm=None, standardize=None, detrend=False, target_affine=None, target_shape=None, low_pass=None, high_pass=None, t_r=None, memory=Memory(cachedir=None), memory_level=0, n_jobs=1, verbose=0):
+    def __init__(self, alignment_method, n_pieces=1, clustering_method='k_means', n_bags=1, mask=None, smoothing_fwhm=None, standardize=None, detrend=False, target_affine=None, target_shape=None, low_pass=None, high_pass=None, t_r=None, memory=Memory(cachedir=None), memory_level=0, n_jobs=1, verbose=0):
         """ Use alignment algorithms to align source and target images.
         If n_pieces > 1, decomposes the images into regions and align each source/target region independantly.
         If n_bags > 1, this parcellation process is applied multiple time and the resulting models are bagged.
@@ -151,15 +145,8 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
             If >1, the voxels are clustered and alignment is performed on each cluster applied to X and Y.
         clustering_method : string, optional (default : k_means)
             'k_means' or 'ward', method used for clustering of voxels
-        joint_clustering : bool, optional (default : False)
-            if False clustering done using X signal, if True, clustering done jointly on X and Y
         n_bags: int, optional (default = 1)
             If 1 : one estimator is fitted. If >1 number of bagged parcellations and estimators used.
-        perturbation: bool, optional (default : False)
-            If False, the penalized transformaion is the one that regress the source X to
-            the target Y
-            If True, the penalized transformation is the one that regress
-             the source X to the difference between the target and the source Y - X.
         mask: Niimg-like object, instance of NiftiMasker or MultiNiftiMasker, optional (default : None)
             Mask to be used on data. If an instance of masker is passed,
             then its mask will be used. If no mask is given,
@@ -203,10 +190,8 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         """
         self.n_pieces = n_pieces
         self.alignment_method = alignment_method
-        self.perturbation = perturbation
         self.n_bags = n_bags
         self.clustering_method = clustering_method
-        self.joint_clustering = joint_clustering
         self.mask = mask
         self.smoothing_fwhm = smoothing_fwhm
         self.standardize = standardize
@@ -249,16 +234,13 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         X_ = load_img(self.masker_, X)
         Y_ = load_img(self.masker_, Y)
 
-        if self.perturbation:
-            Y_ = Y_ - X_
-
         self.fit_, self.labels_ = [], []
         rs = ShuffleSplit(n_splits=self.n_bags,
                           test_size=.8, random_state=0)
 
         outputs = Parallel(n_jobs=self.n_jobs, verbose=self.verbose)(
             delayed(fit_one_parcellation)(
-                X_, Y_, self.alignment_method, self.masker_.mask_img.get_data(), self.n_pieces, self.clustering_method, self.joint_clustering, clustering_index, self.memory, self.n_jobs, verbose=self.verbose) for clustering_index, _ in rs.split(Y_.T))
+                X_, Y_, self.alignment_method, self.masker_.mask_img.get_data(), self.n_pieces, self.clustering_method, clustering_index, self.memory, self.n_jobs, verbose=self.verbose) for clustering_index, _ in rs.split(Y_.T))
 
         self.labels_ = [output[0] for output in outputs]
         self.fit_ = [output[1] for output in outputs]
@@ -288,8 +270,5 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
                 self.labels_[i], self.fit_[i], X_)
 
         X_transform /= self.n_bags
-
-        if self.perturbation:
-            X_transform += X_
 
         return self.masker_.inverse_transform(X_transform.T)
