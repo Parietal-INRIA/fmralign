@@ -7,6 +7,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.linear_assignment_ import linear_assignment
 from sklearn.metrics.pairwise import pairwise_distances
 from sklearn.linear_model import RidgeCV
+from joblib import Parallel, delayed
 import ot
 
 
@@ -82,6 +83,16 @@ def optimal_permutation(X, Y):
     return permutation
 
 
+def projection(x, y):
+    return np.dot(x, y) / np.linalg.norm(x)**2
+
+
+def voxelwise_signal_projection(X, Y, n_jobs):
+    return Parallel(n_jobs)(delayed(projection)(
+        voxel_source, voxel_target)
+        for voxel_source, voxel_target in zip(X, Y))
+
+
 class Alignment(BaseEstimator, TransformerMixin):
     def __init__(self):
         pass
@@ -100,6 +111,35 @@ class Identity(Alignment):
     def transform(self, X):
         """returns X"""
         return X
+
+
+class DiagonalAlignment(Alignment):
+    '''Compute the voxelwise projection factor between X and Y
+
+    Parameters
+    ----------
+    R : scipy.sparse.diags
+        Scaling matrix containing the optimal shrinking factor for every voxel
+    '''
+
+    def __init__(self, n_jobs=1):
+        self.n_jobs = n_jobs
+
+    def fit(self, X, Y):
+        '''Parameters
+        ----------
+        X: (n_samples, n_features) nd array
+            source data
+        Y: (n_samples, n_features) nd array
+            target data'''
+        shrinkage_coefficients = voxelwise_signal_projection(X, Y, self.n_jobs)
+        self.R = diags(shrinkage_coefficients)
+        return
+
+    def transform(self, X):
+        """Transform X using optimal coupling computed during fit.
+        """
+        return self.R.dot(X)
 
 
 class ScaledOrthogonalAlignment(Alignment):

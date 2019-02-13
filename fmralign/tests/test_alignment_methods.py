@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.utils.testing import assert_array_almost_equal, assert_greater
 from scipy.linalg import orthogonal_procrustes
-from fmralign.alignment_methods import scaled_procrustes, optimal_permutation, Identity, ScaledOrthogonalAlignment, Hungarian, RidgeAlignment, OptimalTransportAlignment
+from fmralign.alignment_methods import scaled_procrustes, optimal_permutation, voxelwise_signal_projection, Identity, DiagonalAlignment, ScaledOrthogonalAlignment, Hungarian, RidgeAlignment, OptimalTransportAlignment
 from fmralign.tests.utils import assert_class_align_better_than_identity, zero_mean_coefficient_determination
 
 
@@ -119,6 +119,17 @@ def test_optimal_permutation_on_translation_case():
     assert_array_almost_equal(opt.dot(U.T).T, V)
 
 
+def test_projection_coefficients():
+    n_samples = 4
+    n_features = 6
+    A = np.random.rand(n_samples, n_features)
+    C = []
+    for i, a in enumerate(A):
+        C.append((i + 1) * a)
+    c = voxelwise_signal_projection(A, C, 2)
+    assert_array_almost_equal(c, [i + 1 for i in range(n_samples)])
+
+
 def test_all_classes_better_than_identity():
     '''Test all classes on random case'''
     n_samples, n_features = 100, 20
@@ -127,7 +138,7 @@ def test_all_classes_better_than_identity():
     id = Identity()
     id.fit(X, Y)
     assert_array_almost_equal(X, id.transform(X))
-    for algo in [RidgeAlignment(), ScaledOrthogonalAlignment(), OptimalTransportAlignment(), Hungarian()]:
+    for algo in [DiagonalAlignment(), RidgeAlignment(), ScaledOrthogonalAlignment(), OptimalTransportAlignment(), Hungarian()]:
         print(algo)
         algo.fit(X, Y)
         identity_baseline_score = zero_mean_coefficient_determination(
