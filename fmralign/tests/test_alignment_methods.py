@@ -1,7 +1,8 @@
 import numpy as np
 from sklearn.utils.testing import assert_array_almost_equal, assert_greater
 from scipy.linalg import orthogonal_procrustes
-from fmralign.alignment_methods import scaled_procrustes, optimal_permutation, voxelwise_signal_projection, Identity, DiagonalAlignment, ScaledOrthogonalAlignment, Hungarian, RidgeAlignment, OptimalTransportAlignment
+from fmralign.alignment_methods import scaled_procrustes, optimal_permutation, voxelwise_signal_projection
+from fmralign.alignment_methods import Identity, DiagonalAlignment, ScaledOrthogonalAlignment, Hungarian, RidgeAlignment, OptimalTransportAlignment
 from fmralign.tests.utils import assert_class_align_better_than_identity, zero_mean_coefficient_determination
 
 
