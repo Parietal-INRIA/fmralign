@@ -83,12 +83,38 @@ def optimal_permutation(X, Y):
     return permutation
 
 
-def projection(x, y):
+def _projection(x, y):
+    """Compute scalar d minimizing ||dx-y||
+    Parameters
+    ----------
+    x: (n_features) nd array
+        source vector
+    y: (n_features) nd array
+        target vector
+
+    Returns
+    ----------
+    d: int
+        scaling factor
+    """
     return np.dot(x, y) / np.linalg.norm(x)**2
 
 
-def voxelwise_signal_projection(X, Y, n_jobs):
-    return Parallel(n_jobs)(delayed(projection)(
+def _voxelwise_signal_projection(X, Y, n_jobs=1):
+    """Compute D, list of scalar d_i minimizing ||d_i x_i-y_i|| for every x_i,y_i in X,Y
+    Parameters
+    ----------
+    X: (n_samples, n_features) nd array
+        source data
+    Y: (n_samples, n_features) nd array
+        target data
+
+    Returns
+    ----------
+    D: list of ints
+        List of optimal scaling factors
+    """
+    return Parallel(n_jobs)(delayed(_projection)(
         voxel_source, voxel_target)
         for voxel_source, voxel_target in zip(X, Y))
 
