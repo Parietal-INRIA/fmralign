@@ -1,21 +1,21 @@
-from nilearn.datasets import fetch_neurovault, neurovault, fetch_neurovault_ids
+
+from nilearn.input_data import NiftiMasker
 from fmralign.fetch_example_data import fetch_ibc_subjects_contrasts
 from fmralign.pairwise_alignment import PairwiseAlignment
 
-im_1_train, im_2_train(RL), LR
-im_1_test, im_2_test
+files, df, mask = fetch_ibc_subjects_contrasts(
+    ['sub-01', 'sub-02'])
 
-"%s_stacked_contrasts_%s.nii.gz"
-masker =
+masker = NiftiMasker(mask_img=mask)
+masker.fit()
 
-methods_informations = [("identity", 1, 1, "Identity"),
-                        ("scaled_orthogonal", 1, 1, "Fullbrain Scaled Orthogonal"),
-                        ("scaled_orthogonal", 150, 1,
-                         "Piecewise Scaled Orthogonal"),
-                        ("scaled_orthogonal", 150, 5, "Bagged Piecewise Scaled Orthogonal")]
+parameters = [("identity", 1, 1, "Identity"),
+              ("scaled_orthogonal", 1, 1, "Fullbrain Scaled Orthogonal"),
+              ("scaled_orthogonal", 150, 1,
+               "Piecewise Scaled Orthogonal"),
+              ("scaled_orthogonal", 150, 5, "Bagged Piecewise Scaled Orthogonal")]
 
-
-for method_alignment, n_pieces, labels in
+for method_alignment, n_pieces, labels in parameters:
 
 methods_fullbrain = ["identity", "scaled_orthogonal", "ridge_cv"]
 for method in methods_fullbrain:
