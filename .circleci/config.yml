@@ -8,7 +8,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: v1-packages
+          key: v2-packages
       - run: |
           if
             ls $HOME | grep miniconda3 -q
@@ -25,8 +25,8 @@ jobs:
           source activate testenv
           conda install --no-update-dependencies pot nilearn -c conda-forge -yq
           pip install .
-          #set -o pipefail && pytest 2>&1 | tee log.txt
+          set -o pipefail && pytest 2>&1 | tee log.txt
       - save_cache:
-          key: v1-packages
+          key: v2-packages
           paths:
           - $HOME/miniconda3
