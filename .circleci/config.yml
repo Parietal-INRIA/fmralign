@@ -7,6 +7,6 @@ jobs:
 
     steps:
       - checkout
-      - run: pip install --user pandas scikit-learn nilearn joblib POT Cython
+      - run: pip install --user pandas scikit-learn nilearn joblib Cython POT 
       - run: pip install --user .
       - run: set-o pipefail && pytest 2>&1 | tee log.txt
