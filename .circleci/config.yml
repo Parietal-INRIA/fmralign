@@ -7,6 +7,6 @@ jobs:
 
     steps:
       - checkout
-      - run: pip install pandas scikit-learn nilearn joblib
-      - run: pip install .
+      # - run: pip install --user pandas scikit-learn nilearn joblib
+      - run: pip install --user .
       - run: set-o pipefail && pytest 2>&1 | tee log.txt
