@@ -94,7 +94,7 @@ def hierarchical_k_means(X, n_clusters):
     return _remove_empty_labels(fine_labels)
 
 
-def make_parcellation(X, mask, n_pieces, clustering_method='k_means', memory=Memory(cachedir=None)):
+def make_parcellation(X, mask, n_pieces, clustering_method='k_means', memory=Memory(cachedir=None), to_filename=None):
     """Separates input data into pieces
 
     Parameters
@@ -107,6 +107,8 @@ def make_parcellation(X, mask, n_pieces, clustering_method='k_means', memory=Mem
         number of different labels
     clustering_method: string, optional
         type of clustering applied to input data. Can be 'k_means', 'ward'
+    to_filename: str
+        path to which the parcellation will be saved
 
     Returns
     -------
@@ -122,4 +124,6 @@ def make_parcellation(X, mask, n_pieces, clustering_method='k_means', memory=Mem
             n_clusters=n_pieces, connectivity=connectivity, memory=memory)
         ward.fit(X)
         labels = ward.labels_
+    if to_filename is not None:
+        labels_img_.to_filename(to_filename)
     return labels
