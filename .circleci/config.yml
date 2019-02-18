@@ -17,9 +17,10 @@ jobs:
           else
             wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
             chmod +x ~/miniconda.sh && ~/miniconda.sh -b
-            echo 'export PATH="$HOME/miniconda3/bin:$PATH"' >> $BASH_ENV
-            conda create -n testenv python=3.6 pandas scikit-learn joblib Cython mkl -yq
+            echo 'export PATH="$HOME/miniconda3/bin:$PATH"'
+            conda create -n testenv python pandas scikit-learn joblib Cython mkl -yq
           fi
+      - run: echo 'export PATH="$HOME/miniconda3/bin:$PATH"' >> $BASH_ENV
       - run: source activate testenv
       - run: conda install pot nilearn -c conda-forge -q
       - save_cache:
