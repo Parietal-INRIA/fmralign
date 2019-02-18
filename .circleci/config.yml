@@ -12,6 +12,6 @@ jobs:
       - run: echo 'export PATH="$HOME/miniconda3/bin:$PATH"' >> $BASH_ENV
       - run: conda create -n testenv python=3.6 pandas scikit-learn joblib Cython mkl -yq
       - run: source activate testenv
-      - run: pip install nilearn POT
+      - run: conda install pot nilearn -c conda-forge
       - run: pip install .
       - run: set-o pipefail && pytest 2>&1 | tee log.txt
