@@ -7,6 +7,11 @@ jobs:
 
     steps:
       - checkout
-      - run: pip install --user pandas scikit-learn nilearn joblib Cython POT 
-      - run: pip install --user .
+      - run: wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
+      - run: chmod +x ~/miniconda.sh && ~/miniconda.sh -b
+      - run: echo 'export PATH="$HOME/miniconda3/bin:$PATH"' >> $BASH_ENV
+      - run: conda create -n testenv python=3.6 pandas scikit-learn joblib Cython mkl -yq
+      - run: source activate testenv
+      - run: pip install nilearn POT
+      - run: pip install .
       - run: set-o pipefail && pytest 2>&1 | tee log.txt
