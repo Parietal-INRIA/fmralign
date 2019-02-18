@@ -11,7 +11,7 @@ jobs:
           key: v1-packages
       - run: |
           if
-            ls $HOME/miniconda3/bin | grep conda -q
+            ls $HOME | grep miniconda3 -q
           then
             echo
           else
