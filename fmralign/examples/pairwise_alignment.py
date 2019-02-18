@@ -1,9 +1,8 @@
-
 import matplotlib.pyplot as plt
+from sklearn.metrics import r2_score
 from nilearn.input_data import NiftiMasker
 from nilearn.plotting import plot_stat_map
 from fmralign.fetch_example_data import fetch_ibc_subjects_contrasts
-from sklearn.metrics import r2_score
 from fmralign.pairwise_alignment import PairwiseAlignment
 
 files, df, mask = fetch_ibc_subjects_contrasts(
