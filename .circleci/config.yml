@@ -22,7 +22,7 @@ jobs:
           fi
       - run: echo 'export PATH="$HOME/miniconda3/bin:$PATH"' >> $BASH_ENV
       - run: source activate testenv
-      - run: conda install pot nilearn -c conda-forge -q
+      - run: conda install pot nilearn -c conda-forge -yq
       - save_cache:
           key: v1-packages
           paths:
