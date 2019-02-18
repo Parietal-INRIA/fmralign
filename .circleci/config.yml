@@ -8,7 +8,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: v2-packages
+          key: v3-packages
       - run: |
           if
             ls $HOME | grep miniconda3 -q
@@ -27,6 +27,6 @@ jobs:
           pip install .
           set -o pipefail && pytest 2>&1 | tee log.txt
       - save_cache:
-          key: v2-packages
+          key: v3-packages
           paths:
-          - $HOME/miniconda3
+            - $HOME/miniconda3
