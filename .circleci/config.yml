@@ -1,0 +1,12 @@
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.6
+
+    steps:
+      - checkout
+      - run: pip install pandas scikit-learn nilearn joblib
+      - run: pip install .
+      - run: set-o pipefail && pytest 2>&1 | tee log.txt
