@@ -54,7 +54,7 @@ def fetch_ibc_subjects_contrasts(subjects, data_dir=None, verbose=1):
         metadata_df.contrast.isin(conditions)].path.values[-1]'''
 
     mask = _fetch_files(
-        data_dir, [('gm_mask_3mm.nii.gz', "https://osf.io/yvju3/download", {"uncompress": True})], verbose=verbose)
+        data_dir, [('gm_mask_3mm.nii.gz', "https://osf.io/yvju3/download", {"uncompress": True})], verbose=verbose)[0]
 
     url_keys = {"sub-01": "8z23h", "sub-02": "e9kbm", "sub-04": "qn5b6", "sub-05": "u74a3", "sub-06": "83bje", "sub-07": "43j69",
                 "sub-08": "ua8qx", "sub-09": "bxwtv", "sub-11": "3dfbv", "sub-12": "uat7d", "sub-13": "p238h", "sub-14": "prdk4", "sub-15": "sw72z"}
