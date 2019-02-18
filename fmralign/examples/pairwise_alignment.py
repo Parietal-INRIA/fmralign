@@ -1,6 +1,9 @@
 
+import matplotlib.pyplot as plt
 from nilearn.input_data import NiftiMasker
+from nilearn.plotting import plot_stat_map
 from fmralign.fetch_example_data import fetch_ibc_subjects_contrasts
+from sklearn.metrics import r2_score
 from fmralign.pairwise_alignment import PairwiseAlignment
 
 files, df, mask = fetch_ibc_subjects_contrasts(
@@ -11,21 +14,28 @@ mask
 masker.fit()
 
 
-X_train_1 = df[df.subject == 'sub-01'][df.acquisition == 'ap'].path.values
-X_train_2 = df[df.subject == 'sub-02'][df.acquisition == 'ap'].path.values
-X_test_1 = df[df.subject == 'sub-01'][df.acquisition == 'pa'].path.values
-X_test_2 = df[df.subject == 'sub-02'][df.acquisition == 'pa'].path.values
-from nilearn.image import load_img
-load_img(X_test_2[52])
-masker.transform(X_test_2)
-X_test_2
-parameters = [("identity", 1, 1, "Identity"),
-              ("scaled_orthogonal", 1, 1, "Fullbrain Scaled Orthogonal"),
-              ("scaled_orthogonal", 150, 1, "Piecewise Scaled Orthogonal"),
-              ("scaled_orthogonal", 150, 5, "Bagged Piecewise Scaled Orthogonal")]
+im_train_1 = df[df.subject == 'sub-01'][df.acquisition == 'ap'].path.values
+im_train_2 = df[df.subject == 'sub-02'][df.acquisition == 'ap'].path.values
+im_test_1 = df[df.subject == 'sub-01'][df.acquisition == 'pa'].path.values
+im_test_2 = df[df.subject == 'sub-02'][df.acquisition == 'pa'].path.values
 
-for alignment_method, n_pieces, n_bags, method_label in parameters:
-    alignement_estimator = PairwiseAlignment(
-        alignment_method=alignment_method, n_pieces=n_pieces, n_bags=n_bags, mask=masker)
-    alignement_estimator.fit(X_train_1, X_train_2)
-    X_pred = alignement_estimator.transform(X_train_1)
+alignement_estimator = PairwiseAlignment(
+    alignment_method="scaled_orthogonal", n_pieces=150, mask=masker)
+alignement_estimator.fit(im_train_1, im_train_2)
+im_pred = alignement_estimator.transform(im_test_1)
+
+baseline_score = r2_score(
+    masker.transform(im_test_2), masker.transform(im_test_1), multioutput='raw_values')
+aligned_score = r2_score(
+    masker.transform(im_test_2), masker.transform(im_pred), multioutput='raw_values')
+
+
+baseline_display = plot_stat_map(masker.inverse_transform(
+    baseline_score), display_mode="z", vmax=0.5)
+cut_coords = baseline_display.cut_coords
+baseline_display.title("R2 score between raw data")
+
+display = plot_stat_map(
+    masker.inverse_transform(
+        aligned_score), display_mode="z", cut_coords=cut_coords, vmax=0.5)
+display.title("R2 score after alignment")
