@@ -21,10 +21,11 @@ jobs:
             conda create -n testenv python pandas pytest scikit-learn joblib cython mkl -yq
           fi
       - run: echo 'export PATH="$HOME/miniconda3/bin:$PATH"' >> $BASH_ENV
-      - run: source activate testenv
-      - run: conda install --no-update-dependencies pot nilearn -c conda-forge -yq
-      - run: pip install .
-      - run: set -o pipefail && pytest 2>&1 | tee log.txt
+      - run: |
+          source activate testenv
+          conda install --no-update-dependencies pot nilearn -c conda-forge -yq
+          pip install .
+          #set -o pipefail && pytest 2>&1 | tee log.txt
       - save_cache:
           key: v1-packages
           paths:
