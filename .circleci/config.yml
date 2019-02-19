@@ -1,0 +1,32 @@
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.7
+
+    steps:
+      - checkout
+      - restore_cache:
+          key: v3-packages
+      - run: |
+          if
+            ls $HOME | grep miniconda3 -q
+          then
+            echo
+          else
+            wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
+            chmod +x ~/miniconda.sh && ~/miniconda.sh -b
+            export PATH="$HOME/miniconda3/bin:$PATH"
+            conda create -n testenv python pandas pytest scikit-learn joblib cython mkl -yq
+          fi
+      - run: echo 'export PATH="$HOME/miniconda3/bin:$PATH"' >> $BASH_ENV
+      - run: |
+          source activate testenv
+          conda install --no-update-dependencies pot nilearn -c conda-forge -yq
+          pip install .
+          set -o pipefail && pytest 2>&1 | tee log.txt
+      - save_cache:
+          key: v3-packages
+          paths:
+            - $HOME/miniconda3
