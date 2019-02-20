@@ -22,6 +22,18 @@ alignement_estimator = PairwiseAlignment(
     alignment_method="scaled_orthogonal", n_pieces=150, mask=masker)
 alignement_estimator.fit(im_train_1, im_train_2)
 im_pred = alignement_estimator.transform(im_test_1)
+import numpy as np
+labels = alignement_estimator.labels_[0]
+estimators = alignement_estimator.fit_[0]
+X = masker.transform(im_test_1).T
+np.shape(X_test_1)
+X_transform = np.zeros_like(X)
+i = 0
+X_transform[labels == i] = estimators[i].transform(X[labels == i].T).T
+estimators[i].transform(X[labels == i].T)
+
+X_transform[labels == i] = estimators[i].transform(X[labels == i].T).T
+
 
 baseline_score = r2_score(
     masker.transform(im_test_2), masker.transform(im_test_1), multioutput='raw_values')
