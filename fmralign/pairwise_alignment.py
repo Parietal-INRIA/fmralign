@@ -8,7 +8,7 @@ from sklearn.externals.joblib import Memory
 from sklearn.model_selection import ShuffleSplit
 from nilearn.input_data.masker_validation import check_embedded_nifti_masker
 
-from fmralign.alignment_methods import ScaledOrthogonalAlignment, RidgeAlignment, Identity, Hungarian, OptimalTransportAlignment
+from fmralign.alignment_methods import ScaledOrthogonalAlignment, RidgeAlignment, Identity, Hungarian, OptimalTransportAlignment, DiagonalAlignment
 from fmralign._utils import hierarchical_k_means, make_parcellation, piecewise_transform, load_img
 
 
@@ -56,7 +56,7 @@ def fit_one_piece(X_i, Y_i, alignment_method):
         Target data for piece i (shape : n_features_i, n_samples)
     alignment_method: string
         Algorithm used to perform alignment between X_i and Y_i :
-        - either 'identity', 'scaled_orthogonal', 'ridge_cv', 'permutation'
+        - either 'identity', 'scaled_orthogonal', 'ridge_cv', 'permutation', 'diagonal'
         - or an instance of one of alignment classes (imported from functional_alignment.alignment_methods)
 
     Returns
@@ -75,7 +75,9 @@ def fit_one_piece(X_i, Y_i, alignment_method):
         alignment_algo = Hungarian()
     elif alignment_method == 'optimal_transport':
         alignment_algo = OptimalTransportAlignment()
-    elif isinstance(alignment_method, (Identity, ScaledOrthogonalAlignment, RidgeAlignment, Hungarian, OptimalTransportAlignment)):
+    elif alignment_method == 'diagonal':
+        alignment_algo = DiagonalAlignment()
+    elif isinstance(alignment_method, (Identity, ScaledOrthogonalAlignment, RidgeAlignment, Hungarian, OptimalTransportAlignment, DiagonalAlignment)):
         alignment_algo = copy.deepcopy(alignment_method)
     alignment_algo.fit(X_i.T, Y_i.T)
 
@@ -137,7 +139,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         ----------
         alignment_method: string
             Algorithm used to perform alignment between X_i and Y_i :
-            - either 'identity', 'scaled_orthogonal', 'ridge_cv', 'permutation'
+            - either 'identity', 'scaled_orthogonal', 'ridge_cv', 'permutation', 'diagonal'
             - or an instance of one of alignment classes (imported from functional_alignment.alignment_methods)
         n_pieces: int, optional (default = 1)
             Number of regions in which the data is parcellated for alignment

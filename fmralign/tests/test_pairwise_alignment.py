@@ -32,7 +32,7 @@ def test_models_against_identity():
     ground_truth = masker.transform(img2)
     identity_baseline_score = zero_mean_coefficient_determination(
         ground_truth, masker.transform(img1))
-    for alignment_method in ['permutation',  'ridge_cv', 'scaled_orthogonal', 'optimal_transport']:
+    for alignment_method in ['permutation',  'ridge_cv', 'scaled_orthogonal', 'optimal_transport', 'diagonal']:
         algo = PairwiseAlignment(
             alignment_method=alignment_method, mask=mask_img, n_pieces=2, n_bags=1, n_jobs=1)
         algo.fit(img1, img2)
