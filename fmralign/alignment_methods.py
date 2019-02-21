@@ -184,7 +184,7 @@ class ScaledOrthogonalAlignment(Alignment):
 
     def __init__(self, scaling=True):
         self.scaling = scaling
-        self.scale = None
+        self.scale = 1
 
     def fit(self, X, Y):
         """ Fit orthogonal R s.t. ||sc XR - Y||^2
