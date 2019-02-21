@@ -46,13 +46,13 @@ masker.fit()
 # ---------------------------------------------
 # The train folds used to learn alignment from source subject toward target:
 #
-# - source train: AP contrasts for subject one
-# - target train: AP contrasts for subject two
+# * source train: AP contrasts for subject one
+# * target train: AP contrasts for subject two
 #
 # The test folds:
 #
-# - source test: PA contrasts for subject one, used to predict the corresponding contrasts of subject two
-# - target test: PA contrasts for subject two, used as a ground truth to score our predictions
+# * source test: PA contrasts for subject one, used to predict the corresponding contrasts of subject two
+# * target test: PA contrasts for subject two, used as a ground truth to score our predictions
 #
 
 source_train = df[df.subject == 'sub-01'][df.acquisition == 'ap'].path.values
@@ -64,10 +64,9 @@ target_test = df[df.subject == 'sub-02'][df.acquisition == 'pa'].path.values
 # Define the estimator used to align subjects, fit it and use it to predict
 # -------------------------------------------------------------------------
 # To proceed with alignment we use PairwiseAlignment class.
-# We will use the common model proposed in the literature.
-# We will align the whole brain through multiple local alignments.
-# These alignments are calculated on a parcellation of the brain in 150 pieces.
-# This parcellation creates group of functionnally similar voxels.
+# We will use the common model proposed in the literature:
+# * we will align the whole brain through multiple local alignments.
+# * these alignments are calculated on a parcellation of the brain in 150 pieces, this parcellation creates group of functionnally similar voxels.
 #
 
 from fmralign.pairwise_alignment import PairwiseAlignment
