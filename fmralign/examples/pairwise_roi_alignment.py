@@ -134,7 +134,7 @@ aligned_score = np.maximum(r2_score(
 
 #############################################################################
 # Plotting the prediction quality
-# ---------------------------------------------------
+# --------------------------------
 #
 from nilearn.plotting import plot_stat_map
 baseline_display = plot_stat_map(roi_masker.inverse_transform(
@@ -147,3 +147,22 @@ display.title("R2 score after alignment")
 #############################################################################
 # We can see on the plot that after alignment, the prediction made for one \
 #   subject data, informed by another subject are greatly improved.
+#############################################################################
+# Aligning on ROI directly with PairwiseAlignment
+# ---------------------------------------------------
+# Instead of masking the data and applying alignment separately, /
+# we could also be have done the same directly using PairwiseAlignment() /
+# with the visual mask, on nifti images.
+
+
+from fmralign.pairwise_alignment import PairwiseAlignment
+alignment_estimator = PairwiseAlignment(
+    alignment_method='ridge_cv', n_pieces=1, mask=roi_masker)
+alignment_estimator.fit(im_train_1, im_train_2)
+directly_predicted_img = alignment_estimator.transform(im_test_1)
+directly_aligned_score = np.maximum(r2_score(
+    ground_truth, roi_masker.transform(directly_predicted_img), multioutput='raw_values'), -1)
+display = plot_stat_map(
+    roi_masker.inverse_transform(
+        directly_aligned_score), display_mode="z", cut_coords=[-15, -5], vmax=0.5)
+display.title("R2 score after alignment (using PairwiseAlignment)")
