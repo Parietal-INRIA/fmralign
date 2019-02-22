@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 from nilearn.datasets.utils import _fetch_files, _get_dataset_dir
 import pandas as pd
@@ -43,7 +44,7 @@ def fetch_ibc_subjects_contrasts(subjects, data_dir=None, verbose=1):
     data_dir = _get_dataset_dir(dataset_name, data_dir=data_dir,
                                 verbose=verbose)
 
-    # download/retrieve metadatas, put it in a dataframe, list all condition and specify path to the right directory
+    # download or retrieve metadatas, put it in a dataframe, list all condition and specify path to the right directory
     metadata_path = _fetch_files(data_dir, [('ibc_3mm_all_subjects_metadata.csv',
                                              "https://osf.io/pcvje/download", {"uncompress": True})], verbose=verbose)
     metadata_df = pd.DataFrame.from_csv(metadata_path[0])

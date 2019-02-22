@@ -17,7 +17,6 @@ To run this example, you must launch IPython via ``ipython
     :depth: 1
 
 """
-
 # Retrieving the data
 # -------------------
 # In this example we use the IBC dataset, which include a large number of \
@@ -49,7 +48,7 @@ plot_roi(atlas_yeo, title='Original Yeo atlas',
          cut_coords=(8, -80, 9), colorbar=True, cmap='Paired')
 
 # Select visual cortex, create a mask and resample it to the resolution of the images
-mask_visual = new_img_like(atlas, atlas.get_data() == 1)
+mask_visual = new_img_like(atlas, atlas.get_data() == 6)
 resampled_mask_visual = resample_to_img(
     mask_visual, mask, interpolation="nearest")
 
@@ -104,7 +103,7 @@ im_test_2 = df[df.subject == 'sub-02'][df.acquisition == 'pa'].path.values
 
 from fmralign.alignment_methods import ScaledOrthogonalAlignment, RidgeAlignment
 
-alignment_class = RidgeAlignment()
+alignment_class = ScaledOrthogonalAlignment()
 # Mask the data and learn alignment from source subject 1 to target subject 2 \
 #   on training data
 alignment_class.fit(roi_masker.transform(im_train_1),
@@ -153,11 +152,10 @@ display.title("R2 score after alignment")
 # Instead of masking the data and applying alignment separately, /
 # we could also be have done the same directly using PairwiseAlignment() /
 # with the visual mask, on nifti images.
-
-
 from fmralign.pairwise_alignment import PairwiseAlignment
+
 alignment_estimator = PairwiseAlignment(
-    alignment_method='ridge_cv', n_pieces=1, mask=roi_masker)
+    alignment_method='scaled_orthogonal', n_pieces=1, mask=roi_masker)
 alignment_estimator.fit(im_train_1, im_train_2)
 directly_predicted_img = alignment_estimator.transform(im_test_1)
 directly_aligned_score = np.maximum(r2_score(

@@ -71,7 +71,7 @@ target_test = df[df.subject == 'sub-02'][df.acquisition == 'pa'].path.values
 
 from fmralign.pairwise_alignment import PairwiseAlignment
 alignement_estimator = PairwiseAlignment(
-    alignment_method='ridge_cv', n_pieces=150, mask=masker)
+    alignment_method='scaled_orthogonal', n_pieces=150, mask=masker)
 # Learn alignment operator for source subject 1 to target subject 2 on training data
 alignement_estimator.fit(source_train, target_train)
 # Predict test data for subject 2 from subject 1
