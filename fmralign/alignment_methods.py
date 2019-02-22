@@ -38,6 +38,8 @@ def scaled_procrustes(X, Y, scaling=False, primal=None):
     sc: int
         scaling parameter
     """
+    X = X.astype(np.float64, copy=False)
+    Y = Y.astype(np.float64, copy=False)
     if np.linalg.norm(X) == 0 or np.linalg.norm(Y) == 0:
         return diags(np.ones(X.shape[1])).tocsr(), 1
     if primal is None:
