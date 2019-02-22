@@ -142,7 +142,7 @@ def test_all_classes_R_and_pred_shape_and_better_than_identity():
         id.fit(X, Y)
         identity_baseline_score = zero_mean_coefficient_determination(Y, X)
         assert_array_almost_equal(X, id.transform(X))
-        for algo in [RidgeAlignment(), ScaledOrthogonalAlignment(), OptimalTransportAlignment(), Hungarian(), DiagonalAlignment()]:
+        for algo in [RidgeAlignment(), ScaledOrthogonalAlignment(), ScaledOrthogonalAlignment(scaling=False), OptimalTransportAlignment(), Hungarian(), DiagonalAlignment()]:
             print(algo)
             algo.fit(X, Y)
             # test that permutation matrix is of shape (20, 20) except for Ridge
