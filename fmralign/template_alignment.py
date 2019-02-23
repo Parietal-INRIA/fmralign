@@ -91,7 +91,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
      Use alignment algorithms to align source and target regions independantly.
     """
 
-    def __init__(self, n_pieces=100, alignment_method="mean", n_bags=1, reg=10,
+    def __init__(self, n_pieces=1, alignment_method="mean", n_bags=1, reg=1,
                  mask=None,
                  memory=Memory(cachedir=None), memory_level=0,
                  n_jobs=1,
@@ -117,9 +117,6 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         imgs: List of Niimg-like objects
            See http://nilearn.github.io/manipulating_images/input_output.html
            source data. Every img must have the same length (number of sample)
-        template_method: str, default "mean"
-            Algorithm to built template from pairwise alignment. Possible arguments : mean, regression, greedy
-        !!! expand description of the various algorithms
         scale_template: boolean, default False
             rescale template after each inference so that it keeps the same norm has the average of training images.
         n_iter: int
