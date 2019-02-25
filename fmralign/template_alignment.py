@@ -6,7 +6,7 @@ from nilearn.image import mean_img, index_img
 from fmralign.pairwise_alignment import PairwiseAlignment
 
 
-def euclidian_mean_with_masking(imgs, scale_template, masker):
+def euclidian_mean(imgs, scale_template, masker):
     '''imgs is a list of 3D or 4D images
     each img is 3D by default:'''
     masked_imgs = [masker.transform(img) for img in imgs]
@@ -49,7 +49,7 @@ def create_template(imgs, method_alignment, n_pieces, n_bags, scale_template, ma
     template_history = []
     iter = 0
     while True:
-        template = euclidian_mean_with_masking(
+        template = euclidian_mean(
             aligned_imgs, scale_template, masker)
         if 0 < iter < n_iter:
             template_history.append(template)
