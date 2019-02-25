@@ -109,11 +109,22 @@ def fit_one_parcellation(X_, Y_, alignment_method, mask, n_pieces,
         algorithm used to perform alignment between each region of X_ and Y_
     mask: Niimg-like object
         Mask to be used on data.
-    clustering_method : string
+    n_pieces: n_pieces: int,
+        Number of regions in which the data is parcellated for alignment
+    clustering_method: string
         method used to perform parcellation of data
-    clustering_index : list of integers
+    clustering_index: list of integers
         Clustering is performed on a 20% subset of the data chosen randomly
         in timeframes. This index carry this subset.
+    mem: instance of joblib.Memory or string
+        Used to cache the masking process and results of algorithms.
+        By default, no caching is done. If a string is given, it is the
+        path to the caching directory.
+    n_jobs: integer, optional
+        The number of CPUs to use to do the computation. -1 means
+        'all CPUs', -2 'all CPUs but one', and so on.
+    verbose: integer, optional
+        Indicate the level of verbosity. By default, nothing is printed
 
     Returns
     -------
