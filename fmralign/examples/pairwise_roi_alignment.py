@@ -47,7 +47,7 @@ atlas = load_img(atlas_yeo)
 plot_roi(atlas_yeo, title='Original Yeo atlas',
          cut_coords=(8, -80, 9), colorbar=True, cmap='Paired')
 
-# Select visual cortex, create a mask and resample it to the resolution of the images
+# Select visual cortex, create a mask and resample it to the right resolution
 mask_visual = new_img_like(atlas, atlas.get_data() == 1)
 resampled_mask_visual = resample_to_img(
     mask_visual, mask, interpolation="nearest")
@@ -101,7 +101,7 @@ im_test_2 = df[df.subject == 'sub-02'][df.acquisition == 'pa'].path.values
 #   in fmralign.alignment_methods module
 #
 
-from fmralign.alignment_methods import ScaledOrthogonalAlignment, RidgeAlignment
+from fmralign.alignment_methods import ScaledOrthogonalAlignment
 
 alignment_class = ScaledOrthogonalAlignment()
 # Mask the data and learn alignment from source subject 1 to target subject 2 \
@@ -125,11 +125,13 @@ from sklearn.metrics import r2_score
 ground_truth = roi_masker.transform(im_test_2)
 
 # Score the prediction of test data without alignment...
-baseline_score = np.maximum(r2_score(
-    ground_truth, roi_masker.transform(im_test_1), multioutput='raw_values'), -1)
+baseline_score = np.maximum(
+    r2_score(ground_truth, roi_masker.transform(im_test_1),
+             multioutput='raw_values'), -1)
 # ... and using alignment.
-aligned_score = np.maximum(r2_score(
-    ground_truth, predicted_data, multioutput='raw_values'), -1)
+aligned_score = np.maximum(
+    r2_score(ground_truth, predicted_data,
+             multioutput='raw_values'), -1)
 
 #############################################################################
 # Plotting the prediction quality
@@ -144,8 +146,8 @@ display = plot_stat_map(
         aligned_score), display_mode="z", cut_coords=[-15, -5], vmax=0.5)
 display.title("R2 score after alignment")
 #############################################################################
-# We can see on the plot that after alignment, the prediction made for one \
-#   subject data, informed by another subject are greatly improved.
+# We can see on the plot that after alignment, the prediction made for one
+# subject data, informed by another subject are greatly improved.
 #############################################################################
 # Aligning on ROI directly with PairwiseAlignment
 # ---------------------------------------------------
@@ -158,9 +160,9 @@ alignment_estimator = PairwiseAlignment(
     alignment_method='scaled_orthogonal', n_pieces=1, mask=roi_masker)
 alignment_estimator.fit(im_train_1, im_train_2)
 directly_predicted_img = alignment_estimator.transform(im_test_1)
-directly_aligned_score = np.maximum(r2_score(
-    ground_truth, roi_masker.transform(directly_predicted_img), multioutput='raw_values'), -1)
-display = plot_stat_map(
-    roi_masker.inverse_transform(
-        directly_aligned_score), display_mode="z", cut_coords=[-15, -5], vmax=0.5)
+directly_aligned_score = np.maximum(
+    r2_score(ground_truth, roi_masker.transform(directly_predicted_img),
+             multioutput='raw_values'), -1)
+display = plot_stat_map(roi_masker.inverse_transform(directly_aligned_score),
+                        display_mode="z", cut_coords=[-15, -5], vmax=0.5)
 display.title("R2 score after alignment (using PairwiseAlignment)")

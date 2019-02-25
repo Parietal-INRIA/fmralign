@@ -8,8 +8,10 @@ from sklearn.externals.joblib import Memory
 from sklearn.model_selection import ShuffleSplit
 from nilearn.input_data.masker_validation import check_embedded_nifti_masker
 
-from fmralign.alignment_methods import ScaledOrthogonalAlignment, RidgeAlignment, Identity, Hungarian, OptimalTransportAlignment, DiagonalAlignment
-from fmralign._utils import hierarchical_k_means, make_parcellation, piecewise_transform, load_img
+from fmralign.alignment_methods import RidgeAlignment, Identity, Hungarian, \
+    ScaledOrthogonalAlignment, OptimalTransportAlignment, DiagonalAlignment
+from fmralign._utils import hierarchical_k_means, make_parcellation, \
+    piecewise_transform, load_img
 
 
 def generate_Xi_Yi(labels, X, Y, verbose=0):
@@ -46,7 +48,8 @@ def generate_Xi_Yi(labels, X, Y, verbose=0):
 
 
 def fit_one_piece(X_i, Y_i, alignment_method):
-    """ Align source and target data in one piece i, X_i and Y_i, using alignment method and learn transformation to map X to Y.
+    """ Align source and target data in one piece i, X_i and Y_i, using
+    alignment method and learn transformation to map X to Y.
 
     Parameters
     ----------
@@ -56,8 +59,10 @@ def fit_one_piece(X_i, Y_i, alignment_method):
         Target data for piece i (shape : n_features_i, n_samples)
     alignment_method: string
         Algorithm used to perform alignment between X_i and Y_i :
-        - either 'identity', 'scaled_orthogonal', 'ridge_cv', 'permutation', 'diagonal'
-        - or an instance of one of alignment classes (imported from functional_alignment.alignment_methods)
+        - either 'identity', 'scaled_orthogonal', 'ridge_cv',
+            'permutation', 'diagonal'
+        - or an instance of one of alignment classes
+            (imported from functional_alignment.alignment_methods)
 
     Returns
     -------
@@ -77,16 +82,22 @@ def fit_one_piece(X_i, Y_i, alignment_method):
         alignment_algo = OptimalTransportAlignment()
     elif alignment_method == 'diagonal':
         alignment_algo = DiagonalAlignment()
-    elif isinstance(alignment_method, (Identity, ScaledOrthogonalAlignment, RidgeAlignment, Hungarian, OptimalTransportAlignment, DiagonalAlignment)):
+    elif isinstance(alignment_method, (Identity, ScaledOrthogonalAlignment,
+                                       RidgeAlignment, Hungarian,
+                                       OptimalTransportAlignment,
+                                       DiagonalAlignment)):
         alignment_algo = copy.deepcopy(alignment_method)
     alignment_algo.fit(X_i.T, Y_i.T)
 
     return alignment_algo
 
 
-def fit_one_parcellation(X_, Y_, alignment_method, mask, n_pieces, clustering_method, clustering_index, mem,
+def fit_one_parcellation(X_, Y_, alignment_method, mask, n_pieces,
+                         clustering_method, clustering_index, mem,
                          n_jobs=1, verbose=0):
-    """ Create one parcellation of n_pieces and align each source and target data in one piece i, X_i and Y_i, using alignment method and learn transformation to map X to Y.
+    """ Create one parcellation of n_pieces and align each source and target
+    data in one piece i, X_i and Y_i, using alignment method
+    and learn transformation to map X to Y.
 
     Parameters
     ----------
@@ -101,7 +112,8 @@ def fit_one_parcellation(X_, Y_, alignment_method, mask, n_pieces, clustering_me
     clustering_method : string
         method used to perform parcellation of data
     clustering_index : list of integers
-        Clustering is performed on a 20% subset of the data chosen randomly in timeframes. This index carry this subset.
+        Clustering is performed on a 20% subset of the data chosen randomly
+        in timeframes. This index carry this subset.
 
     Returns
     -------
@@ -130,60 +142,74 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
      Use alignment algorithms to align source and target regions independantly.
     """
 
-    def __init__(self, alignment_method, n_pieces=1, clustering_method='k_means', n_bags=1, mask=None, smoothing_fwhm=None, standardize=None, detrend=False, target_affine=None, target_shape=None, low_pass=None, high_pass=None, t_r=None, memory=Memory(cachedir=None), memory_level=0, n_jobs=1, verbose=0):
+    def __init__(self, alignment_method, n_pieces=1,
+                 clustering_method='k_means', n_bags=1, mask=None,
+                 smoothing_fwhm=None, standardize=None, detrend=False,
+                 target_affine=None, target_shape=None, low_pass=None,
+                 high_pass=None, t_r=None,
+                 memory=Memory(cachedir=None), memory_level=0,
+                 n_jobs=1, verbose=0):
         """ Use alignment algorithms to align source and target images.
-        If n_pieces > 1, decomposes the images into regions and align each source/target region independantly.
-        If n_bags > 1, this parcellation process is applied multiple time and the resulting models are bagged.
+        If n_pieces > 1, decomposes the images into regions
+            and align each source/target region independantly.
+        If n_bags > 1, this parcellation process is applied multiple time
+            and the resulting models are bagged.
 
         Parameters
         ----------
         alignment_method: string
             Algorithm used to perform alignment between X_i and Y_i :
-            - either 'identity', 'scaled_orthogonal', 'ridge_cv', 'permutation', 'diagonal'
-            - or an instance of one of alignment classes (imported from functional_alignment.alignment_methods)
+            - either 'identity', 'scaled_orthogonal', 'ridge_cv',
+                'permutation', 'diagonal'
+            - or an instance of one of alignment classes
+                (imported from functional_alignment.alignment_methods)
         n_pieces: int, optional (default = 1)
             Number of regions in which the data is parcellated for alignment
             If 1 the alignment is done on full scale data.
-            If >1, the voxels are clustered and alignment is performed on each cluster applied to X and Y.
+            If >1, the voxels are clustered and alignment is performed
+                on each cluster applied to X and Y.
         clustering_method : string, optional (default : k_means)
             'k_means' or 'ward', method used for clustering of voxels
         n_bags: int, optional (default = 1)
-            If 1 : one estimator is fitted. If >1 number of bagged parcellations and estimators used.
-        mask: Niimg-like object, instance of NiftiMasker or MultiNiftiMasker, optional (default : None)
+            If 1 : one estimator is fitted.
+            If >1 number of bagged parcellations and estimators used.
+        mask: Niimg-like object, instance of NiftiMasker or
+                                MultiNiftiMasker, optional (default : None)
             Mask to be used on data. If an instance of masker is passed,
             then its mask will be used. If no mask is given,
-            it will be computed automatically by a MultiNiftiMasker with default
-            parameters.
+            it will be computed automatically by a MultiNiftiMasker
+            with defaultparameters.
         smoothing_fwhm: float, optional (default : None)
-            If smoothing_fwhm is not None, it gives the size in millimeters of the
-            spatial smoothing to apply to the signal.
+            If smoothing_fwhm is not None, it gives the size in millimeters
+            of the spatial smoothing to apply to the signal.
         standardize : boolean, optional (default : None)
             If standardize is True, the time-series are centered and normed:
             their variance is put to 1 in the time dimension.
         detrend : boolean, optional (default : None)
-            This parameter is passed to nilearn.signal.clean. Please see the related documentation for details
+            This parameter is passed to nilearn.signal.clean.
+            Please see the related documentation for details
         target_affine: 3x3 or 4x4 matrix, optional (default : None)
-            This parameter is passed to nilearn.image.resample_img. Please see the
-            related documentation for details.
+            This parameter is passed to nilearn.image.resample_img.
+            Please see the related documentation for details.
         target_shape: 3-tuple of integers, optional (default : None)
-            This parameter is passed to nilearn.image.resample_img. Please see the
-            related documentation for details.
+            This parameter is passed to nilearn.image.resample_img.
+            Please see the related documentation for details.
         low_pass: None or float, optional (default : None)
-            This parameter is passed to nilearn.signal.clean. Please see the related
-            documentation for details
+            This parameter is passed to nilearn.signal.clean.
+            Please see the related documentation for details.
         high_pass: None or float, optional (default : None)
-            This parameter is passed to nilearn.signal.clean. Please see the related
-            documentation for details
+            This parameter is passed to nilearn.signal.clean.
+            Please see the related documentation for details.
         t_r: float, optional (default : None)
-            This parameter is passed to nilearn.signal.clean. Please see the related
-            documentation for details
+            This parameter is passed to nilearn.signal.clean.
+            Please see the related documentation for details.
         memory: instance of joblib.Memory or string (default : None)
             Used to cache the masking process and results of algorithms.
             By default, no caching is done. If a string is given, it is the
             path to the caching directory.
         memory_level: integer, optional (default : None)
-            Rough estimator of the amount of memory used by caching. Higher value
-            means more memory for caching.
+            Rough estimator of the amount of memory used by caching.
+            Higher value means more memory for caching.
         n_jobs: integer, optional (default = 1)
             The number of CPUs to use to do the computation. -1 means
             'all CPUs', -2 'all CPUs but one', and so on.
@@ -222,8 +248,6 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         Returns
         -------
         self
-
-        TODO: for now, load_img make transposition that is useless for alignment methods and so we have to transpose to fit() or transform() masked nifti. We could remove it but it would need to make modifications in most functions that use or act on X / Y : utils.piecewise_transform, utils.load_img, fit_one_parcellation, fit_one_piece, generate_Xi_Yi and make_parcellation.
         """
         self.masker_ = check_embedded_nifti_masker(self)
         self.masker_.n_jobs = 1  # self.n_jobs
@@ -242,7 +266,10 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
 
         outputs = Parallel(n_jobs=self.n_jobs, verbose=self.verbose)(
             delayed(fit_one_parcellation)(
-                X_, Y_, self.alignment_method, self.masker_.mask_img.get_data(), self.n_pieces, self.clustering_method, clustering_index, self.memory, self.n_jobs, verbose=self.verbose) for clustering_index, _ in rs.split(Y_.T))
+                X_, Y_, self.alignment_method, self.masker_.mask_img.get_data(),
+                self.n_pieces, self.clustering_method, clustering_index,
+                self.memory, self.n_jobs, verbose=self.verbose)
+            for clustering_index, _ in rs.split(Y_.T))
 
         self.labels_ = [output[0] for output in outputs]
         self.fit_ = [output[1] for output in outputs]

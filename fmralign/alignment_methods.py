@@ -103,7 +103,8 @@ def _projection(x, y):
 
 
 def _voxelwise_signal_projection(X, Y, n_jobs=1):
-    """Compute D, list of scalar d_i minimizing ||d_i x_i-y_i|| for every x_i,y_i in X,Y
+    """Compute D, list of scalar d_i minimizing :
+        ||d_i x_i-y_i|| for every x_i,y_i in X,Y
     Parameters
     ----------
     X: (n_samples, n_features) nd array
@@ -133,7 +134,7 @@ class Alignment(BaseEstimator, TransformerMixin):
 
 
 class Identity(Alignment):
-    """The simplest kind of alignment to be used as a baseline for benchmarks. RX = X
+    """The simplest kind of alignment, used as baseline for benchmarks. RX = X
     """
 
     def transform(self, X):
@@ -208,19 +209,22 @@ class ScaledOrthogonalAlignment(Alignment):
 
 
 class RidgeAlignment(Alignment):
-    """ Compute an scikit-estimator R using a mixing matrix M such that
-    frobenius norm || XM - Y ||^2 + alpha ||M||^2 is minimized with built-in cross-validation
+    """ Compute an scikit-estimator R using a mixing matrix M s.t frobenius
+    norm || XM - Y ||^2 + alpha ||M||^2 is minimized with cross-validation
 
     Parameters
     ----------
-    R : scikit-estimator from sklearn.linear_model.RidgeCV with method fit, predict
+    R : scikit-estimator from sklearn.linear_model.RidgeCV
+        with methods fit, predict
     alpha : numpy array of shape [n_alphas]
-        Array of alpha values to try. Regularization strength; must be a positive float. Regularization
-        improves the conditioning of the problem and reduces the variance of
-        the estimates. Larger values specify stronger regularization.
+        Array of alpha values to try. Regularization strength;
+        must be a positive float. Regularization improves the conditioning
+        of the problem and reduces the variance of the estimates.
+        Larger values specify stronger regularization.
         Alpha corresponds to ``C^-1`` in other linear models.
     cv : int, cross-validation generator or an iterable, optional
-        Determines the cross-validation splitting strategy. Possible inputs for cv are:
+        Determines the cross-validation splitting strategy.
+        Possible inputs for cv are:
         -None, to use the efficient Leave-One-Out cross-validation
         - integer, to specify the number of folds.
         - An object to be used as a cross-validation generator.
@@ -232,7 +236,8 @@ class RidgeAlignment(Alignment):
         self.cv = cv
 
     def fit(self, X, Y):
-        """ Fit R s.t. || XR - Y ||^2 + alpha ||R||^2 is minimized and choose best alpha through cross-validation
+        """ Fit R s.t. || XR - Y ||^2 + alpha ||R||^2 is minimized and
+            choose best alpha through cross-validation
         ----------
         X: (n_samples, n_features) nd array
             source data
@@ -283,14 +288,18 @@ class OptimalTransportAlignment(Alignment):
     R : scipy.sparse.csr_matrix
         Mixing matrix containing the optimal permutation
     solver : str (optional)
-        solver from POT called to find optimal coupling 'sinkhorn', 'greenkhorn', 'sinkhorn_stabilized','sinkhorn_epsilon_scaling', 'exact' see POT/ot/bregman on github for source code of solvers
+        solver from POT called to find optimal coupling 'sinkhorn',
+        'greenkhorn', 'sinkhorn_stabilized','sinkhorn_epsilon_scaling', 'exact'
+        see POT/ot/bregman on github for source code of solvers
     metric : str(optional)
-        metric used to create transport cost matrix, see full list in scipy.spatial.distance.cdist doc
+        metric used to create transport cost matrix,
+        see full list in scipy.spatial.distance.cdist doc
     reg : int (optional)
         level of entropic regularization
     '''
 
-    def __init__(self, solver='sinkhorn_epsilon_scaling', metric='euclidean', reg=1):
+    def __init__(self, solver='sinkhorn_epsilon_scaling',
+                 metric='euclidean', reg=1):
         self.solver = solver
         self.metric = metric
         self.reg = reg
