@@ -25,7 +25,7 @@ def euclidian_mean(imgs, masker, scale_template=False):
 
 def align_images_to_template(imgs, template, method_alignment, n_pieces, n_bags, masker, n_iter, n_jobs, reg):
     '''
-    - Still should take care of clustering method/joint arguments
+    - Still should take care of clustering method
     - Be sure that alignment_methods are the same in class docs and pairwise_alignment
     - Additional arguments are available in pairwise_alignment : perturbation=False, smoothing_fwhm=None, standardize=None, detrend=False, target_affine=None, target_shape=None, low_pass=None, high_pass=None, t_r=None, memory=Memory(cachedir=None), memory_level=0.
 
@@ -34,7 +34,7 @@ def align_images_to_template(imgs, template, method_alignment, n_pieces, n_bags,
     aligned_imgs = []
     for img in imgs:
         piecewise_estimator = PairwiseAlignment(n_pieces=n_pieces, alignment_method=method_alignment,
-                                                mask=masker, clustering_method='k_means', joint_clustering=False, n_bags=n_bags, n_jobs=n_jobs)
+                                                mask=masker, clustering_method='k_means', n_bags=n_bags, n_jobs=n_jobs)
         piecewise_estimator.fit(img, template)
         aligned_imgs.append(piecewise_estimator.transform(img))
     return aligned_imgs
@@ -124,6 +124,8 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         Returns
         -------
             self
+        TODO : add an option to save template in the fit a path that if is not none is the path
+        TODO : no line more than 80
         """
         self.template, self.template_history = create_template(
             imgs, self.alignment_method, self.n_pieces, self.n_bags, scale_template, self.mask, n_iter, self.n_jobs, self.reg)
