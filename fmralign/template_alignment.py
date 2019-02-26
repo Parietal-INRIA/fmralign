@@ -39,22 +39,28 @@ def euclidian_mean(imgs, masker, scale_template=False):
     return masker.inverse_transform(mean_img)
 
 
-def align_images_to_template(imgs, template, n_iter, alignment_method,
-                             n_pieces, clustering_method, n_bags, masker,
-                             smoothing_fwhm, standardize, detrend,
-                             target_affine, target_shape, low_pass, high_pass,
-                             t_r, memory, memory_level, n_jobs, verbose):
-    '''
-    - Still should take care of clustering method
-    - Be sure that alignment_methods are the same in class docs and pairwise_alignment
-    - Additional arguments are available in pairwise_alignment : smoothing_fwhm=None, standardize=None, detrend=False, target_affine=None, target_shape=None, low_pass=None, high_pass=None, t_r=None, memory=Memory(cachedir=None), memory_level=0.
-
-    same for align_template_to_images
+def _align_images_to_template(imgs, template, alignment_method,
+                              n_pieces, clustering_method, n_bags, masker,
+                              smoothing_fwhm, standardize, detrend,
+                              target_affine, target_shape, low_pass, high_pass,
+                              t_r, memory, memory_level, n_jobs, verbose):
+    '''Convenience function : for a list of images, return the list
+    of estimators (PairwiseAlignment instances) aligning each of them to a
+    common target, the template. All arguments are used in PairwiseAlignment
     '''
     aligned_imgs = []
     for img in imgs:
-        piecewise_estimator = PairwiseAlignment(n_pieces=n_pieces, alignment_method=method_alignment,
-                                                mask=masker, clustering_method='k_means', n_bags=n_bags, n_jobs=n_jobs)
+        piecewise_estimator = \
+            PairwiseAlignment(n_pieces=n_pieces,
+                              alignment_method=alignment_method,
+                              clustering_method=clustering_method, n_bags=n_bags,
+                              mask=masker, smoothing_fwhm=smoothing_fwhm,
+                              standardize=standardize, detrend=detrend,
+                              target_affine=target_affine,
+                              target_shape=target_shape, low_pass=low_pass,
+                              high_pass=high_pass, t_r=t_r, memory=memory,
+                              memory_level=memory_level,
+                              n_jobs=n_jobs, verbose=verbose)
         piecewise_estimator.fit(img, template)
         aligned_imgs.append(piecewise_estimator.transform(img))
     return aligned_imgs
@@ -144,14 +150,14 @@ def create_template(imgs, n_iter, scale_template, alignment_method, n_pieces,
             template_history.append(template)
         if iter == n_iter:
             break
-        aligned_imgs = align_images_to_template(imgs, template, n_iter,
-                                                alignment_method, n_pieces,
-                                                clustering_method, n_bags, masker,
-                                                smoothing_fwhm, standardize,
-                                                detrend, target_affine,
-                                                target_shape, low_pass, high_pass,
-                                                t_r, memory, memory_level,
-                                                n_jobs, verbose)
+        aligned_imgs = _align_images_to_template(imgs, template,
+                                                 alignment_method, n_pieces,
+                                                 clustering_method, n_bags, masker,
+                                                 smoothing_fwhm, standardize,
+                                                 detrend, target_affine,
+                                                 target_shape, low_pass, high_pass,
+                                                 t_r, memory, memory_level,
+                                                 n_jobs, verbose)
         iter += 1
 
     return template, template_history
@@ -215,9 +221,16 @@ def map_template_to_image(img, train_index, template, alignment_method,
         Alignment estimator fitted to align the template with the input images'''
     mapping_image = index_img(img, train_index)
     mapping = PairwiseAlignment(n_pieces=n_pieces,
-                                alignment_method=alignment_method, mask=masker,
-                                clustering_method='k_means', n_bags=n_bags,
-                                n_jobs=n_jobs)
+                                alignment_method=alignment_method,
+                                clustering_method=clustering_method,
+                                n_bags=n_bags, mask=masker,
+                                smoothing_fwhm=smoothing_fwhm,
+                                standardize=standardize, detrend=detrend,
+                                target_affine=target_affine,
+                                target_shape=target_shape, low_pass=low_pass,
+                                high_pass=high_pass, t_r=t_r, memory=memory,
+                                memory_level=memory_level,
+                                n_jobs=n_jobs, verbose=verbose)
     mapping.fit(mapping_image, img)
     return mapping
 
@@ -363,12 +376,11 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         -------
             self
         TODO : test save_template
-        TODO : no line more than 80
         """
         self.template, self.template_history = \
             create_template(imgs, n_iter, scale_template,
                             self.alignment_method, self.n_pieces,
-                            self.clustering_method, self.n_bags, self.masker,
+                            self.clustering_method, self.n_bags, self.mask,
                             self.smoothing_fwhm, self.standardize, self.detrend,
                             self.target_affine, self.target_shape, self.low_pass,
                             self.high_pass, self.t_r, self.memory,
@@ -401,7 +413,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             delayed(map_template_to_image)(
                 img, train_index, self.template, self.alignment_method,
                 self.n_pieces, self.clustering_method, self.n_bags,
-                self.masker, self.smoothing_fwhm, self.standardize, self.detrend,
+                self.mask, self.smoothing_fwhm, self.standardize, self.detrend,
                 self.target_affine, self.target_shape, self.low_pass,
                 self.high_pass, self.t_r, self.memory,
                 self.memory_level, self.n_jobs, self.verbose
