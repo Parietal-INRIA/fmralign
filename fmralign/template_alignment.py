@@ -62,9 +62,7 @@ def _align_images_to_template(imgs, template, alignment_method,
 
 
 def create_template(imgs, n_iter, scale_template, alignment_method, n_pieces,
-                    clustering_method, n_bags, masker, smoothing_fwhm,
-                    standardize, detrend, target_affine, target_shape,
-                    low_pass, high_pass, t_r, memory, memory_level,
+                    clustering_method, n_bags, masker, memory, memory_level,
                     n_jobs, verbose):
     '''Create template through alternate minimization:
         At each iteration compute :
