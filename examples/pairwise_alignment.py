@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
-from nilearn.plotting import plot_stat_map
-from sklearn.metrics import r2_score
-import numpy as np
-from fmralign.pairwise_alignment import PairwiseAlignment
-from nilearn.input_data import NiftiMasker
 """Functional alignment on a pair of subject
 ===================================================================
 
-In this tutorial, we show how to better predict new contrasts for a target subject using source subject corresponding contrasts and data in common.
+In this tutorial, we show how to better predict new contrasts for a target
+subject using source subject corresponding contrasts and data in common.
 
-We mostly rely on python common packages and on nilearn to handle functional data in a clean fashion.
+We mostly rely on python common packages and on nilearn to handle functional
+data in a clean fashion.
 
 
 To run this example, you must launch IPython via ``ipython
@@ -43,6 +40,7 @@ files, df, mask = fetch_ibc_subjects_contrasts(
 # http://nilearn.github.io/manipulating_images/masker_objects.html
 #
 
+from nilearn.input_data import NiftiMasker
 masker = NiftiMasker(mask_img=mask)
 mask
 masker.fit()
@@ -78,6 +76,7 @@ target_test = df[df.subject == 'sub-02'][df.acquisition == 'pa'].path.values
 #   pieces, this parcellation creates group of functionnally similar voxels.
 #
 
+from fmralign.pairwise_alignment import PairwiseAlignment
 alignement_estimator = PairwiseAlignment(
     alignment_method='scaled_orthogonal', n_pieces=150, mask=masker)
 # Learn alignment operator from subject 1 to subject 2 on training data
@@ -92,7 +91,8 @@ target_pred = alignement_estimator.transform(source_test)
 # activation profile across contrasts. This score is 1 for a perfect prediction
 # and can get arbitrarly bad (here we clip it to -1 for bad predictions)
 
-
+from sklearn.metrics import r2_score
+import numpy as np
 # The baseline score represents the quality of prediction using raw data
 baseline_score = np.maximum(
     r2_score(masker.transform(target_test), masker.transform(source_test),
@@ -107,14 +107,16 @@ aligned_score = np.maximum(
 # ---------------------------------------------------
 #
 
-baseline_display = plot_stat_map(masker.inverse_transform(
-    baseline_score), display_mode="z", vmax=0.5, cut_coords=[-15, -5])
+from nilearn import plotting
+baseline_display = plotting.plot_stat_map(masker.inverse_transform(
+    baseline_score), display_mode="z", vmax=1, cut_coords=[-15, -5])
 baseline_display.title("R2 score between raw data")
 
-display = plot_stat_map(
+display = plotting.plot_stat_map(
     masker.inverse_transform(
-        aligned_score), display_mode="z", cut_coords=[-15, -5], vmax=0.5)
+        aligned_score), display_mode="z", cut_coords=[-15, -5], vmax=1)
 display.title("R2 score after alignment")
+plotting.show()
 #############################################################################
 # We can see on the plot that after alignment the prediction made
 # for one subject data, informed by another subject are greatly improved
