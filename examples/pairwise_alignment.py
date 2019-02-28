@@ -85,7 +85,7 @@ alignement_estimator.fit(source_train, target_train)
 target_pred = alignement_estimator.transform(source_test)
 
 #############################################################################
-# Score the prediction of test data without alignment
+# Score the prediction of test data with and without alignment
 # ---------------------------------------------------
 #  To score the quality of prediction we use r2 score on each voxel
 # activation profile across contrasts. This score is 1 for a perfect prediction
