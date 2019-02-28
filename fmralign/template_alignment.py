@@ -2,7 +2,8 @@ from sklearn.base import BaseEstimator, TransformerMixin
 import numpy as np
 from joblib import Parallel, delayed
 from sklearn.externals.joblib import Memory
-from nilearn.image import mean_img, index_img
+from nilearn.image import index_img
+from nilearn.input_data.masker_validation import check_embedded_nifti_masker
 from fmralign.pairwise_alignment import PairwiseAlignment
 
 
@@ -36,14 +37,12 @@ def euclidian_mean(imgs, masker, scale_template=False):
         scale = X_norm / np.linalg.norm(average_img)
     average_img *= scale
 
-    return masker.inverse_transform(mean_img)
+    return masker.inverse_transform(average_img)
 
 
 def _align_images_to_template(imgs, template, alignment_method,
                               n_pieces, clustering_method, n_bags, masker,
-                              smoothing_fwhm, standardize, detrend,
-                              target_affine, target_shape, low_pass, high_pass,
-                              t_r, memory, memory_level, n_jobs, verbose):
+                              memory, memory_level, n_jobs, verbose):
     '''Convenience function : for a list of images, return the list
     of estimators (PairwiseAlignment instances) aligning each of them to a
     common target, the template. All arguments are used in PairwiseAlignment
@@ -54,11 +53,7 @@ def _align_images_to_template(imgs, template, alignment_method,
             PairwiseAlignment(n_pieces=n_pieces,
                               alignment_method=alignment_method,
                               clustering_method=clustering_method, n_bags=n_bags,
-                              mask=masker, smoothing_fwhm=smoothing_fwhm,
-                              standardize=standardize, detrend=detrend,
-                              target_affine=target_affine,
-                              target_shape=target_shape, low_pass=low_pass,
-                              high_pass=high_pass, t_r=t_r, memory=memory,
+                              mask=masker, memory=memory,
                               memory_level=memory_level,
                               n_jobs=n_jobs, verbose=verbose)
         piecewise_estimator.fit(img, template)
@@ -101,31 +96,7 @@ def create_template(imgs, n_iter, scale_template, alignment_method, n_pieces,
             Mask to be used on data. If an instance of masker is passed,
             then its mask will be used. If no mask is given,
             it will be computed automatically by a MultiNiftiMasker
-            with defaultparameters.
-        smoothing_fwhm: float, optional (default : None)
-            If smoothing_fwhm is not None, it gives the size in millimeters
-            of the spatial smoothing to apply to the signal.
-        standardize : boolean, optional (default : None)
-            If standardize is True, the time-series are centered and normed:
-            their variance is put to 1 in the time dimension.
-        detrend : boolean, optional (default : None)
-            This parameter is passed to nilearn.signal.clean.
-            Please see the related documentation for details
-        target_affine: 3x3 or 4x4 matrix, optional (default : None)
-            This parameter is passed to nilearn.image.resample_img.
-            Please see the related documentation for details.
-        target_shape: 3-tuple of integers, optional (default : None)
-            This parameter is passed to nilearn.image.resample_img.
-            Please see the related documentation for details.
-        low_pass: None or float, optional (default : None)
-            This parameter is passed to nilearn.signal.clean.
-            Please see the related documentation for details.
-        high_pass: None or float, optional (default : None)
-            This parameter is passed to nilearn.signal.clean.
-            Please see the related documentation for details.
-        t_r: float, optional (default : None)
-            This parameter is passed to nilearn.signal.clean.
-            Please see the related documentation for details.
+            with default parameters.
         memory: instance of joblib.Memory or string (default : None)
             Used to cache the masking process and results of algorithms.
             By default, no caching is done. If a string is given, it is the
@@ -152,11 +123,8 @@ def create_template(imgs, n_iter, scale_template, alignment_method, n_pieces,
             break
         aligned_imgs = _align_images_to_template(imgs, template,
                                                  alignment_method, n_pieces,
-                                                 clustering_method, n_bags, masker,
-                                                 smoothing_fwhm, standardize,
-                                                 detrend, target_affine,
-                                                 target_shape, low_pass, high_pass,
-                                                 t_r, memory, memory_level,
+                                                 clustering_method, n_bags,
+                                                 masker, memory, memory_level,
                                                  n_jobs, verbose)
         iter += 1
 
@@ -165,14 +133,10 @@ def create_template(imgs, n_iter, scale_template, alignment_method, n_pieces,
 
 def map_template_to_image(img, train_index, template, alignment_method,
                           n_pieces, clustering_method, n_bags, masker,
-                          smoothing_fwhm, standardize, detrend, target_affine,
-                          target_shape, low_pass, high_pass, t_r,
                           memory, memory_level, n_jobs, verbose):
     '''From a template, and new images, learn their alignment mapping
     !!! mapping.fit seem to have wrong argument : if error it's upstream in functional_alignment.template
     - Be sure that alignment_methods are the same in class docs and pairwise_alignment
-
-    same for align_template_to_images, align_images_to_template
 
 
     Parameters
@@ -206,9 +170,7 @@ def map_template_to_image(img, train_index, template, alignment_method,
         Mask to be used on data. If an instance of masker is passed,
         then its mask will be used. If no mask is given,
         it will be computed automatically by a MultiNiftiMasker
-        with defaultparameters.
-    smoothing_fwhm, standardize, detrend, target_affine, target_shape, low_pass,
-    high_pass, t_r, memory, memory_level (see PairwiseAlignment documentation)
+        with default parameters.
     n_jobs: integer, optional (default = 1)
         The number of CPUs to use to do the computation. -1 means
         'all CPUs', -2 'all CPUs but one', and so on.
@@ -223,12 +185,7 @@ def map_template_to_image(img, train_index, template, alignment_method,
     mapping = PairwiseAlignment(n_pieces=n_pieces,
                                 alignment_method=alignment_method,
                                 clustering_method=clustering_method,
-                                n_bags=n_bags, mask=masker,
-                                smoothing_fwhm=smoothing_fwhm,
-                                standardize=standardize, detrend=detrend,
-                                target_affine=target_affine,
-                                target_shape=target_shape, low_pass=low_pass,
-                                high_pass=high_pass, t_r=t_r, memory=memory,
+                                n_bags=n_bags, mask=masker, memory=memory,
                                 memory_level=memory_level,
                                 n_jobs=n_jobs, verbose=verbose)
     mapping.fit(mapping_image, img)
@@ -376,15 +333,24 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         -------
             self
         TODO : test save_template
+
+
         """
+        self.masker_ = check_embedded_nifti_masker(self)
+        self.masker_.n_jobs = 1  # self.n_jobs
+        # Avoid warning with imgs != None
+        # if masker_ has been provided a mask_img
+        if self.masker_.mask_img is None:
+            self.masker_.fit(imgs)
+        else:
+            self.masker_.fit()
+
         self.template, self.template_history = \
             create_template(imgs, n_iter, scale_template,
                             self.alignment_method, self.n_pieces,
-                            self.clustering_method, self.n_bags, self.mask,
-                            self.smoothing_fwhm, self.standardize, self.detrend,
-                            self.target_affine, self.target_shape, self.low_pass,
-                            self.high_pass, self.t_r, self.memory,
-                            self.memory_level, self.n_jobs, self.verbose)
+                            self.clustering_method, self.n_bags,
+                            self.masker_, self.memory, self.memory_level,
+                            self.n_jobs, self.verbose)
         if save_template is not None:
             self.template.to_filename(save_template)
 
@@ -409,19 +375,18 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
            List of 4D images, each of them has the same length as the list test_index
         """
 
-        fitted_mappings = Parallel(self.n_jobs, backend="threading", verbose=self.verbose)(
-            delayed(map_template_to_image)(
-                img, train_index, self.template, self.alignment_method,
-                self.n_pieces, self.clustering_method, self.n_bags,
-                self.mask, self.smoothing_fwhm, self.standardize, self.detrend,
-                self.target_affine, self.target_shape, self.low_pass,
-                self.high_pass, self.t_r, self.memory,
-                self.memory_level, self.n_jobs, self.verbose
-            ) for img in imgs
+        fitted_mappings = Parallel(self.n_jobs, backend="threading",
+                                   verbose=self.verbose)(
+            delayed(map_template_to_image)
+            (img, train_index, self.template, self.alignment_method,
+             self.n_pieces, self.clustering_method, self.n_bags, self.masker_,
+             self.memory, self.memory_level, self.n_jobs, self.verbose
+             ) for img in imgs
         )
 
-        predicted_imgs = Parallel(self.n_jobs, backend="threading", verbose=self.verbose)(
-            delayed(predict_from_template_and_mapping)(self.template, test_index, mapping
-                                                       ) for mapping in fitted_mappings
+        predicted_imgs = Parallel(self.n_jobs, backend="threading",
+                                  verbose=self.verbose)(
+            delayed(predict_from_template_and_mapping)
+            (self.template, test_index, mapping) for mapping in fitted_mappings
         )
         return predicted_imgs
