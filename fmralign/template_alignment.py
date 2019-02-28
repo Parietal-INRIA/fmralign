@@ -114,7 +114,7 @@ def create_template(imgs, n_iter, scale_template, alignment_method, n_pieces,
     iter = 0
     while True:
         template = euclidian_mean(
-            aligned_imgs, scale_template, masker)
+            aligned_imgs, masker, scale_template)
         if 0 < iter < n_iter:
             template_history.append(template)
         if iter == n_iter:
