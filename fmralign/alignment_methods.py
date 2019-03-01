@@ -12,9 +12,9 @@ import ot
 
 
 def scaled_procrustes(X, Y, scaling=False, primal=None):
-    """Compute a mixing matrix R and a scaling sc such that
-    frobenius norm ||sc RX - Y||^2 is minimized and
-    R is an orthogonal matrix
+    """Compute a mixing matrix R and a scaling sc such that Frobenius norm
+    ||sc RX - Y||^2 is minimized and R is an orthogonal matrix.
+
     Parameters
     ----------
     X: (n_samples, n_features) nd array
@@ -66,6 +66,7 @@ def scaled_procrustes(X, Y, scaling=False, primal=None):
 
 def optimal_permutation(X, Y):
     """Compute the optmal permutation matrix of X toward Y
+
     Parameters
     ----------
     X: (n_samples, n_features) nd array
@@ -87,6 +88,7 @@ def optimal_permutation(X, Y):
 
 def _projection(x, y):
     """Compute scalar d minimizing ||dx-y||
+
     Parameters
     ----------
     x: (n_features) nd array
@@ -104,7 +106,8 @@ def _projection(x, y):
 
 def _voxelwise_signal_projection(X, Y, n_jobs=1):
     """Compute D, list of scalar d_i minimizing :
-        ||d_i x_i-y_i|| for every x_i,y_i in X,Y
+        ||d_i * x_i - y_i|| for every x_i, y_i in X, Y
+
     Parameters
     ----------
     X: (n_samples, n_features) nd array
@@ -173,9 +176,8 @@ class DiagonalAlignment(Alignment):
 
 
 class ScaledOrthogonalAlignment(Alignment):
-    """Compute a mixing matrix R and a scaling sc such that
-    frobenius norm ||sc RX - Y||^2 is minimized and
-    R is an orthogonal matrix
+    """Compute a mixing matrix R and a scaling sc such that Frobenius norm
+    ||sc RX - Y||^2 is minimized and R is an orthogonal matrix
 
     Parameters
     ---------
@@ -209,8 +211,8 @@ class ScaledOrthogonalAlignment(Alignment):
 
 
 class RidgeAlignment(Alignment):
-    """ Compute an scikit-estimator R using a mixing matrix M s.t frobenius
-    norm || XM - Y ||^2 + alpha ||M||^2 is minimized with cross-validation
+    """ Compute an scikit-estimator R using a mixing matrix M s.t Frobenius
+    norm || XM - Y ||^2 + alpha * ||M||^2 is minimized with cross-validation
 
     Parameters
     ----------
@@ -220,8 +222,8 @@ class RidgeAlignment(Alignment):
         Array of alpha values to try. Regularization strength;
         must be a positive float. Regularization improves the conditioning
         of the problem and reduces the variance of the estimates.
-        Larger values specify stronger regularization.
-        Alpha corresponds to ``C^-1`` in other linear models.
+        Larger values specify stronger regularization. Alpha corresponds to
+        ``C^-1`` in other models such as LogisticRegression or LinearSVC.
     cv : int, cross-validation generator or an iterable, optional
         Determines the cross-validation splitting strategy.
         Possible inputs for cv are:
@@ -290,7 +292,7 @@ class OptimalTransportAlignment(Alignment):
     solver : str (optional)
         solver from POT called to find optimal coupling 'sinkhorn',
         'greenkhorn', 'sinkhorn_stabilized','sinkhorn_epsilon_scaling', 'exact'
-        see POT/ot/bregman on github for source code of solvers
+        see POT/ot/bregman on Github for source code of solvers
     metric : str(optional)
         metric used to create transport cost matrix,
         see full list in scipy.spatial.distance.cdist doc
