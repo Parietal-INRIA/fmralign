@@ -48,12 +48,19 @@ masker.fit()
 ###############################################################################
 # Separate the retrieved files into four folds
 # ---------------------------------------------
-# The train folds used to learn alignment from source subject toward target:
+# For each subject, for each task and conditions, our dataset contains two
+# independent acquisitions, similar except for one acquisition parameter, the
+# encoding phase used that was either Antero-Posterior (AP) or Postero-Anterior (PA).
+# Although this induces small differences in the final data, we will take
+# advantage of these "duplicates" to create a training and a testing set that
+# contains roughly the same signals but acquired totally independently.
+#
+# The training fold, used to learn alignment from source subject toward target:
 #
 # * source train: AP contrasts for subject one
 # * target train: AP contrasts for subject two
 #
-# The test folds:
+# The testing fold:
 #
 # * source test: PA contrasts for subject one, used to predict
 #   the corresponding contrasts of subject two
