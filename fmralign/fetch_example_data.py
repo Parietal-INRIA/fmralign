@@ -33,7 +33,7 @@ def fetch_ibc_subjects_contrasts(subjects, data_dir=None, verbose=1):
         Path to the mask to be used on the data
     Notes
     ------
-    This function is a caller _fetch_files in order
+    This function is a caller to nilearn.datasets.utils._fetch_files in order
     to simplify examples reading and understanding for fmralign.
     See Also
     ---------
