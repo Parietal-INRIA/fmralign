@@ -247,6 +247,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
 
     def fit(self, X, Y):
         """Fit data X and Y and learn transformation to map X to Y
+
         Parameters
         ----------
         X: Niimg-like object
@@ -288,8 +289,8 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X):
-        """
-        Predict data from X
+        """Predict data from X
+
         Parameters
         ----------
         X: Niimg-like object
