@@ -2,10 +2,12 @@
 """Functional alignment on a pair of subject
 ===================================================================
 
-In this tutorial, we show how to better predict new contrasts for a target /
-    subject using source subject corresponding contrasts and data in common.
+In this tutorial, we focus here on a single Region of Interest (ROI). On this\
+ROI, we try to find a transformation from source to target subject that\
+captures the variability between their signal on data they share. We then use\
+this transformation to predict new contrasts for the target subject.
 
-We mostly rely on python common packages and on nilearn to /
+We mostly rely on python common packages and on nilearn to \
     handle functional data in a clean fashion.
 
 
@@ -67,17 +69,24 @@ roi_masker.fit()
 ###############################################################################
 # Separate the retrieved files into four folds
 # ---------------------------------------------
-# The train folds used to learn alignment from source subject toward target:
+# For each subject, for each task and conditions, our dataset contains two
+# independent acquisitions, similar except for one acquisition parameter, the
+# encoding phase used that was either Antero-Posterior (AP) or Postero-Anterior (PA).
+# Although this induces small differences in the final data, we will take
+# advantage of these "duplicates" to create a training and a testing set that
+# contains roughly the same signals but acquired totally independently.
+#
+# The training fold, used to learn alignment from source subject toward target:
 #
 # * source train: AP contrasts for subject one
 # * target train: AP contrasts for subject two
 #
-# The test folds:
+# The testing fold:
 #
-# * source test: PA contrasts for subject one, used to predict the \
-#   corresponding contrasts of subject two
-# * target test: PA contrasts for subject two, \
-#   used as a ground truth to score our predictions
+# * source test: PA contrasts for subject one, used to predict
+#   the corresponding contrasts of subject two
+# * target test: PA contrasts for subject two, used as a ground truth
+#   to score our predictions
 #
 source_train = df[df.subject == 'sub-01'][df.acquisition == 'ap'].path.values
 target_train = df[df.subject == 'sub-02'][df.acquisition == 'ap'].path.values
