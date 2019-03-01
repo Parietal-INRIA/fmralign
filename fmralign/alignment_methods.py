@@ -12,14 +12,14 @@ import ot
 
 
 def scaled_procrustes(X, Y, scaling=False, primal=None):
-    """Compute a mixing matrix R and a scaling sc such that
-    frobenius norm ||sc RX - Y||^2 is minimized and
-    R is an orthogonal matrix
+    """Compute a mixing matrix R and a scaling sc such that Frobenius norm
+    ||sc RX - Y||^2 is minimized and R is an orthogonal matrix.
+
     Parameters
     ----------
-    X: (n_timeframes, n_features) nd array
+    X: (n_samples, n_features) nd array
         source data
-    Y: (n_timeframes, n_features) nd array
+    Y: (n_samples, n_features) nd array
         target data
     scaling: bool
         If scaling is true, computes a floating scaling parameter sc such that:
@@ -38,6 +38,8 @@ def scaled_procrustes(X, Y, scaling=False, primal=None):
     sc: int
         scaling parameter
     """
+    X = X.astype(np.float64, copy=False)
+    Y = Y.astype(np.float64, copy=False)
     if np.linalg.norm(X) == 0 or np.linalg.norm(Y) == 0:
         return diags(np.ones(X.shape[1])).tocsr(), 1
     if primal is None:
@@ -64,6 +66,7 @@ def scaled_procrustes(X, Y, scaling=False, primal=None):
 
 def optimal_permutation(X, Y):
     """Compute the optmal permutation matrix of X toward Y
+
     Parameters
     ----------
     X: (n_samples, n_features) nd array
@@ -85,6 +88,7 @@ def optimal_permutation(X, Y):
 
 def _projection(x, y):
     """Compute scalar d minimizing ||dx-y||
+
     Parameters
     ----------
     x: (n_features) nd array
@@ -101,7 +105,9 @@ def _projection(x, y):
 
 
 def _voxelwise_signal_projection(X, Y, n_jobs=1):
-    """Compute D, list of scalar d_i minimizing ||d_i x_i-y_i|| for every x_i,y_i in X,Y
+    """Compute D, list of scalar d_i minimizing :
+        ||d_i * x_i - y_i|| for every x_i, y_i in X, Y
+
     Parameters
     ----------
     X: (n_samples, n_features) nd array
@@ -131,7 +137,7 @@ class Alignment(BaseEstimator, TransformerMixin):
 
 
 class Identity(Alignment):
-    """The simplest kind of alignment to be used as a baseline for benchmarks. RX = X
+    """The simplest kind of alignment, used as baseline for benchmarks. RX = X
     """
 
     def transform(self, X):
@@ -158,20 +164,20 @@ class DiagonalAlignment(Alignment):
             source data
         Y: (n_samples, n_features) nd array
             target data'''
-        shrinkage_coefficients = voxelwise_signal_projection(X, Y, self.n_jobs)
+        shrinkage_coefficients = _voxelwise_signal_projection(
+            X.T, Y.T, self.n_jobs)
         self.R = diags(shrinkage_coefficients)
         return
 
     def transform(self, X):
         """Transform X using optimal coupling computed during fit.
         """
-        return self.R.dot(X)
+        return self.R.dot(X.T).T
 
 
 class ScaledOrthogonalAlignment(Alignment):
-    """Compute a mixing matrix R and a scaling sc such that
-    frobenius norm ||sc RX - Y||^2 is minimized and
-    R is an orthogonal matrix
+    """Compute a mixing matrix R and a scaling sc such that Frobenius norm
+    ||sc RX - Y||^2 is minimized and R is an orthogonal matrix
 
     Parameters
     ---------
@@ -183,14 +189,14 @@ class ScaledOrthogonalAlignment(Alignment):
 
     def __init__(self, scaling=True):
         self.scaling = scaling
-        self.scale = None
+        self.scale = 1
 
     def fit(self, X, Y):
         """ Fit orthogonal R s.t. ||sc XR - Y||^2
         ----------
-        X: (n_timeframes, n_features) nd array
+        X: (n_samples, n_features) nd array
             source data
-        Y: (n_timeframes, n_features) nd array
+        Y: (n_samples, n_features) nd array
             target data
         """
         R, sc = scaled_procrustes(X, Y, scaling=self.scaling)
@@ -201,23 +207,26 @@ class ScaledOrthogonalAlignment(Alignment):
     def transform(self, X):
         """Transform X using optimal transform computed during fit.
         """
-        return self.scale * X.dot(self.R)
+        return X.dot(self.R)
 
 
 class RidgeAlignment(Alignment):
-    """ Compute an scikit-estimator R using a mixing matrix M such that
-    frobenius norm || XM - Y ||^2 + alpha ||M||^2 is minimized with built-in cross-validation
+    """ Compute an scikit-estimator R using a mixing matrix M s.t Frobenius
+    norm || XM - Y ||^2 + alpha * ||M||^2 is minimized with cross-validation
 
     Parameters
     ----------
-    R : scikit-estimator from sklearn.linear_model.RidgeCV with method fit, predict
+    R : scikit-estimator from sklearn.linear_model.RidgeCV
+        with methods fit, predict
     alpha : numpy array of shape [n_alphas]
-        Array of alpha values to try. Regularization strength; must be a positive float. Regularization
-        improves the conditioning of the problem and reduces the variance of
-        the estimates. Larger values specify stronger regularization.
-        Alpha corresponds to ``C^-1`` in other linear models.
+        Array of alpha values to try. Regularization strength;
+        must be a positive float. Regularization improves the conditioning
+        of the problem and reduces the variance of the estimates.
+        Larger values specify stronger regularization. Alpha corresponds to
+        ``C^-1`` in other models such as LogisticRegression or LinearSVC.
     cv : int, cross-validation generator or an iterable, optional
-        Determines the cross-validation splitting strategy. Possible inputs for cv are:
+        Determines the cross-validation splitting strategy.
+        Possible inputs for cv are:
         -None, to use the efficient Leave-One-Out cross-validation
         - integer, to specify the number of folds.
         - An object to be used as a cross-validation generator.
@@ -229,7 +238,8 @@ class RidgeAlignment(Alignment):
         self.cv = cv
 
     def fit(self, X, Y):
-        """ Fit R s.t. || XR - Y ||^2 + alpha ||R||^2 is minimized and choose best alpha through cross-validation
+        """ Fit R s.t. || XR - Y ||^2 + alpha ||R||^2 is minimized and
+            choose best alpha through cross-validation
         ----------
         X: (n_samples, n_features) nd array
             source data
@@ -259,11 +269,11 @@ class Hungarian(Alignment):
     def fit(self, X, Y):
         '''Parameters
         ----------
-        X: (n_timeframes, n_features) nd array
+        X: (n_samples, n_features) nd array
             source data
-        Y: (n_timeframes, n_features) nd array
+        Y: (n_samples, n_features) nd array
             target data'''
-        self.R = optimal_permutation(X, Y)
+        self.R = optimal_permutation(X, Y).T
         return self
 
     def transform(self, X):
@@ -280,14 +290,18 @@ class OptimalTransportAlignment(Alignment):
     R : scipy.sparse.csr_matrix
         Mixing matrix containing the optimal permutation
     solver : str (optional)
-        solver from OT called to find optimal coupling 'sinkhorn', 'greenkhorn', 'sinkhorn_stabilized','sinkhorn_epsilon_scaling', 'exact' see POT/ot/bregman on github for source code of solvers
+        solver from POT called to find optimal coupling 'sinkhorn',
+        'greenkhorn', 'sinkhorn_stabilized','sinkhorn_epsilon_scaling', 'exact'
+        see POT/ot/bregman on Github for source code of solvers
     metric : str(optional)
-        metric used to create transport cost matrix, see full list in scipy.spatial.distance.cdist doc
+        metric used to create transport cost matrix,
+        see full list in scipy.spatial.distance.cdist doc
     reg : int (optional)
         level of entropic regularization
     '''
 
-    def __init__(self, solver='sinkhorn_epsilon_scaling', metric='euclidean', reg=1):
+    def __init__(self, solver='sinkhorn_epsilon_scaling',
+                 metric='euclidean', reg=1):
         self.solver = solver
         self.metric = metric
         self.reg = reg
@@ -299,11 +313,11 @@ class OptimalTransportAlignment(Alignment):
             source data
         Y: (n_samples, n_features) nd array
             target data'''
-        n = len(X)
+        n = len(X.T)
         a = np.ones(n) * 1 / n
         b = np.ones(n) * 1 / n
 
-        M = cdist(X, Y, metric=self.metric)
+        M = cdist(X.T, Y.T, metric=self.metric)
 
         if self.solver == 'exact':
             self.R = ot.lp.emd(a, b, M) * n
@@ -315,4 +329,4 @@ class OptimalTransportAlignment(Alignment):
     def transform(self, X):
         """Transform X using optimal coupling computed during fit.
         """
-        return self.R.dot(X)
+        return X.dot(self.R)

@@ -1,9 +1,12 @@
 import numpy as np
 from sklearn.utils.testing import assert_array_almost_equal, assert_greater
 from scipy.linalg import orthogonal_procrustes
-from fmralign.alignment_methods import scaled_procrustes, optimal_permutation, voxelwise_signal_projection
-from fmralign.alignment_methods import Identity, DiagonalAlignment, ScaledOrthogonalAlignment, Hungarian, RidgeAlignment, OptimalTransportAlignment
-from fmralign.tests.utils import assert_class_align_better_than_identity, zero_mean_coefficient_determination
+from fmralign.alignment_methods import scaled_procrustes, \
+    optimal_permutation, _voxelwise_signal_projection
+from fmralign.alignment_methods import Identity, DiagonalAlignment, Hungarian,\
+    ScaledOrthogonalAlignment, RidgeAlignment, OptimalTransportAlignment
+from fmralign.tests.utils import assert_class_align_better_than_identity, \
+    zero_mean_coefficient_determination
 
 
 def test_scaled_procrustes_algorithmic():
@@ -127,29 +130,37 @@ def test_projection_coefficients():
     C = []
     for i, a in enumerate(A):
         C.append((i + 1) * a)
-    c = voxelwise_signal_projection(A, C, 2)
+    c = _voxelwise_signal_projection(A, C, 2)
     assert_array_almost_equal(c, [i + 1 for i in range(n_samples)])
 
 
-def test_all_classes_better_than_identity():
+def test_all_classes_R_and_pred_shape_and_better_than_identity():
+    from scipy.sparse.csc import csc_matrix
     '''Test all classes on random case'''
-    n_samples, n_features = 100, 20
-    X = np.random.randn(n_samples, n_features)
-    Y = np.random.randn(n_samples, n_features)
-    id = Identity()
-    id.fit(X, Y)
-    assert_array_almost_equal(X, id.transform(X))
-    for algo in [DiagonalAlignment(), RidgeAlignment(), ScaledOrthogonalAlignment(), OptimalTransportAlignment(), Hungarian()]:
-        print(algo)
-        algo.fit(X, Y)
-        identity_baseline_score = zero_mean_coefficient_determination(
-            Y, X)
-        algo_score = zero_mean_coefficient_determination(Y, algo.transform(X))
-        assert_greater(algo_score, identity_baseline_score)
 
-    n_samples, n_features = 20, 100
-    X = np.random.randn(n_samples, n_features)
-    Y = np.random.randn(n_samples, n_features)
-
-    for algo in [ScaledOrthogonalAlignment(), RidgeAlignment(), OptimalTransportAlignment(), Hungarian()]:
-        assert_class_align_better_than_identity(algo, X, Y)
+    for n_samples, n_features in [(100, 20), (20, 100)]:
+        X = np.random.randn(n_samples, n_features)
+        Y = np.random.randn(n_samples, n_features)
+        id = Identity()
+        id.fit(X, Y)
+        identity_baseline_score = zero_mean_coefficient_determination(Y, X)
+        assert_array_almost_equal(X, id.transform(X))
+        for algo in [RidgeAlignment(), ScaledOrthogonalAlignment(),
+                     ScaledOrthogonalAlignment(scaling=False),
+                     OptimalTransportAlignment(),
+                     Hungarian(), DiagonalAlignment()]:
+            print(algo)
+            algo.fit(X, Y)
+            # test that permutation matrix shape is (20, 20) except for Ridge
+            if type(algo.R) == csc_matrix:
+                R = algo.R.toarray()
+                assert(R.shape == (n_features, n_features))
+            elif type(algo) != RidgeAlignment:
+                R = algo.R
+                assert(R.shape == (n_features, n_features))
+            # test pred shape and loss improvement compared to identity
+            X_pred = algo.transform(X)
+            assert(X_pred.shape == X.shape)
+            algo_score = zero_mean_coefficient_determination(
+                Y, X_pred)
+            assert_greater(algo_score, identity_baseline_score)
