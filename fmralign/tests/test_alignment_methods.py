@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import numpy as np
 from sklearn.utils.testing import assert_array_almost_equal, assert_greater
 from scipy.linalg import orthogonal_procrustes
