@@ -48,7 +48,7 @@ REQUIRED_MODULE_METADATA = (
         'install_info': _FMRALIGN_INSTALL_MSG}),
     ('matplotlib', {
         'min_version': '1.5.0',
-        'install_info': _FMRALIGN_INSTALL_MSG})
+        'install_info': _FMRALIGN_INSTALL_MSG}),
     ('POT', {
         'min_version': '0.5.0',
         'required_at_installation': True,

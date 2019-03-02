@@ -1,8 +1,12 @@
 import numpy as np
 from sklearn.utils.testing import assert_array_almost_equal, assert_greater
 from scipy.linalg import orthogonal_procrustes
-from fmralign.alignment_methods import scaled_procrustes, optimal_permutation, Identity, ScaledOrthogonalAlignment, Hungarian, RidgeAlignment, OptimalTransportAlignment
-from fmralign.tests.utils import assert_class_align_better_than_identity, zero_mean_coefficient_determination
+from fmralign.alignment_methods import scaled_procrustes, \
+    optimal_permutation, _voxelwise_signal_projection
+from fmralign.alignment_methods import Identity, DiagonalAlignment, Hungarian,\
+    ScaledOrthogonalAlignment, RidgeAlignment, OptimalTransportAlignment
+from fmralign.tests.utils import assert_class_align_better_than_identity, \
+    zero_mean_coefficient_determination
 
 
 def test_scaled_procrustes_algorithmic():
@@ -119,6 +123,17 @@ def test_optimal_permutation_on_translation_case():
     assert_array_almost_equal(opt.dot(U.T).T, V)
 
 
+def test_projection_coefficients():
+    n_samples = 4
+    n_features = 6
+    A = np.random.rand(n_samples, n_features)
+    C = []
+    for i, a in enumerate(A):
+        C.append((i + 1) * a)
+    c = _voxelwise_signal_projection(A, C, 2)
+    assert_array_almost_equal(c, [i + 1 for i in range(n_samples)])
+
+
 def test_all_classes_R_and_pred_shape_and_better_than_identity():
     from scipy.sparse.csc import csc_matrix
     '''Test all classes on random case'''
@@ -128,13 +143,15 @@ def test_all_classes_R_and_pred_shape_and_better_than_identity():
         Y = np.random.randn(n_samples, n_features)
         id = Identity()
         id.fit(X, Y)
+        identity_baseline_score = zero_mean_coefficient_determination(Y, X)
         assert_array_almost_equal(X, id.transform(X))
-        identity_baseline_score = zero_mean_coefficient_determination(
-            Y, X)
-        for algo in [RidgeAlignment(), ScaledOrthogonalAlignment(), OptimalTransportAlignment(), Hungarian()]:
+        for algo in [RidgeAlignment(), ScaledOrthogonalAlignment(),
+                     ScaledOrthogonalAlignment(scaling=False),
+                     OptimalTransportAlignment(),
+                     Hungarian(), DiagonalAlignment()]:
             print(algo)
             algo.fit(X, Y)
-            # test that permutation matrix is of shape (20, 20) except for Ridge
+            # test that permutation matrix shape is (20, 20) except for Ridge
             if type(algo.R) == csc_matrix:
                 R = algo.R.toarray()
                 assert(R.shape == (n_features, n_features))
