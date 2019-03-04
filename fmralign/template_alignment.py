@@ -64,8 +64,7 @@ def _align_images_to_template(imgs, template, alignment_method,
 def create_template(imgs, n_iter, scale_template, alignment_method, n_pieces,
                     clustering_method, n_bags, masker, memory, memory_level,
                     n_jobs, verbose):
-    '''Create template through alternate minimization:
-        At each iteration compute :
+    '''Create template through alternate minimization.  Compute iteratively :
         * T minimizing sum(||R_iX_i-T||) which is the mean of aligned images (RX_i)
         * align initial images to new template T
             (find transform R minimizing ||R_iX_i-T|| for each img X_i)
@@ -75,9 +74,9 @@ def create_template(imgs, n_iter, scale_template, alignment_method, n_pieces,
         ----------
         alignment_method: string
             Algorithm used to perform alignment between X_i and Y_i :
-            - either 'identity', 'scaled_orthogonal', 'ridge_cv',
+            * either 'identity', 'scaled_orthogonal', 'ridge_cv',
                 'permutation', 'diagonal'
-            - or an instance of one of alignment classes
+            * or an instance of one of alignment classes
                 (imported from functional_alignment.alignment_methods)
         n_pieces: int, optional (default = 1)
             Number of regions in which the data is parcellated for alignment
@@ -135,23 +134,23 @@ def map_template_to_image(img, train_index, template, alignment_method,
     '''From a template, and new images, learn their alignment mapping
     !!! mapping.fit seem to have wrong argument : if error it's upstream in functional_alignment.template
     - Be sure that alignment_methods are the same in class docs and pairwise_alignment
+    # Check everywhere whether template is list of 3D Niimgs or 4D Niimgs.
 
 
     Parameters
     ----------
-    img:
+    img: list of 3D Niimgs
+
     train_index: list of int
         Matching index between imgs and the corresponding template images to use
         to learn alignment. len(train_index) must be equal to len(imgs)
     template: list of 3D Niimgs
         Learnt in a first step now used to learn the mapping
-    Parameters
-    ----------
     alignment_method: string
         Algorithm used to perform alignment between X_i and Y_i :
-        - either 'identity', 'scaled_orthogonal', 'ridge_cv',
+        * either 'identity', 'scaled_orthogonal', 'ridge_cv',
             'permutation', 'diagonal'
-        - or an instance of one of alignment classes
+        * or an instance of one of alignment classes
             (imported from functional_alignment.alignment_methods)
     n_pieces: int, optional (default = 1)
         Number of regions in which the data is parcellated for alignment
@@ -179,7 +178,7 @@ def map_template_to_image(img, train_index, template, alignment_method,
     -------
     mapping: instance of PairwiseAlignment class
         Alignment estimator fitted to align the template with the input images'''
-    mapping_image = index_img(img, train_index)
+    mapping_image = index_img(template, train_index)
     mapping = PairwiseAlignment(n_pieces=n_pieces,
                                 alignment_method=alignment_method,
                                 clustering_method=clustering_method,
@@ -232,9 +231,9 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         ----------
         alignment_method: string
             Algorithm used to perform alignment between X_i and Y_i :
-            - either 'identity', 'scaled_orthogonal', 'ridge_cv',
+            * either 'identity', 'scaled_orthogonal', 'ridge_cv',
                 'permutation', 'diagonal'
-            - or an instance of one of alignment classes
+            * or an instance of one of alignment classes
                 (imported from functional_alignment.alignment_methods)
         n_pieces: int, optional (default = 1)
             Number of regions in which the data is parcellated for alignment
@@ -327,6 +326,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
            the template is simply the mean of the input images.
         save_template: None or string(optional)
             If not None, path to which the template will be saved.
+
         Returns
         -------
             self
@@ -355,6 +355,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
     def transform(self, imgs, train_index, test_index):
         """
         Predict data from X
+
         Parameters
         ----------
         imgs: List of Niimg-like objects
@@ -365,6 +366,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             indexes of the 3D samples used to map each img to the template
         test_index : list of ints
             indexes of the 3D samples to predict from the template and the mapping
+
         Returns
         -------
         predicted_imgs: Niimg-like object
