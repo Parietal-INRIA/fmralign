@@ -65,8 +65,15 @@ masker.fit()
 # * target test: PA contrasts for subject 7, used as a ground truth to score \
 #   our predictions
 #
-template_train = files[0:5]
+from nilearn.image import concat_imgs
+
+# We make a list of 4D niimgs from our list of list of files containing 3D images
+template_train = []
+for i in range(5):
+    template_train.append(concat_imgs(files[i]))
 target_train = df[df.subject == 'sub-07'][df.acquisition == 'ap'].path.values
+# We make a single 4D Niimg from our list of 3D filenames
+target_train = concat_imgs(target_train)
 target_test = df[df.subject == 'sub-07'][df.acquisition == 'pa'].path.values
 
 #############################################################################
@@ -94,7 +101,7 @@ from fmralign.template_alignment import TemplateAlignment
 from nilearn.image import index_img
 
 template_estim = TemplateAlignment(
-    n_pieces=150, alignment_method='scaled_orthogonal', mask=masker)
+    n_pieces=150, alignment_method='ridge_cv', mask=masker)
 template_estim.fit(template_train, n_iter=2)
 
 #############################################################################
@@ -108,7 +115,9 @@ template_estim.fit(template_train, n_iter=2)
 # 0, to 53, and then the PA contrasts from 53 to 106.
 train_index = range(53)
 test_index = range(53, 106)
-prediction_from_template = template_estim.transform(target_train, train_index,
+# We input the mapping image target_train in a list, we could have input more
+# than one subject for which we'd want to predict : [train_1, train_2 ...]
+prediction_from_template = template_estim.transform([target_train], train_index,
                                                     test_index)
 # We can also try to predict from averaging
 prediction_from_average = index_img(average_subject, test_index)
@@ -131,7 +140,8 @@ average_score = np.maximum(r2_score(
     multioutput='raw_values'), -1)
 # The baseline score represents the quality of prediction using aligned data
 template_score = np.maximum(r2_score(
-    masker.transform(target_test), masker.transform(prediction_from_template),
+    masker.transform(target_test), masker.transform(
+        prediction_from_template[0]),
     multioutput='raw_values'), - 1)
 
 #############################################################################
