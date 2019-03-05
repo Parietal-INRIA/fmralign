@@ -41,32 +41,68 @@ def test_euclidian_mean():
 
 def test_template_identity():
 
-    args_list = [{'alignment_method': 'identity', 'mask': mask_img},
-                 {'alignment_method': 'identity', 'n_pieces': 3, 'mask': mask_img},
+    from nilearn.image import math_img, concat_imgs
+
+    n = 10
+    im, mask_img = random_niimg((6, 5, 3))
+    sub_1 = concat_imgs(n * [im])
+    sub_2 = math_img("2 * img", img=sub_1)
+    sub_3 = math_img("3 * img", img=sub_1)
+
+    ref_template = sub_2
+    subs = [sub_1, sub_2, sub_3]
+    masker = NiftiMasker(mask_img=mask_img)
+    masker.fit()
+
+    args_list = [{'alignment_method': 'identity', 'mask': masker},
+                 {'alignment_method': 'identity', 'mask': masker, 'n_jobs': 2},
+                 {'alignment_method': 'identity', 'n_pieces': 3, 'mask': masker},
                  {'alignment_method': 'identity', 'n_pieces': 3,
-                     'n_bags': 10, 'mask': mask_img},
-                 {'alignment_method': 'identity', 'n_pieces': 3,
-                     'n_bags': 10, 'mask': mask_img, 'n_jobs': 2}
+                     'n_bags': 2, 'mask': masker}
                  ]
+    import time
     for args in args_list:
+        start_time = time.time()
         algo = TemplateAlignment(**args)
         # Learning a template which is
-        algo.fit(imgs)
+        algo.fit(subs)
         # test template
         assert_array_almost_equal(
-            ref_template, algo.template.get_data())
-
+            ref_template.get_data(), algo.template.get_data())
         predicted_imgs = algo.transform(
-            sub_1, train_index=range(3), test_index=range(3, 5))
-        assert_array_almost_equal(index_img(sub_1, range(3, 5)
-                                            ).get_data(), predicted_imgs.get_data())
+            [index_img(sub_1, range(8))], train_index=range(8), test_index=range(8, 10))
+        assert_array_almost_equal(index_img(ref_template, range(8, 10)
+                                            ).get_data(), predicted_imgs[0].get_data())
+        print(time.time() - start_time)
 
     # Try to input some list, check that the template is two time the reference,
+    # TODO:Careful with what to input. For now subjects should be 4D Niimgs and
+    # images hence list of Niimgs.
+    # Would it work with list of lists ? Should it ?
+    # TODO careful with input less than length 5
+    # TODO
 
 # THEN INPUT SOME LIST OF  ONES AND SEE IF THE TRANSFORM WILL CORRECTLY LEARN TO MULTIPLY BY 2 THE TEST images
 # APART FROM THAT
 
 
 def test_template_closer_to_target():
-    pass
+    if 1:
+        pass
+    args_list = [{'alignment_method': 'diagonal', 'mask': masker},
+                 {'alignment_method': 'diagonal', 'n_pieces': 3, 'mask': masker}
+                 ]
+    for args in args_list:
+        algo = TemplateAlignment(**args)
+        # Learning a template which is
+        algo.fit(subs)
+        # test template
+        assert_array_almost_equal(
+            ref_template.get_data(), algo.template.get_data())
+
+        predicted_imgs = algo.transform(
+            [sub_1], train_index=range(3), test_index=range(3, 5))
+        assert_array_almost_equal(index_img(sub_1, range(3, 5)
+                                            ).get_data(), predicted_imgs[0].get_data())
+
 # Take two random images, test that their template is closer to the mean than to any of the three for every method
