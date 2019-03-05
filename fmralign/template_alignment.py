@@ -360,8 +360,8 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         ----------
         imgs: List of Niimg-like objects
            See http://nilearn.github.io/manipulating_images/input_output.html
-           source data. Every img must have the same length (number of sample)
-           as imgs used in the fit() and as the template.
+           source data. Every img must have length (number of sample)
+           train_index.
         train_index : list of ints
             indexes of the 3D samples used to map each img to the template
         test_index : list of ints
@@ -373,6 +373,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
            See http://nilearn.github.io/manipulating_images/input_output.html
            predicted data
            List of 4D images, each of them has the same length as the list test_index
+
         """
 
         fitted_mappings = Parallel(self.n_jobs, backend="threading",
