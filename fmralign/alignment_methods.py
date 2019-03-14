@@ -104,7 +104,7 @@ def _projection(x, y):
     return np.dot(x, y) / np.linalg.norm(x)**2
 
 
-def _voxelwise_signal_projection(X, Y, n_jobs=1):
+def _voxelwise_signal_projection(X, Y, n_jobs=1, parallel_backend='threading'):
     """Compute D, list of scalar d_i minimizing :
         ||d_i * x_i - y_i|| for every x_i, y_i in X, Y
 
@@ -120,7 +120,7 @@ def _voxelwise_signal_projection(X, Y, n_jobs=1):
     D: list of ints
         List of optimal scaling factors
     """
-    return Parallel(n_jobs)(delayed(_projection)(
+    return Parallel(n_jobs, parallel_backend)(delayed(_projection)(
         voxel_source, voxel_target)
         for voxel_source, voxel_target in zip(X, Y))
 
@@ -152,10 +152,17 @@ class DiagonalAlignment(Alignment):
     ----------
     R : scipy.sparse.diags
         Scaling matrix containing the optimal shrinking factor for every voxel
+    n_jobs: integer, optional (default = 1)
+        The number of CPUs to use to do the computation. -1 means
+        'all CPUs', -2 'all CPUs but one', and so on.
+    parallel_backend: str, ParallelBackendBase instance, None (default: 'threading')
+        Specify the parallelization backend implementation. For more
+        informations see joblib.Parallel documentation
     '''
 
-    def __init__(self, n_jobs=1):
+    def __init__(self, n_jobs=1, parallel_backend='threading'):
         self.n_jobs = n_jobs
+        self.parallel_backend = parallel_backend
 
     def fit(self, X, Y):
         '''Parameters
@@ -165,7 +172,7 @@ class DiagonalAlignment(Alignment):
         Y: (n_samples, n_features) nd array
             target data'''
         shrinkage_coefficients = _voxelwise_signal_projection(
-            X.T, Y.T, self.n_jobs)
+            X.T, Y.T, self.n_jobs, self.parallel_backend)
         self.R = diags(shrinkage_coefficients)
         return
 
