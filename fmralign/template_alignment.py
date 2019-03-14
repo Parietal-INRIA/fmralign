@@ -42,7 +42,8 @@ def euclidian_mean(imgs, masker, scale_template=False):
 
 def _align_images_to_template(imgs, template, alignment_method,
                               n_pieces, clustering_method, n_bags, masker,
-                              memory, memory_level, n_jobs, verbose):
+                              memory, memory_level, n_jobs, parallel_backend,
+                              verbose):
     '''Convenience function : for a list of images, return the list
     of estimators (PairwiseAlignment instances) aligning each of them to a
     common target, the template. All arguments are used in PairwiseAlignment
@@ -55,7 +56,8 @@ def _align_images_to_template(imgs, template, alignment_method,
                               clustering_method=clustering_method, n_bags=n_bags,
                               mask=masker, memory=memory,
                               memory_level=memory_level,
-                              n_jobs=n_jobs, verbose=verbose)
+                              n_jobs=n_jobs, parallel_backend=parallel_backend,
+                              verbose=verbose)
         piecewise_estimator.fit(img, template)
         aligned_imgs.append(piecewise_estimator.transform(img))
     return aligned_imgs
@@ -63,7 +65,7 @@ def _align_images_to_template(imgs, template, alignment_method,
 
 def create_template(imgs, n_iter, scale_template, alignment_method, n_pieces,
                     clustering_method, n_bags, masker, memory, memory_level,
-                    n_jobs, verbose):
+                    n_jobs, parallel_backend, verbose):
     '''Create template through alternate minimization.  Compute iteratively :
         * T minimizing sum(||R_iX_i-T||) which is the mean of aligned images (RX_i)
         * align initial images to new template T
@@ -104,6 +106,9 @@ def create_template(imgs, n_iter, scale_template, alignment_method, n_pieces,
         n_jobs: integer, optional (default = 1)
             The number of CPUs to use to do the computation. -1 means
             'all CPUs', -2 'all CPUs but one', and so on.
+        parallel_backend: str, ParallelBackendBase instance, None
+            Specify the parallelization backend implementation. For more
+            informations see joblib.Parallel documentation
         verbose: integer, optional (default = 0)
             Indicate the level of verbosity. By default, nothing is printed.
     '''
@@ -122,7 +127,7 @@ def create_template(imgs, n_iter, scale_template, alignment_method, n_pieces,
                                                  alignment_method, n_pieces,
                                                  clustering_method, n_bags,
                                                  masker, memory, memory_level,
-                                                 n_jobs, verbose)
+                                                 n_jobs, parallel_backend, verbose)
         iter += 1
 
     return template, template_history
@@ -130,7 +135,7 @@ def create_template(imgs, n_iter, scale_template, alignment_method, n_pieces,
 
 def map_template_to_image(img, train_index, template, alignment_method,
                           n_pieces, clustering_method, n_bags, masker,
-                          memory, memory_level, n_jobs, verbose):
+                          memory, memory_level, n_jobs, parallel_backend, verbose):
     '''From a template, and new images, learn their alignment mapping
     !!! mapping.fit seem to have wrong argument : if error it's upstream in functional_alignment.template
     - Be sure that alignment_methods are the same in class docs and pairwise_alignment
@@ -171,6 +176,9 @@ def map_template_to_image(img, train_index, template, alignment_method,
     n_jobs: integer, optional (default = 1)
         The number of CPUs to use to do the computation. -1 means
         'all CPUs', -2 'all CPUs but one', and so on.
+    parallel_backend: str, ParallelBackendBase instance, None
+        Specify the parallelization backend implementation. For more
+        informations see joblib.Parallel documentation
     verbose: integer, optional (default = 0)
         Indicate the level of verbosity. By default, nothing is printed.
 
@@ -184,7 +192,8 @@ def map_template_to_image(img, train_index, template, alignment_method,
                                 clustering_method=clustering_method,
                                 n_bags=n_bags, mask=masker, memory=memory,
                                 memory_level=memory_level,
-                                n_jobs=n_jobs, verbose=verbose)
+                                n_jobs=n_jobs, parallel_backend=parallel_backend,
+                                verbose=verbose)
     mapping.fit(mapping_image, img)
     return mapping
 
@@ -225,7 +234,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
                  detrend=None, target_affine=None, target_shape=None,
                  low_pass=None, high_pass=None, t_r=None,
                  memory=Memory(cachedir=None), memory_level=0,
-                 n_jobs=1, verbose=0):
+                 n_jobs=1, parallel_backend='threading', verbose=0):
         '''
         Parameters
         ----------
@@ -285,6 +294,9 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         n_jobs: integer, optional (default = 1)
             The number of CPUs to use to do the computation. -1 means
             'all CPUs', -2 'all CPUs but one', and so on.
+        parallel_backend: str, ParallelBackendBase instance, None (default: 'threading')
+            Specify the parallelization backend implementation. For more
+            informations see joblib.Parallel documentation
         verbose: integer, optional (default = 0)
             Indicate the level of verbosity. By default, nothing is printed.
         '''
@@ -306,6 +318,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         self.memory = memory
         self.memory_level = memory_level
         self.n_jobs = n_jobs
+        self.parallel_backend = parallel_backend
         self.verbose = verbose
 
     def fit(self, imgs, scale_template=False, n_iter=2, save_template=None):
@@ -348,7 +361,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
                             self.alignment_method, self.n_pieces,
                             self.clustering_method, self.n_bags,
                             self.masker_, self.memory, self.memory_level,
-                            self.n_jobs, self.verbose)
+                            self.n_jobs, self.parallel_backend, self.verbose)
         if save_template is not None:
             self.template.to_filename(save_template)
 
@@ -367,6 +380,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         test_index : list of ints
             indexes of the 3D samples to predict from the template and the mapping
 
+
         Returns
         -------
         predicted_imgs: Niimg-like object
@@ -376,16 +390,17 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
 
         """
 
-        fitted_mappings = Parallel(self.n_jobs, backend="threading",
+        fitted_mappings = Parallel(self.n_jobs, backend=self.parallel_backend,
                                    verbose=self.verbose)(
             delayed(map_template_to_image)
             (img, train_index, self.template, self.alignment_method,
              self.n_pieces, self.clustering_method, self.n_bags, self.masker_,
-             self.memory, self.memory_level, self.n_jobs, self.verbose
+             self.memory, self.memory_level, self.n_jobs, self.parallel_backend,
+             self.verbose
              ) for img in imgs
         )
 
-        predicted_imgs = Parallel(self.n_jobs, backend="threading",
+        predicted_imgs = Parallel(self.n_jobs, backend=self.parallel_backend,
                                   verbose=self.verbose)(
             delayed(predict_from_template_and_mapping)
             (self.template, test_index, mapping) for mapping in fitted_mappings
