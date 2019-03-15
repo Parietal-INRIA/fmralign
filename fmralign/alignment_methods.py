@@ -302,6 +302,18 @@ class OptimalTransportAlignment(Alignment):
 
     def __init__(self, solver='sinkhorn_epsilon_scaling',
                  metric='euclidean', reg=1):
+        try:
+            import ot
+        except ImportError:
+            from fmralign.version import REQUIRED_MODULE_METADATA
+            for module, metadata in REQUIRED_MODULE_METADATA:
+                if module == 'POT':
+                    POT_min_version = metadata['min_version']
+            raise ImportError(
+                "POT module is not installed by default with fmralign, to \
+                use optimal transport solver you must \
+                install POT version < %s. To install it, run 'pip install\
+                POT' " % POT_min_version)
         self.solver = solver
         self.metric = metric
         self.reg = reg
@@ -313,6 +325,7 @@ class OptimalTransportAlignment(Alignment):
             source data
         Y: (n_samples, n_features) nd array
             target data'''
+
         n = len(X.T)
         a = np.ones(n) * 1 / n
         b = np.ones(n) * 1 / n
