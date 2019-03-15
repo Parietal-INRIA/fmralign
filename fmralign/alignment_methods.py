@@ -281,6 +281,25 @@ class Hungarian(Alignment):
         return X.dot(self.R.toarray())
 
 
+def _import_ot():
+    '''Import the optional dependency ot (POT module) if installed or give
+    back a clear error message to the user if not installed
+    '''
+    try:
+        import ot
+    except ImportError:
+        from fmralign.version import REQUIRED_MODULE_METADATA
+        for module, metadata in REQUIRED_MODULE_METADATA:
+            if module == 'POT':
+                POT_min_version = metadata['min_version']
+        raise ImportError(
+            ("To use optimal transport solver, POT module(v > {}) is necessary "
+             "but not installed by default with fmralign. To install it,"
+             "run 'pip install POT' ").format(POT_min_version))
+    else:
+        return ot
+
+
 class OptimalTransportAlignment(Alignment):
     '''Compute the optmal coupling between X and Y with entropic regularization
 
@@ -301,17 +320,7 @@ class OptimalTransportAlignment(Alignment):
 
     def __init__(self, solver='sinkhorn_epsilon_scaling',
                  metric='euclidean', reg=1):
-        try:
-            import ot
-        except ImportError:
-            from fmralign.version import REQUIRED_MODULE_METADATA
-            for module, metadata in REQUIRED_MODULE_METADATA:
-                if module == 'POT':
-                    POT_min_version = metadata['min_version']
-            raise ImportError(
-                "To use optimal transport solver, POT module is necessary but \
-                not installed by default with fmralign. To install it, \
-                run 'pip install POT' " % POT_min_version)
+        self.ot = _import_ot()
         self.solver = solver
         self.metric = metric
         self.reg = reg
@@ -331,9 +340,9 @@ class OptimalTransportAlignment(Alignment):
         M = cdist(X.T, Y.T, metric=self.metric)
 
         if self.solver == 'exact':
-            self.R = ot.lp.emd(a, b, M) * n
+            self.R = self.ot.lp.emd(a, b, M) * n
         else:
-            self.R = ot.sinkhorn(
+            self.R = self.ot.sinkhorn(
                 a, b, M, self.reg, method=self.solver) * n
         return self
 
