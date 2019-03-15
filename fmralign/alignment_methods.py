@@ -8,7 +8,6 @@ from sklearn.utils.linear_assignment_ import linear_assignment
 from sklearn.metrics.pairwise import pairwise_distances
 from sklearn.linear_model import RidgeCV
 from joblib import Parallel, delayed
-import ot
 
 
 def scaled_procrustes(X, Y, scaling=False, primal=None):
@@ -310,10 +309,9 @@ class OptimalTransportAlignment(Alignment):
                 if module == 'POT':
                     POT_min_version = metadata['min_version']
             raise ImportError(
-                "POT module is not installed by default with fmralign, to \
-                use optimal transport solver you must \
-                install POT version < %s. To install it, run 'pip install\
-                POT' " % POT_min_version)
+                "To use optimal transport solver, POT module is necessary but \
+                not installed by default with fmralign. To install it, \
+                run 'pip install POT' " % POT_min_version)
         self.solver = solver
         self.metric = metric
         self.reg = reg
