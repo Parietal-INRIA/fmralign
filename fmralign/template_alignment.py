@@ -14,8 +14,9 @@ def euclidian_mean(imgs, masker, scale_template=False):
     ----------
     imgs: list of Niimgs
         Each img is 3D by default, but can also be 4D.
-    masker:
-
+    masker: instance of NiftiMasker or MultiNiftiMasker
+        Masker to be used on the data. For more information see:
+        http://nilearn.github.io/manipulating_images/masker_objects.html
     scale_template: boolean
         If true, the returned average is scaled to have the average norm of imgs
         If false, it will usually have a smaller norm than initial average
@@ -63,54 +64,28 @@ def _align_images_to_template(imgs, template, alignment_method,
     return aligned_imgs
 
 
-def create_template(imgs, n_iter, scale_template, alignment_method, n_pieces,
-                    clustering_method, n_bags, masker, memory, memory_level,
-                    n_jobs, parallel_backend, verbose):
+def _create_template(imgs, n_iter, scale_template, alignment_method, n_pieces,
+                     clustering_method, n_bags, masker, memory, memory_level,
+                     n_jobs, parallel_backend, verbose):
     '''Create template through alternate minimization.  Compute iteratively :
-        * T minimizing sum(||R_iX_i-T||) which is the mean of aligned images (RX_i)
+        * T minimizing sum(||R_i X_i-T||) which is the mean of aligned images (RX_i)
         * align initial images to new template T
-            (find transform R minimizing ||R_iX_i-T|| for each img X_i)
+            (find transform R_i minimizing ||R_i X_i-T|| for each img X_i)
 
 
         Parameters
         ----------
-        alignment_method: string
-            Algorithm used to perform alignment between X_i and Y_i :
-            * either 'identity', 'scaled_orthogonal', 'ridge_cv',
-                'permutation', 'diagonal'
-            * or an instance of one of alignment classes
-                (imported from functional_alignment.alignment_methods)
-        n_pieces: int, optional (default = 1)
-            Number of regions in which the data is parcellated for alignment
-            If 1 the alignment is done on full scale data.
-            If >1, the voxels are clustered and alignment is performed
-                on each cluster applied to X and Y.
-        clustering_method : string, optional (default : k_means)
-            'k_means' or 'ward', method used for clustering of voxels
-        n_bags: int, optional (default = 1)
-            If 1 : one estimator is fitted.
-            If >1 number of bagged parcellations and estimators used.
-        mask: Niimg-like object, instance of NiftiMasker or
-                                MultiNiftiMasker, optional (default : None)
-            Mask to be used on data. If an instance of masker is passed,
-            then its mask will be used. If no mask is given,
-            it will be computed automatically by a MultiNiftiMasker
-            with default parameters.
-        memory: instance of joblib.Memory or string (default : None)
-            Used to cache the masking process and results of algorithms.
-            By default, no caching is done. If a string is given, it is the
-            path to the caching directory.
-        memory_level: integer, optional (default : None)
-            Rough estimator of the amount of memory used by caching.
-            Higher value means more memory for caching.
-        n_jobs: integer, optional (default = 1)
-            The number of CPUs to use to do the computation. -1 means
-            'all CPUs', -2 'all CPUs but one', and so on.
-        parallel_backend: str, ParallelBackendBase instance, None
-            Specify the parallelization backend implementation. For more
-            informations see joblib.Parallel documentation
-        verbose: integer, optional (default = 0)
-            Indicate the level of verbosity. By default, nothing is printed.
+        imgs: List of Niimg-like objects
+           See http://nilearn.github.io/manipulating_images/input_output.html
+           source data. Every img must have the same length (number of sample)
+        scale_template: boolean
+            rescale template after each inference so that it keeps
+            the same norm as the average of training images.
+        n_iter: int
+           number of iterations in the alternate minimization. Each img is
+           aligned n_iter times to the evolving template. If n_iter = 0,
+           the template is simply the mean of the input images.
+        All other arguments are the same are passed to PairwiseAlignment
     '''
 
     aligned_imgs = imgs
@@ -133,54 +108,22 @@ def create_template(imgs, n_iter, scale_template, alignment_method, n_pieces,
     return template, template_history
 
 
-def map_template_to_image(img, train_index, template, alignment_method,
-                          n_pieces, clustering_method, n_bags, masker,
-                          memory, memory_level, n_jobs, parallel_backend, verbose):
-    '''From a template, and new images, learn their alignment mapping
-    !!! mapping.fit seem to have wrong argument : if error it's upstream in functional_alignment.template
-    - Be sure that alignment_methods are the same in class docs and pairwise_alignment
-    # Check everywhere whether template is list of 3D Niimgs or 4D Niimgs.
-
+def _map_template_to_image(imgs, train_index, template, alignment_method,
+                           n_pieces, clustering_method, n_bags, masker,
+                           memory, memory_level, n_jobs, parallel_backend, verbose):
+    '''Learn alignment operator from the template toward new images.
 
     Parameters
     ----------
-    img: list of 3D Niimgs
-
+    imgs: list of 3D Niimgs
+        Target images to learn mapping from the template to a new subject
     train_index: list of int
         Matching index between imgs and the corresponding template images to use
         to learn alignment. len(train_index) must be equal to len(imgs)
     template: list of 3D Niimgs
-        Learnt in a first step now used to learn the mapping
-    alignment_method: string
-        Algorithm used to perform alignment between X_i and Y_i :
-        * either 'identity', 'scaled_orthogonal', 'ridge_cv',
-            'permutation', 'diagonal'
-        * or an instance of one of alignment classes
-            (imported from functional_alignment.alignment_methods)
-    n_pieces: int, optional (default = 1)
-        Number of regions in which the data is parcellated for alignment
-        If 1 the alignment is done on full scale data.
-        If >1, the voxels are clustered and alignment is performed
-            on each cluster applied to X and Y.
-    clustering_method : string, optional (default : k_means)
-        'k_means' or 'ward', method used for clustering of voxels
-    n_bags: int, optional (default = 1)
-        If 1 : one estimator is fitted.
-        If >1 number of bagged parcellations and estimators used.
-    mask: Niimg-like object, instance of NiftiMasker or
-                            MultiNiftiMasker, optional (default : None)
-        Mask to be used on data. If an instance of masker is passed,
-        then its mask will be used. If no mask is given,
-        it will be computed automatically by a MultiNiftiMasker
-        with default parameters.
-    n_jobs: integer, optional (default = 1)
-        The number of CPUs to use to do the computation. -1 means
-        'all CPUs', -2 'all CPUs but one', and so on.
-    parallel_backend: str, ParallelBackendBase instance, None
-        Specify the parallelization backend implementation. For more
-        informations see joblib.Parallel documentation
-    verbose: integer, optional (default = 0)
-        Indicate the level of verbosity. By default, nothing is printed.
+        Learnt in a first step now used as source image
+    All other arguments are the same are passed to PairwiseAlignment
+
 
     Returns
     -------
@@ -194,11 +137,11 @@ def map_template_to_image(img, train_index, template, alignment_method,
                                 memory_level=memory_level,
                                 n_jobs=n_jobs, parallel_backend=parallel_backend,
                                 verbose=verbose)
-    mapping.fit(mapping_image, img)
+    mapping.fit(mapping_image, imgs)
     return mapping
 
 
-def predict_from_template_and_mapping(template, test_index,  mapping):
+def _predict_from_template_and_mapping(template, test_index, mapping):
     """ From a template, and an alignment estimator, predict new contrasts
 
     Parameters
@@ -214,7 +157,7 @@ def predict_from_template_and_mapping(template, test_index,  mapping):
     Returns
     -------
     transformed_image: list of Niimgs
-        Prediction corresponding to each template image with inex in test_index
+        Prediction corresponding to each template image with index in test_index
         once realigned to the new subjects
     """
     image_to_transform = index_img(template, test_index)
@@ -247,13 +190,13 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         n_pieces: int, optional (default = 1)
             Number of regions in which the data is parcellated for alignment
             If 1 the alignment is done on full scale data.
-            If >1, the voxels are clustered and alignment is performed
+            If > 1, the voxels are clustered and alignment is performed
                 on each cluster applied to X and Y.
         clustering_method : string, optional (default : k_means)
             'k_means' or 'ward', method used for clustering of voxels
         n_bags: int, optional (default = 1)
             If 1 : one estimator is fitted.
-            If >1 number of bagged parcellations and estimators used.
+            If > 1 number of bagged parcellations and estimators used.
         mask: Niimg-like object, instance of NiftiMasker or
                                 MultiNiftiMasker, optional (default : None)
             Mask to be used on data. If an instance of masker is passed,
@@ -333,7 +276,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         scale_template: boolean, default False
             rescale template after each inference so that it keeps
             the same norm as the average of training images.
-        n_iter: int
+        n_iters: int
            number of iteration in the alternate minimization. Each img is
            aligned n_iter times to the evolving template. If n_iter = 0,
            the template is simply the mean of the input images.
@@ -342,9 +285,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
 
         Returns
         -------
-            self
-        TODO : test save_template
-
+        self
 
         """
         self.masker_ = check_embedded_nifti_masker(self)
@@ -357,11 +298,11 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             self.masker_.fit()
 
         self.template, self.template_history = \
-            create_template(imgs, n_iter, scale_template,
-                            self.alignment_method, self.n_pieces,
-                            self.clustering_method, self.n_bags,
-                            self.masker_, self.memory, self.memory_level,
-                            self.n_jobs, self.parallel_backend, self.verbose)
+            _create_template(imgs, n_iter, scale_template,
+                             self.alignment_method, self.n_pieces,
+                             self.clustering_method, self.n_bags,
+                             self.masker_, self.memory, self.memory_level,
+                             self.n_jobs, self.parallel_backend, self.verbose)
         if save_template is not None:
             self.template.to_filename(save_template)
 
@@ -371,7 +312,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
 
         Parameters
         ----------
-        imgs: List of Niimg-like objects
+        imgs: List of 3D Niimg-like objects
            See http://nilearn.github.io/manipulating_images/input_output.html
            source data. Every img must have length (number of sample)
            train_index.
@@ -386,13 +327,13 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         predicted_imgs: Niimg-like object
            See http://nilearn.github.io/manipulating_images/input_output.html
            predicted data
-           List of 4D images, each of them has the same length as the list test_index
+           List of 3D images, each of them has the same length as the list test_index
 
         """
 
         fitted_mappings = Parallel(self.n_jobs, backend=self.parallel_backend,
                                    verbose=self.verbose)(
-            delayed(map_template_to_image)
+            delayed(_map_template_to_image)
             (img, train_index, self.template, self.alignment_method,
              self.n_pieces, self.clustering_method, self.n_bags, self.masker_,
              self.memory, self.memory_level, self.n_jobs, self.parallel_backend,
@@ -402,7 +343,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
 
         predicted_imgs = Parallel(self.n_jobs, backend=self.parallel_backend,
                                   verbose=self.verbose)(
-            delayed(predict_from_template_and_mapping)
+            delayed(_predict_from_template_and_mapping)
             (self.template, test_index, mapping) for mapping in fitted_mappings
         )
         return predicted_imgs
