@@ -4,9 +4,9 @@
 
 In this tutorial, we show how to better predict new contrasts for a target
 subject using many source subjects corresponding contrasts. For this purpose,
-we create and template to which we align the target subject.
+we create a template to which we align the target subject.
 
-We mostly rely on python common packages and on nilearn to handle
+We mostly rely on Python common packages and on nilearn to handle
 functional data in a clean fashion.
 
 
@@ -21,17 +21,17 @@ To run this example, you must launch IPython via ``ipython
 
 # Retrieving the data
 # -------------------
-# In this example we use the IBC dataset, which include a large number of \
+# In this example we use the IBC dataset, which includes a large number of \
 # different contrasts maps for 12 subjects.
-# We download the images for subjects 1 2, 4, 5, 6 and 7 (or retrieve them \
-# if they were already downloaded).
-# Files is the list of paths for each subjects.
+# We download the images for subjects sub-01, 02, 04, 05, 06 and sub-07 \
+# (or retrieve them if they were already downloaded).
+# imgs is the list of paths to available statistical images for each subjects.
 # df is a dataframe with metadata about each of them.
-# mask is an appropriate nifti image to select the data.
+# mask is a binary image used to extract grey matter regions.
 #
 
 from fmralign.fetch_example_data import fetch_ibc_subjects_contrasts
-files, df, mask = fetch_ibc_subjects_contrasts(
+imgs, df, mask_img = fetch_ibc_subjects_contrasts(
     ['sub-01', 'sub-02', 'sub-04', 'sub-05', 'sub-06', 'sub-07'])
 
 ###############################################################################
@@ -43,48 +43,45 @@ files, df, mask = fetch_ibc_subjects_contrasts(
 #
 
 from nilearn.input_data import NiftiMasker
-masker = NiftiMasker(mask_img=mask)
-mask
-masker.fit()
+masker = NiftiMasker(mask_img=mask_img).fit()
 
 ###############################################################################
 # Split the data
 # ---------------------------------------------
-# For each subject, we will use two 'copies' of data acquired in the same \
-# conditions during two independent sessions with a single varying parameter \
-# of acquisition, the phase encoding being either Antero-posterior(AP) or \
-# Postero-anterior(PA).
+# For each subject, we will use two series of contrasts acquired during
+# two independent sessions with a different phase encoding: \
+# Antero-posterior(AP) or Postero-anterior(PA).
 #
-# We infer a template for subjects 1 to 6 for both AP and PA data.
+# We infer a template for subjects sub-01 to sub-06 for both AP and PA data.
 #
-# For subject 7, we split it in two folds, one to learn alignement, the \
+# For subject sub-07, we split it in two folds, one to learn alignement, the \
 # other one that we'll try to predict:
 #
-# * target train: AP contrasts for subject 7, used to learn alignment towards \
-#   the template
-# * target test: PA contrasts for subject 7, used as a ground truth to score \
-#   our predictions
+# * target train: AP contrasts for subject sub-07, used to learn alignment \
+#   towards the template
+# * target test: PA contrasts for subject sub-07, used as a ground truth to  \
+#   score our predictions
 #
 from nilearn.image import concat_imgs
 
 # We make a list of 4D niimgs from our list of list of files containing 3D images
 template_train = []
 for i in range(5):
-    template_train.append(concat_imgs(files[i]))
+    template_train.append(concat_imgs(imgs[i]))
 target_train = df[df.subject == 'sub-07'][df.acquisition == 'ap'].path.values
 # We make a single 4D Niimg from our list of 3D filenames
 target_train = concat_imgs(target_train)
 target_test = df[df.subject == 'sub-07'][df.acquisition == 'pa'].path.values
 
 #############################################################################
-# Find the average of training subjects images, to be used as a baseline.
+# Compute the average of training subjects images, to be used as a baseline.
 # -------------------------------------------------------------------------
 # We use a function that return an image with as many contrasts as any subject
 # representing the average of all train subjects.
 
-from fmralign.template_alignment import euclidian_mean
+from fmralign.template_alignment import euclidean_mean
 
-average_subject = euclidian_mean(template_train, masker)
+average_subject = euclidean_mean(template_train, masker)
 
 #############################################################################
 # Create a template from the training subjects.
@@ -105,7 +102,7 @@ template_estim = TemplateAlignment(
 template_estim.fit(template_train, n_iter=2)
 
 #############################################################################
-# Predict subject 7 PA data from the template and fitted estimator
+# Predict subject sub-07 PA data from the template and fitted estimator
 # ----------------------------------------------------------------
 # We use target_train data to fit the transform, indicating it corresponds to
 # the contrasts indexed by train_index and predict from this learnt alignment
@@ -160,5 +157,5 @@ display = plotting.plot_stat_map(
 display.title("R2 score of prediction using template and alignment")
 plotting.show()
 #############################################################################
-# We observe that creating a template and aligning a new subject to it enables
-# us to predict new contrasts for him better than just using the group average.
+# We observe that creating a template and aligning a new subject to it yiels \
+# better prediction of his test contrasts than just using the group average.
