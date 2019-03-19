@@ -28,6 +28,7 @@ def is_installing():
     install_commands = set(['install', 'develop'])
     return install_commands.intersection(set(sys.argv))
 
+
 # Make sources available using relative paths from this file's directory.
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -51,7 +52,8 @@ if __name__ == "__main__":
 
     install_requires = \
         ['%s>=%s' % (meta.get('pypi_name', mod), meta['min_version'])
-            for mod, meta in _VERSION_GLOBALS['REQUIRED_MODULE_METADATA']]
+            for mod, meta in _VERSION_GLOBALS['REQUIRED_MODULE_METADATA']
+            if meta['required_at_installation']]
     print(install_requires)
     setup(name=DISTNAME,
           maintainer=MAINTAINER,
