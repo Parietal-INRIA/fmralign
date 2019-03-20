@@ -5,7 +5,7 @@ from sklearn.utils.testing import assert_array_almost_equal, assert_greater
 from nilearn.input_data import NiftiMasker
 from nilearn.image import math_img, concat_imgs, index_img
 
-from fmralign.template_alignment import TemplateAlignment, euclidian_mean
+from fmralign.template_alignment import TemplateAlignment, euclidean_mean
 from fmralign.tests.utils import random_niimg, zero_mean_coefficient_determination
 
 
@@ -23,7 +23,7 @@ def test_template_identity():
     masker.fit()
 
     # test euclidian mean function
-    euclidian_template = euclidian_mean(subs, masker)
+    euclidian_template = euclidean_mean(subs, masker)
     assert_array_almost_equal(
         ref_template.get_data(), euclidian_template.get_data())
 
@@ -62,7 +62,7 @@ def test_template_closer_to_target():
     sub_1 = masker.transform(subject_1)
     sub_2 = masker.transform(subject_2)
     subs = [subject_1, subject_2]
-    average_img = euclidian_mean(subs, masker)
+    average_img = euclidean_mean(subs, masker)
     avg_data = masker.transform(average_img)
     mean_distance_1 = zero_mean_coefficient_determination(sub_1, avg_data)
     mean_distance_2 = zero_mean_coefficient_determination(sub_2, avg_data)
