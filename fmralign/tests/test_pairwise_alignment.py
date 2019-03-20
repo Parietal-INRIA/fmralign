@@ -18,9 +18,12 @@ def test_pairwise_identity():
                  {'alignment_method': 'identity', 'n_pieces': 3,
                   'mask': mask_img},
                  {'alignment_method': 'identity', 'n_pieces': 3,
-                     'n_bags': 10, 'mask': mask_img},
+                     'n_bags': 4, 'mask': mask_img},
                  {'alignment_method': 'identity', 'n_pieces': 3,
-                     'n_bags': 10, 'mask': mask_img, 'n_jobs': 2}
+                     'n_bags': 3, 'mask': mask_img, 'n_jobs': 2},
+                 {'alignment_method': 'identity', 'n_pieces': 3,
+                     'n_bags': 2, 'mask': mask_img, 'n_jobs': 2,
+                     'parallel_backend': 'multiprocessing'}
                  ]
     for args in args_list:
         algo = PairwiseAlignment(**args)

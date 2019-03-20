@@ -8,7 +8,6 @@ from sklearn.utils.linear_assignment_ import linear_assignment
 from sklearn.metrics.pairwise import pairwise_distances
 from sklearn.linear_model import RidgeCV
 from joblib import Parallel, delayed
-import ot
 
 
 def scaled_procrustes(X, Y, scaling=False, primal=None):
@@ -104,7 +103,7 @@ def _projection(x, y):
     return np.dot(x, y) / np.linalg.norm(x)**2
 
 
-def _voxelwise_signal_projection(X, Y, n_jobs=1):
+def _voxelwise_signal_projection(X, Y, n_jobs=1, parallel_backend='threading'):
     """Compute D, list of scalar d_i minimizing :
         ||d_i * x_i - y_i|| for every x_i, y_i in X, Y
 
@@ -120,7 +119,7 @@ def _voxelwise_signal_projection(X, Y, n_jobs=1):
     D: list of ints
         List of optimal scaling factors
     """
-    return Parallel(n_jobs)(delayed(_projection)(
+    return Parallel(n_jobs, parallel_backend)(delayed(_projection)(
         voxel_source, voxel_target)
         for voxel_source, voxel_target in zip(X, Y))
 
@@ -152,10 +151,17 @@ class DiagonalAlignment(Alignment):
     ----------
     R : scipy.sparse.diags
         Scaling matrix containing the optimal shrinking factor for every voxel
+    n_jobs: integer, optional (default = 1)
+        The number of CPUs to use to do the computation. -1 means
+        'all CPUs', -2 'all CPUs but one', and so on.
+    parallel_backend: str, ParallelBackendBase instance, None (default: 'threading')
+        Specify the parallelization backend implementation. For more
+        informations see joblib.Parallel documentation
     '''
 
-    def __init__(self, n_jobs=1):
+    def __init__(self, n_jobs=1, parallel_backend='threading'):
         self.n_jobs = n_jobs
+        self.parallel_backend = parallel_backend
 
     def fit(self, X, Y):
         '''Parameters
@@ -165,7 +171,7 @@ class DiagonalAlignment(Alignment):
         Y: (n_samples, n_features) nd array
             target data'''
         shrinkage_coefficients = _voxelwise_signal_projection(
-            X.T, Y.T, self.n_jobs)
+            X.T, Y.T, self.n_jobs, self.parallel_backend)
         self.R = diags(shrinkage_coefficients)
         return
 
@@ -282,6 +288,25 @@ class Hungarian(Alignment):
         return X.dot(self.R.toarray())
 
 
+def _import_ot():
+    '''Import the optional dependency ot (POT module) if installed or give
+    back a clear error message to the user if not installed
+    '''
+    try:
+        import ot
+    except ImportError:
+        from fmralign.version import REQUIRED_MODULE_METADATA
+        for module, metadata in REQUIRED_MODULE_METADATA:
+            if module == 'POT':
+                POT_min_version = metadata['min_version']
+        raise ImportError(
+            ("To use optimal transport solver, POT module(v > {}) is necessary "
+             "but not installed by default with fmralign. To install it,"
+             "run 'pip install POT' ").format(POT_min_version))
+    else:
+        return ot
+
+
 class OptimalTransportAlignment(Alignment):
     '''Compute the optmal coupling between X and Y with entropic regularization
 
@@ -302,6 +327,7 @@ class OptimalTransportAlignment(Alignment):
 
     def __init__(self, solver='sinkhorn_epsilon_scaling',
                  metric='euclidean', reg=1):
+        self.ot = _import_ot()
         self.solver = solver
         self.metric = metric
         self.reg = reg
@@ -313,6 +339,7 @@ class OptimalTransportAlignment(Alignment):
             source data
         Y: (n_samples, n_features) nd array
             target data'''
+
         n = len(X.T)
         a = np.ones(n) * 1 / n
         b = np.ones(n) * 1 / n
@@ -320,9 +347,9 @@ class OptimalTransportAlignment(Alignment):
         M = cdist(X.T, Y.T, metric=self.metric)
 
         if self.solver == 'exact':
-            self.R = ot.lp.emd(a, b, M) * n
+            self.R = self.ot.lp.emd(a, b, M) * n
         else:
-            self.R = ot.sinkhorn(
+            self.R = self.ot.sinkhorn(
                 a, b, M, self.reg, method=self.solver) * n
         return self
 

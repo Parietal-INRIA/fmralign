@@ -31,12 +31,15 @@ _FMRALIGN_INSTALL_MSG = 'See %s for installation information.' % (
 REQUIRED_MODULE_METADATA = (
     ('numpy', {
         'min_version': '1.11',
+        'required_at_installation': True,
         'install_info': _FMRALIGN_INSTALL_MSG}),
     ('scipy', {
         'min_version': '0.17',
+        'required_at_installation': True,
         'install_info': _FMRALIGN_INSTALL_MSG}),
     ('sklearn', {
         'pypi_name': 'scikit-learn',
+        'required_at_installation': True,
         'min_version': '0.18',
         'install_info': _FMRALIGN_INSTALL_MSG}),
     ('nibabel', {
@@ -45,13 +48,15 @@ REQUIRED_MODULE_METADATA = (
         'install_info': _FMRALIGN_INSTALL_MSG}),
     ('nilearn', {
         'min_version': '0.4',
+        'required_at_installation': True,
         'install_info': _FMRALIGN_INSTALL_MSG}),
     ('matplotlib', {
         'min_version': '1.5.0',
+        'required_at_installation': True,
         'install_info': _FMRALIGN_INSTALL_MSG}),
     ('POT', {
         'min_version': '0.5.0',
-        'required_at_installation': True,
+        'required_at_installation': False,
         'install_info': _FMRALIGN_INSTALL_MSG})
 )
 
@@ -113,7 +118,8 @@ def _check_module_dependencies(is_fmralign_installing=False):
     """
 
     for (module_name, module_metadata) in REQUIRED_MODULE_METADATA:
-        if not is_fmralign_installing:
+        if not (is_fmralign_installing and
+                not module_metadata['required_at_installation']):
             _import_module_with_version_check(
                 module_name=module_name,
                 minimum_version=module_metadata['min_version'],
