@@ -1,3 +1,9 @@
+""" Module for functional template inference using functional alignment and
+prediction of new subjects unseen images
+"""
+# Author: T. Bazeille, B. Thirion
+# License: simplified BSD
+
 from sklearn.base import BaseEstimator, TransformerMixin
 import numpy as np
 from joblib import Parallel, delayed
