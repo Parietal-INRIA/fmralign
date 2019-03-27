@@ -304,7 +304,9 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
 
     def transform(self, imgs, train_index, test_index):
         """
-        Predict data from X
+        Learn alignment between imgs and corresponding conditions in the template
+        (indexed by train_index) and predict from this alignment and template
+        imgs for test_index conditions
 
         Parameters
         ----------
