@@ -90,20 +90,16 @@ def _create_template(imgs, n_iter, scale_template, alignment_method, n_pieces,
 
     aligned_imgs = imgs
     template_history = []
-    iter = 0
-    while True:
+    for iter in range(n_iter):
         template = euclidean_mean(
             aligned_imgs, masker, scale_template)
-        if 0 < iter < n_iter:
+        if 0 < iter < n_iter - 1:
             template_history.append(template)
-        if iter == n_iter:
-            break
         aligned_imgs = _align_images_to_template(imgs, template,
                                                  alignment_method, n_pieces,
                                                  clustering_method, n_bags,
                                                  masker, memory, memory_level,
                                                  n_jobs, parallel_backend, verbose)
-        iter += 1
 
     return template, template_history
 
