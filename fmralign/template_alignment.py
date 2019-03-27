@@ -7,8 +7,8 @@ from nilearn.input_data.masker_validation import check_embedded_nifti_masker
 from fmralign.pairwise_alignment import PairwiseAlignment
 
 
-def euclidean_mean(imgs, masker, scale_template=False):
-    """ Make the euclidian average of images.
+def _rescaled_euclidean_mean(imgs, masker, scale_template=False):
+    """ Make the euclidian average of images
 
     Parameters
     ----------
@@ -91,7 +91,7 @@ def _create_template(imgs, n_iter, scale_template, alignment_method, n_pieces,
     aligned_imgs = imgs
     template_history = []
     for iter in range(n_iter):
-        template = euclidean_mean(
+        template = _rescaled_euclidean_mean(
             aligned_imgs, masker, scale_template)
         if 0 < iter < n_iter - 1:
             template_history.append(template)

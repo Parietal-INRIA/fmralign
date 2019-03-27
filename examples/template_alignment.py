@@ -76,12 +76,13 @@ target_test = df[df.subject == 'sub-07'][df.acquisition == 'pa'].path.values
 #############################################################################
 # Compute the average of training subjects images, to be used as a baseline.
 # -------------------------------------------------------------------------
-# We use a function that return an image with as many contrasts as any subject
-# representing the average of all train subjects.
+# We create an image with as many contrasts as any subject
+# representing for each contrast the average of all train subjects maps.
+import numpy as np
 
-from fmralign.template_alignment import euclidean_mean
-
-average_subject = euclidean_mean(template_train, masker)
+masked_imgs = [masker.transform(img) for img in template_train]
+average_img = np.mean(masked_imgs, axis=0)
+average_subject = masker.inverse_transform(average_img)
 
 #############################################################################
 # Create a template from the training subjects.
@@ -146,7 +147,6 @@ template_score = np.maximum(r2_score(
 # ---------------------------------------------------
 #
 from nilearn import plotting
-
 baseline_display = plotting.plot_stat_map(masker.inverse_transform(
     average_score), display_mode="z", vmax=1, cut_coords=[-15, -5])
 baseline_display.title("R2 score of prediction from group average")
