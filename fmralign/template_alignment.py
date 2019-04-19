@@ -177,7 +177,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
 
     def __init__(self, alignment_method="identity", n_pieces=1,
                  clustering_method='k_means', scale_template=False,
-                 n_iter=2, save_template=None n_bags=1,
+                 n_iter=2, save_template=None, n_bags=1,
                  mask=None, smoothing_fwhm=None, standardize=None,
                  detrend=None, target_affine=None, target_shape=None,
                  low_pass=None, high_pass=None, t_r=None,
@@ -311,7 +311,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
                              self.clustering_method, self.n_bags,
                              self.masker_, self.memory, self.memory_level,
                              self.n_jobs, self.parallel_backend, self.verbose)
-        if save_template is not None:
+        if self.save_template is not None:
             self.template.to_filename(self.save_template)
 
     def transform(self, imgs, train_index, test_index):
