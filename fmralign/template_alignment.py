@@ -130,7 +130,9 @@ def _map_template_to_image(imgs, train_index, template, alignment_method,
     Returns
     -------
     mapping: instance of PairwiseAlignment class
-        Alignment estimator fitted to align the template with the input images'''
+        Alignment estimator fitted to align the template with the input images
+    '''
+
     mapping_image = index_img(template, train_index)
     mapping = PairwiseAlignment(n_pieces=n_pieces,
                                 alignment_method=alignment_method,
