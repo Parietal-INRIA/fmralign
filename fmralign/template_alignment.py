@@ -174,7 +174,8 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
     """
 
     def __init__(self, alignment_method="identity", n_pieces=1,
-                 clustering_method='k_means', n_bags=1,
+                 clustering_method='k_means', scale_template=False, n_iter=2,
+                 save_template=None n_bags=1,
                  mask=None, smoothing_fwhm=None, standardize=None,
                  detrend=None, target_affine=None, target_shape=None,
                  low_pass=None, high_pass=None, t_r=None,
@@ -196,6 +197,15 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
                 on each cluster applied to X and Y.
         clustering_method : string, optional (default : k_means)
             'k_means' or 'ward', method used for clustering of voxels
+        scale_template: boolean, default False
+            rescale template after each inference so that it keeps
+            the same norm as the average of training images.
+        n_iter: int
+           number of iteration in the alternate minimization. Each img is
+           aligned n_iter times to the evolving template. If n_iter = 0,
+           the template is simply the mean of the input images.
+        save_template: None or string(optional)
+            If not None, path to which the template will be saved.
         n_bags: int, optional (default = 1)
             If 1 : one estimator is fitted.
             If > 1 number of bagged parcellations and estimators used.
@@ -250,6 +260,9 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         self.alignment_method = alignment_method
         self.n_pieces = n_pieces
         self.clustering_method = clustering_method
+        self.n_iter = n_iter
+        self.scale_template = scale_template
+        self.save_template = save_template
         self.n_bags = n_bags
         self.mask = mask
         self.smoothing_fwhm = smoothing_fwhm
@@ -266,7 +279,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         self.parallel_backend = parallel_backend
         self.verbose = verbose
 
-    def fit(self, imgs, scale_template=False, n_iter=2, save_template=None):
+    def fit(self, imgs):
         """
         Learn a template from imgs
 
@@ -275,15 +288,6 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         imgs: List of Niimg-like objects
            See http://nilearn.github.io/manipulating_images/input_output.html
            source data. Every img must have the same length (number of sample)
-        scale_template: boolean, default False
-            rescale template after each inference so that it keeps
-            the same norm as the average of training images.
-        n_iters: int
-           number of iteration in the alternate minimization. Each img is
-           aligned n_iter times to the evolving template. If n_iter = 0,
-           the template is simply the mean of the input images.
-        save_template: None or string(optional)
-            If not None, path to which the template will be saved.
 
         Returns
         -------
@@ -300,13 +304,13 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             self.masker_.fit()
 
         self.template, self.template_history = \
-            _create_template(imgs, n_iter, scale_template,
+            _create_template(imgs, self.n_iter, self.scale_template,
                              self.alignment_method, self.n_pieces,
                              self.clustering_method, self.n_bags,
                              self.masker_, self.memory, self.memory_level,
                              self.n_jobs, self.parallel_backend, self.verbose)
         if save_template is not None:
-            self.template.to_filename(save_template)
+            self.template.to_filename(self.save_template)
 
     def transform(self, imgs, train_index, test_index):
         """
