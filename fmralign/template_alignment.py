@@ -83,15 +83,22 @@ def _create_template(imgs, n_iter, scale_template, alignment_method, n_pieces,
         ----------
         imgs: List of Niimg-like objects
            See http://nilearn.github.io/manipulating_images/input_output.html
-           source data. Every img must have the same length (number of sample)
+           source data. Every img must have the same length (n_sample)
         scale_template: boolean
-            rescale template after each inference so that it keeps
+            If true, template is rescaled after each inference so that it keeps
             the same norm as the average of training images.
         n_iter: int
-           number of iterations in the alternate minimization. Each img is
+           Number of iterations in the alternate minimization. Each img is
            aligned n_iter times to the evolving template. If n_iter = 0,
            the template is simply the mean of the input images.
         All other arguments are the same are passed to PairwiseAlignment
+
+        Returns
+        -------
+        template: list of 3D Niimgs of length (n_sample)
+            Models the barycenter of input imgs
+        template_history: list of list of 3D Niimgs
+            List of the intermediate templates computed at the end of each iteration
     '''
 
     aligned_imgs = imgs
