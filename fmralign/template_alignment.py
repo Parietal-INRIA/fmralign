@@ -304,7 +304,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
 
         """
         self.masker_ = check_embedded_nifti_masker(self)
-        self.masker_.n_jobs = 1  # self.n_jobs
+        self.masker_.n_jobs = n_jobs  # self.n_jobs
         # Avoid warning with imgs != None
         # if masker_ has been provided a mask_img
         if self.masker_.mask_img is None:
