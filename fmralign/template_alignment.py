@@ -13,7 +13,7 @@ from nilearn.input_data.masker_validation import check_embedded_nifti_masker
 from fmralign.pairwise_alignment import PairwiseAlignment
 
 
-def _rescaled_euclidean_mean(imgs, masker, scale_template=False):
+def _rescaled_euclidean_mean(imgs, masker, scale_average=False):
     """ Make the euclidian average of images
 
     Parameters
@@ -23,7 +23,7 @@ def _rescaled_euclidean_mean(imgs, masker, scale_template=False):
     masker: instance of NiftiMasker or MultiNiftiMasker
         Masker to be used on the data. For more information see:
         http://nilearn.github.io/manipulating_images/masker_objects.html
-    scale_template: boolean
+    scale_average: boolean
         If true, the returned average is scaled to have the average norm of imgs
         If false, it will usually have a smaller norm than initial average
         because noise will cancel across images
@@ -36,7 +36,7 @@ def _rescaled_euclidean_mean(imgs, masker, scale_template=False):
     masked_imgs = [masker.transform(img) for img in imgs]
     average_img = np.mean(masked_imgs, axis=0)
     scale = 1
-    if scale_template:
+    if scale_average:
         X_norm = 0
         for img in masked_imgs:
             X_norm += np.linalg.norm(img)
