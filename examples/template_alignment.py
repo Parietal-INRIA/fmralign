@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-"""Creating a template for a group of subject using alignment
+"""Predicting new contrast for a target subject using informations of a group of subjects
 ===================================================================
 
 In this tutorial, we show how to better predict new contrasts for a target
 subject using many source subjects corresponding contrasts. For this purpose,
-we create a template to which we align the target subject.
+we create a template to which we align the target subject, using shared information.
 
 We mostly rely on Python common packages and on nilearn to handle
 functional data in a clean fashion.
@@ -100,7 +100,7 @@ from nilearn.image import index_img
 
 template_estim = TemplateAlignment(
     n_pieces=150, alignment_method='ridge_cv', mask=masker)
-template_estim.fit(template_train, n_iter=2)
+template_estim.fit(template_train)
 
 #############################################################################
 # Predict subject sub-07 PA data from the template and fitted estimator
@@ -117,45 +117,63 @@ test_index = range(53, 106)
 # than one subject for which we'd want to predict : [train_1, train_2 ...]
 prediction_from_template = template_estim.transform([target_train], train_index,
                                                     test_index)
-# We can also try to predict from averaging
+# As a baseline prediction, let's just take the average of activations across subjects.
 prediction_from_average = index_img(average_subject, test_index)
 
 #############################################################################
-# Score the prediction of test data without alignment
+# Defining a metric to score the performance of these predictions
 # ---------------------------------------------------
-# To score the quality of prediction we use r2 score on each voxel \
-# activation profile across contrasts. This score is 1 for a perfect prediction \
-# and can get arbitrarly bad (here we clip it to -1 for bad predictions)
-# We compare accuracy of predictions made from group average and from template.
+# We define a scoring function to measure the correlation, between
+# the prediction and the ground truth for each voxel profiles of activation.
 
 import numpy as np
-from sklearn.metrics import r2_score
-# The PA contrasts deduced from averaging training subjects
+from scipy.stats import pearsonr
 
-# The baseline score represents the quality of prediction using raw data
-average_score = np.maximum(r2_score(
-    masker.transform(target_test), masker.transform(prediction_from_average),
-    multioutput='raw_values'), -1)
-# The baseline score represents the quality of prediction using aligned data
-template_score = np.maximum(r2_score(
-    masker.transform(target_test), masker.transform(
-        prediction_from_template[0]),
-    multioutput='raw_values'), - 1)
+
+def voxelwise_correlation(ground_truth, prediction, masker):
+    """
+    Parameters
+    ----------
+    ground truth and prediction are Niimgs with same shape.
+    masker : instance of NiftiMasker
+
+    Returns
+    -------
+    Niimg, voxelwise correlation between ground_truth and prediction
+    """
+    X_gt = masker.transform(ground_truth)
+    X_pred = masker.transform(prediction)
+
+    voxelwise_correlation = np.array([pearsonr(X_gt[:, vox], X_pred[:, vox])[0]
+                                      for vox in range(X_pred.shape[1])])
+    return masker.inverse_transform(voxelwise_correlation)
+
+
+#############################################################################
+# Score the prediction of test data with and without alignment
+# -----------------------------------------------------------
+# Now we use this scoring function to compare the correlation of predictions
+# made from group average and from template with the real PA contrasts of sub-07
+average_score = voxelwise_correlation(
+    target_test, prediction_from_average, masker)
+template_score = voxelwise_correlation(
+    target_test, prediction_from_template[0], masker)
 
 #############################################################################
 # Plotting the prediction quality
 # ---------------------------------------------------
-#
+# Finally we plot both scores
 from nilearn import plotting
-baseline_display = plotting.plot_stat_map(masker.inverse_transform(
-    average_score), display_mode="z", vmax=1, cut_coords=[-15, -5])
-baseline_display.title("R2 score of prediction from group average")
-
+baseline_display = plotting.plot_stat_map(
+    average_score, display_mode="z", vmax=1, cut_coords=[-15, -5])
+baseline_display.title(
+    "Correlation of prediction and ground truth using group average")
 display = plotting.plot_stat_map(
-    masker.inverse_transform(
-        template_score), display_mode="z", cut_coords=[-15, -5], vmax=1)
-display.title("R2 score of prediction using template and alignment")
+    template_score, display_mode="z", cut_coords=[-15, -5], vmax=1)
+display.title(
+    "Correlation of prediction and ground truth using template and alignment")
 plotting.show()
 #############################################################################
-# We observe that creating a template and aligning a new subject to it yiels \
-# better prediction of his test contrasts than just using the group average.
+# We observe that creating a template and aligning a new subject to it yields \
+# a prediction that is better correlated with the ground truth than just using
+# the average activations of subjects.
