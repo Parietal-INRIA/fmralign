@@ -54,7 +54,7 @@ def fetch_ibc_subjects_contrasts(subjects, data_dir=None, verbose=1):
                                              "https://osf.io/pcvje/download",
                                              {"uncompress": True})],
                                  verbose=verbose)
-    metadata_df = pd.DataFrame.from_csv(metadata_path[0])
+    metadata_df = pd.read_csv(metadata_path[0])
     conditions = metadata_df.condition.unique()
     metadata_df['path'] = metadata_df['path'].str.replace(
         'path_to_dir', data_dir)
