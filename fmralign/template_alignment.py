@@ -14,7 +14,7 @@ from fmralign.pairwise_alignment import PairwiseAlignment
 
 
 def _rescaled_euclidean_mean(imgs, masker, scale_average=False):
-    """ Make the euclidian average of images
+    """ Make the Euclidian average of images
 
     Parameters
     ----------
@@ -88,7 +88,7 @@ def _create_template(imgs, n_iter, scale_template, alignment_method, n_pieces,
             If true, template is rescaled after each inference so that it keeps
             the same norm as the average of training images.
         n_iter: int
-           Number of iterations in the alternate minimization. Each img is
+           Number of iterations in the alternate minimization. Each image is
            aligned n_iter times to the evolving template. If n_iter = 0,
            the template is simply the mean of the input images.
         All other arguments are the same are passed to PairwiseAlignment
@@ -163,7 +163,7 @@ def _predict_from_template_and_mapping(template, test_index, mapping):
         Index of the images not used to learn the alignment mapping and so
         predictable without overfitting
     mapping: instance of PairwiseAlignment class
-        Alignment estimator that should be already fitted
+        Alignment estimator that must have been fitted already
 
     Returns
     -------
@@ -178,8 +178,10 @@ def _predict_from_template_and_mapping(template, test_index, mapping):
 
 class TemplateAlignment(BaseEstimator, TransformerMixin):
     """
-    Decompose the source and target images into source and target regions
-     Use alignment algorithms to align source and target regions independantly.
+    Predict some new contrasts for target subject from source subjects for which
+    they are known and shared information. First summarize source subjects
+    information in a template, then use alignment and this template to predict
+    new contrast for target subject.
     """
 
     def __init__(self, alignment_method="identity", n_pieces=1,
@@ -218,12 +220,12 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         n_bags: int, optional (default = 1)
             If 1 : one estimator is fitted.
             If > 1 number of bagged parcellations and estimators used.
-        mask: Niimg-like object, instance of NiftiMasker or
-                                MultiNiftiMasker, optional (default : None)
+        mask: Niimg-like object, instance of NiftiMasker or MultiNiftiMasker,
+        optional (default : None)
             Mask to be used on data. If an instance of masker is passed,
             then its mask will be used. If no mask is given,
             it will be computed automatically by a MultiNiftiMasker
-            with defaultparameters.
+            with default parameters.
         smoothing_fwhm: float, optional (default : None)
             If smoothing_fwhm is not None, it gives the size in millimeters
             of the spatial smoothing to apply to the signal.
@@ -290,7 +292,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
 
     def fit(self, imgs):
         """
-        Learn a template from imgs
+        Learn a template from images, using alignment.
 
         Parameters
         ----------
@@ -301,6 +303,10 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         Returns
         -------
         self
+
+        Attributes
+        ----------
+        self.template: 4D Niimg object of same shape as one img.
 
         """
         self.masker_ = check_embedded_nifti_masker(self)
@@ -322,10 +328,10 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             self.template.to_filename(self.save_template)
 
     def transform(self, imgs, train_index, test_index):
-        """
-        Learn alignment between imgs and corresponding conditions in the template
-        (indexed by train_index) and predict from this alignment and template
-        imgs for test_index conditions
+        """ Learn alignment between new subject and template calculated during fit,
+        then predicts other conditions for this new subject.
+        Alignment is learnt between imgs and conditions in the template indexed by train_index.
+        Prediction correspond to conditions in the template index by test_index.
 
         Parameters
         ----------
@@ -334,9 +340,11 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
            source data. Every img must have length (number of sample)
            train_index.
         train_index : list of ints
-            indexes of the 3D samples used to map each img to the template
+            Indexes of the 3D samples used to map each img to the template.
+            Every index should be smaller than the number of images in the template.
         test_index : list of ints
-            indexes of the 3D samples to predict from the template and the mapping
+            Indexes of the 3D samples to predict from the template and the mapping.
+            Every index should be smaller than the number of images in the template.
 
 
         Returns
@@ -347,6 +355,21 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
            List of 3D images, each of them has the same length as the list test_index
 
         """
+        """
+        try:
+            template_length = self.template.shape[-1]
+            if not (all(i < template_length for i in test_index) and all(
+                    i < template_length for i in train_index)):
+                raise ValueError(
+                    ("Template has {} images but you provided a greater index in train_index or test_index.").format(template_length))
+        except (ValueError):
+            exit('Could not complete request.')
+        """
+        template_length = self.template.shape[-1]
+        if not (all(i < template_length for i in test_index) and all(
+                i < template_length for i in train_index)):
+            raise ValueError(
+                ("Template has {} images but you provided a greater index in train_index or test_index.").format(template_length))
 
         fitted_mappings = Parallel(self.n_jobs, backend=self.parallel_backend,
                                    verbose=self.verbose)(

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import pytest
 from sklearn.utils.testing import assert_array_almost_equal, assert_greater
 
 from nilearn.input_data import NiftiMasker
@@ -46,6 +46,14 @@ def test_template_identity():
         ground_truth = index_img(ref_template, range(8, 10))
         assert_array_almost_equal(
             ground_truth.get_data(), predicted_imgs[0].get_data())
+
+    # test last algo transform with wrong indexes
+    train_inds, test_inds = [[0, 1], [1, 3, 10],
+                             [4, 11]], [[6, 8, 29], [4, 6], [4, 11]]
+    for train_ind, test_ind in zip(train_inds, test_inds):
+        with pytest.raises(Exception):
+            assert algo.transform(
+                [index_img(sub_1, range(8))], train_index=train_ind, test_index=test_ind)
 
 
 def test_template_closer_to_target():
