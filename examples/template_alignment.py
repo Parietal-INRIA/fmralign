@@ -67,7 +67,7 @@ from nilearn.image import concat_imgs
 # We make a list of 4D niimgs from our list of list of files containing 3D images
 template_train = []
 for i in range(5):
-    template_train.append(concat_imgs(imgs[i]))
+    template_train = [concat_imgs(imgs[i]) for i in range(5)]
 target_train = df[df.subject == 'sub-07'][df.acquisition == 'ap'].path.values
 # We make a single 4D Niimg from our list of 3D filenames
 target_train = concat_imgs(target_train)
