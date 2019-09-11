@@ -67,7 +67,7 @@ from nilearn.image import concat_imgs
 # We make a list of 4D niimgs from our list of list of files containing 3D images
 template_train = []
 for i in range(5):
-    template_train = [concat_imgs(imgs[i]) for i in range(5)]
+    template_train.append(concat_imgs(imgs[i]))
 target_train = df[df.subject == 'sub-07'][df.acquisition == 'ap'].path.values
 # We make a single 4D Niimg from our list of 3D filenames
 target_train = concat_imgs(target_train)
@@ -121,39 +121,18 @@ prediction_from_template = template_estim.transform([target_train], train_index,
 prediction_from_average = index_img(average_subject, test_index)
 
 #############################################################################
-# Defining a metric to score the performance of these predictions
-# ---------------------------------------------------
-# We define a scoring function to measure the correlation, between
-# the prediction and the ground truth for each voxel profiles of activation.
-
-import numpy as np
-from scipy.stats import pearsonr
-
-
-def voxelwise_correlation(ground_truth, prediction, masker):
-    """
-    Parameters
-    ----------
-    ground truth and prediction are Niimgs with same shape.
-    masker : instance of NiftiMasker
-
-    Returns
-    -------
-    Niimg, voxelwise correlation between ground_truth and prediction
-    """
-    X_gt = masker.transform(ground_truth)
-    X_pred = masker.transform(prediction)
-
-    voxelwise_correlation = np.array([pearsonr(X_gt[:, vox], X_pred[:, vox])[0]
-                                      for vox in range(X_pred.shape[1])])
-    return masker.inverse_transform(voxelwise_correlation)
-
-
-#############################################################################
 # Score the prediction of test data with and without alignment
 # -----------------------------------------------------------
+# We use a utility scoring function to measure the voxelwise correlation between
+# the prediction and the ground truth. That is, for each voxel, we measure the
+# correlation between its profile of activation without and with alignment,
+# to see if alignment was able to predict a signal more alike the ground truth.
+
+from fmralign._utils import voxelwise_correlation
+
 # Now we use this scoring function to compare the correlation of predictions
 # made from group average and from template with the real PA contrasts of sub-07
+
 average_score = voxelwise_correlation(
     target_test, prediction_from_average, masker)
 template_score = voxelwise_correlation(
