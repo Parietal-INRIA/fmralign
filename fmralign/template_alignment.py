@@ -355,16 +355,6 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
            List of 3D images, each of them has the same length as the list test_index
 
         """
-        """
-        try:
-            template_length = self.template.shape[-1]
-            if not (all(i < template_length for i in test_index) and all(
-                    i < template_length for i in train_index)):
-                raise ValueError(
-                    ("Template has {} images but you provided a greater index in train_index or test_index.").format(template_length))
-        except (ValueError):
-            exit('Could not complete request.')
-        """
         template_length = self.template.shape[-1]
         if not (all(i < template_length for i in test_index) and all(
                 i < template_length for i in train_index)):
