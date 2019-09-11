@@ -1,4 +1,5 @@
-import time
+# -*- coding: utf-8 -*-
+
 import numpy as np
 import nibabel
 from sklearn.utils.testing import assert_array_almost_equal, assert_greater

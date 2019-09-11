@@ -6,6 +6,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from joblib import Parallel, delayed
 from sklearn.externals.joblib import Memory
 from sklearn.model_selection import ShuffleSplit
+from sklearn.base import clone
 from nilearn.input_data.masker_validation import check_embedded_nifti_masker
 
 from fmralign.alignment_methods import RidgeAlignment, Identity, Hungarian, \
@@ -86,7 +87,7 @@ def fit_one_piece(X_i, Y_i, alignment_method):
                                        RidgeAlignment, Hungarian,
                                        OptimalTransportAlignment,
                                        DiagonalAlignment)):
-        alignment_algo = copy.deepcopy(alignment_method)
+        alignment_algo = clone(alignment_method)
     alignment_algo.fit(X_i.T, Y_i.T)
 
     return alignment_algo

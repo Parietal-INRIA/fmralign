@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.cluster import MiniBatchKMeans, AgglomerativeClustering
 from sklearn.feature_extraction.image import grid_to_graph
 from sklearn.externals.joblib import Memory
+from scipy.stats import pearsonr
 
 
 def load_img(masker, imgs, axis=0, confound=None):
@@ -127,3 +128,27 @@ def make_parcellation(X, mask, n_pieces, clustering_method='k_means', memory=Mem
     if to_filename is not None:
         labels_img_.to_filename(to_filename)
     return labels
+
+
+def voxelwise_correlation(ground_truth, prediction, masker):
+    """
+    Parameters
+    ----------
+    ground_truth: 3D or 4D Niimg
+        Reference image (data acquired but never used before and considered as missing)
+    prediction : 3D or 4D Niimg
+        Same shape as ground_truth
+    masker : instance of NiftiMasker
+        masker to use on ground truth and prediction
+
+    Returns
+    -------
+    voxelwise_correlation : 3D Niimg
+        Voxelwise score between ground_truth and prediction
+    """
+    X_gt = masker.transform(ground_truth)
+    X_pred = masker.transform(prediction)
+
+    voxelwise_correlation = np.array([pearsonr(X_gt[:, vox], X_pred[:, vox])[0]
+                                      for vox in range(X_pred.shape[1])])
+    return masker.inverse_transform(voxelwise_correlation)
