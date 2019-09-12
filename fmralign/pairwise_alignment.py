@@ -190,8 +190,8 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
             If 1 the alignment is done on full scale data.
             If >1, the voxels are clustered and alignment is performed
                 on each cluster applied to X and Y.
-        clustering_method : string or 3D Niimg optional (default : k_means)
-            'k_means', 'ward', 'rena' method used for clustering of voxels based
+        clustering_method : string or 3D Niimg optional (default : kmeans)
+            'kmeans', 'ward', 'rena' method used for clustering of voxels based
             on functional signal, passed to nilearn.regions.parcellations
             If 3D Niimg, image used as predefined clustering,
             n_bags and n_pieces are then ignored.
