@@ -1,8 +1,5 @@
 import numpy as np
 from scipy.stats import pearsonr
-from sklearn.cluster import MiniBatchKMeans, AgglomerativeClustering
-from sklearn.feature_extraction.image import grid_to_graph
-from sklearn.externals.joblib import Memory
 from nilearn.regions.parcellations import Parcellations
 from nilearn.image import smooth_img
 from nilearn.masking import _apply_mask_fmri
@@ -45,6 +42,7 @@ def _make_parcellation(imgs, clustering_method, n_pieces, masker, to_filename=No
         In : {'kmeans', 'ward', 'rena'}, passed to nilearn Parcellations class.
         If you aim for speed, choose k-means (and check kmeans_smoothing_fwhm parameter)
         If you want spatially connected and/or reproducible regions use 'ward'
+        For 'rena', need nilearn > 0.5.2
     n_pieces: int
         number of different labels
     masker: instance of NiftiMasker or MultiNiftiMasker
