@@ -15,37 +15,44 @@ from fmralign._utils import hierarchical_k_means, _make_parcellation, \
     piecewise_transform
 
 
-def generate_Xi_Yi(labels, X, Y, verbose=0):
+def generate_Xi_Yi(labels, X, Y, masker, verbose=0):
     """ Generate source and target data X_i and Y_i for each piece i.
 
     Parameters
     ----------
     labels : list of ints (len n_features)
         Parcellation of features in clusters
-    X: ndarray
-        Source data for piece i (shape : n_features, n_samples)
-    Y: ndarray
-        Target data for piece i (shape : n_features, n_samples)
+    X: Niimg-like object
+        Source data
+    Y: Niimg-like object
+        Target data
+    masker: Niimg-like object
+        Mask to be used on data.
     verbose: integer, optional.
         Indicate the level of verbosity.
+
     Yields
     -------
     X_i: ndarray
-        Source data for piece i (shape : n_features_i, n_samples)
+        Source data for piece i (shape : n_samples, n_features_i)
     Y_i: ndarray
-        Target data for piece i (shape : n_features_i, n_samples)
+        Target data for piece i (shape : n_samples, n_features_i)
 
     """
-    unique_labels, counts = np.unique(labels, return_counts=True)
     if verbose > 0:
+        unique_labels, counts = np.unique(labels, return_counts=True)
         print(counts)
+    else:
+        unique_labels = np.unique(labels)
+
     for k in range(len(unique_labels)):
         label = unique_labels[k]
         i = label == labels
         if (k + 1) % 25 == 0 and verbose > 0:
             print("Fitting parcel: " + str(k + 1) +
                   "/" + str(len(unique_labels)))
-        yield X[i], Y[i]
+        # should return X_i Y_i
+        yield masker.transform(X)[:, i], masker.transform(Y)[:, i]
 
 
 def fit_one_piece(X_i, Y_i, alignment_method):
@@ -55,9 +62,9 @@ def fit_one_piece(X_i, Y_i, alignment_method):
     Parameters
     ----------
     X_i: ndarray
-        Source data for piece i (shape : n_features_i, n_samples)
+        Source data for piece i (shape : n_samples, n_features_i)
     Y_i: ndarray
-        Target data for piece i (shape : n_features_i, n_samples)
+        Target data for piece i (shape : n_samples, n_features_i)
     alignment_method: string
         Algorithm used to perform alignment between X_i and Y_i :
         - either 'identity', 'scaled_orthogonal', 'ridge_cv',
@@ -88,7 +95,7 @@ def fit_one_piece(X_i, Y_i, alignment_method):
                                        OptimalTransportAlignment,
                                        DiagonalAlignment)):
         alignment_algo = clone(alignment_method)
-    alignment_algo.fit(X_i.T, Y_i.T)
+    alignment_algo.fit(X_i, Y_i)
 
     return alignment_algo
 
@@ -102,10 +109,10 @@ def fit_one_parcellation(X_, Y_, alignment_method, masker, n_pieces,
 
     Parameters
     ----------
-    X_: ndarray
-        Source data (shape : n_samples, n_features)
-    Y_: ndarray
-        Target data (shape : n_samples, n_features)
+    X_: Niimg-like object
+        Source data
+    Y_: Niimg-like object
+        Target data
     alignment_method: string
         algorithm used to perform alignment between each region of X_ and Y_
     masker: Niimg-like object
@@ -137,13 +144,13 @@ def fit_one_parcellation(X_, Y_, alignment_method, masker, n_pieces,
         labels = _make_parcellation(clustering_data, clustering_method,
                                     n_pieces, masker, to_filename=save_parcellation, verbose=verbose)
     else:
-        labels = np.zeros(
+        labels = np.ones(
             int(masker.mask_img_.get_data().sum()), dtype=np.int8)
 
     fit = Parallel(n_jobs, backend=parallel_backend, verbose=verbose)(
         delayed(fit_one_piece)(
             X_i, Y_i, alignment_method
-        ) for X_i, Y_i in generate_Xi_Yi(labels, masker.transform(X_).T, masker.transform(Y_).T, verbose)
+        ) for X_i, Y_i in generate_Xi_Yi(labels, X_, Y_, masker, verbose)
     )
 
     return labels, fit
