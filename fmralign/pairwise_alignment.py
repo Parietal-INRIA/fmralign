@@ -8,11 +8,11 @@ from sklearn.externals.joblib import Memory
 from sklearn.model_selection import ShuffleSplit
 from sklearn.base import clone
 from nilearn.input_data.masker_validation import check_embedded_nifti_masker
-
+from nilearn.image import load_img, concat_imgs, index_img
 from fmralign.alignment_methods import RidgeAlignment, Identity, Hungarian, \
     ScaledOrthogonalAlignment, OptimalTransportAlignment, DiagonalAlignment
-from fmralign._utils import hierarchical_k_means, make_parcellation, \
-    piecewise_transform, load_img
+from fmralign._utils import hierarchical_k_means, _make_parcellation, \
+    piecewise_transform
 
 
 def generate_Xi_Yi(labels, X, Y, verbose=0):
@@ -93,9 +93,9 @@ def fit_one_piece(X_i, Y_i, alignment_method):
     return alignment_algo
 
 
-def fit_one_parcellation(X_, Y_, alignment_method, mask, n_pieces,
-                         clustering_method, clustering_index, mem,
-                         n_jobs, parallel_backend, verbose):
+def fit_one_parcellation(X_, Y_, alignment_method, masker, n_pieces,
+                         clustering_method, clustering_index,
+                         n_jobs, parallel_backend, save_parcellation, verbose):
     """ Create one parcellation of n_pieces and align each source and target
     data in one piece i, X_i and Y_i, using alignment method
     and learn transformation to map X to Y.
@@ -108,7 +108,7 @@ def fit_one_parcellation(X_, Y_, alignment_method, mask, n_pieces,
         Target data (shape : n_samples, n_features)
     alignment_method: string
         algorithm used to perform alignment between each region of X_ and Y_
-    mask: Niimg-like object
+    masker: Niimg-like object
         Mask to be used on data.
     n_pieces: n_pieces: int,
         Number of regions in which the data is parcellated for alignment
@@ -117,10 +117,6 @@ def fit_one_parcellation(X_, Y_, alignment_method, mask, n_pieces,
     clustering_index: list of integers
         Clustering is performed on a 20% subset of the data chosen randomly
         in timeframes. This index carry this subset.
-    mem: instance of joblib.Memory or string
-        Used to cache the masking process and results of algorithms.
-        By default, no caching is done. If a string is given, it is the
-        path to the caching directory.
     n_jobs: integer, optional
         The number of CPUs to use to do the computation. -1 means
         'all CPUs', -2 'all CPUs but one', and so on.
@@ -135,17 +131,19 @@ def fit_one_parcellation(X_, Y_, alignment_method, mask, n_pieces,
     alignment_algo
         Instance of alignment estimator class fitted for X_i, Y_i
     """
+    # choose indexes maybe with index_img to not
     if n_pieces > 1:
-        clustering_data = X_[:, clustering_index]
-        labels = make_parcellation(clustering_data, mask,
-                                   n_pieces, clustering_method, memory=mem)
+        clustering_data = index_img(X_, clustering_index)
+        labels = _make_parcellation(clustering_data, clustering_method,
+                                    n_pieces, masker, to_filename=save_parcellation, verbose=verbose)
     else:
-        labels = np.zeros(int(mask.sum()), dtype=np.int8)
+        labels = np.zeros(
+            int(masker.mask_img_.get_data().sum()), dtype=np.int8)
 
     fit = Parallel(n_jobs, backend=parallel_backend, verbose=verbose)(
         delayed(fit_one_piece)(
             X_i, Y_i, alignment_method
-        ) for X_i, Y_i in generate_Xi_Yi(labels, X_, Y_, verbose)
+        ) for X_i, Y_i in generate_Xi_Yi(labels, masker.transform(X_).T, masker.transform(Y_).T, verbose)
     )
 
     return labels, fit
@@ -158,12 +156,12 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
     """
 
     def __init__(self, alignment_method, n_pieces=1,
-                 clustering_method='k_means', n_bags=1, mask=None,
+                 clustering_method='kmeans', n_bags=1, mask=None,
                  smoothing_fwhm=None, standardize=None, detrend=False,
                  target_affine=None, target_shape=None, low_pass=None,
                  high_pass=None, t_r=None,
                  memory=Memory(cachedir=None), memory_level=0,
-                 n_jobs=1, parallel_backend='threading', verbose=0):
+                 n_jobs=1, parallel_backend='threading', save_parcellation=None, verbose=0):
         """ Use alignment algorithms to align source and target images.
         If n_pieces > 1, decomposes the images into regions
             and align each source/target region independantly.
@@ -231,6 +229,8 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         parallel_backend: str, ParallelBackendBase instance, None (default: 'threading')
             Specify the parallelization backend implementation. For more
             informations see joblib.Parallel documentation
+        save_parcellation: str, optional (default None)
+            Link to which parcellation should be saved
         verbose: integer, optional (default = 0)
             Indicate the level of verbosity. By default, nothing is printed.
         """
@@ -252,6 +252,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         self.n_jobs = n_jobs
         self.parallel_backend = parallel_backend
         self.verbose = verbose
+        self.save_parcellation = save_parcellation
 
     def fit(self, X, Y):
         """Fit data X and Y and learn transformation to map X to Y
@@ -277,8 +278,15 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
             self.masker_.fit([X])
         else:
             self.masker_.fit()
-        X_ = load_img(self.masker_, X)
-        Y_ = load_img(self.masker_, Y)
+        # miss concatenation, transpose
+        if type(X) == list:
+            X_ = concat_imgs(X)
+        else:
+            X_ = load_img(X)
+        if type(Y) == list:
+            Y_ = concat_imgs(Y)
+        else:
+            Y_ = load_img(Y)
 
         self.fit_, self.labels_ = [], []
         rs = ShuffleSplit(n_splits=self.n_bags,
@@ -287,11 +295,11 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         outputs = Parallel(n_jobs=self.n_jobs, backend=self.parallel_backend,
                            verbose=self.verbose)(
             delayed(fit_one_parcellation)(
-                X_, Y_, self.alignment_method, self.masker_.mask_img.get_data(),
-                self.n_pieces, self.clustering_method, clustering_index,
-                self.memory, self.n_jobs, self.parallel_backend, self.verbose)
-            for clustering_index, _ in rs.split(Y_.T))
-
+                X_, Y_, self.alignment_method, self.masker_, self.n_pieces,
+                self.clustering_method, clustering_index, self.n_jobs,
+                self.parallel_backend, self.save_parcellation, self.verbose)
+            for clustering_index, _ in rs.split(range(X_.shape[-1])))
+        # change split
         self.labels_ = [output[0] for output in outputs]
         self.fit_ = [output[1] for output in outputs]
 
@@ -312,7 +320,9 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
            See http://nilearn.github.io/manipulating_images/input_output.html
            predicted data
         """
-        X_ = load_img(self.masker_, X)
+        if type(X) == list:
+            X = concat_imgs(X)
+        X_ = self.masker_.transform(X).T
 
         X_transform = np.zeros_like(X_)
         for i in range(self.n_bags):

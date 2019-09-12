@@ -185,7 +185,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
     """
 
     def __init__(self, alignment_method="identity", n_pieces=1,
-                 clustering_method='k_means', scale_template=False,
+                 clustering_method='kmeans', scale_template=False,
                  n_iter=2, save_template=None, n_bags=1,
                  mask=None, smoothing_fwhm=None, standardize=None,
                  detrend=None, target_affine=None, target_shape=None,

@@ -52,7 +52,8 @@ def piecewise_transform(labels, estimators, X):
 
     X_transform = np.zeros_like(X)
     for i in np.unique(labels):
-        X_transform[labels == i] = estimators[i].transform(X[labels == i].T).T
+        X_transform[labels == i] = estimators[i -
+                                              1].transform(X[labels == i].T).T
     return X_transform
 
 
@@ -177,7 +178,7 @@ def _make_parcellation(imgs, clustering_method, n_pieces, masker, to_filename=No
     parcellation.fit(imgs)
     if to_filename is not None:
         parcellation.labels_img_.to_filename(to_filename)
-    return _apply_mask_fmri(parcellation.labels_img_, masker.mask_img_)
+    return _apply_mask_fmri(parcellation.labels_img_, masker.mask_img_).astype(int)
 
 
 def voxelwise_correlation(ground_truth, prediction, masker):
