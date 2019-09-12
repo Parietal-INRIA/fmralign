@@ -3,6 +3,8 @@ from scipy.stats import pearsonr
 from nilearn.regions.parcellations import Parcellations
 from nilearn.image import smooth_img
 from nilearn.masking import _apply_mask_fmri
+from nilearn._utils.niimg_conversions import _check_same_fov
+import nibabel
 
 
 def piecewise_transform(labels, estimators, X):
@@ -29,7 +31,7 @@ def piecewise_transform(labels, estimators, X):
     return X_transform
 
 
-def _make_parcellation(imgs, clustering_method, n_pieces, masker, to_filename=None, kmeans_smoothing_fwhm=5, verbose=0):
+def _make_parcellation(imgs, clustering_method, n_pieces, masker, kmeans_smoothing_fwhm=5, verbose=0):
     """Convenience function to use nilearn Parcellation class in our pipeline.
     It is used to find local regions of the brain in which alignment will be later applied.
     For alignment computational efficiency, regions should be of hundreds of voxels.
@@ -38,16 +40,15 @@ def _make_parcellation(imgs, clustering_method, n_pieces, masker, to_filename=No
     ----------
     imgs: Niimgs
         data to cluster
-    clustering_method: string
+    clustering_method: string or 3D Niimg
         In : {'kmeans', 'ward', 'rena'}, passed to nilearn Parcellations class.
         If you aim for speed, choose k-means (and check kmeans_smoothing_fwhm parameter)
         If you want spatially connected and/or reproducible regions use 'ward'
         For 'rena', need nilearn > 0.5.2
+        If 3D Niimg, image used as predefined clustering, n_pieces is ignored
     n_pieces: int
         number of different labels
     masker: instance of NiftiMasker or MultiNiftiMasker
-    to_filename: str, optional
-        path to which the parcellation will be saved
     kmeans_smoothing_fwhm: None or int
         By default 5mm smoothing will be applied before clusterisation to have
         more compact clusters (but this will not change the data later).
@@ -58,23 +59,27 @@ def _make_parcellation(imgs, clustering_method, n_pieces, masker, to_filename=No
     labels : list of ints (len n_features)
         Parcellation of features in clusters
     """
-    if clustering_method == "kmeans" and kmeans_smoothing_fwhm is not None:
-        images_to_parcel = smooth_img(imgs, kmeans_smoothing_fwhm)
-    try:
-        parcellation = Parcellations(method=clustering_method, n_parcels=n_pieces, mask=masker,
-                                     scaling=False, n_iter=20, verbose=verbose)
-        parcellation.fit()
-    except TypeError:
-        if clustering_method == "rena":
-            raise InputError(
-                ('ReNA algorithm is only available in Nilearn version > 0.5.2. If you want to use it, please run "pip install --upgrade nilearn"'))
-        else:
-            parcellation = Parcellations(
-                method=clustering_method, n_parcels=n_pieces, mask=masker, verbose=verbose)
-    parcellation.fit(imgs)
-    if to_filename is not None:
-        parcellation.labels_img_.to_filename(to_filename)
-    return _apply_mask_fmri(parcellation.labels_img_, masker.mask_img_).astype(int)
+    if type(clustering_method) == nibabel.nifti1.Nifti1Image:
+        # check image makes suitable labels, this will return friendly error message if needed
+        _check_same_fov(masker.mask_img_, clustering_method)
+        labels_img = clustering_method
+    else:
+        if clustering_method == "kmeans" and kmeans_smoothing_fwhm is not None:
+            images_to_parcel = smooth_img(imgs, kmeans_smoothing_fwhm)
+        try:
+            parcellation = Parcellations(method=clustering_method, n_parcels=n_pieces, mask=masker,
+                                         scaling=False, n_iter=20, verbose=verbose)
+            parcellation.fit()
+        except TypeError:
+            if clustering_method == "rena":
+                raise InputError(
+                    ('ReNA algorithm is only available in Nilearn version > 0.5.2. If you want to use it, please run "pip install --upgrade nilearn"'))
+            else:
+                parcellation = Parcellations(
+                    method=clustering_method, n_parcels=n_pieces, mask=masker, verbose=verbose)
+        parcellation.fit(imgs)
+        labels_img = parcellation.labels_img_
+    return _apply_mask_fmri(labels_img, masker.mask_img_).astype(int)
 
 
 def voxelwise_correlation(ground_truth, prediction, masker):

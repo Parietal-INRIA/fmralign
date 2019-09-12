@@ -13,18 +13,21 @@ def test_make_parcellation():
     img, mask_img = random_niimg((7, 6, 8, 5))
     masker = NiftiMasker(mask_img=mask_img).fit()
     n_pieces = 2
-
-    for clustering_method in ["kmeans", "ward"]:
+    # create a predefined parcellation
+    labels_img = nibabel.Nifti1Image(
+        np.hstack([np.ones((7, 3, 8)), 2 * np.ones((7, 3, 8))]), np.eye(4))
+    for clustering_method in ["kmeans", "ward", labels_img]:
         labels = _make_parcellation(
             img, clustering_method, n_pieces, masker)
         assert(len(np.unique(labels)) == 2)
 
-    clustering_method = "rena"
     # this is an exception on the installed version on nilearn for now ReNA is not released
     # out of developper mode. Once it is ready, you'll be able to call it directly
     # with the latest version of nilearn and this test will evaluate false.
     with pytest.raises(Exception):
-        assert make_parcellation(img, clustering_method, n_pieces, masker)
+        assert make_parcellation(img, "rena", n_pieces, masker)
+
+    mask_img.shape
 
 
 def test_voxelwise_correlation():

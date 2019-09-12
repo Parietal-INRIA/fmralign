@@ -103,7 +103,7 @@ def fit_one_piece(X_i, Y_i, alignment_method):
 
 def fit_one_parcellation(X_, Y_, alignment_method, masker, n_pieces,
                          clustering_method, clustering_index,
-                         n_jobs, parallel_backend, save_parcellation, verbose):
+                         n_jobs, parallel_backend, verbose):
     """ Create one parcellation of n_pieces and align each source and target
     data in one piece i, X_i and Y_i, using alignment method
     and learn transformation to map X to Y.
@@ -120,8 +120,9 @@ def fit_one_parcellation(X_, Y_, alignment_method, masker, n_pieces,
         Mask to be used on data.
     n_pieces: n_pieces: int,
         Number of regions in which the data is parcellated for alignment
-    clustering_method: string
-        method used to perform parcellation of data
+    clustering_method: string or 3D Niimg
+        method used to perform parcellation of data.
+        If 3D Niimg, image used as predefined clustering.
     clustering_index: list of integers
         Clustering is performed on a 20% subset of the data chosen randomly
         in timeframes. This index carry this subset.
@@ -143,7 +144,7 @@ def fit_one_parcellation(X_, Y_, alignment_method, masker, n_pieces,
     if n_pieces > 1:
         clustering_data = index_img(X_, clustering_index)
         labels = _make_parcellation(clustering_data, clustering_method,
-                                    n_pieces, masker, to_filename=save_parcellation, verbose=verbose)
+                                    n_pieces, masker, verbose=verbose)
     else:
         labels = np.ones(
             int(masker.mask_img_.get_data().sum()), dtype=np.int8)
@@ -160,7 +161,7 @@ def fit_one_parcellation(X_, Y_, alignment_method, masker, n_pieces,
 class PairwiseAlignment(BaseEstimator, TransformerMixin):
     """
     Decompose the source and target images into source and target regions
-     Use alignment algorithms to align source and target regions independantly.
+    Use alignment algorithms to align source and target regions independantly.
     """
 
     def __init__(self, alignment_method, n_pieces=1,
@@ -169,7 +170,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
                  target_affine=None, target_shape=None, low_pass=None,
                  high_pass=None, t_r=None,
                  memory=Memory(cachedir=None), memory_level=0,
-                 n_jobs=1, parallel_backend='threading', save_parcellation=None, verbose=0):
+                 n_jobs=1, parallel_backend='threading', verbose=0):
         """ Use alignment algorithms to align source and target images.
         If n_pieces > 1, decomposes the images into regions
             and align each source/target region independantly.
@@ -189,8 +190,11 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
             If 1 the alignment is done on full scale data.
             If >1, the voxels are clustered and alignment is performed
                 on each cluster applied to X and Y.
-        clustering_method : string, optional (default : k_means)
-            'k_means' or 'ward', method used for clustering of voxels
+        clustering_method : string or 3D Niimg optional (default : k_means)
+            'k_means', 'ward', 'rena' method used for clustering of voxels based
+            on functional signal, passed to nilearn.regions.parcellations
+            If 3D Niimg, image used as predefined clustering,
+            n_bags and n_pieces are then ignored.
         n_bags: int, optional (default = 1)
             If 1 : one estimator is fitted.
             If >1 number of bagged parcellations and estimators used.
@@ -237,8 +241,6 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         parallel_backend: str, ParallelBackendBase instance, None (default: 'threading')
             Specify the parallelization backend implementation. For more
             informations see joblib.Parallel documentation
-        save_parcellation: str, optional (default None)
-            Link to which parcellation should be saved
         verbose: integer, optional (default = 0)
             Indicate the level of verbosity. By default, nothing is printed.
         """
@@ -260,7 +262,6 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         self.n_jobs = n_jobs
         self.parallel_backend = parallel_backend
         self.verbose = verbose
-        self.save_parcellation = save_parcellation
 
     def fit(self, X, Y):
         """Fit data X and Y and learn transformation to map X to Y
@@ -305,7 +306,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
             delayed(fit_one_parcellation)(
                 X_, Y_, self.alignment_method, self.masker_, self.n_pieces,
                 self.clustering_method, clustering_index, self.n_jobs,
-                self.parallel_backend, self.save_parcellation, self.verbose)
+                self.parallel_backend, self.verbose)
             for clustering_index, _ in rs.split(range(X_.shape[-1])))
         # change split
         self.labels_ = [output[0] for output in outputs]
