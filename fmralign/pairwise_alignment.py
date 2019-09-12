@@ -11,8 +11,7 @@ from nilearn.input_data.masker_validation import check_embedded_nifti_masker
 from nilearn.image import load_img, concat_imgs, index_img
 from fmralign.alignment_methods import RidgeAlignment, Identity, Hungarian, \
     ScaledOrthogonalAlignment, OptimalTransportAlignment, DiagonalAlignment
-from fmralign._utils import hierarchical_k_means, _make_parcellation, \
-    piecewise_transform
+from fmralign._utils import _make_parcellation, piecewise_transform
 
 
 def generate_Xi_Yi(labels, X, Y, masker, verbose=0):
@@ -39,6 +38,8 @@ def generate_Xi_Yi(labels, X, Y, masker, verbose=0):
         Target data for piece i (shape : n_samples, n_features_i)
 
     """
+    X_ = masker.transform(X)
+    Y_ = masker.transform(Y)
     if verbose > 0:
         unique_labels, counts = np.unique(labels, return_counts=True)
         print(counts)
@@ -52,7 +53,7 @@ def generate_Xi_Yi(labels, X, Y, masker, verbose=0):
             print("Fitting parcel: " + str(k + 1) +
                   "/" + str(len(unique_labels)))
         # should return X_i Y_i
-        yield masker.transform(X)[:, i], masker.transform(Y)[:, i]
+        yield X_[:, i], Y_[:, i]
 
 
 def fit_one_piece(X_i, Y_i, alignment_method):
@@ -329,7 +330,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         """
         if type(X) == list:
             X = concat_imgs(X)
-        X_ = self.masker_.transform(X).T
+        X_ = self.masker_.transform(X)
 
         X_transform = np.zeros_like(X_)
         for i in range(self.n_bags):
@@ -338,4 +339,4 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
 
         X_transform /= self.n_bags
 
-        return self.masker_.inverse_transform(X_transform.T)
+        return self.masker_.inverse_transform(X_transform)
