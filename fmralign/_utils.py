@@ -26,9 +26,8 @@ def piecewise_transform(labels, estimators, X):
 
     X_transform = np.zeros_like(X)
     for i in np.unique(labels):
-        X_transform[:, labels == i] = estimators[i -
         X_transform[:, labels == i] = estimators[i - 1].transform(
-             X[:, labels == i])
+            X[:, labels == i])
     return X_transform
 
 
