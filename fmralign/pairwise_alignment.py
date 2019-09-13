@@ -161,7 +161,7 @@ def fit_one_parcellation(X_, Y_, alignment_method, masker, n_pieces,
 class PairwiseAlignment(BaseEstimator, TransformerMixin):
     """
     Decompose the source and target images into source and target regions
-    Use alignment algorithms to align source and target regions independantly.
+    Use alignment algorithms to align source and target regions independently.
     """
 
     def __init__(self, alignment_method, n_pieces=1,
