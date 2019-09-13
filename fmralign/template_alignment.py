@@ -48,7 +48,7 @@ def _rescaled_euclidean_mean(imgs, masker, scale_average=False):
 
 
 def _align_images_to_template(imgs, template, alignment_method,
-                              n_pieces, clustering_method, n_bags, masker,
+                              n_pieces, clustering, n_bags, masker,
                               memory, memory_level, n_jobs, parallel_backend,
                               verbose):
     '''Convenience function : for a list of images, return the list
@@ -60,7 +60,7 @@ def _align_images_to_template(imgs, template, alignment_method,
         piecewise_estimator = \
             PairwiseAlignment(n_pieces=n_pieces,
                               alignment_method=alignment_method,
-                              clustering_method=clustering_method, n_bags=n_bags,
+                              clustering=clustering, n_bags=n_bags,
                               mask=masker, memory=memory,
                               memory_level=memory_level,
                               n_jobs=n_jobs, parallel_backend=parallel_backend,
@@ -71,7 +71,7 @@ def _align_images_to_template(imgs, template, alignment_method,
 
 
 def _create_template(imgs, n_iter, scale_template, alignment_method, n_pieces,
-                     clustering_method, n_bags, masker, memory, memory_level,
+                     clustering, n_bags, masker, memory, memory_level,
                      n_jobs, parallel_backend, verbose):
     '''Create template through alternate minimization.  Compute iteratively :
         * T minimizing sum(||R_i X_i-T||) which is the mean of aligned images (RX_i)
@@ -110,7 +110,7 @@ def _create_template(imgs, n_iter, scale_template, alignment_method, n_pieces,
             template_history.append(template)
         aligned_imgs = _align_images_to_template(imgs, template,
                                                  alignment_method, n_pieces,
-                                                 clustering_method, n_bags,
+                                                 clustering, n_bags,
                                                  masker, memory, memory_level,
                                                  n_jobs, parallel_backend, verbose)
 
@@ -118,7 +118,7 @@ def _create_template(imgs, n_iter, scale_template, alignment_method, n_pieces,
 
 
 def _map_template_to_image(imgs, train_index, template, alignment_method,
-                           n_pieces, clustering_method, n_bags, masker,
+                           n_pieces, clustering, n_bags, masker,
                            memory, memory_level, n_jobs, parallel_backend, verbose):
     '''Learn alignment operator from the template toward new images.
 
@@ -143,7 +143,7 @@ def _map_template_to_image(imgs, train_index, template, alignment_method,
     mapping_image = index_img(template, train_index)
     mapping = PairwiseAlignment(n_pieces=n_pieces,
                                 alignment_method=alignment_method,
-                                clustering_method=clustering_method,
+                                clustering=clustering,
                                 n_bags=n_bags, mask=masker, memory=memory,
                                 memory_level=memory_level,
                                 n_jobs=n_jobs, parallel_backend=parallel_backend,
@@ -185,7 +185,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
     """
 
     def __init__(self, alignment_method="identity", n_pieces=1,
-                 clustering_method='kmeans', scale_template=False,
+                 clustering='kmeans', scale_template=False,
                  n_iter=2, save_template=None, n_bags=1,
                  mask=None, smoothing_fwhm=None, standardize=None,
                  detrend=None, target_affine=None, target_shape=None,
@@ -206,7 +206,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             If 1 the alignment is done on full scale data.
             If > 1, the voxels are clustered and alignment is performed
                 on each cluster applied to X and Y.
-        clustering_method : string or 3D Niimg optional (default : kmeans)
+        clustering : string or 3D Niimg optional (default : kmeans)
             'kmeans', 'ward', 'rena' method used for clustering of voxels based
             on functional signal, passed to nilearn.regions.parcellations
             If 3D Niimg, image used as predefined clustering,
@@ -273,7 +273,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         self.template_history = None
         self.alignment_method = alignment_method
         self.n_pieces = n_pieces
-        self.clustering_method = clustering_method
+        self.clustering = clustering
         self.n_iter = n_iter
         self.scale_template = scale_template
         self.save_template = save_template
@@ -324,7 +324,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         self.template, self.template_history = \
             _create_template(imgs, self.n_iter, self.scale_template,
                              self.alignment_method, self.n_pieces,
-                             self.clustering_method, self.n_bags,
+                             self.clustering, self.n_bags,
                              self.masker_, self.memory, self.memory_level,
                              self.n_jobs, self.parallel_backend, self.verbose)
         if self.save_template is not None:
@@ -368,7 +368,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
                                    verbose=self.verbose)(
             delayed(_map_template_to_image)
             (img, train_index, self.template, self.alignment_method,
-             self.n_pieces, self.clustering_method, self.n_bags, self.masker_,
+             self.n_pieces, self.clustering, self.n_bags, self.masker_,
              self.memory, self.memory_level, self.n_jobs, self.parallel_backend,
              self.verbose
              ) for img in imgs

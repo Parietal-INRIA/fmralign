@@ -31,7 +31,7 @@ def piecewise_transform(labels, estimators, X):
     return X_transform
 
 
-def _make_parcellation(imgs, clustering_method, n_pieces, masker, kmeans_smoothing_fwhm=5, verbose=0):
+def _make_parcellation(imgs, clustering, n_pieces, masker, kmeans_smoothing_fwhm=5, verbose=0):
     """Convenience function to use nilearn Parcellation class in our pipeline.
     It is used to find local regions of the brain in which alignment will be later applied.
     For alignment computational efficiency, regions should be of hundreds of voxels.
@@ -40,7 +40,7 @@ def _make_parcellation(imgs, clustering_method, n_pieces, masker, kmeans_smoothi
     ----------
     imgs: Niimgs
         data to cluster
-    clustering_method: string or 3D Niimg
+    clustering: string or 3D Niimg
         In : {'kmeans', 'ward', 'rena'}, passed to nilearn Parcellations class.
         If you aim for speed, choose k-means (and check kmeans_smoothing_fwhm parameter)
         If you want spatially connected and/or reproducible regions use 'ward'
@@ -49,6 +49,8 @@ def _make_parcellation(imgs, clustering_method, n_pieces, masker, kmeans_smoothi
     n_pieces: int
         number of different labels
     masker: instance of NiftiMasker or MultiNiftiMasker
+        Masker to be used on the data. For more information see:
+        http://nilearn.github.io/manipulating_images/masker_objects.html
     kmeans_smoothing_fwhm: None or int
         By default 5mm smoothing will be applied before clusterisation to have
         more compact clusters (but this will not change the data later).
@@ -59,24 +61,24 @@ def _make_parcellation(imgs, clustering_method, n_pieces, masker, kmeans_smoothi
     labels : list of ints (len n_features)
         Parcellation of features in clusters
     """
-    if type(clustering_method) == nibabel.nifti1.Nifti1Image:
+    if type(clustering) == nibabel.nifti1.Nifti1Image:
         # check image makes suitable labels, this will return friendly error message if needed
-        _check_same_fov(masker.mask_img_, clustering_method)
-        labels_img = clustering_method
+        _check_same_fov(masker.mask_img_, clustering)
+        labels_img = clustering
     else:
-        if clustering_method == "kmeans" and kmeans_smoothing_fwhm is not None:
+        if clustering == "kmeans" and kmeans_smoothing_fwhm is not None:
             images_to_parcel = smooth_img(imgs, kmeans_smoothing_fwhm)
         try:
-            parcellation = Parcellations(method=clustering_method, n_parcels=n_pieces, mask=masker,
+            parcellation = Parcellations(method=clustering, n_parcels=n_pieces, mask=masker,
                                          scaling=False, n_iter=20, verbose=verbose)
             parcellation.fit()
         except TypeError:
-            if clustering_method == "rena":
+            if clustering == "rena":
                 raise InputError(
                     ('ReNA algorithm is only available in Nilearn version > 0.5.2. If you want to use it, please run "pip install --upgrade nilearn"'))
             else:
                 parcellation = Parcellations(
-                    method=clustering_method, n_parcels=n_pieces, mask=masker, verbose=verbose)
+                    method=clustering, n_parcels=n_pieces, mask=masker, verbose=verbose)
         parcellation.fit(imgs)
         labels_img = parcellation.labels_img_
     return _apply_mask_fmri(labels_img, masker.mask_img_).astype(int)
@@ -90,8 +92,9 @@ def voxelwise_correlation(ground_truth, prediction, masker):
         Reference image (data acquired but never used before and considered as missing)
     prediction : 3D or 4D Niimg
         Same shape as ground_truth
-    masker : instance of NiftiMasker
-        masker to use on ground truth and prediction
+    masker: instance of NiftiMasker or MultiNiftiMasker
+        Masker to be used on ground_truth and prediction. For more information see:
+        http://nilearn.github.io/manipulating_images/masker_objects.html
 
     Returns
     -------

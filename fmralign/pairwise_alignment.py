@@ -25,8 +25,9 @@ def generate_Xi_Yi(labels, X, Y, masker, verbose=0):
         Source data
     Y: Niimg-like object
         Target data
-    masker: Niimg-like object
-        Mask to be used on data.
+    masker: instance of NiftiMasker or MultiNiftiMasker
+        Masker to be used on the data. For more information see:
+        http://nilearn.github.io/manipulating_images/masker_objects.html
     verbose: integer, optional.
         Indicate the level of verbosity.
 
@@ -102,7 +103,7 @@ def fit_one_piece(X_i, Y_i, alignment_method):
 
 
 def fit_one_parcellation(X_, Y_, alignment_method, masker, n_pieces,
-                         clustering_method, clustering_index,
+                         clustering, clustering_index,
                          n_jobs, parallel_backend, verbose):
     """ Create one parcellation of n_pieces and align each source and target
     data in one piece i, X_i and Y_i, using alignment method
@@ -116,11 +117,12 @@ def fit_one_parcellation(X_, Y_, alignment_method, masker, n_pieces,
         Target data
     alignment_method: string
         algorithm used to perform alignment between each region of X_ and Y_
-    masker: Niimg-like object
-        Mask to be used on data.
+    masker: instance of NiftiMasker or MultiNiftiMasker
+        Masker to be used on the data. For more information see:
+        http://nilearn.github.io/manipulating_images/masker_objects.html
     n_pieces: n_pieces: int,
         Number of regions in which the data is parcellated for alignment
-    clustering_method: string or 3D Niimg
+    clustering: string or 3D Niimg
         method used to perform parcellation of data.
         If 3D Niimg, image used as predefined clustering.
     clustering_index: list of integers
@@ -143,7 +145,7 @@ def fit_one_parcellation(X_, Y_, alignment_method, masker, n_pieces,
     # choose indexes maybe with index_img to not
     if n_pieces > 1:
         clustering_data = index_img(X_, clustering_index)
-        labels = _make_parcellation(clustering_data, clustering_method,
+        labels = _make_parcellation(clustering_data, clustering,
                                     n_pieces, masker, verbose=verbose)
     else:
         labels = np.ones(
@@ -165,7 +167,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
     """
 
     def __init__(self, alignment_method, n_pieces=1,
-                 clustering_method='kmeans', n_bags=1, mask=None,
+                 clustering='kmeans', n_bags=1, mask=None,
                  smoothing_fwhm=None, standardize=None, detrend=False,
                  target_affine=None, target_shape=None, low_pass=None,
                  high_pass=None, t_r=None,
@@ -190,7 +192,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
             If 1 the alignment is done on full scale data.
             If >1, the voxels are clustered and alignment is performed
                 on each cluster applied to X and Y.
-        clustering_method : string or 3D Niimg optional (default : kmeans)
+        clustering : string or 3D Niimg optional (default : kmeans)
             'kmeans', 'ward', 'rena' method used for clustering of voxels based
             on functional signal, passed to nilearn.regions.parcellations
             If 3D Niimg, image used as predefined clustering,
@@ -247,7 +249,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         self.n_pieces = n_pieces
         self.alignment_method = alignment_method
         self.n_bags = n_bags
-        self.clustering_method = clustering_method
+        self.clustering = clustering
         self.mask = mask
         self.smoothing_fwhm = smoothing_fwhm
         self.standardize = standardize
@@ -288,11 +290,11 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         else:
             self.masker_.fit()
         # miss concatenation, transpose
-        if type(X) == list:
+        if isinstance(X, (list, np.ndarray)):
             X_ = concat_imgs(X)
         else:
             X_ = load_img(X)
-        if type(Y) == list:
+        if isinstance(X, (list, np.ndarray)):
             Y_ = concat_imgs(Y)
         else:
             Y_ = load_img(Y)
@@ -305,7 +307,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
                            verbose=self.verbose)(
             delayed(fit_one_parcellation)(
                 X_, Y_, self.alignment_method, self.masker_, self.n_pieces,
-                self.clustering_method, clustering_index, self.n_jobs,
+                self.clustering, clustering_index, self.n_jobs,
                 self.parallel_backend, self.verbose)
             for clustering_index, _ in rs.split(range(X_.shape[-1])))
         # change split
@@ -329,7 +331,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
            See http://nilearn.github.io/manipulating_images/input_output.html
            predicted data
         """
-        if type(X) == list:
+        if isinstance(X, (list, np.ndarray)):
             X = concat_imgs(X)
         X_ = self.masker_.transform(X)
 
