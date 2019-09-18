@@ -316,9 +316,9 @@ def _import_ot():
             if module == 'POT':
                 POT_min_version = metadata['min_version']
         raise ImportError(
-            ("To use optimal transport solver, POT module(v > {}) is necessary \
-             but not installed by default with fmralign. To install it \
-             run 'pip install POT' ").format(POT_min_version))
+            f"To use optimal transport solver, POT module(v > {POT_min_version}) \
+            is necessary but not installed by default with fmralign. To install \
+            it run 'pip install POT'")
     else:
         return ot
 
