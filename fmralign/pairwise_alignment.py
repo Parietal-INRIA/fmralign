@@ -36,7 +36,7 @@ def generate_Xi_Yi(labels, X, Y, masker, verbose=0):
     X_i: ndarray
         Source data for piece i (shape : n_samples, n_features)
     Y_i: ndarray
-        Target data for piece i (shape : n_samples, n_features_i)
+        Target data for piece i (shape : n_samples, n_features)
 
     """
     X_ = masker.transform(X)
