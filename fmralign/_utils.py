@@ -75,7 +75,8 @@ def _make_parcellation(imgs, clustering, n_pieces, masker, kmeans_smoothing_fwhm
         except TypeError:
             if clustering == "rena":
                 raise InputError(
-                    ('ReNA algorithm is only available in Nilearn version > 0.5.2. If you want to use it, please run "pip install --upgrade nilearn"'))
+                    ('ReNA algorithm is only available in Nilearn version > 0.5.2. \
+                     If you want to use it, please run "pip install --upgrade nilearn"'))
             else:
                 parcellation = Parcellations(
                     method=clustering, n_parcels=n_pieces, mask=masker, verbose=verbose)
