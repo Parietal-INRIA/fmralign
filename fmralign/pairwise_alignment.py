@@ -1,10 +1,15 @@
+""" Module for pairwise functional alignment on Niimgs
+"""
+
 import copy
 import numpy as np
 from time import time
 
 from sklearn.base import BaseEstimator, TransformerMixin
 from joblib import Parallel, delayed
-from sklearn.externals.joblib import Memory
+from sklearn.ex""" Module for functional template inference using functional alignment and
+prediction of new subjects unseen images
+"""ternals.joblib import Memory
 from sklearn.model_selection import ShuffleSplit
 from sklearn.base import clone
 from nilearn.input_data.masker_validation import check_embedded_nifti_masker
@@ -153,8 +158,8 @@ def fit_one_parcellation(X_, Y_, alignment_method, mask, n_pieces,
 
 class PairwiseAlignment(BaseEstimator, TransformerMixin):
     """
-    Decompose the source and target images into source and target regions
-     Use alignment algorithms to align source and target regions independantly.
+    Decompose the source and target images into regions and align corresponding \
+    regions independently.
     """
 
     def __init__(self, alignment_method, n_pieces=1,
@@ -164,25 +169,25 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
                  high_pass=None, t_r=None,
                  memory=Memory(cachedir=None), memory_level=0,
                  n_jobs=1, parallel_backend='threading', verbose=0):
-        """ Use alignment algorithms to align source and target images.
-        If n_pieces > 1, decomposes the images into regions
-            and align each source/target region independantly.
-        If n_bags > 1, this parcellation process is applied multiple time
-            and the resulting models are bagged.
+        """
+        If n_pieces > 1, decomposes the images into regions \
+        and align each source/target region independantly.
+        If n_bags > 1, this parcellation process is applied multiple time \
+        and the resulting models are bagged.
 
         Parameters
         ----------
         alignment_method: string
             Algorithm used to perform alignment between X_i and Y_i :
-            - either 'identity', 'scaled_orthogonal', 'ridge_cv',
-                'permutation', 'diagonal'
-            - or an instance of one of alignment classes
-                (imported from functional_alignment.alignment_methods)
+            * either 'identity', 'scaled_orthogonal', 'ridge_cv', \
+            'permutation', 'diagonal'
+            * or an instance of one of alignment classes \
+            (imported from functional_alignment.alignment_methods)
         n_pieces: int, optional (default = 1)
-            Number of regions in which the data is parcellated for alignment
+            Number of regions in which the data is parcellated for alignment.
             If 1 the alignment is done on full scale data.
-            If >1, the voxels are clustered and alignment is performed
-                on each cluster applied to X and Y.
+            If >1, the voxels are clustered and alignment is performed \
+            on each cluster applied to X and Y.
         clustering_method : string, optional (default : k_means)
             'k_means' or 'ward', method used for clustering of voxels
         n_bags: int, optional (default = 1)
