@@ -1,4 +1,4 @@
-""" Module for pairwise functional alignment on Niimgs
+""" Module for pairwise functional alignment
 """
 
 import copy
