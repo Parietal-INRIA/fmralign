@@ -7,9 +7,7 @@ from time import time
 
 from sklearn.base import BaseEstimator, TransformerMixin
 from joblib import Parallel, delayed
-from sklearn.ex""" Module for functional template inference using functional alignment and
-prediction of new subjects unseen images
-"""ternals.joblib import Memory
+from sklearn.externals.joblib import Memory
 from sklearn.model_selection import ShuffleSplit
 from sklearn.base import clone
 from nilearn.input_data.masker_validation import check_embedded_nifti_masker
@@ -188,53 +186,53 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
             If 1 the alignment is done on full scale data.
             If >1, the voxels are clustered and alignment is performed \
             on each cluster applied to X and Y.
-        clustering_method : string, optional (default : k_means)
+        clustering_method: string, optional (default = k_means)
             'k_means' or 'ward', method used for clustering of voxels
         n_bags: int, optional (default = 1)
             If 1 : one estimator is fitted.
             If >1 number of bagged parcellations and estimators used.
-        mask: Niimg-like object, instance of NiftiMasker or
-                                MultiNiftiMasker, optional (default : None)
-            Mask to be used on data. If an instance of masker is passed,
-            then its mask will be used. If no mask is given,
-            it will be computed automatically by a MultiNiftiMasker
-            with defaultparameters.
-        smoothing_fwhm: float, optional (default : None)
-            If smoothing_fwhm is not None, it gives the size in millimeters
+        mask: Niimg-like object, instance of NiftiMasker or \
+                                MultiNiftiMasker, optional (default = None)
+            Mask to be used on data. If an instance of masker is passed, \
+            then its mask will be used. If no mask is given, \
+            it will be computed automatically by a MultiNiftiMasker \
+            with default parameters.
+        smoothing_fwhm: float, optional (default = None)
+            If smoothing_fwhm is not None, it gives the size in millimeters \
             of the spatial smoothing to apply to the signal.
-        standardize : boolean, optional (default : None)
-            If standardize is True, the time-series are centered and normed:
+        standardize: boolean, optional (default = None)
+            If standardize is True, the time-series are centered and normed: \
             their variance is put to 1 in the time dimension.
-        detrend : boolean, optional (default : None)
-            This parameter is passed to nilearn.signal.clean.
+        detrend: boolean, optional (default = None)
+            This parameter is passed to nilearn.signal.clean. \
             Please see the related documentation for details
-        target_affine: 3x3 or 4x4 matrix, optional (default : None)
-            This parameter is passed to nilearn.image.resample_img.
+        target_affine: 3x3 or 4x4 matrix, optional (default = None)
+            This parameter is passed to nilearn.image.resample_img. \
             Please see the related documentation for details.
-        target_shape: 3-tuple of integers, optional (default : None)
-            This parameter is passed to nilearn.image.resample_img.
+        target_shape: 3-tuple of integers, optional (default = None)
+            This parameter is passed to nilearn.image.resample_img. \
             Please see the related documentation for details.
-        low_pass: None or float, optional (default : None)
-            This parameter is passed to nilearn.signal.clean.
+        low_pass: None or float, optional (default = None)
+            This parameter is passed to nilearn.signal.clean. \
             Please see the related documentation for details.
-        high_pass: None or float, optional (default : None)
-            This parameter is passed to nilearn.signal.clean.
+        high_pass: None or float, optional (default = None)
+            This parameter is passed to nilearn.signal.clean. \
             Please see the related documentation for details.
-        t_r: float, optional (default : None)
-            This parameter is passed to nilearn.signal.clean.
+        t_r: float, optional (default = None)
+            This parameter is passed to nilearn.signal.clean. \
             Please see the related documentation for details.
-        memory: instance of joblib.Memory or string (default : None)
-            Used to cache the masking process and results of algorithms.
-            By default, no caching is done. If a string is given, it is the
+        memory: instance of joblib.Memory or string (default = None)
+            Used to cache the masking process and results of algorithms. \
+            By default, no caching is done. If a string is given, it is the \
             path to the caching directory.
-        memory_level: integer, optional (default : None)
-            Rough estimator of the amount of memory used by caching.
+        memory_level: integer, optional (default = None)
+            Rough estimator of the amount of memory used by caching. \
             Higher value means more memory for caching.
         n_jobs: integer, optional (default = 1)
-            The number of CPUs to use to do the computation. -1 means
+            The number of CPUs to use to do the computation. -1 means \
             'all CPUs', -2 'all CPUs but one', and so on.
-        parallel_backend: str, ParallelBackendBase instance, None (default: 'threading')
-            Specify the parallelization backend implementation. For more
+        parallel_backend: str, ParallelBackendBase instance, None (default = 'threading')
+            Specify the parallelization backend implementation. For more \
             informations see joblib.Parallel documentation
         verbose: integer, optional (default = 0)
             Indicate the level of verbosity. By default, nothing is printed.
@@ -264,11 +262,10 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         Parameters
         ----------
         X: Niimg-like object
-           See http://nilearn.github.io/manipulating_images/input_output.html
-           source data
+            Source data.
+
         Y: Niimg-like object
-           See http://nilearn.github.io/manipulating_images/input_output.html
-           target data
+            Target data
 
         Returns
         -------
@@ -308,14 +305,12 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         Parameters
         ----------
         X: Niimg-like object
-           See http://nilearn.github.io/manipulating_images/input_output.html
-           source data
+            Source data
 
         Returns
         -------
         X_transform: Niimg-like object
-           See http://nilearn.github.io/manipulating_images/input_output.html
-           predicted data
+            Predicted data
         """
         X_ = load_img(self.masker_, X)
 

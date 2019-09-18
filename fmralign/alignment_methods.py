@@ -1,3 +1,6 @@
+""" Module implementing alignment estimators on ndarrays
+"""
+
 import numpy as np
 import scipy
 from scipy.spatial.distance import cdist
@@ -96,7 +99,7 @@ def _projection(x, y):
         target vector
 
     Returns
-    ----------
+    --------
     d: int
         scaling factor
     """
@@ -115,7 +118,7 @@ def _voxelwise_signal_projection(X, Y, n_jobs=1, parallel_backend='threading'):
         target data
 
     Returns
-    ----------
+    --------
     D: list of ints
         List of optimal scaling factors
     """
@@ -136,7 +139,7 @@ class Alignment(BaseEstimator, TransformerMixin):
 
 
 class Identity(Alignment):
-    """The simplest kind of alignment, used as baseline for benchmarks. RX = X
+    """Compute no alignment, used as baseline for benchmarks : RX = X.
     """
 
     def transform(self, X):
@@ -145,18 +148,21 @@ class Identity(Alignment):
 
 
 class DiagonalAlignment(Alignment):
-    '''Compute the voxelwise projection factor between X and Y
+    '''Compute the voxelwise projection factor between X and Y.
 
     Parameters
     ----------
-    R : scipy.sparse.diags
-        Scaling matrix containing the optimal shrinking factor for every voxel
     n_jobs: integer, optional (default = 1)
         The number of CPUs to use to do the computation. -1 means
         'all CPUs', -2 'all CPUs but one', and so on.
     parallel_backend: str, ParallelBackendBase instance, None (default: 'threading')
         Specify the parallelization backend implementation. For more
         informations see joblib.Parallel documentation
+
+    Attributes
+    -----------
+    R : scipy.sparse.diags
+        Scaling matrix containing the optimal shrinking factor for every voxel
     '''
 
     def __init__(self, n_jobs=1, parallel_backend='threading'):
@@ -164,8 +170,10 @@ class DiagonalAlignment(Alignment):
         self.parallel_backend = parallel_backend
 
     def fit(self, X, Y):
-        '''Parameters
-        ----------
+        '''
+
+        Parameters
+        --------------
         X: (n_samples, n_features) nd array
             source data
         Y: (n_samples, n_features) nd array
@@ -182,13 +190,16 @@ class DiagonalAlignment(Alignment):
 
 
 class ScaledOrthogonalAlignment(Alignment):
-    """Compute a mixing matrix R and a scaling sc such that Frobenius norm
-    ||sc RX - Y||^2 is minimized and R is an orthogonal matrix
+    """Compute a orthogonal mixing matrix R and a scaling sc such that Frobenius norm \
+    ||sc RX - Y||^2 is minimized.
 
     Parameters
-    ---------
+    -----------
     scaling : boolean, optional
         Determines whether a scaling parameter is applied to improve transform.
+
+    Attributes
+    -----------
     R : ndarray (n_features, n_features)
         Optimal orthogonal transform
     """
@@ -199,7 +210,9 @@ class ScaledOrthogonalAlignment(Alignment):
 
     def fit(self, X, Y):
         """ Fit orthogonal R s.t. ||sc XR - Y||^2
-        ----------
+
+        Parameters
+        -----------
         X: (n_samples, n_features) nd array
             source data
         Y: (n_samples, n_features) nd array
@@ -217,7 +230,7 @@ class ScaledOrthogonalAlignment(Alignment):
 
 
 class RidgeAlignment(Alignment):
-    """ Compute an scikit-estimator R using a mixing matrix M s.t Frobenius
+    """ Compute an scikit-estimator R using a mixing matrix M s.t Frobenius \
     norm || XM - Y ||^2 + alpha * ||M||^2 is minimized with cross-validation
 
     Parameters
@@ -225,13 +238,13 @@ class RidgeAlignment(Alignment):
     R : scikit-estimator from sklearn.linear_model.RidgeCV
         with methods fit, predict
     alpha : numpy array of shape [n_alphas]
-        Array of alpha values to try. Regularization strength;
-        must be a positive float. Regularization improves the conditioning
-        of the problem and reduces the variance of the estimates.
-        Larger values specify stronger regularization. Alpha corresponds to
+        Array of alpha values to try. Regularization strength; \
+        must be a positive float. Regularization improves the conditioning \
+        of the problem and reduces the variance of the estimates. \
+        Larger values specify stronger regularization. Alpha corresponds to \
         ``C^-1`` in other models such as LogisticRegression or LinearSVC.
     cv : int, cross-validation generator or an iterable, optional
-        Determines the cross-validation splitting strategy.
+        Determines the cross-validation splitting strategy.\
         Possible inputs for cv are:
         -None, to use the efficient Leave-One-Out cross-validation
         - integer, to specify the number of folds.
@@ -244,9 +257,10 @@ class RidgeAlignment(Alignment):
         self.cv = cv
 
     def fit(self, X, Y):
-        """ Fit R s.t. || XR - Y ||^2 + alpha ||R||^2 is minimized and
-            choose best alpha through cross-validation
-        ----------
+        """ Fit R s.t. || XR - Y ||^2 + alpha ||R||^2 is minimized with cv
+
+        Parameters
+        -----------
         X: (n_samples, n_features) nd array
             source data
         Y: (n_samples, n_features) nd array
@@ -264,17 +278,19 @@ class RidgeAlignment(Alignment):
 
 
 class Hungarian(Alignment):
-    '''Compute the optmal permutation matrix of X toward Y
+    '''Compute the optimal permutation matrix of X toward Y
 
-    Parameters
+    Attributes
     ----------
     R : scipy.sparse.csr_matrix
         Mixing matrix containing the optimal permutation
     '''
 
     def fit(self, X, Y):
-        '''Parameters
-        ----------
+        '''
+
+        Parameters
+        -----------
         X: (n_samples, n_features) nd array
             source data
         Y: (n_samples, n_features) nd array
@@ -300,29 +316,32 @@ def _import_ot():
             if module == 'POT':
                 POT_min_version = metadata['min_version']
         raise ImportError(
-            ("To use optimal transport solver, POT module(v > {}) is necessary "
-             "but not installed by default with fmralign. To install it,"
-             "run 'pip install POT' ").format(POT_min_version))
+            ("To use optimal transport solver, POT module(v > {}) is necessary \
+             but not installed by default with fmralign. To install it \
+             run 'pip install POT' ").format(POT_min_version))
     else:
         return ot
 
 
 class OptimalTransportAlignment(Alignment):
-    '''Compute the optmal coupling between X and Y with entropic regularization
+    '''Compute the optimal coupling between X and Y with entropic regularization.
 
     Parameters
     ----------
-    R : scipy.sparse.csr_matrix
-        Mixing matrix containing the optimal permutation
     solver : str (optional)
-        solver from POT called to find optimal coupling 'sinkhorn',
-        'greenkhorn', 'sinkhorn_stabilized','sinkhorn_epsilon_scaling', 'exact'
+        solver from POT called to find optimal coupling 'sinkhorn', \
+        'greenkhorn', 'sinkhorn_stabilized','sinkhorn_epsilon_scaling', 'exact' \
         see POT/ot/bregman on Github for source code of solvers
     metric : str(optional)
-        metric used to create transport cost matrix,
+        metric used to create transport cost matrix, \
         see full list in scipy.spatial.distance.cdist doc
     reg : int (optional)
         level of entropic regularization
+
+    Attributes
+    ----------
+    R : scipy.sparse.csr_matrix
+        Mixing matrix containing the optimal permutation
     '''
 
     def __init__(self, solver='sinkhorn_epsilon_scaling',
@@ -334,7 +353,7 @@ class OptimalTransportAlignment(Alignment):
 
     def fit(self, X, Y):
         '''Parameters
-        ----------
+        --------------
         X: (n_samples, n_features) nd array
             source data
         Y: (n_samples, n_features) nd array
