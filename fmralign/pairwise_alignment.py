@@ -322,3 +322,10 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         X_transform /= self.n_bags
 
         return self.masker_.inverse_transform(X_transform.T)
+
+    # Make inherited function harmless
+    def fit_transform(self):
+        """Parent method not applicable here. Will raise AttributeError if called.
+        """
+        raise AttributeError(
+            "type object 'PairwiseAlignment' has no attribute 'fit_transform'")
