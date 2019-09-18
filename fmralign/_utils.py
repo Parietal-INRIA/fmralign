@@ -52,7 +52,7 @@ def _make_parcellation(imgs, clustering, n_pieces, masker, kmeans_smoothing_fwhm
         Masker to be used on the data. For more information see:
         http://nilearn.github.io/manipulating_images/masker_objects.html
     kmeans_smoothing_fwhm: None or int
-        By default 5mm smoothing will be applied before clusterisation to have
+        By default 5mm smoothing will be applied before clustering to have
         more compact clusters (but this will not change the data later).
         To disable this option, this parameter should be None.
 
