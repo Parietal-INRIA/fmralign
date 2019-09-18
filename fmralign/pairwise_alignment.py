@@ -64,9 +64,9 @@ def fit_one_piece(X_i, Y_i, alignment_method):
     Parameters
     ----------
     X_i: ndarray
-        Source data for piece i (shape : n_samples, n_features_i)
+        Source data for piece i (shape : n_samples, n_features)
     Y_i: ndarray
-        Target data for piece i (shape : n_samples, n_features_i)
+        Target data for piece i (shape : n_samples, n_features)
     alignment_method: string
         Algorithm used to perform alignment between X_i and Y_i :
         - either 'identity', 'scaled_orthogonal', 'ridge_cv',
