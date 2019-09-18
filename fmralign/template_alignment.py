@@ -370,3 +370,10 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             (self.template, test_index, mapping) for mapping in fitted_mappings
         )
         return predicted_imgs
+
+    # Make inherited function harmless
+    def fit_transform(self):
+        """Parent method not applicable here. Will raise AttributeError if called.
+        """
+        raise AttributeError(
+            "type object 'PairwiseAlignment' has no attribute 'fit_transform'")
