@@ -1,4 +1,4 @@
-""" Module for functional template inference using functional alignment and
+""" Module for functional template inference using functional alignment on Niimgs and
 prediction of new subjects unseen images
 """
 # Author: T. Bazeille, B. Thirion
@@ -178,9 +178,8 @@ def _predict_from_template_and_mapping(template, test_index, mapping):
 
 class TemplateAlignment(BaseEstimator, TransformerMixin):
     """
-    Predict some new contrasts for target subject from source subjects for which
-    they are known and shared information. First summarize source subjects
-    information in a template, then use alignment and this template to predict
+    Decompose the source images into regions and summarize subjects information \
+    in a template, then use pairwise alignment to predict
     new contrast for target subject.
     """
 
@@ -292,7 +291,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
 
     def fit(self, imgs):
         """
-        Learn a template from images, using alignment.
+        Learn a template from source images, using alignment.
 
         Parameters
         ----------
