@@ -1,7 +1,7 @@
 .. include:: ../tune_toc.rst
 
 
-.. _decoding:
+.. _functional_alignment:
 
 =====================================================
 Functional alignment: handling functional variability
