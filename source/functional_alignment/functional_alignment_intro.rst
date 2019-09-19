@@ -16,7 +16,8 @@ In this documentation we use a subset of `Individual Brain Charting dataset <htt
 .. topic:: **Full code example**
 
    The documentation here just gives the big idea. A full code example can be found on
-   :ref:`sphx_glr_auto_examples_plot_pairwise_alignment.py`
+   :ref:`sphx_glr_auto_examples_plot_pairwise_alignment.py`. If you want to work on a
+   Region Of Interest see :ref:`sphx_glr_auto_examples_plot_pairwise_alignment.py`.
 
 .. contents:: **Contents**
     :local:
@@ -49,6 +50,7 @@ that will keep only relevant data.
 >>> from nilearn.input_data import NiftiMasker
 >>> masker = NiftiMasker(mask_img=mask).fit()
 
+
 For each subject, for each task and conditions, our dataset contains two
 independent acquisitions, similar except for one acquisition parameter, the
 encoding phase used that was either Antero-Posterior (AP) or Postero-Anterior (PA).
@@ -56,6 +58,8 @@ In this part we focus only on the 'PA' images that we put apart.
 
 >>> sub-01_pa = df[df.subject == 'sub-01'][df.acquisition == 'pa'].path.values
 >>> sub-02_pa = df[df.subject == 'sub-02'][df.acquisition == 'pa'].path.values
+
+
 
 Measure correlation between subjects images
 -------------------------------------------
