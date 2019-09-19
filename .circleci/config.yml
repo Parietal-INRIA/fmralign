@@ -26,6 +26,12 @@ jobs:
           conda install --no-update-deps pot nilearn -c conda-forge -yq
           pip install .
           set -o pipefail && pytest 2>&1 | tee log.txt
+      - run:
+          |
+          make html
+        - persist_to_workspace:
+          root: build
+          paths: html
       - save_cache:
           key: v3-packages
           paths:
