@@ -95,7 +95,7 @@ offered by fmralign are available here.
 Then we can use this alignment, for example to predict some missing data of the target subject
 from source subject as summarized in picture below.
 
-.. image:: ../images/pairwise_alignment.pdf
+.. image:: ../images/pairwise_alignment.png
 
 To do this concretely with fmralign on our example, let's choose sub-01 as source and sub-02 as target.
 The say we have the 'AP' images in common for both subjects, we only have 'PA' images for sub-01
