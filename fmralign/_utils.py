@@ -25,13 +25,14 @@ def piecewise_transform(labels, estimators, X):
     """
 
     X_transform = np.zeros_like(X)
+    # Labels are from 1 to n where as estimators are indexed from 0 to n-1
     for i in np.unique(labels):
         X_transform[:, labels == i] = estimators[i - 1].transform(
             X[:, labels == i])
     return X_transform
 
 
-def _make_parcellation(imgs, clustering, n_pieces, masker, kmeans_smoothing_fwhm=5, verbose=0):
+def _make_parcellation(imgs, clustering, n_pieces, masker, smoothing_fwhm=5, verbose=0):
     """Convenience function to use nilearn Parcellation class in our pipeline.
     It is used to find local regions of the brain in which alignment will be later applied.
     For alignment computational efficiency, regions should be of hundreds of voxels.
@@ -51,8 +52,8 @@ def _make_parcellation(imgs, clustering, n_pieces, masker, kmeans_smoothing_fwhm
     masker: instance of NiftiMasker or MultiNiftiMasker
         Masker to be used on the data. For more information see:
         http://nilearn.github.io/manipulating_images/masker_objects.html
-    kmeans_smoothing_fwhm: None or int
-        By default 5mm smoothing will be applied before clustering to have
+    smoothing_fwhm: None or int
+        By default 5mm smoothing will be applied before kmeans clustering to have
         more compact clusters (but this will not change the data later).
         To disable this option, this parameter should be None.
 
@@ -66,8 +67,8 @@ def _make_parcellation(imgs, clustering, n_pieces, masker, kmeans_smoothing_fwhm
         _check_same_fov(masker.mask_img_, clustering)
         labels_img = clustering
     else:
-        if clustering == "kmeans" and kmeans_smoothing_fwhm is not None:
-            images_to_parcel = smooth_img(imgs, kmeans_smoothing_fwhm)
+        if clustering == "kmeans" and smoothing_fwhm is not None:
+            images_to_parcel = smooth_img(imgs, smoothing_fwhm)
         try:
             parcellation = Parcellations(method=clustering, n_parcels=n_pieces, mask=masker,
                                          scaling=False, n_iter=20, verbose=verbose)
