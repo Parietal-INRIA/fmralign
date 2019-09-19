@@ -14,10 +14,9 @@ finding transformation between subjects to handle the functional variability.
 In this documentation we use a subset of `Individual Brain Charting dataset <https://project.inria.fr/IBC/>`_ where we have a lot of functional informations on several subjects, in the form of several task-based contrast per subject.
 
 .. topic:: **Full code example**
-
    The documentation here just gives the big idea. A full code example can be found on
    :ref:`sphx_glr_auto_examples_plot_pairwise_alignment.py`. If you want to work on a
-   Region Of Interest see :ref:`sphx_glr_auto_examples_plot_pairwise_alignment.py`.
+   Region Of Interest see :ref:`sphx_glr_auto_examples_plot_pairwise_roi_alignment.py`.
 
 .. contents:: **Contents**
     :local:
