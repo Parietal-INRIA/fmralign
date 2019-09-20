@@ -28,6 +28,7 @@ jobs:
           set -o pipefail && pytest 2>&1 | tee log.txt
       - run: |
           source activate testenv
+          pwd
           set -o pipefail && make html 2>&1 | tee log.txt
       - store_artifacts:
           path: build/html
