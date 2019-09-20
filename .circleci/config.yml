@@ -26,7 +26,7 @@ jobs:
           conda install --no-update-deps pot nilearn -c conda-forge -yq
           pip install .
           set -o pipefail && pytest 2>&1 | tee log.txt
-      - run:
+      - run: |
           source activate testenv
           set -o pipefail && make html 2>&1 | tee log.txt
       - store_artifacts:
