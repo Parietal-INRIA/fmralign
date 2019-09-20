@@ -55,8 +55,6 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx_gallery.gen_gallery',
               'sphinx.ext.coverage',
               'sphinx.ext.viewcode',
-              'matplotlib.sphinxext.only_directives',
-              'matplotlib.sphinxext.plot_directive',
               'sphinx.ext.doctest']
 
 autodoc_default_options = {'members': None, 'inherited-members': None}
