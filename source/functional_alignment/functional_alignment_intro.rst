@@ -72,7 +72,8 @@ activation profile for subject 1 and for subject 2.
 We then plot this correlation for two specific cuts.
 
 >>> from nilearn import plotting
->>> corr_display = plotting.plot_stat_map(average_score, display_mode="z", vmax=1, cut_coords=[-15, -5])
+>>> corr_display = plotting.plot_stat_map(average_score, display_mode="z",
+>>>                                       vmax=1, cut_coords=[-15, -5])
 >>> corr_display.title("Initial correlation between subjects 1 and 2 images")
 >>> plotting.show()
 
@@ -112,7 +113,8 @@ As we want to learn the transformation on 'AP' images, we should retrieve these 
 We align the whole brain through multiple local alignment, each applied on a piece of the brain, isolated through a functional clustering. We define the estimator used and fit it.
 
 >>> from fmralign.pairwise_alignment import PairwiseAlignment
->>> alignement_estimator = PairwiseAlignment(alignment_method='scaled_orthogonal', n_pieces=150, mask=masker)
+>>> alignement_estimator = PairwiseAlignment(alignment_method='scaled_orthogonal',
+>>>                                                   n_pieces=150, mask=masker)
 
 We learn alignment operator from subject 1 to subject 2 on 'AP' data.
 
@@ -131,7 +133,8 @@ improved their similarity to those of the target subject and we compare it to
 our previous results.
 
 >>> alignment_correlation = voxelwise_correlation(sub-02_pa, sub-01_pa, masker)
->>> alignment_display = plotting.plot_stat_map(average_score, display_mode="z", vmax=1, cut_coords=[-15, -5])
+>>> alignment_display = plotting.plot_stat_map(average_score, display_mode="z",
+>>>                                            vmax=1, cut_coords=[-15, -5])
 >>> corr_display.title("Correlation between 1 and 2 after alignment")
 >>> plotting.show()
 
