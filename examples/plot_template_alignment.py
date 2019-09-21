@@ -130,11 +130,11 @@ prediction_from_average = index_img(average_subject, test_index)
 
 #############################################################################
 # Score the baseline and the prediction
-# ----------------------------------------
-# We use a utility scoring function to measure the voxelwise correlation between \
-# the prediction and the ground truth. That is, for each voxel, we measure the \
-# correlation between its profile of activation without and with alignment, \
-# to see if alignment was able to predict a signal more alike the ground truth.
+# -------------------------------------
+# We use a utility scoring function to measure the voxelwise correlation \
+# between the prediction and the ground truth. That is, for each voxel, we \
+# measure the correlation between its profile of activation without and with \
+# alignment, to see if alignment was able to predict a signal more alike the ground truth.
 #
 
 from fmralign._utils import voxelwise_correlation
@@ -149,7 +149,7 @@ template_score = voxelwise_correlation(
 
 #############################################################################
 # Plotting the measures
-# ------------------------
+# ---------------------
 # Finally we plot both scores
 #
 
