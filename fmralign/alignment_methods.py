@@ -230,7 +230,7 @@ class ScaledOrthogonalAlignment(Alignment):
 
 
 class RidgeAlignment(Alignment):
-    """ Compute an scikit-estimator R using a mixing matrix M s.t Frobenius \
+    """ Compute a scikit-estimator R using a mixing matrix M s.t Frobenius \
     norm || XM - Y ||^2 + alpha * ||M||^2 is minimized with cross-validation
 
     Parameters
