@@ -90,7 +90,7 @@ The core idea of functional alignment is to handle this variablity by learning a
 from one subject to another.
 
 First, we choose one **target** subject, toward which we'll transform images from a **source** subject. We use shared information to learn the transformation from source to target. We won't get now into
-details about how the transformation is learnt. More details on the possibility
+details about how the transformation is learnt. More details on the features
 offered by fmralign are available here.
 
 Then we can use this alignment, for example to predict some missing data of the target subject
