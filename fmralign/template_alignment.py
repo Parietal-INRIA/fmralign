@@ -298,7 +298,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         Parameters
         ----------
         imgs: List of Niimg-like objects
-            Source subjects data. Every img must have the same length (number of sample).
+            Source subjects data. Every img must have the same length (number of samples).
 
         Returns
         -------
