@@ -52,7 +52,7 @@ masker.fit()
 # independent acquisitions, similar except for one acquisition parameter, the \
 # encoding phase used that was either Antero-Posterior (AP) or Postero-Anterior (PA).
 # Although this induces small differences in the final data, we will take \
-# advantage of these "duplicates" to create a training and a testing set that \
+# advantage of these "duplicates to create a training and a testing set that \
 # contains roughly the same signals but acquired totally independently.
 #
 
