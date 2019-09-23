@@ -25,15 +25,13 @@ Local functional alignment
 ==================================
 
 .. figure:: ../images/alignment_pipeline.png
-   :scale: 30
+   :scale: 25
    :align: right
 
 Aligning images of various size is not always easy because when we search a \
 transformation for `n` voxels yields at least a complexity of :math:`n^2`. Moreover, \
 finding just one transformation for similarity of functional signal in the whole \
 brain could create unrealistic correspondances, for example inter-hemispheric.
-
-
 
 To avoid these issues, we keep alignment local, i.e. on local and functionally meaningful regions. \
 Thus, in a first step we realize a functional clustering of the voxels in the image into `n_pieces` regions. \
