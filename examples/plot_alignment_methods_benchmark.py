@@ -104,8 +104,8 @@ target_test = df[df.subject == 'sub-02'][df.acquisition == 'pa'].path.values
 import numpy as np
 n_voxels = roi_masker.mask_img_.get_data().sum()
 print("The chosen region of interest contains {} voxels".format(n_voxels))
-n_pieces = np.round(n_voxels / 200)
-type(n_pieces)
+n_pieces = int(np.round(n_voxels / 200))
+
 print("We will cluster them in {} regions".format(n_pieces))
 
 ###############################################################################
