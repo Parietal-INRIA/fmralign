@@ -23,14 +23,17 @@ We compare various methods of alignment on a pairwise alignment problem for `Ind
 
 Local functional alignment
 ==================================
+
+.. figure:: ../images/alignment_pipeline.png
+   :scale: 30
+   :align: right
+
 Aligning images of various size is not always easy because when we search a \
 transformation for `n` voxels yields at least a complexity of :math:`n^2`. Moreover, \
 finding just one transformation for similarity of functional signal in the whole \
 brain could create unrealistic correspondances, for example inter-hemispheric.
 
-.. figure:: ../images/alignment_pipeline.png
-   :scale: 40
-   :align: right
+
 
 To avoid these issues, we keep alignment local, i.e. on local and functionally meaningful regions. \
 Thus, in a first step we realize a functional clustering of the voxels in the image into `n_pieces` regions. \
@@ -42,64 +45,64 @@ With this technique, it is possible to find quickly sensible alignment even for 
 Alignment methods on a region
 ==================================
 
-As we mentionned several times, we search for a transformation, let's call it R,
-between the source subject data X and the target data Y. X and Y are arrays of
+As we mentionned several times, we search for a transformation, let's call it `R`,
+between the source subject data `X` and the target data `Y`. `X` and `Y` are arrays of
 dimensions `(n_voxels, n_samples)` where each image is a sample.
 So we can see each signal as a distribution where each voxel as a point
 in a multidimensional functional space (each dimension is a sample).
 
-We show below a 2D example, with 2 distributions: X in green, Y in red. Both have 20 voxels (points) characterized by 2 samples (images). And the alignment we search for is the matching of both distibutions, optimally in some sense.
+We show below a 2D example, with 2 distributions: `X` in green, `Y` in red. Both have 20 voxels (points) characterized by 2 samples (images). And the alignment we search for is the matching of both distibutions, optimally in some sense.
 
 .. figure:: ../images/Source_distributions.png
-   :scale: 30
+   :scale: 20
    :align: left
 
 Orthogonal alignment (Procrustes)
 ----------------------------------
 The first idea proposed in Haxby, 2011 was to compute an orthogonal mixing
-matrix R and a scaling sc such that Frobenius norm :math:`||sc RX - Y||^2` is minimized.
+matrix `R` and a scaling `sc` such that Frobenius norm :math:`||sc RX - Y||^2` is minimized.
 
 .. figure:: ../images/Procrustes_transport.png
-   :scale: 25
+   :scale: 20
    :align: left
 
    Orthogonal alignment
 
 .. figure:: ../images/Procrustes_mix.png
-   :scale: 30
+   :scale: 24
    :align: left
 
    Orthogonal mixing matrix
 
 Ridge alignment
 ----------------------------------
-Another simple idea to regularize the transform R searched for is to penalize it's L2 norm. This is a ridge regression, which means we search R such that Frobenius  norm :math:`|| XR - Y ||^2 + alpha * ||R||^2` is minimized with cross-validation.
+Another simple idea to regularize the transform `R` searched for is to penalize it's L2 norm. This is a ridge regression, which means we search `R` such that Frobenius  norm :math:`|| XR - Y ||^2 + alpha * ||R||^2` is minimized with cross-validation.
 
 .. figure:: ../images/Ridge_transport.png
-   :scale: 25
+   :scale: 20
    :align: left
 
    Ridge alignment
 
 .. figure:: ../images/Ridge_mix.png
-  :scale: 30
+  :scale: 24
   :align: left
 
    Ridge mixing matrix
 
 Optimal Transport alignment
 ----------------------------------
-Finally this package comes with a new method that build on the Wasserstein distance which is well-suited for this problem. This is the framework of Optimal Transport that search to transport all signal from X to Y
-while minimizign the overall cost of this transport. R is here the optimal coupling between X and Y with entropic regularization.
+Finally this package comes with a new method that build on the Wasserstein distance which is well-suited for this problem. This is the framework of Optimal Transport that search to transport all signal from `X` to `Y`
+while minimizign the overall cost of this transport. `R` is here the optimal coupling between `X` and `Y` with entropic regularization.
 
 .. figure:: ../images/OT_transport.png
-   :scale: 25
+   :scale: 20
    :align: left
 
    Optimal transport alignment
 
 .. figure:: ../images/OT_mix.png
-  :scale: 30
+  :scale: 24
   :align: left
 
    Optimal transport mixing matrix
@@ -139,7 +142,9 @@ Plot the mask we will use
 >>> plotting.plot_roi(resampled_mask_visual, title='Visual regions mask extracted from atlas',
          cut_coords=(8, -80, 9), colorbar=True, cmap='Paired')
 
-.. image:: ../auto_examples/images/sphx_glr_plot_alignment_methods_benchmark_001.png
+.. figure:: ../auto_examples/images/sphx_glr_plot_alignment_methods_benchmark_001.png
+   :scale: 30
+   :align: left
 
 Define a masker
 ---------------
