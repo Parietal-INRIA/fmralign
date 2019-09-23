@@ -3,7 +3,7 @@
 ===================================================================
 
 In this tutorial, We compare various methods of alignment on a pairwise alignment \
-problem for `Individual Brain Charting < https: // project.inria.fr / IBC / >`_ subjects.\
+problem for Individual Brain Charting subjects.\
 For each subject, we have a lot of functional informations in the form of several task-based\
 contrast per subject. We will just work here on a ROI.
 
@@ -103,9 +103,10 @@ target_test = df[df.subject == 'sub-02'][df.acquisition == 'pa'].path.values
 # make a functional clustering of voxels based on train data to divide them into meaningful regions.
 import numpy as np
 n_voxels = roi_masker.mask_img_.get_data().sum()
-print(f"The chosen region of interest contains {n_voxels} voxels")
+print("The chosen region of interest contains {} voxels".format(n_voxels))
 n_pieces = np.round(n_voxels / 200)
-print(f"We will cluster them in {n_pieces} regions")
+type(n_pieces)
+print("We will cluster them in {} regions".format(n_pieces))
 
 ###############################################################################
 # Define the estimators, fit them and do a prediction
@@ -133,7 +134,7 @@ for method in methods:
     target_pred = alignment_estimator.transform(source_test)
     aligned_score = voxelwise_correlation(target_test, target_pred, roi_masker)
     display = plotting.plot_stat_map(aligned_score, display_mode="z",
-                                     cut_coords=[-15, -5], vmax=1, title=f"Correlation of prediction after {method} alignment")
+                                     cut_coords=[-15, -5], vmax=1, title="Correlation of prediction after {} alignment".format(method))
 
 #############################################################################
 # We can observe that all alignment methods perform better than identity(no alignment). \
