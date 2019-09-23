@@ -24,21 +24,19 @@ We compare various methods of alignment on a pairwise alignment problem for `Ind
 Local functional alignment
 ==================================
 Aligning images of various size is not always easy because when we search a \
-transformation for n voxels yields at least a complexity of n^2. Moreover, \
+transformation for `n` voxels yields at least a complexity of :math:`n^2`. Moreover, \
 finding just one transformation for similarity of functional signal in the whole \
 brain could create unrealistic correspondances, for example inter-hemispheric.
 
-To avoid these issues, we keep alignment local, i.e. on local and functionally meaningful regions.
-Thus, in a first step we realize a functional clustering of the voxels in the image into 'n_pieces' regions.
-Then we find local alignment on each parcel and we recompose the global matrix from these.
-
 .. figure:: ../images/alignment_pipeline.png
-   :scale: 25
-   :align: left
+   :scale: 40
+   :align: right
 
-With this technique, it is possible to find quickly sensible alignment even for full-brain images in 2mm resolution.
+To avoid these issues, we keep alignment local, i.e. on local and functionally meaningful regions. \
+Thus, in a first step we realize a functional clustering of the voxels in the image into `n_pieces` regions. \
+Then we find local alignment on each parcel and we recompose the global matrix from these. \
 
-The parcellation chosen can obviously have an impact. We recommend 'ward' to have spatially compact and reproducible clusters.
+With this technique, it is possible to find quickly sensible alignment even for full-brain images in 2mm resolution. The \ parcellation chosen can obviously have an impact. We recommend 'ward' to have spatially compact and reproducible clusters.
 
 
 Alignment methods on a region
@@ -59,7 +57,7 @@ We show below a 2D example, with 2 distributions: X in green, Y in red. Both hav
 Orthogonal alignment (Procrustes)
 ----------------------------------
 The first idea proposed in Haxby, 2011 was to compute an orthogonal mixing
-matrix R and a scaling sc such that Frobenius norm ||sc RX - Y||^2 is minimized.
+matrix R and a scaling sc such that Frobenius norm :math:`||sc RX - Y||^2` is minimized.
 
 .. figure:: ../images/Procrustes_transport.png
    :scale: 25
@@ -75,7 +73,7 @@ matrix R and a scaling sc such that Frobenius norm ||sc RX - Y||^2 is minimized.
 
 Ridge alignment
 ----------------------------------
-Another simple idea to regularize the transform R searched for is to penalize it's L2 norm. This is a ridge regression, which means we search R such that Frobenius  norm || XR - Y ||^2 + alpha * ||R||^2 is minimized with cross-validation
+Another simple idea to regularize the transform R searched for is to penalize it's L2 norm. This is a ridge regression, which means we search R such that Frobenius  norm :math:`|| XR - Y ||^2 + alpha * ||R||^2` is minimized with cross-validation.
 
 .. figure:: ../images/Ridge_transport.png
    :scale: 25
@@ -108,9 +106,9 @@ while minimizign the overall cost of this transport. R is here the optimal coupl
 
 Comparing those methods on a region of interest
 =================================================
-Now let's compare the
 
-
+Now let's compare the performance of these various methods on our simple example:
+the prediction of left-out data for a new subject from another subjects data.
 
 Loading the data
 ------------------------------
@@ -198,4 +196,10 @@ the correlation of this prediction with the real signal. We also include identit
 >>>   display = plotting.plot_stat_map(
           aligned_score, display_mode="z", cut_coords=[-15, -5], vmax=1, title=f'{aligned_score})
 
-We can observe that all alignment methods perform better than identity (no alignment)
+We can observe that all alignment methods perform better than identity (no alignment).
+As argued in our paper, both Ridge and Optimal Transport perform better
+than Scaled Orthogonal alignment. Usually Ridge yields best scores for this kind
+of metrics but for real world problem we suspect it destroys the structure of
+the signal and its specificity, because it yiels very smooth predictions.
+Our recommandation is to use scaled orthogonal for quick alignments and
+optimal transport for best alignment.
