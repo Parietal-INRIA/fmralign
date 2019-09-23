@@ -180,7 +180,7 @@ To proceed with alignment we use the class PairwiseAlignment with the masker we 
 First we choose a suitable number of regions such that each regions is approximately 200 voxels wide.
 
 >>> n_voxels = roi_masker.mask_img_.get_data().sum()
->>> n_pieces = np.round(n_voxels \ 200)
+>>> n_pieces = np.round(n_voxels / 200)
 
 Then for each method we define the estimator fit it, and predict new image. We then plot
 the correlation of this prediction with the real signal. We also include identity (no alignment) as a baseline.
