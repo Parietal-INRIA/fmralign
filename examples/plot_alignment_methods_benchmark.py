@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
-""" Alignment methods benchmark (pairwise ROI case)
+"""Alignment methods benchmark (pairwise ROI case)
 ===================================================================
 
-In this tutorial, We compare various methods of alignment on a pairwise alignment \
-problem for Individual Brain Charting subjects.\
-For each subject, we have a lot of functional informations in the form of several task-based\
+In this tutorial, we compare various methods of alignment on a pairwise alignment \
+problem for Individual Brain Charting subjects. For each subject, we have a lot \
+of functional informations in the form of several task-based \
 contrast per subject. We will just work here on a ROI.
 
 We mostly rely on python common packages and on nilearn to handle functional \
 data in a clean fashion.
-
 
 To run this example, you must launch IPython via ``ipython \
 --matplotlib`` in a terminal, or use ``jupyter-notebook``.
@@ -17,7 +16,6 @@ To run this example, you must launch IPython via ``ipython \
 .. contents:: **Contents**
     :local:
     :depth: 1
-
 """
 
 ###############################################################################
@@ -60,23 +58,23 @@ plotting.plot_roi(resampled_mask_visual, title='Visual regions mask extracted fr
 # Define a masker
 # ----------------
 # We define a nilearn masker that will be used to handle relevant data. \
-#   For more information, visit : \
-#   'http://nilearn.github.io/manipulating_images/masker_objects.html'
+# For more information, visit : \
+# 'http://nilearn.github.io/manipulating_images/masker_objects.html'
 #
 
 from nilearn.input_data import NiftiMasker
 roi_masker = NiftiMasker(mask_img=resampled_mask_visual).fit()
 
-
 ###############################################################################
 # Prepare the data
-# -------------------
+# ---------------------------------------------------------------------------
 # For each subject, for each task and conditions, our dataset contains two \
 # independent acquisitions, similar except for one acquisition parameter, the \
-# encoding phase used that was either Antero-Posterior (AP) or Postero-Anterior (PA).
-# Although this induces small differences in the final data, we will take \
-# advantage of these "duplicates" to create a training and a testing set that \
-# contains roughly the same signals but acquired totally independently.
+# encoding phase used that was either Antero-Posterior (AP) or \
+# Postero-Anterior (PA). Although this induces small differences \
+# in the final data, we will take  advantage of these pseudo-duplicates to \
+# create a training and a testing set that contains roughly the same signals \
+# but acquired totally independently.
 #
 
 # The training fold, used to learn alignment from source subject toward target:
@@ -98,14 +96,16 @@ target_test = df[df.subject == 'sub-02'][df.acquisition == 'pa'].path.values
 ###############################################################################
 # Choose the number of regions for local alignment
 # ---------------------------------------------------------------------------
-# First, as we will proceed to local alignment we choose a suitable number of regions \
-# so that each of them is approximately 200 voxels wide. Then our estimator will first \
-# make a functional clustering of voxels based on train data to divide them into meaningful regions.
+# First, as we will proceed to local alignment we choose a suitable number of \
+# regions so that each of them is approximately 200 voxels wide. Then our \
+# estimator will first make a functional clustering of voxels based on train \
+# data to divide them into meaningful regions.
+#
+
 import numpy as np
 n_voxels = roi_masker.mask_img_.get_data().sum()
 print("The chosen region of interest contains {} voxels".format(n_voxels))
 n_pieces = int(np.round(n_voxels / 200))
-
 print("We will cluster them in {} regions".format(n_pieces))
 
 ###############################################################################
@@ -113,18 +113,18 @@ print("We will cluster them in {} regions".format(n_pieces))
 # ---------------------------------------------------------------------------
 # On each region, we search for a transformation R that is either :
 #   *  orthogonal, i.e. R orthogonal, scaling sc s.t. ||sc RX - Y ||^2 is minimized
-#   *  a ridge regression : ||XR - Y||^2 + alpha *||R||^2` with a L2 penalization
-#       on the norm of R.
-#   *  the optimal transport plan, which yields the minimal transport cost while \
-#       respecting the mass conservation constraints. Calculated with entropic regularization.
+#   *  a ridge regression : ||XR - Y||^2 + alpha *||R||^2 with a L2 penalization
+#      on the norm of R.
+#   *  the optimal transport plan, which yields the minimal transport cost
+#       while respecting the mass conservation constraints. Calculated with
+#       entropic regularization.
 #   *  we also include identity (no alignment) as a baseline.
 # Then for each method we define the estimator fit it, predict the new image and plot
 # its correlation with the real signal.
-
+#
 
 from fmralign.pairwise_alignment import PairwiseAlignment
 from fmralign._utils import voxelwise_correlation
-#
 methods = ['identity', 'scaled_orthogonal', 'ridge_cv', 'optimal_transport']
 
 for method in methods:
@@ -133,13 +133,16 @@ for method in methods:
     alignment_estimator.fit(source_train, target_train)
     target_pred = alignment_estimator.transform(source_test)
     aligned_score = voxelwise_correlation(target_test, target_pred, roi_masker)
+    title = "Correlation of prediction after {} alignment".format(method)
     display = plotting.plot_stat_map(aligned_score, display_mode="z",
-                                     cut_coords=[-15, -5], vmax=1, title="Correlation of prediction after {} alignment".format(method))
+                                     cut_coords=[-15, -5], vmax=1, title=title)
 
 #############################################################################
-# We can observe that all alignment methods perform better than identity(no alignment). \
-# Ridge and Optimal Transport perform better than Scaled Orthogonal alignment. \
-# Usually Ridge yields best scores for this kind of metrics but for real world \
-# problem we suspect it destroys signal specificity, and yiels very smooth predictions. \
-# Our recommandation is to use scaled orthogonal for quick alignments and \
-# optimal transport for best alignment.
+# We can observe that all alignment methods perform better than identity \
+# (no alignment). Ridge and Optimal Transport perform better than Scaled \
+# Orthogonal alignment. Usually Ridge yields best scores for this kind of \
+# metrics but for real world problem we suspect it destroys signal specificity, \
+# and yiels very smooth predictions. \ Our recommandation is to use scaled \
+# orthogonal for quick alignments and optimal transport for best alignment.
+#
+# sphinx_gallery_thumbnail_number = 5
