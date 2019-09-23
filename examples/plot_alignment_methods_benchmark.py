@@ -41,8 +41,7 @@ files, df, mask = fetch_ibc_subjects_contrasts(
 # First, we fetch and plot the complete atlas
 #
 
-from nilearn import datasets
-from nilearn.plotting import plot_roi
+from nilearn import datasets, plotting
 from nilearn.image import resample_to_img, load_img, new_img_like
 atlas_yeo_2011 = datasets.fetch_atlas_yeo_2011()
 atlas = load_img(atlas_yeo_2011.thick_7)
@@ -102,10 +101,10 @@ target_test = df[df.subject == 'sub-02'][df.acquisition == 'pa'].path.values
 # First, as we will proceed to local alignment we choose a suitable number of regions \
 # so that each of them is approximately 200 voxels wide. Then our estimator will first \
 # make a functional clustering of voxels based on train data to divide them into meaningful regions.
-
+import numpy as np
 n_voxels = roi_masker.mask_img_.get_data().sum()
 print(f"The chosen region of interest contains {n_voxels} voxels")
-n_pieces = np.round(n_voxels \ 200)
+n_pieces = np.round(n_voxels / 200)
 print(f"We will cluster them in {n_pieces} regions")
 
 ###############################################################################
