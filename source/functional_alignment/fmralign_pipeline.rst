@@ -44,7 +44,7 @@ Alignment methods on a region
 
 As we mentionned several times, we search for a transformation, let's call it R,
 between the source subject data X and the target data Y. X and Y are arrays of
-dimensions '(n_voxels, n_samples)' where each image is a sample.
+dimensions `(n_voxels, n_samples)` where each image is a sample.
 So we can see each signal as a distribution where each voxel as a point
 in a multidimensional functional space (each dimension is a sample).
 
@@ -139,6 +139,8 @@ Plot the mask we will use
 >>> plotting.plot_roi(resampled_mask_visual, title='Visual regions mask extracted from atlas',
          cut_coords=(8, -80, 9), colorbar=True, cmap='Paired')
 
+.. image:: ../auto_examples/images/sphx_glr_plot_alignment_methods_benchmark_001.png
+
 Define a masker
 ---------------
 >>> from nilearn.input_data import NiftiMasker
@@ -178,8 +180,7 @@ To proceed with alignment we use the class PairwiseAlignment with the masker we 
 First we choose a suitable number of regions such that each regions is approximately 200 voxels wide.
 
 >>> n_voxels = roi_masker.mask_img_.get_data().sum()
->>> print(n_voxels)
->>> n_pieces = np.round(n_voxels)
+>>> n_pieces = np.round(n_voxels \ 200)
 
 Then for each method we define the estimator fit it, and predict new image. We then plot
 the correlation of this prediction with the real signal. We also include identity (no alignment) as a baseline.
@@ -193,8 +194,13 @@ the correlation of this prediction with the real signal. We also include identit
 >>>   alignment_estimator.fit(source_train, target_train)
 >>>   target_pred = alignment_estimator.transform(source_test)
 >>>   aligned_score = voxelwise_correlation(target_test, target_pred, roi_masker)
->>>   display = plotting.plot_stat_map(
-          aligned_score, display_mode="z", cut_coords=[-15, -5], vmax=1, title=f'{aligned_score})
+>>>   display = plotting.plot_stat_map(aligned_score, display_mode="z", cut_coords=[-15, -5],
+>>>         vmax=1, title=f"Correlation of prediction after {method} alignment")
+
+.. image:: ../auto_examples/images/sphx_glr_plot_alignment_methods_benchmark_002.png
+.. image:: ../auto_examples/images/sphx_glr_plot_alignment_methods_benchmark_003.png
+.. image:: ../auto_examples/images/sphx_glr_plot_alignment_methods_benchmark_004.png
+.. image:: ../auto_examples/images/sphx_glr_plot_alignment_methods_benchmark_005.png
 
 We can observe that all alignment methods perform better than identity (no alignment).
 As argued in our paper, both Ridge and Optimal Transport perform better
