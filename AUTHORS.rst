@@ -22,14 +22,6 @@ fmralign is also supported by `Digiteo <https://digiteo.fr>`_
 
 .. _citing:
 
-Citing scikit-learn
+Citing Nilearn
 --------------------
-
-A huge amount of work goes in the scikit-learn. Researchers that invest
-their time in developing and maintaining the package deserve recognition
-with citations. In addition, the Parietal team needs the citations to the
-paper in order to justify paying a software engineer on the project. To
-guarantee the future of the toolkit, if you use it, please cite it.
-
-See the scikit-learn documentation on `how to cite
-<http://scikit-learn.org/stable/about.html#citing-scikit-learn>`_.
+This package can be lightweight and efficient because it relies on great toolboxes (Nilearn, Scikit Learn). A huge amount of work goes into nilearn. In addition, the Parietal team needs the citations to the paper in order to justify paying a software engineer on the project. To guarantee the future of the toolkit, if you use it, please cite `this paper <https://hal.inria.fr/hal-01093971>`_ .
