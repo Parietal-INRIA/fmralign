@@ -47,9 +47,6 @@ release = u'0.0.1'
 
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.autosummary',
-              ('sphinx.ext.imgmath'  # only available for sphinx >= 1.4
-                  if sphinx.version_info[:2] >= (1, 4)
-                  else 'sphinx.ext.pngmath'),
               'sphinx.ext.intersphinx',
               'numpydoc.numpydoc',
               'sphinx_gallery.gen_gallery',
