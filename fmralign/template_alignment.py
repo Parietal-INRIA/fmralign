@@ -1,4 +1,4 @@
-""" Module for functional template inference using functional alignment and
+""" Module for functional template inference using functional alignment on Niimgs and
 prediction of new subjects unseen images
 """
 # Author: T. Bazeille, B. Thirion
@@ -21,8 +21,7 @@ def _rescaled_euclidean_mean(imgs, masker, scale_average=False):
     imgs: list of Niimgs
         Each img is 3D by default, but can also be 4D.
     masker: instance of NiftiMasker or MultiNiftiMasker
-        Masker to be used on the data. For more information see:
-        http://nilearn.github.io/manipulating_images/masker_objects.html
+        Masker to be used on the data.
     scale_average: boolean
         If true, the returned average is scaled to have the average norm of imgs
         If false, it will usually have a smaller norm than initial average
@@ -178,9 +177,8 @@ def _predict_from_template_and_mapping(template, test_index, mapping):
 
 class TemplateAlignment(BaseEstimator, TransformerMixin):
     """
-    Predict some new contrasts for target subject from source subjects for which
-    they are known and shared information. First summarize source subjects
-    information in a template, then use alignment and this template to predict
+    Decompose the source images into regions and summarize subjects information \
+    in a template, then use pairwise alignment to predict \
     new contrast for target subject.
     """
 
@@ -197,12 +195,12 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         ----------
         alignment_method: string
             Algorithm used to perform alignment between X_i and Y_i :
-            * either 'identity', 'scaled_orthogonal', 'ridge_cv',
-                'permutation', 'diagonal'
-            * or an instance of one of alignment classes
-                (imported from functional_alignment.alignment_methods)
+            * either 'identity', 'scaled_orthogonal', 'ridge_cv', \
+            'permutation', 'diagonal'
+            * or an instance of one of alignment classes \
+            (imported from functional_alignment.alignment_methods)
         n_pieces: int, optional (default = 1)
-            Number of regions in which the data is parcellated for alignment
+            Number of regions in which the data is parcellated for alignment.
             If 1 the alignment is done on full scale data.
             If > 1, the voxels are clustered and alignment is performed
                 on each cluster applied to X and Y.
@@ -222,49 +220,49 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             If not None, path to which the template will be saved.
         n_bags: int, optional (default = 1)
             If 1 : one estimator is fitted.
-            If > 1 number of bagged parcellations and estimators used.
-        mask: Niimg-like object, instance of NiftiMasker or MultiNiftiMasker,
-        optional (default : None)
-            Mask to be used on data. If an instance of masker is passed,
-            then its mask will be used. If no mask is given,
-            it will be computed automatically by a MultiNiftiMasker
+            If >1 number of bagged parcellations and estimators used.
+        mask: Niimg-like object, instance of NiftiMasker or \
+                                MultiNiftiMasker, optional (default = None)
+            Mask to be used on data. If an instance of masker is passed, \
+            then its mask will be used. If no mask is given, \
+            it will be computed automatically by a MultiNiftiMasker \
             with default parameters.
-        smoothing_fwhm: float, optional (default : None)
-            If smoothing_fwhm is not None, it gives the size in millimeters
+        smoothing_fwhm: float, optional (default = None)
+            If smoothing_fwhm is not None, it gives the size in millimeters \
             of the spatial smoothing to apply to the signal.
-        standardize : boolean, optional (default : None)
-            If standardize is True, the time-series are centered and normed:
+        standardize: boolean, optional (default = None)
+            If standardize is True, the time-series are centered and normed: \
             their variance is put to 1 in the time dimension.
-        detrend : boolean, optional (default : None)
-            This parameter is passed to nilearn.signal.clean.
+        detrend: boolean, optional (default = None)
+            This parameter is passed to nilearn.signal.clean. \
             Please see the related documentation for details
-        target_affine: 3x3 or 4x4 matrix, optional (default : None)
-            This parameter is passed to nilearn.image.resample_img.
+        target_affine: 3x3 or 4x4 matrix, optional (default = None)
+            This parameter is passed to nilearn.image.resample_img. \
             Please see the related documentation for details.
-        target_shape: 3-tuple of integers, optional (default : None)
-            This parameter is passed to nilearn.image.resample_img.
+        target_shape: 3-tuple of integers, optional (default = None)
+            This parameter is passed to nilearn.image.resample_img. \
             Please see the related documentation for details.
-        low_pass: None or float, optional (default : None)
-            This parameter is passed to nilearn.signal.clean.
+        low_pass: None or float, optional (default = None)
+            This parameter is passed to nilearn.signal.clean. \
             Please see the related documentation for details.
-        high_pass: None or float, optional (default : None)
-            This parameter is passed to nilearn.signal.clean.
+        high_pass: None or float, optional (default = None)
+            This parameter is passed to nilearn.signal.clean. \
             Please see the related documentation for details.
-        t_r: float, optional (default : None)
-            This parameter is passed to nilearn.signal.clean.
+        t_r: float, optional (default = None)
+            This parameter is passed to nilearn.signal.clean. \
             Please see the related documentation for details.
-        memory: instance of joblib.Memory or string (default : None)
-            Used to cache the masking process and results of algorithms.
-            By default, no caching is done. If a string is given, it is the
+        memory: instance of joblib.Memory or string (default = None)
+            Used to cache the masking process and results of algorithms. \
+            By default, no caching is done. If a string is given, it is the \
             path to the caching directory.
-        memory_level: integer, optional (default : None)
-            Rough estimator of the amount of memory used by caching.
+        memory_level: integer, optional (default = None)
+            Rough estimator of the amount of memory used by caching. \
             Higher value means more memory for caching.
         n_jobs: integer, optional (default = 1)
-            The number of CPUs to use to do the computation. -1 means
+            The number of CPUs to use to do the computation. -1 means \
             'all CPUs', -2 'all CPUs but one', and so on.
-        parallel_backend: str, ParallelBackendBase instance, None (default: 'threading')
-            Specify the parallelization backend implementation. For more
+        parallel_backend: str, ParallelBackendBase instance, None (default = 'threading')
+            Specify the parallelization backend implementation. For more \
             informations see joblib.Parallel documentation
         verbose: integer, optional (default = 0)
             Indicate the level of verbosity. By default, nothing is printed.
@@ -295,13 +293,12 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
 
     def fit(self, imgs):
         """
-        Learn a template from images, using alignment.
+        Learn a template from source images, using alignment.
 
         Parameters
         ----------
         imgs: List of Niimg-like objects
-           See http://nilearn.github.io/manipulating_images/input_output.html
-           source data. Every img must have the same length (number of sample)
+            Source subjects data. Every img must have the same length (number of samples).
 
         Returns
         -------
@@ -339,30 +336,26 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         Parameters
         ----------
         imgs: List of 3D Niimg-like objects
-           See http://nilearn.github.io/manipulating_images/input_output.html
-           source data. Every img must have length (number of sample)
-           train_index.
-        train_index : list of ints
+            Target subjects known data. Every img must have length (number of sample) train_index.
+        train_index: list of ints
             Indexes of the 3D samples used to map each img to the template.
             Every index should be smaller than the number of images in the template.
-        test_index : list of ints
+        test_index: list of ints
             Indexes of the 3D samples to predict from the template and the mapping.
             Every index should be smaller than the number of images in the template.
 
 
         Returns
         -------
-        predicted_imgs: Niimg-like object
-           See http://nilearn.github.io/manipulating_images/input_output.html
-           predicted data
-           List of 3D images, each of them has the same length as the list test_index
+        predicted_imgs: List of 3D Niimg-like objects
+            Target subjects predicted data. Each Niimg has the same length as the list test_index
 
         """
         template_length = self.template.shape[-1]
         if not (all(i < template_length for i in test_index) and all(
                 i < template_length for i in train_index)):
             raise ValueError(
-                ("Template has {} images but you provided a greater index in train_index or test_index.").format(template_length))
+                f"Template has {template_length} images but you provided a greater index in train_index or test_index.")
 
         fitted_mappings = Parallel(self.n_jobs, backend=self.parallel_backend,
                                    verbose=self.verbose)(
@@ -380,3 +373,10 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             (self.template, test_index, mapping) for mapping in fitted_mappings
         )
         return predicted_imgs
+
+    # Make inherited function harmless
+    def fit_transform(self):
+        """Parent method not applicable here. Will raise AttributeError if called.
+        """
+        raise AttributeError(
+            "type object 'PairwiseAlignment' has no attribute 'fit_transform'")

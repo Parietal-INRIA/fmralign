@@ -30,28 +30,28 @@ _FMRALIGN_INSTALL_MSG = 'See %s for installation information.' % (
 #   in some meaningful order (more => less 'core').
 REQUIRED_MODULE_METADATA = (
     ('numpy', {
-        'min_version': '1.11',
+        'min_version': '1.16.2',
         'required_at_installation': True,
         'install_info': _FMRALIGN_INSTALL_MSG}),
     ('scipy', {
-        'min_version': '0.17',
+        'min_version': '1.2.2',
         'required_at_installation': True,
         'install_info': _FMRALIGN_INSTALL_MSG}),
     ('sklearn', {
         'pypi_name': 'scikit-learn',
         'required_at_installation': True,
-        'min_version': '0.18',
+        'min_version': '0.20',
         'install_info': _FMRALIGN_INSTALL_MSG}),
     ('nibabel', {
-        'min_version': '2.0.2',
+        'min_version': '2.5.0',
         'required_at_installation': True,
         'install_info': _FMRALIGN_INSTALL_MSG}),
     ('nilearn', {
-        'min_version': '0.4',
+        'min_version': '0.5.2',
         'required_at_installation': True,
         'install_info': _FMRALIGN_INSTALL_MSG}),
     ('matplotlib', {
-        'min_version': '1.5.0',
+        'min_version': '3.1.1',
         'required_at_installation': True,
         'install_info': _FMRALIGN_INSTALL_MSG}),
     ('POT', {

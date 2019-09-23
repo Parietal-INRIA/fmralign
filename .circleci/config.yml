@@ -23,9 +23,16 @@ jobs:
       - run: echo 'export PATH="$HOME/miniconda3/bin:$PATH"' >> $BASH_ENV
       - run: |
           source activate testenv
-          conda install --no-update-deps pot nilearn -c conda-forge -yq
+          conda install --no-update-deps pot nilearn sphinx numpydoc sphinx-gallery -c conda-forge -yq
           pip install .
           set -o pipefail && pytest 2>&1 | tee log.txt
+      - run: |
+          source activate testenv
+          pwd
+          ls
+          set -o pipefail && make html 2>&1 | tee log.txt
+      - store_artifacts:
+          path: build/html
       - save_cache:
           key: v3-packages
           paths:
