@@ -34,7 +34,7 @@ finding just one transformation for similarity of functional signal in the whole
 brain could create unrealistic correspondances, for example inter-hemispheric.
 
 To avoid these issues, we keep alignment local, i.e. on local and functionally meaningful regions. \
-Thus, in a first step we realize a functional clustering of the voxels in the image into `n_pieces` regions. \
+Thus, in a first step cluster the voxels in the image into `n_pieces` regions, based on functional information. \
 Then we find local alignment on each parcel and we recompose the global matrix from these. \
 
 With this technique, it is possible to find quickly sensible alignment even for full-brain images in 2mm resolution. The \ parcellation chosen can obviously have an impact. We recommend 'ward' to have spatially compact and reproducible clusters.
@@ -135,7 +135,7 @@ Select visual cortex, create a mask and resample it to the right resolution
 >>> resampled_mask_visual = resample_to_img(
     mask_visual, mask, interpolation="nearest")
 
-Plot the mask we will use
+Plot the mask we  use
 
 >>> plotting.plot_roi(resampled_mask_visual, title='Visual regions mask extracted from atlas',
          cut_coords=(8, -80, 9), colorbar=True, cmap='Paired')
@@ -157,7 +157,7 @@ independent acquisitions, similar except for one acquisition parameter, the \
 encoding phase used that was either Antero-Posterior (AP) or Postero-Anterior (PA).
 Although this induces small differences in the final data, we will take \
 advantage of these "duplicates" to create a training and a testing set that \
-contains roughly the same signals but acquired totally independently.
+contains roughly the same signals but acquired independently.
 
 
 The training fold, used to learn alignment from source subject toward target:
@@ -168,7 +168,7 @@ The training fold, used to learn alignment from source subject toward target:
 >>> target_train = df[df.subject == 'sub-02'][df.acquisition == 'ap'].path.values
 
 The testing fold:
-  * source test: PA contrasts for subject one, used to predict \
+  * source test: PA contrasts for subject 'sub-01', used to predict \
     the corresponding contrasts of subject 'sub-02'
   * target test: PA contrasts for subject 'sub-02', used as a ground truth \
     to score our predictions
