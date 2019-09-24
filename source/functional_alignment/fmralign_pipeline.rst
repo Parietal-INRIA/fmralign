@@ -168,7 +168,7 @@ The training fold, used to learn alignment from source subject toward target:
 >>> target_train = df[df.subject == 'sub-02'][df.acquisition == 'ap'].path.values
 
 The testing fold:
-  * source test: PA contrasts for subject one, used to predict \
+ * source test: PA contrasts for subject 'sub-01', used to predict \
     the corresponding contrasts of subject two
   * target test: PA contrasts for subject two, used as a ground truth \
     to score our predictions
