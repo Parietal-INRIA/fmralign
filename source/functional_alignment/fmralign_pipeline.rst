@@ -135,7 +135,7 @@ Select visual cortex, create a mask and resample it to the right resolution
 >>> resampled_mask_visual = resample_to_img(
     mask_visual, mask, interpolation="nearest")
 
-Plot the mask we will use
+Plot the mask we  use
 
 >>> plotting.plot_roi(resampled_mask_visual, title='Visual regions mask extracted from atlas',
          cut_coords=(8, -80, 9), colorbar=True, cmap='Paired')
