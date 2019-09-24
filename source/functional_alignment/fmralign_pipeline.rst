@@ -161,16 +161,16 @@ contains roughly the same signals but acquired totally independently.
 
 
 The training fold, used to learn alignment from source subject toward target:
-  * source train: AP contrasts for subject one
-  * target train: AP contrasts for subject two
+  * source train: AP contrasts for subject 'sub-01'
+  * target train: AP contrasts for subject 'sub-02'
 
 >>> source_train = df[df.subject == 'sub-01'][df.acquisition == 'ap'].path.values
 >>> target_train = df[df.subject == 'sub-02'][df.acquisition == 'ap'].path.values
 
 The testing fold:
   * source test: PA contrasts for subject one, used to predict \
-    the corresponding contrasts of subject two
-  * target test: PA contrasts for subject two, used as a ground truth \
+    the corresponding contrasts of subject 'sub-02'
+  * target test: PA contrasts for subject 'sub-02', used as a ground truth \
     to score our predictions
 
 >>> source_test = df[df.subject == 'sub-01'][df.acquisition == 'pa'].path.values
