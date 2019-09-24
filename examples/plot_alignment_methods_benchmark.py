@@ -138,11 +138,10 @@ for method in methods:
                                      cut_coords=[-15, -5], vmax=1, title=title)
 
 #############################################################################
-# We can observe that all alignment methods perform better than identity \
-# (no alignment). Ridge and Optimal Transport perform better than Scaled \
-# Orthogonal alignment. Usually Ridge yields best scores for this kind of \
-# metrics but for real world problem we suspect it destroys signal specificity, \
-# and yiels very smooth predictions. \ Our recommandation is to use scaled \
-# orthogonal for quick alignments and optimal transport for best alignment.
+# We can observe that all alignment methods perform better than identity  \
+# (no alignment). Ridge is the best performing method, followed by Optimal \
+# Transport. If you use Ridge though, be careful about the smooth predictions \
+# it yields.
 #
+
 # sphinx_gallery_thumbnail_number = 5
