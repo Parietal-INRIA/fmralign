@@ -4,22 +4,16 @@
 Functional alignment pipeline
 =======================================
 
-As seen in :ref:functional_alignment_intro, functional alignment search for a transform \
+As seen in the :ref:`previous section <functional_alignment_intro.rst>`, functional alignment search for a transform \
 between images of two or several subjects in order to match voxels which have \
 similar profile of activation. This section explains how this transform
 is found in fmralign to make the process easy, efficient and scalable.
 
 We compare various methods of alignment on a pairwise alignment problem for `Individual Brain Charting <https://project.inria.fr/IBC/>`_ subjects. For each subject, we have a lot of functional informations in the form of several task-based contrast per subject. We will just work here on a ROI.
 
-.. topic:: **Full code example**
-   The documentation here just gives the big idea. A full code example can be found on
-   :ref:`sphx_glr_auto_examples_plot_pairwise_alignment.py`. If you want to work on a
-   Region Of Interest see :ref:`sphx_glr_auto_examples_plot_pairwise_roi_alignment.py`.
-
 .. contents:: **Contents**
     :local:
     :depth: 1
-
 
 Local functional alignment
 ==================================
@@ -43,6 +37,11 @@ With this technique, it is possible to find quickly sensible alignment even for 
 Alignment methods on a region
 ==================================
 
+.. topic:: **Full code example on 2D simulated data**
+
+    All the figures in this section were generated from a dedicated example:
+    :ref:`sphx_glr_auto_examples_plot_alignment_simulated_2D_data.py`.
+
 As we mentionned several times, we search for a transformation, let's call it `R`,
 between the source subject data `X` and the target data `Y`. `X` and `Y` are arrays of
 dimensions `(n_voxels, n_samples)` where each image is a sample.
@@ -51,8 +50,7 @@ in a multidimensional functional space (each dimension is a sample).
 
 We show below a 2D example, with 2 distributions: `X` in green, `Y` in red. Both have 20 voxels (points) characterized by 2 samples (images). And the alignment we search for is the matching of both distibutions, optimally in some sense.
 
-.. figure:: ../images/Source_distributions.png
-   :scale: 20
+.. figure:: ../auto_examples/images/sphx_glr_plot_alignment_simulated_2D_data_001.png
    :align: left
 
 Orthogonal alignment (Procrustes)
@@ -60,53 +58,42 @@ Orthogonal alignment (Procrustes)
 The first idea proposed in Haxby, 2011 was to compute an orthogonal mixing
 matrix `R` and a scaling `sc` such that Frobenius norm :math:`||sc RX - Y||^2` is minimized.
 
-.. figure:: ../images/Procrustes_transport.png
-   :scale: 20
+.. figure:: ../auto_examples/images/sphx_glr_plot_alignment_simulated_2D_data_003.png
    :align: left
 
-   Orthogonal alignment
-
-.. figure:: ../images/Procrustes_mix.png
-   :scale: 24
+.. figure:: ../auto_examples/images/sphx_glr_plot_alignment_simulated_2D_data_004.png
    :align: left
-
-   Orthogonal mixing matrix
 
 Ridge alignment
 ----------------------------------
 Another simple idea to regularize the transform `R` searched for is to penalize it's L2 norm. This is a ridge regression, which means we search `R` such that Frobenius  norm :math:`|| XR - Y ||^2 + alpha * ||R||^2` is minimized with cross-validation.
 
-.. figure:: ../images/Ridge_transport.png
-   :scale: 20
+.. figure:: ../auto_examples/images/sphx_glr_plot_alignment_simulated_2D_data_005.png
    :align: left
 
-   Ridge alignment
+.. figure:: ../auto_examples/images/sphx_glr_plot_alignment_simulated_2D_data_006.png
+   :align: left
 
-.. figure:: ../images/Ridge_mix.png
-  :scale: 24
-  :align: left
-
-   Ridge mixing matrix
 
 Optimal Transport alignment
 ----------------------------------
 Finally this package comes with a new method that build on the Wasserstein distance which is well-suited for this problem. This is the framework of Optimal Transport that search to transport all signal from `X` to `Y`
 while minimizign the overall cost of this transport. `R` is here the optimal coupling between `X` and `Y` with entropic regularization.
 
-.. figure:: ../images/OT_transport.png
-   :scale: 20
+.. figure:: ../auto_examples/images/sphx_glr_plot_alignment_simulated_2D_data_007.png
    :align: left
 
-   Optimal transport alignment
-
-.. figure:: ../images/OT_mix.png
-  :scale: 24
+.. figure:: ../auto_examples/images/sphx_glr_plot_alignment_simulated_2D_data_008.png
   :align: left
 
-   Optimal transport mixing matrix
 
 Comparing those methods on a region of interest
 =================================================
+
+.. topic:: **Full code example**
+
+    The full code example of this section is :
+    :ref:`sphx_glr_auto_examples_plot_alignment_methods_benchmark.py`.
 
 Now let's compare the performance of these various methods on our simple example:
 the prediction of left-out data for a new subject from another subjects data.
