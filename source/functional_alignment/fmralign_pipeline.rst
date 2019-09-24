@@ -206,9 +206,5 @@ the correlation of this prediction with the real signal. We also include identit
 .. image:: ../auto_examples/images/sphx_glr_plot_alignment_methods_benchmark_005.png
 
 We can observe that all alignment methods perform better than identity (no alignment).
-As argued in our paper, both Ridge and Optimal Transport perform better
-than Scaled Orthogonal alignment. Usually Ridge yields best scores for this kind
-of metrics but for real world problem we suspect it destroys the structure of
-the signal and its specificity, because it yiels very smooth predictions.
-Our recommandation is to use scaled orthogonal for quick alignments and
-optimal transport for best alignment.
+Ridge is the best performing method, followed by Optimal Transport. If you use
+Ridge though, be careful about the smooth predictions it yields.
