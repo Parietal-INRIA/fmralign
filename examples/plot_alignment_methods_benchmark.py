@@ -77,7 +77,7 @@ roi_masker = NiftiMasker(mask_img=resampled_mask_visual).fit()
 # but acquired totally independently.
 #
 
-# The training fold, used to learn alignment from source subject toward target:
+# The training set, used to learn alignment from source subject toward target:
 # * source train: AP contrasts for subject one
 # * target train: AP contrasts for subject two
 
