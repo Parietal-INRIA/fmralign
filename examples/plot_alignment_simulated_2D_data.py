@@ -107,7 +107,7 @@ def _plot_distributions_and_alignment(X, Y, R=None, thr=.1, title=None, tick_par
 # First we generate a distribution that possess some geometrical information, \
 # a S shape. Here the dimension of our distributions will `(n_points, 2)` \
 # since we want to be able to plot each voxel in a point. In real cases \
-# however we have tens or hundreds of images that characterize each point.
+# however we have tens or hundreds of observations that characterize each point.
 #
 
 
