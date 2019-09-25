@@ -84,7 +84,7 @@ roi_masker = NiftiMasker(mask_img=resampled_mask_visual).fit()
 source_train = df[df.subject == 'sub-01'][df.acquisition == 'ap'].path.values
 target_train = df[df.subject == 'sub-02'][df.acquisition == 'ap'].path.values
 
-# The testing fold:
+# The testing set:
 # * source test: PA contrasts for subject one, used to predict \
 #   the corresponding contrasts of subject two
 # * target test: PA contrasts for subject two, used as a ground truth \
