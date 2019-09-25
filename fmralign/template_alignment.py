@@ -9,7 +9,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 import numpy as np
 from joblib import Parallel, delayed
 from sklearn.externals.joblib import Memory
-from nilearn.image import index_img
+from nilearn.image import index_img, concat_imgs
 from nilearn.input_data.masker_validation import check_embedded_nifti_masker
 from fmralign.pairwise_alignment import PairwiseAlignment
 
