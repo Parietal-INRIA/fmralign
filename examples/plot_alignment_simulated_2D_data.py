@@ -166,7 +166,7 @@ _plot_mixing_matrix(R=scaled_orthogonal_alignment.R.T,
 # Ridge alignment
 # ---------------
 # Another simple idea to regularize the transform `R` searched for is to \
-# penalize it's L2 norm. This is a ridge regression, which means we search `R` \
+# penalize its L2 norm. This is a ridge regression, which means we search `R` \
 # such that Frobenius  norm :math:`|| XR - Y ||^2 + alpha * ||R||^2` \
 # is minimized with cross-validation.
 #
