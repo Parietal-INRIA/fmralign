@@ -74,7 +74,7 @@ roi_masker = NiftiMasker(mask_img=resampled_mask_visual).fit()
 # Postero-Anterior (PA). Although this induces small differences \
 # in the final data, we will take  advantage of these pseudo-duplicates to \
 # create a training and a testing set that contains roughly the same signals \
-# but acquired totally independently.
+# but acquired independently.
 #
 
 # The training set, used to learn alignment from source subject toward target:
