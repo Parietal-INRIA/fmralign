@@ -291,8 +291,9 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
 
         Parameters
         ----------
-        imgs: List of Niimg-like objects
-            Source subjects data. Every img must have the same length (number of samples).
+        imgs: List of 4D Niimg-like or List of lists of 3D Niimg-like
+            Source subjects data. Each element of the parent list is one subject
+            data, and all must have the same length (n_samples).
 
         Returns
         -------
@@ -300,12 +301,23 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
 
         Attributes
         ----------
-        self.template: 4D Niimg object of same shape as one img.
+        self.template: 4D Niimg object
+            Length : n_samples
 
         """
+        # Check if the input is a list, if list of lists, concatenate each subjects
+        # data into one unique image.
+        if not isinstance(imgs, (list, np.ndarray)) or len(imgs) < 2:
+            raise InputError('The method TemplateAlignment.fit() need a list input. \
+                             Each element of the list (Niimg-like or list of Niimgs) \
+                             is the data for one subject.')
+        else:
+            if isinstance(imgs[0], (list, np.ndarray)):
+                imgs = [concat_imgs(img) for img in imgs]
+
         self.masker_ = check_embedded_nifti_masker(self)
         self.masker_.n_jobs = self.n_jobs  # self.n_jobs
-        # Avoid warning with imgs != None
+
         # if masker_ has been provided a mask_img
         if self.masker_.mask_img is None:
             self.masker_.fit(imgs)
