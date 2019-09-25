@@ -2,18 +2,18 @@
 """Alignment on simulated 2D data
 ===================================================================
 
-As we mentionned several times, we search for a transformation, let's call it \
-`R`, between the source subject data `X` and the target data `Y`. `X` and `Y` \
-are arrays of dimensions `(n_voxels, n_samples)` where each image is a sample. \
-So we can see each signal as a distribution where each voxel as a point \
+As we mentionned several times, we search for a transformation, let's call it
+`R`, between the source subject data `X` and the target data `Y`. `X` and `Y`
+are arrays of dimensions `(n_voxels, n_samples)` where each image is a sample.
+So we can see each signal as a distribution where each voxel as a point
 in a multidimensional functional space (each dimension is a sample).
 
-We show below a 2D example, with 2 distributions: `X` in green, `Y` in red. \
-Both have 20 voxels (points) characterized by 2 samples (images). And the \
-alignment we search for is the matching of both distibutions, optimally in \
+We show below a 2D example, with 2 distributions: `X` in green, `Y` in red.
+Both have 20 voxels (points) characterized by 2 samples (images). And the
+alignment we search for is the matching of both distibutions, optimally in
 some sense.
 
-To run this example, you must launch IPython via ``ipython \
+To run this example, you must launch IPython via ``ipython
 --matplotlib`` in a terminal, or use ``jupyter-notebook``.
 
 .. contents:: **Contents**
@@ -24,7 +24,7 @@ To run this example, you must launch IPython via ``ipython \
 
 ###############################################################################
 # Defining utility functions
-# -----------------------------
+# --------------------------
 # In this example we will do a lot of plotting so we first define :
 #   * _rotate to do a 2D rotation for a point from an origin
 #   * _plot_mixing_matrix to plot 2D alignment matrix as pretty tables
@@ -103,10 +103,10 @@ def _plot_distributions_and_alignment(X, Y, R=None, thr=.1, title=None, tick_par
 
 ###############################################################################
 # Create a sample distribution
-# ------------------------------
-# First we generate a distribution that possess some geometrical information, \
-# a S shape. Here the dimension of our distributions will `(n_points, 2)` \
-# since we want to be able to plot each voxel in a point. In real cases \
+# ----------------------------
+# First we generate a distribution that possess some geometrical information,
+# a S shape. Here the dimension of our distributions will `(n_points, 2)`
+# since we want to be able to plot each voxel in a point. In real cases
 # however we have tens or hundreds of observations that characterize each point.
 #
 
@@ -138,10 +138,10 @@ _plot_distributions_and_alignment(
 
 ###############################################################################
 # Alignment : finding the right transform
-# ----------------------------------------
-# The source and target distributions we created are not well matched. The \
-# idea of alignment is to find a transform, let's call it `R`, between the \
-# source `X` and the target `Y` that will handle that. Now we will showcase \
+# ---------------------------------------
+# The source and target distributions we created are not well matched. The
+# idea of alignment is to find a transform, let's call it `R`, between the
+# source `X` and the target `Y` that will handle that. Now we will showcase
 # on our simple 2D example different kind of transformation we can look for.
 #
 
@@ -165,9 +165,9 @@ _plot_mixing_matrix(R=scaled_orthogonal_alignment.R.T,
 ###############################################################################
 # Ridge alignment
 # ---------------
-# Another simple idea to regularize the transform `R` searched for is to \
-# penalize its L2 norm. This is a ridge regression, which means we search `R` \
-# such that Frobenius  norm :math:`|| XR - Y ||^2 + alpha * ||R||^2` \
+# Another simple idea to regularize the transform `R` searched for is to
+# penalize its L2 norm. This is a ridge regression, which means we search `R`
+# such that Frobenius  norm :math:`|| XR - Y ||^2 + alpha * ||R||^2`
 # is minimized with cross-validation.
 #
 
@@ -178,14 +178,15 @@ _plot_distributions_and_alignment(
 _plot_mixing_matrix(R=ridge_alignment.R.coef_, title='Ridge coefficients')
 ###############################################################################
 # Optimal Transport alignment
-# ----------------------------
-# Finally this package comes with a new method that build on the Wasserstein \
-# distance which is well-suited for this problem. This is the framework of \
-# Optimal Transport that search to transport all signal from `X` to `Y` \
-# while minimizing the overall cost of this transport. `R` is here the \
+# ---------------------------
+# Finally this package comes with a new method that build on the Wasserstein
+# distance which is well-suited for this problem. This is the framework of
+# Optimal Transport that search to transport all signal from `X` to `Y`
+# while minimizing the overall cost of this transport. `R` is here the
 # optimal coupling between `X` and `Y` with entropic regularization.
-# This way of finding a transform uses more geometrical information from the \
+# This way of finding a transform uses more geometrical information from the
 # distributions.
+#
 
 ot_alignment = OptimalTransportAlignment(reg=.1)
 ot_alignment.fit(X.T, Y.T)

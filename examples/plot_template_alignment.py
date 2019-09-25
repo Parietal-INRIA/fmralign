@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 """Template-based prediction
-==========================================================================================
+================================================================================
 
-In this tutorial, we show how to better predict new contrasts for a target \
-subject using many source subjects corresponding contrasts. For this purpose, \
-we create a template to which we align the target subject, using shared information. \
+In this tutorial, we show how to better predict new contrasts for a target
+subject using many source subjects corresponding contrasts. For this purpose,
+we create a template to which we align the target subject, using shared information.
 We then predict new images for the target and compare them to a baseline.
 
-We mostly rely on Python common packages and on nilearn to handle \
+We mostly rely on Python common packages and on nilearn to handle
 functional data in a clean fashion.
 
 
-To run this example, you must launch IPython via ``ipython \
+To run this example, you must launch IPython via ``ipython
 --matplotlib`` in a terminal, or use ``jupyter-notebook``.
 
 .. contents:: **Contents**
@@ -22,10 +22,10 @@ To run this example, you must launch IPython via ``ipython \
 
 ###############################################################################
 # Retrieve the data
-# ------------------
-# In this example we use the IBC dataset, which includes a large number of \
-# different contrasts maps for 12 subjects. \
-# We download the images for subjects sub-01, sub-02, sub-04, sub-05, sub-06 \
+# -----------------
+# In this example we use the IBC dataset, which includes a large number of
+# different contrasts maps for 12 subjects.
+# We download the images for subjects sub-01, sub-02, sub-04, sub-05, sub-06
 # and sub-07 (or retrieve them if they were already downloaded).
 # imgs is the list of paths to available statistical images for each subjects.
 # df is a dataframe with metadata about each of them.
@@ -39,8 +39,8 @@ imgs, df, mask_img = fetch_ibc_subjects_contrasts(
 ###############################################################################
 # Definine a masker
 # -----------------
-# We define a nilearn masker that will be used to handle relevant data. \
-#   For more information, visit : \
+# We define a nilearn masker that will be used to handle relevant data.
+#   For more information, visit :
 #   'http://nilearn.github.io/manipulating_images/masker_objects.html'
 #
 
@@ -49,9 +49,9 @@ masker = NiftiMasker(mask_img=mask_img).fit()
 
 ###############################################################################
 # Prepare the data
-# -----------------
-# For each subject, we will use two series of contrasts acquired during \
-# two independent sessions with a different phase encoding: \
+# ----------------
+# For each subject, we will use two series of contrasts acquired during
+# two independent sessions with a different phase encoding:
 # Antero-posterior(AP) or Postero-anterior(PA).
 #
 
@@ -73,10 +73,10 @@ target_train = df[df.subject == 'sub-07'][df.acquisition == 'ap'].path.values
 target_train = concat_imgs(target_train)
 target_test = df[df.subject == 'sub-07'][df.acquisition == 'pa'].path.values
 
-#############################################################################
+###############################################################################
 # Compute a baseline (average of subjects)
 # ----------------------------------------
-# We create an image with as many contrasts as any subject representing for \
+# We create an image with as many contrasts as any subject representing for
 # each contrast the average of all train subjects maps.
 #
 
@@ -86,7 +86,7 @@ masked_imgs = [masker.transform(img) for img in template_train]
 average_img = np.mean(masked_imgs, axis=0)
 average_subject = masker.inverse_transform(average_img)
 
-#############################################################################
+###############################################################################
 # Create a template from the training subjects.
 # ---------------------------------------------
 # We define an estimator using the class TemplateAlignment:
@@ -105,13 +105,13 @@ template_estim = TemplateAlignment(
     n_pieces=150, alignment_method='ridge_cv', mask=masker)
 template_estim.fit(template_train)
 
-#############################################################################
+###############################################################################
 # Predict new data for left-out subject
 # -------------------------------------
-# We use target_train data to fit the transform, indicating it corresponds to \
-# the contrasts indexed by train_index and predict from this learnt alignment \
+# We use target_train data to fit the transform, indicating it corresponds to
+# the contrasts indexed by train_index and predict from this learnt alignment
 # contrasts corresponding to template test_index numbers.
-# For each train subject and for the template, the AP contrasts are sorted from \
+# For each train subject and for the template, the AP contrasts are sorted from
 # 0, to 53, and then the PA contrasts from 53 to 106.
 #
 
@@ -128,12 +128,12 @@ prediction_from_template = template_estim.transform([target_train], train_index,
 
 prediction_from_average = index_img(average_subject, test_index)
 
-#############################################################################
+###############################################################################
 # Score the baseline and the prediction
 # -------------------------------------
-# We use a utility scoring function to measure the voxelwise correlation \
-# between the prediction and the ground truth. That is, for each voxel, we \
-# measure the correlation between its profile of activation without and with \
+# We use a utility scoring function to measure the voxelwise correlation
+# between the prediction and the ground truth. That is, for each voxel, we
+# measure the correlation between its profile of activation without and with
 # alignment, to see if alignment was able to predict a signal more alike the ground truth.
 #
 
@@ -147,7 +147,7 @@ average_score = voxelwise_correlation(
 template_score = voxelwise_correlation(
     target_test, prediction_from_template[0], masker)
 
-#############################################################################
+###############################################################################
 # Plotting the measures
 # ---------------------
 # Finally we plot both scores
@@ -163,8 +163,8 @@ display = plotting.plot_stat_map(
 display.title(
     "Template-based prediction correlation wt ground truth")
 
-#############################################################################
-# We observe that creating a template and aligning a new subject to it yields \
-# a prediction that is better correlated with the ground truth than just using \
+###############################################################################
+# We observe that creating a template and aligning a new subject to it yields
+# a prediction that is better correlated with the ground truth than just using
 # the average activations of subjects.
 #

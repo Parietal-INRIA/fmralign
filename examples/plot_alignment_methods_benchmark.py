@@ -2,15 +2,15 @@
 """Alignment methods benchmark (pairwise ROI case)
 ===================================================================
 
-In this tutorial, we compare various methods of alignment on a pairwise alignment \
-problem for Individual Brain Charting subjects. For each subject, we have a lot \
-of functional informations in the form of several task-based \
+In this tutorial, we compare various methods of alignment on a pairwise alignment
+problem for Individual Brain Charting subjects. For each subject, we have a lot
+of functional informations in the form of several task-based
 contrast per subject. We will just work here on a ROI.
 
-We mostly rely on python common packages and on nilearn to handle functional \
+We mostly rely on python common packages and on nilearn to handle functional
 data in a clean fashion.
 
-To run this example, you must launch IPython via ``ipython \
+To run this example, you must launch IPython via ``ipython
 --matplotlib`` in a terminal, or use ``jupyter-notebook``.
 
 .. contents:: **Contents**
@@ -20,9 +20,9 @@ To run this example, you must launch IPython via ``ipython \
 
 ###############################################################################
 #  Retrieve the data
-# ---------------------
-# In this example we use the IBC dataset, which include a large number of \
-# different contrasts maps for 12 subjects. \
+# ------------------
+# In this example we use the IBC dataset, which include a large number of
+# different contrasts maps for 12 subjects.
 # We download the images for subjects sub-01 and sub-02.
 # Files is the list of paths for each subjects.
 # df is a dataframe with metadata about each of them.
@@ -35,7 +35,7 @@ files, df, mask = fetch_ibc_subjects_contrasts(
 
 ###############################################################################
 # Extract a mask for the visual cortex from Yeo Atlas
-# ----------------------------------------------------
+# ---------------------------------------------------
 # First, we fetch and plot the complete atlas
 #
 
@@ -56,9 +56,9 @@ plotting.plot_roi(resampled_mask_visual, title='Visual regions mask extracted fr
 
 ###############################################################################
 # Define a masker
-# ----------------
-# We define a nilearn masker that will be used to handle relevant data. \
-# For more information, visit : \
+# ---------------
+# We define a nilearn masker that will be used to handle relevant data.
+# For more information, visit :
 # 'http://nilearn.github.io/manipulating_images/masker_objects.html'
 #
 
@@ -67,13 +67,13 @@ roi_masker = NiftiMasker(mask_img=resampled_mask_visual).fit()
 
 ###############################################################################
 # Prepare the data
-# ---------------------------------------------------------------------------
-# For each subject, for each task and conditions, our dataset contains two \
-# independent acquisitions, similar except for one acquisition parameter, the \
-# encoding phase used that was either Antero-Posterior (AP) or \
-# Postero-Anterior (PA). Although this induces small differences \
-# in the final data, we will take  advantage of these pseudo-duplicates to \
-# create a training and a testing set that contains roughly the same signals \
+# ----------------
+# For each subject, for each task and conditions, our dataset contains two
+# independent acquisitions, similar except for one acquisition parameter, the
+# encoding phase used that was either Antero-Posterior (AP) or
+# Postero-Anterior (PA). Although this induces small differences
+# in the final data, we will take  advantage of these pseudo-duplicates to
+# create a training and a testing set that contains roughly the same signals
 # but acquired independently.
 #
 
@@ -85,9 +85,9 @@ source_train = df[df.subject == 'sub-01'][df.acquisition == 'ap'].path.values
 target_train = df[df.subject == 'sub-02'][df.acquisition == 'ap'].path.values
 
 # The testing set:
-# * source test: PA contrasts for subject one, used to predict \
+# * source test: PA contrasts for subject one, used to predict
 #   the corresponding contrasts of subject sub-01
-# * target test: PA contrasts for subject sub-02, used as a ground truth \
+# * target test: PA contrasts for subject sub-02, used as a ground truth
 #   to score our predictions
 
 source_test = df[df.subject == 'sub-01'][df.acquisition == 'pa'].path.values
@@ -95,10 +95,10 @@ target_test = df[df.subject == 'sub-02'][df.acquisition == 'pa'].path.values
 
 ###############################################################################
 # Choose the number of regions for local alignment
-# ---------------------------------------------------------------------------
-# First, as we will proceed to local alignment we choose a suitable number of \
-# regions so that each of them is approximately 200 voxels wide. Then our \
-# estimator will first make a functional clustering of voxels based on train \
+# ------------------------------------------------
+# First, as we will proceed to local alignment we choose a suitable number of
+# regions so that each of them is approximately 200 voxels wide. Then our
+# estimator will first make a functional clustering of voxels based on train
 # data to divide them into meaningful regions.
 #
 
@@ -110,7 +110,7 @@ print("We will cluster them in {} regions".format(n_pieces))
 
 ###############################################################################
 # Define the estimators, fit them and do a prediction
-# ---------------------------------------------------------------------------
+# ---------------------------------------------------
 # On each region, we search for a transformation R that is either :
 #   *  orthogonal, i.e. R orthogonal, scaling sc s.t. ||sc RX - Y ||^2 is minimized
 #   *  a ridge regression : ||XR - Y||^2 + alpha *||R||^2 with a L2 penalization
@@ -137,10 +137,10 @@ for method in methods:
     display = plotting.plot_stat_map(aligned_score, display_mode="z",
                                      cut_coords=[-15, -5], vmax=1, title=title)
 
-#############################################################################
-# We can observe that all alignment methods perform better than identity  \
-# (no alignment). Ridge is the best performing method, followed by Optimal \
-# Transport. If you use Ridge though, be careful about the smooth predictions \
+###############################################################################
+# We can observe that all alignment methods perform better than identity
+# (no alignment). Ridge is the best performing method, followed by Optimal
+# Transport. If you use Ridge though, be careful about the smooth predictions
 # it yields.
 #
 
