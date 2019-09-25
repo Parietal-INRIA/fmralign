@@ -79,7 +79,7 @@ roi_masker = NiftiMasker(mask_img=resampled_mask_visual).fit()
 
 # The training set, used to learn alignment from source subject toward target:
 # * source train: AP contrasts for subject sub-01
-# * target train: AP contrasts for subject two
+# * target train: AP contrasts for subject sub-02
 
 source_train = df[df.subject == 'sub-01'][df.acquisition == 'ap'].path.values
 target_train = df[df.subject == 'sub-02'][df.acquisition == 'ap'].path.values
