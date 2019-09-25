@@ -202,8 +202,8 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         n_pieces: int, optional (default = 1)
             Number of regions in which the data is parcellated for alignment.
             If 1 the alignment is done on full scale data.
-            If > 1, the voxels are clustered and alignment is performed
-                on each cluster applied to X and Y.
+            If > 1, the voxels are clustered and alignment is performed \
+            on each cluster applied to X and Y.
         clustering : string or 3D Niimg optional (default : kmeans)
             'kmeans', 'ward', 'rena' method used for clustering of voxels based
             on functional signal, passed to nilearn.regions.parcellations
