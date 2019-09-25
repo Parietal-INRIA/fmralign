@@ -9,7 +9,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 import numpy as np
 from joblib import Parallel, delayed
 from sklearn.externals.joblib import Memory
-from nilearn.image import index_img, concat_imgs
+from nilearn.image import index_img, concat_imgs, load_img
 from nilearn.input_data.masker_validation import check_embedded_nifti_masker
 from fmralign.pairwise_alignment import PairwiseAlignment
 
@@ -358,6 +358,20 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             Target subjects predicted data. Each Niimg has the same length as the list test_index
 
         """
+        if not isinstance(imgs, (list, np.ndarray)):
+            raise InputError('The method TemplateAlignment.transform() need a list input. \
+                             Each element of the list (Niimg-like or list of Niimgs) \
+                             is the data used to align one new subject with images \
+                             indexed by train_index.')
+        else:
+            if isinstance(imgs[0], (list, np.ndarray)) and len(imgs[0]) != len(train_index):
+                raise ValueError(' Each element of imgs (Niimg-like or list of Niimgs) \
+                                 should have the same length as the length of train_index.')
+            elif load_img(imgs[0]).shape[-1] != len(train_index):
+                raise ValueError(
+                    ' Each element of imgs (Niimg-like or list of Niimgs) \
+                    should have the same length as the length of train_index.')
+
         template_length = self.template.shape[-1]
         if not (all(i < template_length for i in test_index) and all(
                 i < template_length for i in train_index)):
