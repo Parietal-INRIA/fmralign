@@ -25,8 +25,8 @@ To run this example, you must launch IPython via ``ipython \
 # ------------------
 # In this example we use the IBC dataset, which includes a large number of \
 # different contrasts maps for 12 subjects. \
-# We download the images for subjects sub-01, 02, 04, 05, 06 and sub-07 \
-# (or retrieve them if they were already downloaded).
+# We download the images for subjects sub-01, sub-02, sub-04, sub-05, sub-06 \
+# and sub-07 (or retrieve them if they were already downloaded).
 # imgs is the list of paths to available statistical images for each subjects.
 # df is a dataframe with metadata about each of them.
 # mask is a binary image used to extract grey matter regions.

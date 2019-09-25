@@ -23,7 +23,7 @@ To run this example, you must launch IPython via ``ipython \
 # ---------------------
 # In this example we use the IBC dataset, which include a large number of \
 # different contrasts maps for 12 subjects. \
-# We download the images for subjects 1 and 2.
+# We download the images for subjects sub-01 and sub-02.
 # Files is the list of paths for each subjects.
 # df is a dataframe with metadata about each of them.
 #
@@ -86,8 +86,8 @@ target_train = df[df.subject == 'sub-02'][df.acquisition == 'ap'].path.values
 
 # The testing set:
 # * source test: PA contrasts for subject one, used to predict \
-#   the corresponding contrasts of subject two
-# * target test: PA contrasts for subject two, used as a ground truth \
+#   the corresponding contrasts of subject sub-01
+# * target test: PA contrasts for subject sub-02, used as a ground truth \
 #   to score our predictions
 
 source_test = df[df.subject == 'sub-01'][df.acquisition == 'pa'].path.values
