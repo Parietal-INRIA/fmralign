@@ -13,14 +13,16 @@ def test_template_identity():
 
     n = 10
     im, mask_img = random_niimg((6, 5, 3))
+
     sub_1 = concat_imgs(n * [im])
     sub_2 = math_img("2 * img", img=sub_1)
     sub_3 = math_img("3 * img", img=sub_1)
 
     ref_template = sub_2
-    subs = [sub_1, sub_2, sub_3]
     masker = NiftiMasker(mask_img=mask_img)
     masker.fit()
+
+    subs = [sub_1, sub_2, sub_3]
 
     # test euclidian mean function
     euclidian_template = _rescaled_euclidean_mean(subs, masker)
@@ -33,6 +35,7 @@ def test_template_identity():
                  {'alignment_method': 'identity', 'n_pieces': 3,
                      'n_bags': 2, 'mask': masker}
                  ]
+
     for args in args_list:
         algo = TemplateAlignment(**args)
         # Learning a template which is
@@ -54,6 +57,16 @@ def test_template_identity():
         with pytest.raises(Exception):
             assert algo.transform(
                 [index_img(sub_1, range(8))], train_index=train_ind, test_index=test_ind)
+
+    # to test different kinds of input : replace sub-1 by a list of 3D Niimgs
+    algo = TemplateAlignment(alignment_method='identity', mask=masker)
+    algo.fit([n * [im]] * 3)
+    # test template
+    assert_array_almost_equal(
+        sub_1.get_data(), algo.template.get_data())
+
+    with pytest.raises(Exception):
+        assert algo.fit([im])
 
 
 def test_template_closer_to_target():
