@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Module for functional template inference using functional alignment on Niimgs and
 prediction of new subjects unseen images
 """
@@ -361,7 +362,8 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         if not (all(i < template_length for i in test_index) and all(
                 i < template_length for i in train_index)):
             raise ValueError(
-                f"Template has {template_length} images but you provided a greater index in train_index or test_index.")
+                "Template has {} images but you provided a greater index in \
+                train_index or test_index.".format(template_length))
 
         fitted_mappings = Parallel(self.n_jobs, prefer="threads", verbose=self.verbose)(
             delayed(_map_template_to_image)
