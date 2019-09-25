@@ -66,7 +66,7 @@ matrix `R` and a scaling `sc` such that Frobenius norm :math:`||sc RX - Y||^2` i
 
 Ridge alignment
 ----------------------------------
-Another simple idea to regularize the transform `R` searched for is to penalize it's L2 norm. This is a ridge regression, which means we search `R` such that Frobenius  norm :math:`|| XR - Y ||^2 + alpha * ||R||^2` is minimized with cross-validation.
+Another simple idea to regularize the transform `R` searched for is to penalize its L2 norm. This is a ridge regression, which means we search `R` such that Frobenius  norm :math:`|| XR - Y ||^2 + alpha * ||R||^2` is minimized with cross-validation.
 
 .. figure:: ../auto_examples/images/sphx_glr_plot_alignment_simulated_2D_data_005.png
    :align: left
