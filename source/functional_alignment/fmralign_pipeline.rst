@@ -28,7 +28,7 @@ finding just one transformation for similarity of functional signal in the whole
 brain could create unrealistic correspondances, for example inter-hemispheric.
 
 To avoid these issues, we keep alignment local, i.e. on local and functionally meaningful regions. \
-Thus, in a first step cluster the voxels in the image into `n_pieces` regions, based on functional information. \
+Thus, in a first step cluster the voxels in the image into `n_pieces` sub-regions, based on functional information. \
 Then we find local alignment on each parcel and we recompose the global matrix from these. \
 
 With this technique, it is possible to find quickly sensible alignment even for full-brain images in 2mm resolution. The \ parcellation chosen can obviously have an impact. We recommend 'ward' to have spatially compact and reproducible clusters.
