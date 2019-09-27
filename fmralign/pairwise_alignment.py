@@ -108,7 +108,7 @@ def fit_one_piece(X_i, Y_i, alignment_method):
 
 def fit_one_parcellation(X_, Y_, alignment_method, masker, n_pieces,
                          clustering, clustering_index,
-                         n_jobs, parallel_backend, verbose):
+                         n_jobs, verbose):
     """ Create one parcellation of n_pieces and align each source and target
     data in one piece i, X_i and Y_i, using alignment method
     and learn transformation to map X to Y.
@@ -135,9 +135,6 @@ def fit_one_parcellation(X_, Y_, alignment_method, masker, n_pieces,
     n_jobs: integer, optional
         The number of CPUs to use to do the computation. -1 means
         'all CPUs', -2 'all CPUs but one', and so on.
-    parallel_backend: str, ParallelBackendBase instance, None
-        Specify the parallelization backend implementation. For more
-        informations see joblib.Parallel documentation
     verbose: integer, optional
         Indicate the level of verbosity. By default, nothing is printed
 
@@ -155,7 +152,7 @@ def fit_one_parcellation(X_, Y_, alignment_method, masker, n_pieces,
         labels = np.ones(
             int(masker.mask_img_.get_data().sum()), dtype=np.int8)
 
-    fit = Parallel(n_jobs, backend=parallel_backend, verbose=verbose)(
+    fit = Parallel(n_jobs, prefer="threads", verbose=verbose)(
         delayed(fit_one_piece)(
             X_i, Y_i, alignment_method
         ) for X_i, Y_i in generate_Xi_Yi(labels, X_, Y_, masker, verbose)
@@ -176,7 +173,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
                  target_affine=None, target_shape=None, low_pass=None,
                  high_pass=None, t_r=None,
                  memory=Memory(cachedir=None), memory_level=0,
-                 n_jobs=1, parallel_backend='threading', verbose=0):
+                 n_jobs=1, verbose=0):
         """
         If n_pieces > 1, decomposes the images into regions \
         and align each source/target region independantly.
@@ -244,9 +241,6 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         n_jobs: integer, optional (default = 1)
             The number of CPUs to use to do the computation. -1 means \
             'all CPUs', -2 'all CPUs but one', and so on.
-        parallel_backend: str, ParallelBackendBase instance, None (default = 'threading')
-            Specify the parallelization backend implementation. For more \
-            informations see joblib.Parallel documentation
         verbose: integer, optional (default = 0)
             Indicate the level of verbosity. By default, nothing is printed.
         """
@@ -266,7 +260,6 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         self.memory = memory
         self.memory_level = memory_level
         self.n_jobs = n_jobs
-        self.parallel_backend = parallel_backend
         self.verbose = verbose
 
     def fit(self, X, Y):
@@ -306,12 +299,11 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         rs = ShuffleSplit(n_splits=self.n_bags,
                           test_size=.8, random_state=0)
 
-        outputs = Parallel(n_jobs=self.n_jobs, backend=self.parallel_backend,
+        outputs = Parallel(n_jobs=self.n_jobs, prefer="threads",
                            verbose=self.verbose)(
             delayed(fit_one_parcellation)(
                 X_, Y_, self.alignment_method, self.masker_, self.n_pieces,
-                self.clustering, clustering_index, self.n_jobs,
-                self.parallel_backend, self.verbose)
+                self.clustering, clustering_index, self.n_jobs, self.verbose)
             for clustering_index, _ in rs.split(range(X_.shape[-1])))
         # change split
         self.labels_ = [output[0] for output in outputs]

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Module for functional template inference using functional alignment on Niimgs and
 prediction of new subjects unseen images
 """
@@ -8,7 +9,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 import numpy as np
 from joblib import Parallel, delayed
 from sklearn.externals.joblib import Memory
-from nilearn.image import index_img
+from nilearn.image import index_img, concat_imgs, load_img
 from nilearn.input_data.masker_validation import check_embedded_nifti_masker
 from fmralign.pairwise_alignment import PairwiseAlignment
 
@@ -48,8 +49,7 @@ def _rescaled_euclidean_mean(imgs, masker, scale_average=False):
 
 def _align_images_to_template(imgs, template, alignment_method,
                               n_pieces, clustering, n_bags, masker,
-                              memory, memory_level, n_jobs, parallel_backend,
-                              verbose):
+                              memory, memory_level, n_jobs, verbose):
     '''Convenience function : for a list of images, return the list
     of estimators (PairwiseAlignment instances) aligning each of them to a
     common target, the template. All arguments are used in PairwiseAlignment
@@ -62,7 +62,7 @@ def _align_images_to_template(imgs, template, alignment_method,
                               clustering=clustering, n_bags=n_bags,
                               mask=masker, memory=memory,
                               memory_level=memory_level,
-                              n_jobs=n_jobs, parallel_backend=parallel_backend,
+                              n_jobs=n_jobs,
                               verbose=verbose)
         piecewise_estimator.fit(img, template)
         aligned_imgs.append(piecewise_estimator.transform(img))
@@ -71,7 +71,7 @@ def _align_images_to_template(imgs, template, alignment_method,
 
 def _create_template(imgs, n_iter, scale_template, alignment_method, n_pieces,
                      clustering, n_bags, masker, memory, memory_level,
-                     n_jobs, parallel_backend, verbose):
+                     n_jobs, verbose):
     '''Create template through alternate minimization.  Compute iteratively :
         * T minimizing sum(||R_i X_i-T||) which is the mean of aligned images (RX_i)
         * align initial images to new template T
@@ -111,14 +111,14 @@ def _create_template(imgs, n_iter, scale_template, alignment_method, n_pieces,
                                                  alignment_method, n_pieces,
                                                  clustering, n_bags,
                                                  masker, memory, memory_level,
-                                                 n_jobs, parallel_backend, verbose)
+                                                 n_jobs, verbose)
 
     return template, template_history
 
 
 def _map_template_to_image(imgs, train_index, template, alignment_method,
                            n_pieces, clustering, n_bags, masker,
-                           memory, memory_level, n_jobs, parallel_backend, verbose):
+                           memory, memory_level, n_jobs, verbose):
     '''Learn alignment operator from the template toward new images.
 
     Parameters
@@ -145,8 +145,7 @@ def _map_template_to_image(imgs, train_index, template, alignment_method,
                                 clustering=clustering,
                                 n_bags=n_bags, mask=masker, memory=memory,
                                 memory_level=memory_level,
-                                n_jobs=n_jobs, parallel_backend=parallel_backend,
-                                verbose=verbose)
+                                n_jobs=n_jobs, verbose=verbose)
     mapping.fit(mapping_image, imgs)
     return mapping
 
@@ -189,7 +188,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
                  detrend=None, target_affine=None, target_shape=None,
                  low_pass=None, high_pass=None, t_r=None,
                  memory=Memory(cachedir=None), memory_level=0,
-                 n_jobs=1, parallel_backend='threading', verbose=0):
+                 n_jobs=1, verbose=0):
         '''
         Parameters
         ----------
@@ -261,9 +260,6 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         n_jobs: integer, optional (default = 1)
             The number of CPUs to use to do the computation. -1 means \
             'all CPUs', -2 'all CPUs but one', and so on.
-        parallel_backend: str, ParallelBackendBase instance, None (default = 'threading')
-            Specify the parallelization backend implementation. For more \
-            informations see joblib.Parallel documentation
         verbose: integer, optional (default = 0)
             Indicate the level of verbosity. By default, nothing is printed.
         '''
@@ -288,7 +284,6 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         self.memory = memory
         self.memory_level = memory_level
         self.n_jobs = n_jobs
-        self.parallel_backend = parallel_backend
         self.verbose = verbose
 
     def fit(self, imgs):
@@ -297,8 +292,9 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
 
         Parameters
         ----------
-        imgs: List of Niimg-like objects
-            Source subjects data. Every img must have the same length (number of samples).
+        imgs: List of 4D Niimg-like or List of lists of 3D Niimg-like
+            Source subjects data. Each element of the parent list is one subject
+            data, and all must have the same length (n_samples).
 
         Returns
         -------
@@ -306,12 +302,23 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
 
         Attributes
         ----------
-        self.template: 4D Niimg object of same shape as one img.
+        self.template: 4D Niimg object
+            Length : n_samples
 
         """
+        # Check if the input is a list, if list of lists, concatenate each subjects
+        # data into one unique image.
+        if not isinstance(imgs, (list, np.ndarray)) or len(imgs) < 2:
+            raise InputError('The method TemplateAlignment.fit() need a list input. \
+                             Each element of the list (Niimg-like or list of Niimgs) \
+                             is the data for one subject.')
+        else:
+            if isinstance(imgs[0], (list, np.ndarray)):
+                imgs = [concat_imgs(img) for img in imgs]
+
         self.masker_ = check_embedded_nifti_masker(self)
         self.masker_.n_jobs = self.n_jobs  # self.n_jobs
-        # Avoid warning with imgs != None
+
         # if masker_ has been provided a mask_img
         if self.masker_.mask_img is None:
             self.masker_.fit(imgs)
@@ -323,7 +330,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
                              self.alignment_method, self.n_pieces,
                              self.clustering, self.n_bags,
                              self.masker_, self.memory, self.memory_level,
-                             self.n_jobs, self.parallel_backend, self.verbose)
+                             self.n_jobs, self.verbose)
         if self.save_template is not None:
             self.template.to_filename(self.save_template)
 
@@ -351,24 +358,36 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             Target subjects predicted data. Each Niimg has the same length as the list test_index
 
         """
+        if not isinstance(imgs, (list, np.ndarray)):
+            raise InputError('The method TemplateAlignment.transform() need a list input. \
+                             Each element of the list (Niimg-like or list of Niimgs) \
+                             is the data used to align one new subject with images \
+                             indexed by train_index.')
+        else:
+            if isinstance(imgs[0], (list, np.ndarray)) and len(imgs[0]) != len(train_index):
+                raise ValueError(' Each element of imgs (Niimg-like or list of Niimgs) \
+                                 should have the same length as the length of train_index.')
+            elif load_img(imgs[0]).shape[-1] != len(train_index):
+                raise ValueError(
+                    ' Each element of imgs (Niimg-like or list of Niimgs) \
+                    should have the same length as the length of train_index.')
+
         template_length = self.template.shape[-1]
         if not (all(i < template_length for i in test_index) and all(
                 i < template_length for i in train_index)):
             raise ValueError(
-                f"Template has {template_length} images but you provided a greater index in train_index or test_index.")
+                "Template has {} images but you provided a greater index in \
+                train_index or test_index.".format(template_length))
 
-        fitted_mappings = Parallel(self.n_jobs, backend=self.parallel_backend,
-                                   verbose=self.verbose)(
+        fitted_mappings = Parallel(self.n_jobs, prefer="threads", verbose=self.verbose)(
             delayed(_map_template_to_image)
             (img, train_index, self.template, self.alignment_method,
              self.n_pieces, self.clustering, self.n_bags, self.masker_,
-             self.memory, self.memory_level, self.n_jobs, self.parallel_backend,
-             self.verbose
+             self.memory, self.memory_level, self.n_jobs, self.verbose
              ) for img in imgs
         )
 
-        predicted_imgs = Parallel(self.n_jobs, backend=self.parallel_backend,
-                                  verbose=self.verbose)(
+        predicted_imgs = Parallel(self.n_jobs, prefer="threads", verbose=self.verbose)(
             delayed(_predict_from_template_and_mapping)
             (self.template, test_index, mapping) for mapping in fitted_mappings
         )

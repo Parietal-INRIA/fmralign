@@ -13,26 +13,37 @@ def test_template_identity():
 
     n = 10
     im, mask_img = random_niimg((6, 5, 3))
+
     sub_1 = concat_imgs(n * [im])
     sub_2 = math_img("2 * img", img=sub_1)
     sub_3 = math_img("3 * img", img=sub_1)
 
     ref_template = sub_2
-    subs = [sub_1, sub_2, sub_3]
     masker = NiftiMasker(mask_img=mask_img)
     masker.fit()
+
+    subs = [sub_1, sub_2, sub_3]
 
     # test euclidian mean function
     euclidian_template = _rescaled_euclidean_mean(subs, masker)
     assert_array_almost_equal(
         ref_template.get_data(), euclidian_template.get_data())
 
+    # test different fit() accept list of list of 3D Niimgs as input.
+    algo = TemplateAlignment(alignment_method='identity', mask=masker)
+    algo.fit([n * [im]] * 3)
+    # test template
+    assert_array_almost_equal(
+        sub_1.get_data(), algo.template.get_data())
+
+    # test fit() transform() with 4D Niimgs input for several params set
     args_list = [{'alignment_method': 'identity', 'mask': masker},
                  {'alignment_method': 'identity', 'mask': masker, 'n_jobs': 2},
                  {'alignment_method': 'identity', 'n_pieces': 3, 'mask': masker},
                  {'alignment_method': 'identity', 'n_pieces': 3,
                      'n_bags': 2, 'mask': masker}
                  ]
+
     for args in args_list:
         algo = TemplateAlignment(**args)
         # Learning a template which is
@@ -47,13 +58,22 @@ def test_template_identity():
         assert_array_almost_equal(
             ground_truth.get_data(), predicted_imgs[0].get_data())
 
-    # test last algo transform with wrong indexes
-    train_inds, test_inds = [[0, 1], [1, 3, 10],
-                             [4, 11]], [[6, 8, 29], [4, 6], [4, 11]]
+    # test transform() with wrong indexes length or content (on previous fitted algo)
+    train_inds, test_inds = [[0, 1], [1, 10],
+                             [4, 11], [0, 1, 2]], [[6, 8, 29], [4, 6], [4, 11], [4, 5]]
+
     for train_ind, test_ind in zip(train_inds, test_inds):
         with pytest.raises(Exception):
             assert algo.transform(
-                [index_img(sub_1, range(8))], train_index=train_ind, test_index=test_ind)
+                [index_img(sub_1, range(2))], train_index=train_ind, test_index=test_ind)
+
+    # test wrong images input in fit() and transform method
+    with pytest.raises(Exception):
+        assert algo.transform(
+            [n * [im]] * 2, train_index=train_inds[-1], test_index=test_inds[-1])
+        assert algo.fit([im])
+        assert algo.transform(
+            [im], train_index=train_inds[-1], test_index=test_inds[-1])
 
 
 def test_template_closer_to_target():

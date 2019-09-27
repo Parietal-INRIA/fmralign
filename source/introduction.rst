@@ -17,5 +17,5 @@ Installing fmralign
 In a Python 3 environnment :
 
 ```
-pip install -U --user fmralign
+pip install fmralign
 ```
