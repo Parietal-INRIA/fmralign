@@ -23,9 +23,7 @@ fmralign requires a Python installation and the following dependencies:
 Open a terminal window, go the location where you want to install it. Then run:
 
 ```
-git clone https://github.com/Parietal-INRIA/fmralign.git
-cd fmralign/
-pip install -e .
+pip install fmralign
 ```
 
 If you plan to use optimal transport based method, you should also run:
