@@ -36,7 +36,9 @@ You're up and running!
 
 ### Documentation
 
-You can found an introduction about functional alignment .
+You can found a theoretical introduction to functional alignment at
+(https://parietal-inria.github.io/fmralign-docs), a user guide and some examples
+on how to use the package.
 
 ## License
 
