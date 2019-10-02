@@ -12,15 +12,15 @@ Alternative implementations of these ideas can be found in the
 ### Prerequisites
 
 fmralign requires a Python installation and the following dependencies:
-* Python >= 3.6,
+* Python >= 3.6
 * Numpy >= 1.16.2
 * SciPy >= 1.2.2
 * Scikit-learn >= 0.20
-* Matplotlib >= '1.5.0'
+* Matplotlib >= 3.1.1
 * Nibabel >= 2.5.0
-* Nilearn >= 3.1.1
+* Nilearn >= 1.5.0
 
-### Installing
+### Installation
 
 Open a terminal window, go the location where you want to install it. Then run:
 
@@ -28,7 +28,15 @@ Open a terminal window, go the location where you want to install it. Then run:
 pip install fmralign
 ```
 
-If you plan to use optimal transport based method, you should also run:
+Or if you want the latest version available (for example to develop):
+
+```
+git clone https://github.com/Parietal-INRIA/fmralign.git
+cd fmralign
+pip install -e .
+```
+
+Optionally, if you want to use optimal transport based method, you should also run:
 
 ```
 pip install POT
@@ -39,7 +47,7 @@ You're up and running!
 ### Documentation
 
 You can found an introduction to functional alignment, a user guide and some examples
-on how to use the package at https://parietal-inria.github.io/fmralign-docs. 
+on how to use the package at https://parietal-inria.github.io/fmralign-docs.
 
 ## License
 
