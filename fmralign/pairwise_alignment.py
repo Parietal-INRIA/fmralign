@@ -169,7 +169,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
 
     def __init__(self, alignment_method, n_pieces=1,
                  clustering='kmeans', n_bags=1, mask=None,
-                 smoothing_fwhm=None, standardize=None, detrend=False,
+                 smoothing_fwhm=None, standardize=False, detrend=False,
                  target_affine=None, target_shape=None, low_pass=None,
                  high_pass=None, t_r=None,
                  memory=Memory(cachedir=None), memory_level=0,

@@ -5,6 +5,8 @@ import nibabel
 import pytest
 from fmralign.tests.utils import random_niimg
 from fmralign._utils import _make_parcellation, voxelwise_correlation
+import nilearn
+from packaging import version
 
 
 def test_make_parcellation():
@@ -16,16 +18,20 @@ def test_make_parcellation():
     # create a predefined parcellation
     labels_img = nibabel.Nifti1Image(
         np.hstack([np.ones((7, 3, 8)), 2 * np.ones((7, 3, 8))]), np.eye(4))
-    for clustering_method in ["kmeans", "ward", labels_img]:
+
+    methods = ["kmeans", "ward", labels_img]
+    if version.parse(nilearn.__version__) <= version.parse("0.5.2"):
+        with pytest.raises(Exception):
+            assert make_parcellation(img, "rena", n_pieces, masker)
+    else:
+        methods.append("rena")
+    for clustering_method in methods:
         labels = _make_parcellation(
             img, clustering_method, n_pieces, masker)
         assert(len(np.unique(labels)) == 2)
-
     # this is an exception on the installed version on nilearn for now ReNA is not released
     # out of developper mode. Once it is ready, you'll be able to call it directly
     # with the latest version of nilearn and this test will evaluate false.
-    with pytest.raises(Exception):
-        assert make_parcellation(img, "rena", n_pieces, masker)
 
     mask_img.shape
 
