@@ -4,7 +4,9 @@ from nilearn.regions.parcellations import Parcellations
 from nilearn.image import smooth_img
 from nilearn.masking import _apply_mask_fmri
 from nilearn._utils.niimg_conversions import _check_same_fov
+import nilearn
 import nibabel
+from packaging import version
 
 
 def piecewise_transform(labels, estimators, X):
@@ -72,12 +74,11 @@ def _make_parcellation(imgs, clustering, n_pieces, masker, smoothing_fwhm=5, ver
         try:
             parcellation = Parcellations(method=clustering, n_parcels=n_pieces, mask=masker,
                                          scaling=False, n_iter=20, verbose=verbose)
-            parcellation.fit()
         except TypeError:
-            if clustering == "rena":
+            if clustering == "rena" and (version.parse(nilearn.__version__) <= version.parse("0.5.2")):
                 raise InputError(
                     ('ReNA algorithm is only available in Nilearn version > 0.5.2. \
-                     If you want to use it, please run "pip install --upgrade nilearn"'))
+                     Your version is {}. If you want to use ReNA, please run "pip install nilearn --upgrade"'.format(nilearn.__version__)))
             else:
                 parcellation = Parcellations(
                     method=clustering, n_parcels=n_pieces, mask=masker, verbose=verbose)
