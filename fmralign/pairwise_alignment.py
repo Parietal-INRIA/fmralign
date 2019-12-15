@@ -194,7 +194,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
             If >1, the voxels are clustered and alignment is performed \
             on each cluster applied to X and Y.
         clustering : string or 3D Niimg optional (default : kmeans)
-            'kmeans', 'ward', 'rena' method used for clustering of voxels based
+            'kmeans', 'ward', 'rena', 'hierarchical_kmeans' method used for clustering of voxels based
             on functional signal, passed to nilearn.regions.parcellations
             If 3D Niimg, image used as predefined clustering,
             n_bags and n_pieces are then ignored.
@@ -210,7 +210,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         smoothing_fwhm: float, optional (default = None)
             If smoothing_fwhm is not None, it gives the size in millimeters \
             of the spatial smoothing to apply to the signal.
-        standardize: boolean, optional (default = None)
+        standardize: boolean, optional (default = False)
             If standardize is True, the time-series are centered and normed: \
             their variance is put to 1 in the time dimension.
         detrend: boolean, optional (default = None)

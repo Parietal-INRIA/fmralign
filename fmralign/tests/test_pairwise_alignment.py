@@ -38,12 +38,13 @@ def test_models_against_identity():
         ground_truth, masker.transform(img1))
     for alignment_method in ['permutation',  'ridge_cv', 'scaled_orthogonal',
                              'optimal_transport', 'diagonal']:
-        algo = PairwiseAlignment(
-            alignment_method=alignment_method, mask=mask_img,
-            n_pieces=2, n_bags=1, n_jobs=1)
-        algo.fit(img1, img2)
-        im_test = algo.transform(img1)
-        algo_score = zero_mean_coefficient_determination(ground_truth,
-                                                         masker.transform(
-                                                             im_test))
-        assert_greater(algo_score, identity_baseline_score)
+        for clustering in ["kmeans", "hierarchical_kmeans"]:
+            algo = PairwiseAlignment(
+                alignment_method=alignment_method, mask=masker, clustering=clustering,
+                n_pieces=2, n_bags=1, n_jobs=1)
+            algo.fit(img1, img2)
+            im_test = algo.transform(img1)
+            algo_score = zero_mean_coefficient_determination(ground_truth,
+                                                             masker.transform(
+                                                                 im_test))
+            assert_greater(algo_score, identity_baseline_score)

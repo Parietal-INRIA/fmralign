@@ -204,7 +204,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             If > 1, the voxels are clustered and alignment is performed \
             on each cluster applied to X and Y.
         clustering : string or 3D Niimg optional (default : kmeans)
-            'kmeans', 'ward', 'rena' method used for clustering of voxels based
+            'kmeans', 'ward', 'rena', 'hierarchical_kmeans' method used for clustering of voxels based
             on functional signal, passed to nilearn.regions.parcellations
             If 3D Niimg, image used as predefined clustering,
             n_bags and n_pieces are then ignored.
