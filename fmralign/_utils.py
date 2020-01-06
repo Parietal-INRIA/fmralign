@@ -179,28 +179,3 @@ def _make_parcellation(imgs, clustering, n_pieces, masker, smoothing_fwhm=5, ver
             ('Clustering should be "kmeans", "ward", "rena", "hierarchical_kmeans", \
              or a 3D Niimg'))
     return _apply_mask_fmri(labels_img, masker.mask_img_).astype(int)
-
-
-def voxelwise_correlation(ground_truth, prediction, masker):
-    """
-    Parameters
-    ----------
-    ground_truth: 3D or 4D Niimg
-        Reference image (data acquired but never used before and considered as missing)
-    prediction : 3D or 4D Niimg
-        Same shape as ground_truth
-    masker: instance of NiftiMasker or MultiNiftiMasker
-        Masker to be used on ground_truth and prediction. For more information see:
-        http://nilearn.github.io/manipulating_images/masker_objects.html
-
-    Returns
-    -------
-    voxelwise_correlation : 3D Niimg
-        Voxelwise score between ground_truth and prediction
-    """
-    X_gt = masker.transform(ground_truth)
-    X_pred = masker.transform(prediction)
-
-    voxelwise_correlation = np.array([pearsonr(X_gt[:, vox], X_pred[:, vox])[0]
-                                      for vox in range(X_pred.shape[1])])
-    return masker.inverse_transform(voxelwise_correlation)
