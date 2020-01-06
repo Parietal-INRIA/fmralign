@@ -24,10 +24,13 @@ def score_table(ground_truth, prediction, masker, loss,
         reconstruction error.
         'R2' :
             The R2 distance between source and target arrays.
+            Best possible score is 1.0 and it can be negative (because the
+            model can be arbitrarily worse).
         'corr' :
             The correlation between source and target arrays.
         'n_reconstruction_err' :
-            The normalized reconstruction error.
+            The normalized reconstruction error. A perfect prediction
+            yields a value of 1.0
     multioutput: str in ['raw_values', 'uniform_average']
         Defines aggregating of multiple output scores. Default is raw values.
         'raw_values' :
@@ -121,20 +124,20 @@ def normalized_reconstruction_error(y_true, y_pred, sample_weights=None,
     if multioutput == 'raw_values':
         # return scores individually
         return output_scores
+    
     elif multioutput == 'uniform_average':
         # passing None as weights yields uniform average
         return np.average(output_scores, weights=None)
 
-    # NOTE: I don't understand this section
     elif multioutput == 'variance_weighted':
         # if providing sample_weights directly
         if sample_weights is not None:
             weight = sample_weights[:, np.newaxis]
         else:
             weight = 1.
-        avg_weights = (weight *
-            (y_true - np.average(y_true, axis=0, weights=sample_weights)
-            ) ** 2).sum(axis=0, dtype=np.float64)
+        avg_weights = (weight * (y_true - np.average(
+            y_true, axis=0, weights=sample_weights)) ** 2).sum(axis=0,
+                                                               dtype=np.float64)
         # avoid failing on constant y or one-element arrays
         if not np.any(nonzero_denominator):
             if not np.any(nonzero_numerator):

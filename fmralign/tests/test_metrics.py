@@ -37,17 +37,21 @@ def test_score_table():
 
 
 def test_normalized_reconstruction_error():
-    A = np.asarray([[
-        [[1, 1.2, 1, 1.2, 1]],
-        [[1, 1, 1, .2, 1]],
-        [[1, -1, 1, -1, 1]]
-    ]])
-    B = np.asarray([[
-        [[0, 0.2, 0, 0.2, 0]],
-        [[.2, 1, 1, 1, 1]],
-        [[-1, 1, -1, 1, -1]]
-    ]])
+    A = np.asarray([
+        [1, 1.2, 1, 1.2, 1],
+        [1, 1, 1, .2, 1],
+        [1, -1, 1, -1, 1]
+    ])
+    B = np.asarray([
+        [0, 0.2, 0, 0.2, 0],
+        [.2, 1, 1, 1, 1],
+        [-1, 1, -1, 1, -1]
+    ])
     
     avg_norm_rec = metrics.normalized_reconstruction_error(
-                    A, B, multioutput='uniform_average')
-    assert_array_almost_equal(avg_norm_rec, -0.055724)
+        A, B, multioutput='uniform_average')
+    np.testing.assert_almost_equal(avg_norm_rec, -0.788203)
+
+    var_norm_rec = metrics.normalized_reconstruction_error(
+        A, B, multioutput='variance_weighted')
+    np.testing.assert_almost_equal(var_norm_rec, -0.823212)
