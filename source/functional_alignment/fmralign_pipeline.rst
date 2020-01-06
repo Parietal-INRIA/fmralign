@@ -4,12 +4,14 @@
 Functional alignment pipeline
 =======================================
 
-As seen in the :ref:`previous section <functional_alignment_intro.rst>`, functional alignment search for a transform \
+As seen in the :ref:`previous section <functional_alignment_intro.rst>`, functional alignment searches for a transform \
 between images of two or several subjects in order to match voxels which have \
 similar profile of activation. This section explains how this transform
 is found in fmralign to make the process easy, efficient and scalable.
 
-We compare various methods of alignment on a pairwise alignment problem for `Individual Brain Charting <https://project.inria.fr/IBC/>`_ subjects. For each subject, we have a lot of functional informations in the form of several task-based contrast per subject. We will just work here on a ROI.
+We compare various methods of alignment on a pairwise alignment problem for `Individual Brain Charting <https://project.inria.fr/IBC/>`_ subjects.
+For each subject, we have a lot of functional informations in the form of several task-based contrast per subject.
+We will just work here on a ROI.
 
 .. contents:: **Contents**
     :local:
@@ -31,7 +33,14 @@ To avoid these issues, we keep alignment local, i.e. on local and functionally m
 Thus, in a first step cluster the voxels in the image into `n_pieces` sub-regions, based on functional information. \
 Then we find local alignment on each parcel and we recompose the global matrix from these. \
 
-With this technique, it is possible to find quickly sensible alignment even for full-brain images in 2mm resolution. The \ parcellation chosen can obviously have an impact. We recommend 'ward' to have spatially compact and reproducible clusters.
+With this technique, it is possible to find quickly sensible alignment even for full-brain images in 2mm resolution. The \
+parcellation chosen can obviously have an impact. We recommend 'ward' to have spatially compact and reproducible clusters.
+
+.. warning::
+   Optimal transport `shows poor convergence`_ for ROIs greater than 1000 voxels.
+   We therefore recommend working with smaller regions when using this method.
+
+.. _shows poor convergence: ../_images/profiling_methods.png
 
 
 Alignment methods on a region
