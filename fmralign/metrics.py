@@ -1,0 +1,177 @@
+import numpy as np
+from scipy.stats import pearsonr
+from sklearn.metrics import r2_score
+
+
+def score_table(ground_truth, prediction, masker, loss,
+                multioutput='raw_values'):
+    """
+    Calculates loss function for predicted, ground truth
+    arrays. Supported scores are R2, correlation, and normalized
+    reconstruction error (Bazeille et al., 2019)
+
+    Parameters
+    ----------
+    ground_truth: 3D or 4D Niimg
+        Reference image
+    prediction : 3D or 4D Niimg
+        Same shape as `ground_truth`
+    masker: instance of NiftiMasker or MultiNiftiMasker
+        Masker to be used on ground_truth and prediction. For more information see:
+        http://nilearn.github.io/manipulating_images/masker_objects.html
+    loss : str in ['R2', 'corr', 'n_reconstruction_err']
+        The loss function used in scoring. Default is normalized
+        reconstruction error.
+        'R2' :
+            The R2 distance between source and target arrays.
+        'corr' :
+            The correlation between source and target arrays.
+        'n_reconstruction_err' :
+            The normalized reconstruction error.
+    multioutput: str in ['raw_values', 'uniform_average']
+        Defines aggregating of multiple output scores. Default is raw values.
+        'raw_values' :
+            Returns a full set of scores in case of multioutput input.
+        'uniform_average' :
+            Scores of all outputs are averaged with uniform weight.
+
+    Returns
+    -------
+    score : float or ndarray of floats
+        The score or ndarray of scores if ‘multioutput’ is ‘raw_values’.
+    """
+    X_gt = masker.transform(ground_truth)
+    X_pred = masker.transform(prediction)
+
+    if loss is "R2":
+        score = r2_score(X_gt, X_pred, multioutput=multioutput)
+    elif loss is "n_reconstruction_err":
+        score = normalized_reconstruction_error(
+            X_gt, X_pred, multioutput=multioutput)
+    elif loss is "corr":
+        score = np.array([pearsonr(X_gt[:, vox], X_pred[:, vox])[0]  # pearsonr returns both rho and p
+                          for vox in range(X_pred.shape[1])])
+    else:
+        raise NameError(
+            "Unknown loss. Recognized values are 'R2', 'corr', or 'reconstruction_err'")
+    # if the calculated score is less than -1, return -1
+    return np.maximum(score, -1)
+
+
+def normalized_reconstruction_error(y_true, y_pred, sample_weights=None,
+                                    multioutput='raw_values'):
+    """
+    Calculates the normalized reconstruction error
+    as defined by Bazeille and colleagues (2019).
+    
+    A perfect prediction yields a value of 1.
+    
+    Parameters
+    ----------
+    y_true : arr
+        The ground truth array.
+    y_pred : arr
+        The predicted array.
+    sample_weights : arr
+        Weights to assign to each sample.
+    multioutput: str in ['raw_values', 'uniform_average',
+                         'variance_weighted']
+        Defines aggregating of multiple output scores.
+        Default is raw values.
+        'raw_values' :
+            Returns a full set of scores in case of multioutput input.
+        'uniform_average' :
+            Scores of all outputs are averaged with uniform weight.
+        'variance_weighted' :
+            Scores of all outputs are weighted by the variance of a given
+            sample.
+    
+    Returns
+    -------
+    score : float or ndarray of floats
+        The score or ndarray of scores if `multioutput` is `raw_values`.
+
+    References
+    ----------
+    `Bazeille T., Richard H., Janati H., and Thirion B. (2019) Local
+    Optimal Transport for Functional Brain Template Estimation.
+    In: Chung A., Gee J., Yushkevich P., and Bao S. (eds) Information 
+    Processing in Medical Imaging. Lecture Notes in Computer Science,
+    vol 11492. Springer, Cham.
+    DOI: 10.1007/978-3-030-20351-1_18.`
+    """
+    if y_true.ndim == 1:
+        y_true = y_true.reshape((-1, 1))
+
+    if y_pred.ndim == 1:
+        y_pred = y_pred.reshape((-1, 1))
+
+    numerator = ((y_true - y_pred) ** 2).sum(axis=0, dtype=np.float64)
+    denominator = ((y_true) ** 2).sum(axis=0, dtype=np.float64)
+
+    # Include only non-zero values
+    nonzero_denominator = (denominator != 0)
+    nonzero_numerator = (numerator != 0)
+    valid_score = (nonzero_denominator & nonzero_numerator)
+
+    # Calculate reconstruction error
+    output_scores = np.ones([y_true.shape[-1]])
+    output_scores[valid_score] = 1 - (numerator[valid_score] /
+                                      denominator[valid_score])
+    if multioutput == 'raw_values':
+        # return scores individually
+        return output_scores
+    elif multioutput == 'uniform_average':
+        # passing None as weights yields uniform average
+        return np.average(output_scores, weights=None)
+
+    # NOTE: I don't understand this section
+    elif multioutput == 'variance_weighted':
+        # if providing sample_weights directly
+        if sample_weights is not None:
+            weight = sample_weights[:, np.newaxis]
+        else:
+            weight = 1.
+        avg_weights = (weight *
+            (y_true - np.average(y_true, axis=0, weights=sample_weights)
+            ) ** 2).sum(axis=0, dtype=np.float64)
+        # avoid failing on constant y or one-element arrays
+        if not np.any(nonzero_denominator):
+            if not np.any(nonzero_numerator):
+                return 1.0
+            else:
+                return 0.0
+        return np.average(output_scores, weights=avg_weights)
+
+
+def reconstruction_ratio(aligned_error, identity_error):
+    """
+    Calculates the reconstruction error
+    as defined by Bazeille and
+    colleagues (2019).
+    
+    A value greater than 0 indicates that
+    voxels are predicted better by aligned data
+    than by raw data.
+    
+    Parameters
+    ----------
+    aligned_error : float64
+        The reconstruction error from a given
+        functional alignment method
+    identity error :  float64
+        The reconstruction error from predicting
+        the target subject as the source subject
+
+    References
+    ----------
+    `Bazeille T., Richard H., Janati H., and Thirion B. (2019) Local
+    Optimal Transport for Functional Brain Template Estimation.
+    In: Chung A., Gee J., Yushkevich P., and Bao S. (eds) Information 
+    Processing in Medical Imaging. Lecture Notes in Computer Science,
+    vol 11492. Springer, Cham.
+    DOI: 10.1007/978-3-030-20351-1_18.`
+    """
+    num = 1 - aligned_error
+    den = 1 - identity_error
+    return 1 - (num / den)
