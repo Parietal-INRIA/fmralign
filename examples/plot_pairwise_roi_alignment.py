@@ -122,14 +122,14 @@ target_pred = alignment_estimator.transform(source_test)
 # alike the ground truth.
 #
 
-from fmralign.metrics import score_table
+from fmralign.metrics import score_voxelwise
 
 # Now we use this scoring function to compare the correlation of aligned and
 # original data from sub-01 made with the real PA contrasts of sub-02.
 
-baseline_score = roi_masker.inverse_transform(score_table(
+baseline_score = roi_masker.inverse_transform(score_voxelwise(
     target_test, source_test, roi_masker, loss='corr'))
-aligned_score = roi_masker.inverse_transform(score_table(
+aligned_score = roi_masker.inverse_transform(score_voxelwise(
     target_test, target_pred, roi_masker, loss='corr'))
 
 ###############################################################################

@@ -5,7 +5,7 @@ from sklearn.utils.testing import assert_array_almost_equal
 
 from fmralign import metrics
 
-def test_score_table():
+def test_score_voxelwise():
     A = np.asarray([[
         [[1, 1.2, 1, 1.2, 1]],
         [[1, 1, 1, .2, 1]], 
@@ -22,17 +22,17 @@ def test_score_table():
     masker = NiftiMasker(mask_img=mask_img).fit()
 
     # check correlation
-    correlation = metrics.score_table(im_A, im_B,
-                                      masker, loss='corr')
+    correlation = metrics.score_voxelwise(im_A, im_B,
+                                          masker, loss='corr')
     assert_array_almost_equal(correlation, [1., -0.25, -1])
 
     # check R2
-    r2 = metrics.score_table(im_A, im_B, masker, loss='R2')
+    r2 = metrics.score_voxelwise(im_A, im_B, masker, loss='R2')
     assert_array_almost_equal(r2, [-1., -1., -1.])
 
     # check normalized reconstruction
-    norm_rec = metrics.score_table(im_A, im_B, masker,
-                                   loss='n_reconstruction_err')
+    norm_rec = metrics.score_voxelwise(im_A, im_B, masker,
+                                       loss='n_reconstruction_err')
     assert_array_almost_equal(norm_rec, [0.14966, 0.683168, -1.])
 
 

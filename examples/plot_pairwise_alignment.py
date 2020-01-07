@@ -85,12 +85,12 @@ target_test = df[df.subject == 'sub-02'][df.acquisition == 'pa'].path.values
 #
 
 from fmralign.pairwise_alignment import PairwiseAlignment
-alignement_estimator = PairwiseAlignment(
+alignment_estimator = PairwiseAlignment(
     alignment_method='scaled_orthogonal', n_pieces=150, mask=masker)
 # Learn alignment operator from subject 1 to subject 2 on training data
-alignement_estimator.fit(source_train, target_train)
+alignment_estimator.fit(source_train, target_train)
 # Predict test data for subject 2 from subject 1
-target_pred = alignement_estimator.transform(source_test)
+target_pred = alignment_estimator.transform(source_test)
 
 ###############################################################################
 # Score the baseline and the prediction
@@ -101,14 +101,14 @@ target_pred = alignement_estimator.transform(source_test)
 # to see if alignment was able to predict a signal more alike the ground truth.
 #
 
-from fmralign.metrics import score_table
+from fmralign.metrics import score_voxelwise
 
 # Now we use this scoring function to compare the correlation of aligned and
 # original data from sub-01 made with the real PA contrasts of sub-02.
 
-baseline_score = masker.inverse_transform(score_table(
+baseline_score = masker.inverse_transform(score_voxelwise(
     target_test, source_test, masker, loss='corr'))
-aligned_score = masker.inverse_transform(score_table(
+aligned_score = masker.inverse_transform(score_voxelwise(
     target_test, target_pred, masker, loss='corr'))
 
 ###############################################################################

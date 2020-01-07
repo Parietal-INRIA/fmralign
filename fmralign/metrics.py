@@ -3,8 +3,8 @@ from scipy.stats import pearsonr
 from sklearn.metrics import r2_score
 
 
-def score_table(ground_truth, prediction, masker, loss,
-                multioutput='raw_values'):
+def score_voxelwise(ground_truth, prediction, masker, loss,
+                    multioutput='raw_values'):
     """
     Calculates loss function for predicted, ground truth
     arrays. Supported scores are R2, correlation, and normalized
@@ -42,6 +42,7 @@ def score_table(ground_truth, prediction, masker, loss,
     -------
     score : float or ndarray of floats
         The score or ndarray of scores if ‘multioutput’ is ‘raw_values’.
+        The worst possible score is arbitrarily set to -1 for all metrics.
     """
     X_gt = masker.transform(ground_truth)
     X_pred = masker.transform(prediction)
@@ -159,10 +160,10 @@ def reconstruction_ratio(aligned_error, identity_error):
     
     Parameters
     ----------
-    aligned_error : float64
+    aligned_error : float or ndarray of floats
         The reconstruction error from a given
         functional alignment method
-    identity error :  float64
+    identity error :  float or ndarray of floats
         The reconstruction error from predicting
         the target subject as the source subject
 
@@ -177,4 +178,7 @@ def reconstruction_ratio(aligned_error, identity_error):
     """
     num = 1 - aligned_error
     den = 1 - identity_error
-    return 1 - (num / den)
+    try:
+        return 1 - (num / den)
+    except ZeroDivisionError:
+        return 0.0
