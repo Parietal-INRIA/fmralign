@@ -55,6 +55,8 @@ def score_voxelwise(ground_truth, prediction, masker, loss,
     elif loss is "corr":
         score = np.array([pearsonr(X_gt[:, vox], X_pred[:, vox])[0]  # pearsonr returns both rho and p
                           for vox in range(X_pred.shape[1])])
+        if multioutput == "uniform_average":
+            score = np.mean(score)
     else:
         raise NameError(
             "Unknown loss. Recognized values are 'R2', 'corr', or 'reconstruction_err'")
@@ -86,9 +88,6 @@ def normalized_reconstruction_error(y_true, y_pred, sample_weights=None,
             Returns a full set of scores in case of multioutput input.
         'uniform_average' :
             Scores of all outputs are averaged with uniform weight.
-        'variance_weighted' :
-            Scores of all outputs are weighted by the variance of a given
-            sample.
     
     Returns
     -------
@@ -129,23 +128,6 @@ def normalized_reconstruction_error(y_true, y_pred, sample_weights=None,
     elif multioutput == 'uniform_average':
         # passing None as weights yields uniform average
         return np.average(output_scores, weights=None)
-
-    elif multioutput == 'variance_weighted':
-        # if providing sample_weights directly
-        if sample_weights is not None:
-            weight = sample_weights[:, np.newaxis]
-        else:
-            weight = 1.
-        avg_weights = (weight * (y_true - np.average(
-            y_true, axis=0, weights=sample_weights)) ** 2).sum(axis=0,
-                                                               dtype=np.float64)
-        # avoid failing on constant y or one-element arrays
-        if not np.any(nonzero_denominator):
-            if not np.any(nonzero_numerator):
-                return 1.0
-            else:
-                return 0.0
-        return np.average(output_scores, weights=avg_weights)
 
 
 def reconstruction_ratio(aligned_error, identity_error):

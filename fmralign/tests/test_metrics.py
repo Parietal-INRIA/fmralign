@@ -21,10 +21,16 @@ def test_score_voxelwise():
     mask_img = nib.Nifti1Image(np.ones(im_A.shape[0:3]), np.eye(4))
     masker = NiftiMasker(mask_img=mask_img).fit()
 
-    # check correlation
-    correlation = metrics.score_voxelwise(im_A, im_B,
+    # check correlation raw_values
+    correlation1 = metrics.score_voxelwise(im_A, im_B,
                                           masker, loss='corr')
-    assert_array_almost_equal(correlation, [1., -0.25, -1])
+    assert_array_almost_equal(correlation1, [1., -0.25, -1])
+
+    # check correlation uniform_average
+    correlation2 = metrics.score_voxelwise(im_A, im_B,
+                                          masker, loss='corr',
+                                          multioutput='uniform_average')
+    assert(correlation2.ndim == 0)
 
     # check R2
     r2 = metrics.score_voxelwise(im_A, im_B, masker, loss='R2')
@@ -51,7 +57,3 @@ def test_normalized_reconstruction_error():
     avg_norm_rec = metrics.normalized_reconstruction_error(
         A, B, multioutput='uniform_average')
     np.testing.assert_almost_equal(avg_norm_rec, -0.788203)
-
-    var_norm_rec = metrics.normalized_reconstruction_error(
-        A, B, multioutput='variance_weighted')
-    np.testing.assert_almost_equal(var_norm_rec, -0.823212)
