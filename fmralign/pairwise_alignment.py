@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 """ Module for pairwise functional alignment
 """
-
-import copy
 import numpy as np
-from time import time
 
 from sklearn.base import BaseEstimator, TransformerMixin
 from joblib import Parallel, delayed
@@ -101,7 +98,12 @@ def fit_one_piece(X_i, Y_i, alignment_method):
                                        OptimalTransportAlignment,
                                        DiagonalAlignment)):
         alignment_algo = clone(alignment_method)
-    alignment_algo.fit(X_i, Y_i)
+    try:
+        alignment_algo.fit(X_i, Y_i)
+    except UnboundLocalError:
+        warn = "Unrecognized alignment method {}.".format(alignment_method) + \
+               " Please provide a recognized alignment method."
+        raise NotImplementedError(warn)
 
     return alignment_algo
 
