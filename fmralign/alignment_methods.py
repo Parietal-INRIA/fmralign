@@ -6,6 +6,7 @@ import scipy
 from scipy.spatial.distance import cdist
 from scipy import linalg
 from scipy.sparse import diags
+import sklearn
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.linear_assignment_ import linear_assignment
 from sklearn.metrics.pairwise import pairwise_distances
@@ -267,7 +268,9 @@ class RidgeAlignment(Alignment):
             target data
         """
         self.R = RidgeCV(alphas=self.alphas, fit_intercept=True,
-                         normalize=False, scoring=None, cv=self.cv)
+                         normalize=False,
+                         scoring=sklearn.metrics.SCORERS['r2'],
+                         cv=self.cv)
         self.R.fit(X, Y)
         return self
 
