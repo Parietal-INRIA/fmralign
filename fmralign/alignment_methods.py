@@ -8,7 +8,7 @@ from scipy import linalg
 from scipy.sparse import diags
 import sklearn
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.utils.linear_assignment_ import linear_assignment
+from scipy.optimize import linear_sum_assignment
 from sklearn.metrics.pairwise import pairwise_distances
 from sklearn.linear_model import RidgeCV
 from joblib import Parallel, delayed
@@ -83,7 +83,8 @@ def optimal_permutation(X, Y):
         transformation matrix
     """
     dist = pairwise_distances(X.T, Y.T)
-    u = linear_assignment(dist)
+    u = linear_sum_assignment(dist)
+    u = np.array(list(zip(*u)))
     permutation = scipy.sparse.csr_matrix(
         (np.ones(X.shape[1]), (u[:, 0], u[:, 1]))).T
     return permutation

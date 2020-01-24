@@ -7,8 +7,7 @@ import numpy as np
 from time import time
 
 from sklearn.base import BaseEstimator, TransformerMixin
-from joblib import Parallel, delayed
-from sklearn.externals.joblib import Memory
+from joblib import (delayed, Memory, Parallel)
 from sklearn.model_selection import ShuffleSplit
 from sklearn.base import clone
 from nilearn.input_data.masker_validation import check_embedded_nifti_masker
