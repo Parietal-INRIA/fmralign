@@ -10,10 +10,12 @@ from fmralign.tests.utils import (assert_algo_transform_almost_exactly,
 
 
 def test_unsupported_alignment():
-    mask_img = random_niimg((8, 7, 6, 10))
+    img1, mask_img = random_niimg((8, 7, 6, 10))
+    img2, _ = random_niimg((7, 6, 8, 5))
     args = {'alignment_method': 'scaled_procrustes', 'mask': mask_img}
+    algo = PairwiseAlignment(**args)
     with pytest.raises(NotImplementedError):
-        PairwiseAlignment(**args)
+        algo.fit(img1, img2)
 
 
 def test_pairwise_identity():
