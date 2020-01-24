@@ -1,18 +1,14 @@
 import numpy as np
+import nibabel as nib
+from packaging import version
 from scipy.stats import pearsonr
-from nilearn.regions.parcellations import Parcellations
+from sklearn.cluster import MiniBatchKMeans
+
+import nilearn
 from nilearn.image import smooth_img
+from nilearn.regions.parcellations import Parcellations
 from nilearn.masking import _apply_mask_fmri
 from nilearn._utils.niimg_conversions import _check_same_fov
-import nilearn
-import nibabel
-from packaging import version
-import numpy as np
-from sklearn.cluster import MiniBatchKMeans
-from sklearn.base import TransformerMixin, ClusterMixin
-from sklearn.base import BaseEstimator
-from sklearn.utils import check_array
-from sklearn.utils.validation import check_is_fitted
 
 
 def piecewise_transform(labels, estimators, X):
@@ -145,9 +141,9 @@ def _make_parcellation(imgs, clustering, n_pieces, masker, smoothing_fwhm=5, ver
     labels : list of ints (len n_features)
         Parcellation of features in clusters
     """
-    print(clustering)
-    if type(clustering) == nibabel.nifti1.Nifti1Image:
-        # check image makes suitable labels, this will return friendly error message if needed
+    if type(clustering) == nib.nifti1.Nifti1Image:
+        # check image makes suitable labels,
+        # this will return friendly error message if needed
         _check_same_fov(masker.mask_img_, clustering)
         labels_img = clustering
     elif clustering == "hierarchical_kmeans":

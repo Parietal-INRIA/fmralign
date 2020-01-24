@@ -54,6 +54,10 @@ REQUIRED_MODULE_METADATA = (
         'min_version': '3.1.1',
         'required_at_installation': True,
         'install_info': _FMRALIGN_INSTALL_MSG}),
+    ('packaging', {
+        'min_version': '20.0',
+        'required_at_installation': True,
+        'install_info': _FMRALIGN_INSTALL_MSG}),
     ('POT', {
         'min_version': '0.5.0',
         'required_at_installation': False,
