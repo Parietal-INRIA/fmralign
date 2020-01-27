@@ -1,14 +1,21 @@
 # -*- coding: utf-8 -*-
 
-import numpy as np
-import nibabel
-from sklearn.utils.testing import assert_array_almost_equal, assert_greater
+import pytest
+from sklearn.utils.testing import assert_greater
 from nilearn.input_data import NiftiMasker
 from fmralign.pairwise_alignment import PairwiseAlignment
-from fmralign.tests.utils import assert_algo_transform_almost_exactly, \
-    random_niimg, assert_model_align_better_than_identity, \
-    zero_mean_coefficient_determination
-from fmralign.alignment_methods import optimal_permutation, Hungarian
+from fmralign.tests.utils import (assert_algo_transform_almost_exactly,
+                                  zero_mean_coefficient_determination,
+                                  random_niimg)
+
+
+def test_unsupported_alignment():
+    img1, mask_img = random_niimg((8, 7, 6, 10))
+    img2, _ = random_niimg((7, 6, 8, 5))
+    args = {'alignment_method': 'scaled_procrustes', 'mask': mask_img}
+    algo = PairwiseAlignment(**args)
+    with pytest.raises(NotImplementedError):
+        algo.fit(img1, img2)
 
 
 def test_pairwise_identity():
@@ -40,8 +47,8 @@ def test_models_against_identity():
                              'optimal_transport', 'diagonal']:
         for clustering in ["kmeans", "hierarchical_kmeans"]:
             algo = PairwiseAlignment(
-                alignment_method=alignment_method, mask=masker, clustering=clustering,
-                n_pieces=2, n_bags=1, n_jobs=1)
+                alignment_method=alignment_method, mask=masker,
+                clustering=clustering, n_pieces=2, n_bags=1, n_jobs=1)
             algo.fit(img1, img2)
             im_test = algo.transform(img1)
             algo_score = zero_mean_coefficient_determination(ground_truth,
