@@ -32,7 +32,8 @@ def score_voxelwise(ground_truth, prediction, masker, loss,
             The normalized reconstruction error. A perfect prediction
             yields a value of 1.0
     multioutput: str in ['raw_values', 'uniform_average']
-        Defines aggregating of multiple output scores. Default is raw values.
+        Defines method for aggregating multiple output scores. Default method
+        is 'raw_values' i.e. no aggregation.
         'raw_values' :
             Returns a full set of scores in case of multioutput input.
         'uniform_average' :
@@ -69,9 +70,9 @@ def normalized_reconstruction_error(y_true, y_pred, sample_weights=None,
     """
     Calculates the normalized reconstruction error
     as defined by Bazeille and colleagues (2019).
-    
+
     A perfect prediction yields a value of 1.
-    
+
     Parameters
     ----------
     y_true : arr
@@ -80,15 +81,14 @@ def normalized_reconstruction_error(y_true, y_pred, sample_weights=None,
         The predicted array.
     sample_weights : arr
         Weights to assign to each sample.
-    multioutput: str in ['raw_values', 'uniform_average',
-                         'variance_weighted']
-        Defines aggregating of multiple output scores.
-        Default is raw values.
+    multioutput: str in ['raw_values', 'uniform_average']
+        Defines method for aggregating multiple output scores. Default method
+        is 'raw_values' i.e. no aggregation.
         'raw_values' :
             Returns a full set of scores in case of multioutput input.
         'uniform_average' :
             Scores of all outputs are averaged with uniform weight.
-    
+
     Returns
     -------
     score : float or ndarray of floats
@@ -98,7 +98,7 @@ def normalized_reconstruction_error(y_true, y_pred, sample_weights=None,
     ----------
     `Bazeille T., Richard H., Janati H., and Thirion B. (2019) Local
     Optimal Transport for Functional Brain Template Estimation.
-    In: Chung A., Gee J., Yushkevich P., and Bao S. (eds) Information 
+    In: Chung A., Gee J., Yushkevich P., and Bao S. (eds) Information
     Processing in Medical Imaging. Lecture Notes in Computer Science,
     vol 11492. Springer, Cham.
     DOI: 10.1007/978-3-030-20351-1_18.`
@@ -124,7 +124,7 @@ def normalized_reconstruction_error(y_true, y_pred, sample_weights=None,
     if multioutput == 'raw_values':
         # return scores individually
         return output_scores
-    
+
     elif multioutput == 'uniform_average':
         # passing None as weights yields uniform average
         return np.average(output_scores, weights=None)
@@ -135,11 +135,11 @@ def reconstruction_ratio(aligned_error, identity_error):
     Calculates the reconstruction error
     as defined by Bazeille and
     colleagues (2019).
-    
+
     A value greater than 0 indicates that
     voxels are predicted better by aligned data
     than by raw data.
-    
+
     Parameters
     ----------
     aligned_error : float or ndarray of floats
@@ -153,7 +153,7 @@ def reconstruction_ratio(aligned_error, identity_error):
     ----------
     `Bazeille T., Richard H., Janati H., and Thirion B. (2019) Local
     Optimal Transport for Functional Brain Template Estimation.
-    In: Chung A., Gee J., Yushkevich P., and Bao S. (eds) Information 
+    In: Chung A., Gee J., Yushkevich P., and Bao S. (eds) Information
     Processing in Medical Imaging. Lecture Notes in Computer Science,
     vol 11492. Springer, Cham.
     DOI: 10.1007/978-3-030-20351-1_18.`
