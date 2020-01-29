@@ -46,7 +46,7 @@ atlas = load_img(atlas_yeo_2011.thick_7)
 
 # Select visual cortex, create a mask and resample it to the right resolution
 
-mask_visual = new_img_like(atlas, atlas.get_data() == 1)
+mask_visual = new_img_like(atlas, atlas.get_fdata() == 1)
 resampled_mask_visual = resample_to_img(
     mask_visual, mask, interpolation="nearest")
 
@@ -103,7 +103,7 @@ target_test = df[df.subject == 'sub-02'][df.acquisition == 'pa'].path.values
 #
 
 import numpy as np
-n_voxels = roi_masker.mask_img_.get_data().sum()
+n_voxels = roi_masker.mask_img_.get_fdata().sum()
 print("The chosen region of interest contains {} voxels".format(n_voxels))
 n_pieces = int(np.round(n_voxels / 200))
 print("We will cluster them in {} regions".format(n_pieces))
