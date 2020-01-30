@@ -27,14 +27,14 @@ def test_template_identity():
     # test euclidian mean function
     euclidian_template = _rescaled_euclidean_mean(subs, masker)
     assert_array_almost_equal(
-        ref_template.get_data(), euclidian_template.get_data())
+        ref_template.get_fdata(), euclidian_template.get_fdata())
 
     # test different fit() accept list of list of 3D Niimgs as input.
     algo = TemplateAlignment(alignment_method='identity', mask=masker)
     algo.fit([n * [im]] * 3)
     # test template
     assert_array_almost_equal(
-        sub_1.get_data(), algo.template.get_data())
+        sub_1.get_fdata(), algo.template.get_fdata())
 
     # test fit() transform() with 4D Niimgs input for several params set
     args_list = [{'alignment_method': 'identity', 'mask': masker},
@@ -50,13 +50,13 @@ def test_template_identity():
         algo.fit(subs)
         # test template
         assert_array_almost_equal(
-            ref_template.get_data(), algo.template.get_data())
+            ref_template.get_fdata(), algo.template.get_fdata())
         predicted_imgs = algo.transform(
             [index_img(sub_1, range(8))], train_index=range(8),
             test_index=range(8, 10))
         ground_truth = index_img(ref_template, range(8, 10))
         assert_array_almost_equal(
-            ground_truth.get_data(), predicted_imgs[0].get_data())
+            ground_truth.get_fdata(), predicted_imgs[0].get_fdata())
 
     # test transform() with wrong indexes length or content (on previous fitted algo)
     train_inds, test_inds = [[0, 1], [1, 10],

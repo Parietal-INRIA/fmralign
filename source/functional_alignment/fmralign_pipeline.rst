@@ -127,7 +127,7 @@ Extract a mask for the visual cortex from Yeo Atlas
 
 Select visual cortex, create a mask and resample it to the right resolution
 
->>> mask_visual = new_img_like(atlas, atlas.get_data() == 1)
+>>> mask_visual = new_img_like(atlas, atlas.get_fdata() == 1)
 >>> resampled_mask_visual = resample_to_img(
     mask_visual, mask, interpolation="nearest")
 
@@ -178,7 +178,7 @@ To proceed with alignment we use the class PairwiseAlignment with the masker we 
 
 First we choose a suitable number of regions such that each regions is approximately 200 voxels wide.
 
->>> n_voxels = roi_masker.mask_img_.get_data().sum()
+>>> n_voxels = roi_masker.mask_img_.get_fdata().sum()
 >>> n_pieces = np.round(n_voxels / 200)
 
 Then for each method we define the estimator, fit it, and predict new image. We then plot

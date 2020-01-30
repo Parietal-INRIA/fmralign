@@ -50,7 +50,7 @@ atlas = load_img(atlas_yeo)
 
 # Select visual cortex, create a mask and resample it to the right resolution
 
-mask_visual = new_img_like(atlas, atlas.get_data() == 1)
+mask_visual = new_img_like(atlas, atlas.get_fdata() == 1)
 resampled_mask_visual = resample_to_img(
     mask_visual, mask, interpolation="nearest")
 

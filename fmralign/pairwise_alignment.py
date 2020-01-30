@@ -151,7 +151,7 @@ def fit_one_parcellation(X_, Y_, alignment_method, masker, n_pieces,
                                     n_pieces, masker, verbose=verbose)
     else:
         labels = np.ones(
-            int(masker.mask_img_.get_data().sum()), dtype=np.int8)
+            int(masker.mask_img_.get_fdata().sum()), dtype=np.int8)
 
     fit = Parallel(n_jobs, prefer="threads", verbose=verbose)(
         delayed(fit_one_piece)(
