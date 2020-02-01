@@ -124,7 +124,7 @@ print("We will cluster them in {} regions".format(n_pieces))
 #
 
 from fmralign.pairwise_alignment import PairwiseAlignment
-from fmralign._utils import voxelwise_correlation
+from fmralign.metrics import score_voxelwise
 methods = ['identity', 'scaled_orthogonal', 'ridge_cv', 'optimal_transport']
 
 for method in methods:
@@ -132,7 +132,13 @@ for method in methods:
         alignment_method=method, n_pieces=n_pieces, mask=roi_masker)
     alignment_estimator.fit(source_train, target_train)
     target_pred = alignment_estimator.transform(source_test)
-    aligned_score = voxelwise_correlation(target_test, target_pred, roi_masker)
+
+    # derive correlation between prediction, test
+    method_error = score_voxelwise(target_test, target_pred,
+                                   masker=roi_masker, loss='corr')
+
+    # plot correlation for each method
+    aligned_score = roi_masker.inverse_transform(method_error)
     title = "Correlation of prediction after {} alignment".format(method)
     display = plotting.plot_stat_map(aligned_score, display_mode="z",
                                      cut_coords=[-15, -5], vmax=1, title=title)

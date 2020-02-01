@@ -137,15 +137,16 @@ prediction_from_average = index_img(average_subject, test_index)
 # alignment, to see if alignment was able to predict a signal more alike the ground truth.
 #
 
-from fmralign._utils import voxelwise_correlation
+from fmralign.metrics import score_voxelwise
 
 # Now we use this scoring function to compare the correlation of predictions
 # made from group average and from template with the real PA contrasts of sub-07
 
-average_score = voxelwise_correlation(
-    target_test, prediction_from_average, masker)
-template_score = voxelwise_correlation(
-    target_test, prediction_from_template[0], masker)
+average_score = masker.inverse_transform(score_voxelwise(
+    target_test, prediction_from_average, masker, loss='corr'))
+template_score = masker.inverse_transform(score_voxelwise(
+    target_test, prediction_from_template[0], masker, loss='corr'))
+
 
 ###############################################################################
 # Plotting the measures
