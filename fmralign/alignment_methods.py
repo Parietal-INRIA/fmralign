@@ -363,6 +363,9 @@ class OptimalTransportAlignment(Alignment):
             target data'''
 
         n = len(X.T)
+        if n > 5000:
+            raise ValueError(
+                'Alignment with optimal transport on a parcel of {} voxels will take too much time. Decrease parcel sizes'.format(n))
         a = np.ones(n) * 1 / n
         b = np.ones(n) * 1 / n
 
