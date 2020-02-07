@@ -14,7 +14,7 @@ from fmralign.alignment_methods import RidgeAlignment, Identity, Hungarian, \
 from fmralign._utils import _make_parcellation, piecewise_transform
 
 
-def generate_Xi_Yi(labels, X, Y, masker, verbose=0):
+def generate_Xi_Yi(labels, X, Y, masker, verbose):
     """ Generate source and target data X_i and Y_i for each piece i.
 
     Parameters
@@ -41,11 +41,7 @@ def generate_Xi_Yi(labels, X, Y, masker, verbose=0):
     """
     X_ = masker.transform(X)
     Y_ = masker.transform(Y)
-    if verbose > 0:
-        unique_labels, counts = np.unique(labels, return_counts=True)
-        print(counts)
-    else:
-        unique_labels = np.unique(labels)
+    unique_labels = np.unique(labels)
 
     for k in range(len(unique_labels)):
         label = unique_labels[k]
@@ -69,11 +65,10 @@ def fit_one_piece(X_i, Y_i, alignment_method):
         Target data for piece i (shape : n_samples, n_features)
     alignment_method: string
         Algorithm used to perform alignment between X_i and Y_i :
-        - either 'identity', 'scaled_orthogonal', 'ridge_cv',
-            'permutation', 'diagonal'
+        - either 'identity', 'scaled_orthogonal', 'optimal_transport',
+        'ridge_cv', 'permutation', 'diagonal'
         - or an instance of one of alignment classes
             (imported from functional_alignment.alignment_methods)
-
     Returns
     -------
     alignment_algo
@@ -145,13 +140,8 @@ def fit_one_parcellation(X_, Y_, alignment_method, masker, n_pieces,
         Instance of alignment estimator class fitted for X_i, Y_i
     """
     # choose indexes maybe with index_img to not
-    if n_pieces > 1:
-        clustering_data = index_img(X_, clustering_index)
-        labels = _make_parcellation(clustering_data, clustering,
-                                    n_pieces, masker, verbose=verbose)
-    else:
-        labels = np.ones(
-            int(masker.mask_img_.get_fdata().sum()), dtype=np.int8)
+    labels = _make_parcellation(X_, clustering_index, clustering,
+                                n_pieces, masker, verbose=verbose)
 
     fit = Parallel(n_jobs, prefer="threads", verbose=verbose)(
         delayed(fit_one_piece)(
@@ -185,8 +175,8 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         ----------
         alignment_method: string
             Algorithm used to perform alignment between X_i and Y_i :
-            * either 'identity', 'scaled_orthogonal', 'ridge_cv', \
-            'permutation', 'diagonal'
+            * either 'identity', 'scaled_orthogonal', 'optimal_transport', \
+            'ridge_cv', 'permutation', 'diagonal'
             * or an instance of one of alignment classes \
             (imported from functional_alignment.alignment_methods)
         n_pieces: int, optional (default = 1)
