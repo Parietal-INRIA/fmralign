@@ -49,7 +49,7 @@ def test_pairwise_identity():
     # create ground truth
     clustering_mask = new_img_like(mask_img, data_mask)
     data_clust = copy.deepcopy(data_mask)
-    data_clust[1] = 2
+    data_clust[1] = 3
     # create 2-parcels clustering, smaller than background
     clustering = new_img_like(mask_img, data_clust)
 
@@ -61,6 +61,7 @@ def test_pairwise_identity():
         algo.fit(img1, img1)
     assert (algo.mask.get_data() > 0).sum() == (
         clustering.get_data() > 0).sum()
+    algo.transform(img1)
 
 
 def test_models_against_identity():

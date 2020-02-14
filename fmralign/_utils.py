@@ -40,12 +40,13 @@ def piecewise_transform(labels, estimators, X):
     X_transform: nd array (n_features, n_samples)
         Transformed data
     """
-
+    unique_labels = np.unique(labels)
     X_transform = np.zeros_like(X)
-    # Labels are from 1 to n where as estimators are indexed from 0 to n-1
-    for i in np.unique(labels):
-        X_transform[:, labels == i] = estimators[i - 1].transform(
-            X[:, labels == i])
+
+    for i in range(len(unique_labels)):
+        label = unique_labels[i]
+        X_transform[:, labels == label] = estimators[i].transform(
+            X[:, labels == label])
     return X_transform
 
 
