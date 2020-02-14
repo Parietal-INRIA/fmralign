@@ -46,9 +46,11 @@ def _remove_empty_labels(labels):
     return inverse_vals[labels]
 
 
-def _check_labels(unique_labels, counts, threshold=1000):
+def _check_labels(labels, threshold=1000):
     """ Check is some parcels are bigger than a certain threshold and raise warning if so
     """
+    unique_labels, counts = np.unique(
+        labels, return_counts=True)
     above_thr = counts > threshold
 
     warning = "\n Some parcels are more than 1000 voxels wide it can slow down alignment, especially optimal_transport :"
@@ -137,7 +139,7 @@ def _make_parcellation(imgs, clustering_index, clustering, n_pieces, masker, smo
         data to cluster
     clustering_index: list of integers
         Clustering is performed on a subset of the data chosen randomly
-        in timeframes. This index carry this subset.
+        in timeframes. This index carries this subset.
     clustering: string or 3D Niimg
         In : {'kmeans', 'ward', 'rena'}, passed to nilearn Parcellations class.
         If you aim for speed, choose k-means (and check kmeans_smoothing_fwhm parameter)
@@ -204,13 +206,12 @@ def _make_parcellation(imgs, clustering_index, clustering, n_pieces, masker, smo
             ('Clustering should be "kmeans", "ward", "rena", "hierarchical_kmeans", \
              or a 3D Niimg and n_pieces an integer ≥ 1'))
 
-    unique_labels, counts = np.unique(
-        labels, return_counts=True)
-
     if verbose > 0:
+        unique_labels, counts = np.unique(
+            labels, return_counts=True)
         print("The alignment will be applied on parcels of sizes {}".format(counts))
 
     # raise warning if some parcels are bigger than 1000 voxels
-    _check_labels(unique_labels, counts)
+    _check_labels(labels)
 
     return labels
