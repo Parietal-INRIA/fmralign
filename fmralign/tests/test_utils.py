@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 from sklearn.utils.testing import assert_array_almost_equal
 from nilearn.input_data import NiftiMasker
@@ -9,7 +10,6 @@ import nilearn
 from packaging import version
 from nilearn._utils.data_gen import generate_fake_fmri
 from itertools import product
-import warnings
 
 
 def test_hierarchical_k_means():
