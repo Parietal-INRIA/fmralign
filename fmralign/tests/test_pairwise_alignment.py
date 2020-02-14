@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-
+import copy
 import pytest
 import numpy as np
 from sklearn.utils.testing import assert_greater
 from nilearn.input_data import NiftiMasker
+from nilearn.image import new_img_like
 from fmralign.pairwise_alignment import PairwiseAlignment, fit_one_piece
 from fmralign.tests.utils import (assert_algo_transform_almost_exactly,
                                   zero_mean_coefficient_determination,
@@ -41,6 +42,25 @@ def test_pairwise_identity():
         algo = PairwiseAlignment(**args)
         assert_algo_transform_almost_exactly(
             algo, img1, img1, mask=mask_img)
+
+    # test intersection of clustering and mask
+    data_mask = copy.deepcopy(mask_img.get_data())
+    data_mask[0] = 0
+    # create ground truth
+    clustering_mask = new_img_like(mask_img, data_mask)
+    data_clust = copy.deepcopy(data_mask)
+    data_clust[1] = 2
+    # create 2-parcels clustering, smaller than background
+    clustering = new_img_like(mask_img, data_clust)
+
+    # clustering is smaller than mask
+    assert (mask_img.get_data() > 0).sum() > (clustering.get_data() > 0).sum()
+    algo = PairwiseAlignment(alignment_method='identity',
+                             mask=mask_img, clustering=clustering)
+    with pytest.warns(UserWarning):
+        algo.fit(img1, img1)
+    assert (algo.mask.get_data() > 0).sum() == (
+        clustering.get_data() > 0).sum()
 
 
 def test_models_against_identity():
