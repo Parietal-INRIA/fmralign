@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Module implementing alignment estimators on ndarrays
 """
 
@@ -12,6 +13,7 @@ from scipy.optimize import linear_sum_assignment
 from sklearn.metrics.pairwise import pairwise_distances
 from sklearn.linear_model import RidgeCV
 from joblib import Parallel, delayed
+import warnings
 
 
 def scaled_procrustes(X, Y, scaling=False, primal=None):
@@ -364,19 +366,22 @@ class OptimalTransportAlignment(Alignment):
 
         n = len(X.T)
         if n > 5000:
-            raise ValueError(
-                'Alignment with optimal transport on a parcel of {} voxels will take too much time. Decrease parcel sizes'.format(n))
-        a = np.ones(n) * 1 / n
-        b = np.ones(n) * 1 / n
-
-        M = cdist(X.T, Y.T, metric=self.metric)
-
-        if self.solver == 'exact':
-            self.R = self.ot.lp.emd(a, b, M) * n
+            warnings.warn(
+                'One parcel is {} voxels. As optimal transport on this region would take too much time, no alignment was performed on it. Decrease parcel size to have intended behavior of alignment.'.format(n))
+            self.R = np.eye(n)
+            return self
         else:
-            self.R = self.ot.sinkhorn(
-                a, b, M, self.reg, method=self.solver) * n
-        return self
+            a = np.ones(n) * 1 / n
+            b = np.ones(n) * 1 / n
+
+            M = cdist(X.T, Y.T, metric=self.metric)
+
+            if self.solver == 'exact':
+                self.R = self.ot.lp.emd(a, b, M) * n
+            else:
+                self.R = self.ot.sinkhorn(
+                    a, b, M, self.reg, method=self.solver) * n
+            return self
 
     def transform(self, X):
         """Transform X using optimal coupling computed during fit.

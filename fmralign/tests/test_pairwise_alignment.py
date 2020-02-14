@@ -23,7 +23,7 @@ def test_unsupported_alignment():
 def test_optimal_transport_error_big_parcels():
     n_voxels, n_features = 6000, 10
     X, Y = np.ones((n_features, n_voxels)), np.ones((n_features, n_voxels))
-    with pytest.raises(ValueError):
+    with pytest.warns(UserWarning):
         estimator = fit_one_piece(X, Y, "optimal_transport")
 
 
