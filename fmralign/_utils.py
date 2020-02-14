@@ -8,9 +8,20 @@ from sklearn.cluster import MiniBatchKMeans
 import nilearn
 from nilearn.image import smooth_img, index_img
 from nilearn.regions.parcellations import Parcellations
-from nilearn.masking import _apply_mask_fmri
+from nilearn.masking import _apply_mask_fmri, intersect_masks
 from nilearn._utils.niimg_conversions import _check_same_fov
 import warnings
+
+
+def _intersect_clustering_mask(clustering, mask):
+    "Take 3D Niimg clustering and bigger mask, output reduced mask"
+    from nilearn.image import new_img_like
+    dat = clustering.get_data()
+    new_ = np.zeros_like(dat)
+    new_[dat > 0] = 1
+    clustering_mask = new_img_like(clustering, new_)
+    return intersect_masks(
+        [clustering_mask, mask], threshold=1, connected=True)
 
 
 def piecewise_transform(labels, estimators, X):
@@ -166,6 +177,7 @@ def _make_parcellation(imgs, clustering_index, clustering, n_pieces, masker, smo
     if type(clustering) == nib.nifti1.Nifti1Image or os.path.isfile(clustering):
         _check_same_fov(masker.mask_img_, clustering)
         labels = _apply_mask_fmri(clustering, masker.mask_img_).astype(int)
+
     # otherwise check it's needed, if not return 1 everywhere
     elif n_pieces == 1:
         labels = np.ones(
