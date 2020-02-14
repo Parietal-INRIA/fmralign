@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """ Module for pairwise functional alignment
 """
+import warnings
 import numpy as np
+import os
 
 from sklearn.base import BaseEstimator, TransformerMixin
 from joblib import (delayed, Memory, Parallel)
@@ -9,9 +11,10 @@ from sklearn.model_selection import ShuffleSplit
 from sklearn.base import clone
 from nilearn.input_data.masker_validation import check_embedded_nifti_masker
 from nilearn.image import load_img, concat_imgs, index_img
+import nibabel as nib
 from fmralign.alignment_methods import RidgeAlignment, Identity, Hungarian, \
     ScaledOrthogonalAlignment, OptimalTransportAlignment, DiagonalAlignment
-from fmralign._utils import _make_parcellation, piecewise_transform
+from fmralign._utils import _make_parcellation, piecewise_transform, _intersect_clustering_mask
 
 
 def generate_Xi_Yi(labels, X, Y, masker, verbose):
@@ -269,14 +272,25 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         self
         """
         self.masker_ = check_embedded_nifti_masker(self)
-        self.masker_.n_jobs = 1  # self.n_jobs
-        # Avoid warning with imgs != None
-        # if masker_ has been provided a mask_img
+        self.masker_.n_jobs = self.n_jobs
+
         if self.masker_.mask_img is None:
             self.masker_.fit([X])
         else:
             self.masker_.fit()
-        # miss concatenation, transpose
+
+        if type(self.clustering) == nib.nifti1.Nifti1Image or os.path.isfile(self.clustering):
+            # check that clustering provided fills the mask, if not, reduce the mask
+            if 0 in self.masker_.transform(self.clustering):
+                reduced_mask = _intersect_clustering_mask(
+                    self.clustering, self.masker_.mask_img)
+                self.mask = reduced_mask
+                self.masker_ = check_embedded_nifti_masker(self)
+                self.masker_.n_jobs = self.n_jobs
+                self.masker_.fit()
+                warnings.warn(
+                    "Mask used was bigger than clustering provided. Its intersection with the clustering was used instead.")
+
         if isinstance(X, (list, np.ndarray)):
             X_ = concat_imgs(X)
         else:
