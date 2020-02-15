@@ -63,14 +63,14 @@ def _check_labels(labels, threshold=1000):
     """
     unique_labels, counts = np.unique(
         labels, return_counts=True)
-    above_thr = counts > threshold
 
-    warning = "\n Some parcels are more than 1000 voxels wide it can slow down alignment, especially optimal_transport :"
-    for i in range(len(above_thr)):
-        if above_thr[i]:
-            warning += "\n parcel {} : {} voxels".format(
-                unique_labels[i], counts[i])
-    warnings.warn(warning)
+    if not all(count < threshold for count in counts):
+        warning = "\n Some parcels are more than 1000 voxels wide it can slow down alignment, especially optimal_transport :"
+        for i in range(len(counts)):
+            if counts[i] > threshold:
+                warning += "\n parcel {} : {} voxels".format(
+                    unique_labels[i], counts[i])
+        warnings.warn(warning)
     pass
 
 
