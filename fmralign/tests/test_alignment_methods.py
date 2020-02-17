@@ -17,7 +17,7 @@ def test_scaled_procrustes_algorithmic():
     Y = np.zeros_like(X)
     R = np.eye(X.shape[1])
     R_test, _ = scaled_procrustes(X, Y)
-    assert_array_almost_equal(R, R_test.toarray())
+    assert_array_almost_equal(R, R_test)
 
     '''Test if scaled_procrustes basis is orthogonal'''
     X = np.random.rand(3, 4)
@@ -139,6 +139,14 @@ def test_projection_coefficients():
 def test_all_classes_R_and_pred_shape_and_better_than_identity():
     from scipy.sparse.csc import csc_matrix
     '''Test all classes on random case'''
+    # test on empty data
+    X = np.zeros((30, 10))
+    for algo in [Identity(), RidgeAlignment(), ScaledOrthogonalAlignment(),
+                 OptimalTransportAlignment(), Hungarian(), DiagonalAlignment()]:
+        algo.fit(X, X)
+        assert_array_almost_equal(algo.transform(X), X)
+    # if trying to learn a fit from array of zeros to zeros (empty parcel)
+    # every algo will return a zero matrix
 
     for n_samples, n_features in [(100, 20), (20, 100)]:
         X = np.random.randn(n_samples, n_features)
@@ -151,7 +159,7 @@ def test_all_classes_R_and_pred_shape_and_better_than_identity():
                      ScaledOrthogonalAlignment(scaling=False),
                      OptimalTransportAlignment(),
                      Hungarian(), DiagonalAlignment()]:
-            print(algo)
+            # print(algo)
             algo.fit(X, Y)
             # test that permutation matrix shape is (20, 20) except for Ridge
             if type(algo.R) == csc_matrix:

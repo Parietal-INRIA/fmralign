@@ -46,7 +46,7 @@ def scaled_procrustes(X, Y, scaling=False, primal=None):
     X = X.astype(np.float64, copy=False)
     Y = Y.astype(np.float64, copy=False)
     if np.linalg.norm(X) == 0 or np.linalg.norm(Y) == 0:
-        return diags(np.ones(X.shape[1])).tocsr(), 1
+        return np.eye(X.shape[1]), 1
     if primal is None:
         primal = X.shape[0] >= X.shape[1]
     if primal:
@@ -107,7 +107,10 @@ def _projection(x, y):
     d: int
         scaling factor
     """
-    return np.dot(x, y) / np.linalg.norm(x)**2
+    if (x == 0).all():
+        return 0
+    else:
+        return np.dot(x, y) / np.linalg.norm(x)**2
 
 
 def _voxelwise_signal_projection(X, Y, n_jobs=1, parallel_backend='threading'):
@@ -184,6 +187,7 @@ class DiagonalAlignment(Alignment):
             target data'''
         shrinkage_coefficients = _voxelwise_signal_projection(
             X.T, Y.T, self.n_jobs, self.parallel_backend)
+
         self.R = diags(shrinkage_coefficients)
         return
 
