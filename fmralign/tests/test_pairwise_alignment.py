@@ -44,7 +44,7 @@ def test_pairwise_identity():
             algo, img1, img1, mask=mask_img)
 
     # test intersection of clustering and mask
-    data_mask = copy.deepcopy(mask_img.get_data())
+    data_mask = copy.deepcopy(mask_img.get_fdata())
     data_mask[0] = 0
     # create ground truth
     clustering_mask = new_img_like(mask_img, data_mask)
@@ -54,13 +54,18 @@ def test_pairwise_identity():
     clustering = new_img_like(mask_img, data_clust)
 
     # clustering is smaller than mask
-    assert (mask_img.get_data() > 0).sum() > (clustering.get_data() > 0).sum()
+    assert (mask_img.get_fdata() > 0).sum() > (clustering.get_data() > 0).sum()
     algo = PairwiseAlignment(alignment_method='identity',
                              mask=mask_img, clustering=clustering)
     with pytest.warns(UserWarning):
         algo.fit(img1, img1)
-    assert (algo.mask.get_data() > 0).sum() == (
-        clustering.get_data() > 0).sum()
+    assert (algo.mask.get_fdata() > 0).sum() == (
+        clustering.get_fdata() > 0).sum()
+
+    # test warning raised if parcel is 0 :
+    null_im = new_img_like(img1, np.zeros_like(img1.get_fdata()))
+    with pytest.warns(UserWarning):
+        algo.fit(null_im, null_im)
 
 
 def test_models_against_identity():
