@@ -9,6 +9,7 @@ the `INRIA Parietal Project Team <https://team.inria.fr/parietal/>`_.
 * Bertrand Thirion
 * Thomas Bazeille
 * Hugo Richard
+* Elizabeth DuPre
 * `Kshitij Chawla <https://github.com/kchawla-pi>`_
 
 

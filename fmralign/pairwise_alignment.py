@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """ Module for pairwise functional alignment
 """
+import warnings
 import numpy as np
+import os
 
 from sklearn.base import BaseEstimator, TransformerMixin
 from joblib import (delayed, Memory, Parallel)
@@ -9,12 +11,13 @@ from sklearn.model_selection import ShuffleSplit
 from sklearn.base import clone
 from nilearn.input_data.masker_validation import check_embedded_nifti_masker
 from nilearn.image import load_img, concat_imgs, index_img
+import nibabel as nib
 from fmralign.alignment_methods import RidgeAlignment, Identity, Hungarian, \
     ScaledOrthogonalAlignment, OptimalTransportAlignment, DiagonalAlignment
-from fmralign._utils import _make_parcellation, piecewise_transform
+from fmralign._utils import _make_parcellation, piecewise_transform, _intersect_clustering_mask
 
 
-def generate_Xi_Yi(labels, X, Y, masker, verbose=0):
+def generate_Xi_Yi(labels, X, Y, masker, verbose):
     """ Generate source and target data X_i and Y_i for each piece i.
 
     Parameters
@@ -41,11 +44,7 @@ def generate_Xi_Yi(labels, X, Y, masker, verbose=0):
     """
     X_ = masker.transform(X)
     Y_ = masker.transform(Y)
-    if verbose > 0:
-        unique_labels, counts = np.unique(labels, return_counts=True)
-        print(counts)
-    else:
-        unique_labels = np.unique(labels)
+    unique_labels = np.unique(labels)
 
     for k in range(len(unique_labels)):
         label = unique_labels[k]
@@ -69,11 +68,10 @@ def fit_one_piece(X_i, Y_i, alignment_method):
         Target data for piece i (shape : n_samples, n_features)
     alignment_method: string
         Algorithm used to perform alignment between X_i and Y_i :
-        - either 'identity', 'scaled_orthogonal', 'ridge_cv',
-            'permutation', 'diagonal'
+        - either 'identity', 'scaled_orthogonal', 'optimal_transport',
+        'ridge_cv', 'permutation', 'diagonal'
         - or an instance of one of alignment classes
             (imported from functional_alignment.alignment_methods)
-
     Returns
     -------
     alignment_algo
@@ -97,13 +95,20 @@ def fit_one_piece(X_i, Y_i, alignment_method):
                                        OptimalTransportAlignment,
                                        DiagonalAlignment)):
         alignment_algo = clone(alignment_method)
+
+    if not np.count_nonzero(X_i) or not np.count_nonzero(Y_i):
+        warn_msg = ("Empty parcel found. Please check overlap between " +
+                    "provided mask and functional image. Returning " +
+                    "Identity alignment for empty parcel")
+        warnings.warn(warn_msg)
+        alignment_algo = Identity()
     try:
         alignment_algo.fit(X_i, Y_i)
     except UnboundLocalError:
-        warn = "Unrecognized alignment method {}.".format(alignment_method) + \
-               " Please provide a recognized alignment method."
-        raise NotImplementedError(warn)
-
+        warn_msg = ("{} is an unrecognized ".format(alignment_method) +
+                    "alignment method. Please provide a recognized " +
+                    "alignment method.")
+        raise NotImplementedError(warn_msg)
     return alignment_algo
 
 
@@ -145,13 +150,8 @@ def fit_one_parcellation(X_, Y_, alignment_method, masker, n_pieces,
         Instance of alignment estimator class fitted for X_i, Y_i
     """
     # choose indexes maybe with index_img to not
-    if n_pieces > 1:
-        clustering_data = index_img(X_, clustering_index)
-        labels = _make_parcellation(clustering_data, clustering,
-                                    n_pieces, masker, verbose=verbose)
-    else:
-        labels = np.ones(
-            int(masker.mask_img_.get_fdata().sum()), dtype=np.int8)
+    labels = _make_parcellation(X_, clustering_index, clustering,
+                                n_pieces, masker, verbose=verbose)
 
     fit = Parallel(n_jobs, prefer="threads", verbose=verbose)(
         delayed(fit_one_piece)(
@@ -185,62 +185,63 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         ----------
         alignment_method: string
             Algorithm used to perform alignment between X_i and Y_i :
-            * either 'identity', 'scaled_orthogonal', 'ridge_cv', \
-            'permutation', 'diagonal'
-            * or an instance of one of alignment classes \
+            * either 'identity', 'scaled_orthogonal', 'optimal_transport',
+            'ridge_cv', 'permutation', 'diagonal'
+            * or an instance of one of alignment classes
             (imported from functional_alignment.alignment_methods)
         n_pieces: int, optional (default = 1)
             Number of regions in which the data is parcellated for alignment.
             If 1 the alignment is done on full scale data.
-            If >1, the voxels are clustered and alignment is performed \
+            If >1, the voxels are clustered and alignment is performed
             on each cluster applied to X and Y.
         clustering : string or 3D Niimg optional (default : kmeans)
-            'kmeans', 'ward', 'rena', 'hierarchical_kmeans' method used for clustering of voxels based
-            on functional signal, passed to nilearn.regions.parcellations
+            'kmeans', 'ward', 'rena', 'hierarchical_kmeans' method used for
+            clustering of voxels based on functional signal, passed to
+            nilearn.regions.parcellations
             If 3D Niimg, image used as predefined clustering,
             n_bags and n_pieces are then ignored.
         n_bags: int, optional (default = 1)
             If 1 : one estimator is fitted.
             If >1 number of bagged parcellations and estimators used.
-        mask: Niimg-like object, instance of NiftiMasker or \
+        mask: Niimg-like object, instance of NiftiMasker or
                                 MultiNiftiMasker, optional (default = None)
-            Mask to be used on data. If an instance of masker is passed, \
-            then its mask will be used. If no mask is given, \
-            it will be computed automatically by a MultiNiftiMasker \
+            Mask to be used on data. If an instance of masker is passed,
+            then its mask will be used. If no mask is given,
+            it will be computed automatically by a MultiNiftiMasker
             with default parameters.
         smoothing_fwhm: float, optional (default = None)
-            If smoothing_fwhm is not None, it gives the size in millimeters \
+            If smoothing_fwhm is not None, it gives the size in millimeters
             of the spatial smoothing to apply to the signal.
         standardize: boolean, optional (default = False)
-            If standardize is True, the time-series are centered and normed: \
+            If standardize is True, the time-series are centered and normed:
             their variance is put to 1 in the time dimension.
         detrend: boolean, optional (default = None)
-            This parameter is passed to nilearn.signal.clean. \
+            This parameter is passed to nilearn.signal.clean.
             Please see the related documentation for details
         target_affine: 3x3 or 4x4 matrix, optional (default = None)
-            This parameter is passed to nilearn.image.resample_img. \
+            This parameter is passed to nilearn.image.resample_img.
             Please see the related documentation for details.
         target_shape: 3-tuple of integers, optional (default = None)
-            This parameter is passed to nilearn.image.resample_img. \
+            This parameter is passed to nilearn.image.resample_img.
             Please see the related documentation for details.
         low_pass: None or float, optional (default = None)
-            This parameter is passed to nilearn.signal.clean. \
+            This parameter is passed to nilearn.signal.clean.
             Please see the related documentation for details.
         high_pass: None or float, optional (default = None)
-            This parameter is passed to nilearn.signal.clean. \
+            This parameter is passed to nilearn.signal.clean.
             Please see the related documentation for details.
         t_r: float, optional (default = None)
-            This parameter is passed to nilearn.signal.clean. \
+            This parameter is passed to nilearn.signal.clean.
             Please see the related documentation for details.
         memory: instance of joblib.Memory or string (default = None)
-            Used to cache the masking process and results of algorithms. \
-            By default, no caching is done. If a string is given, it is the \
+            Used to cache the masking process and results of algorithms.
+            By default, no caching is done. If a string is given, it is the
             path to the caching directory.
         memory_level: integer, optional (default = None)
-            Rough estimator of the amount of memory used by caching. \
+            Rough estimator of the amount of memory used by caching.
             Higher value means more memory for caching.
         n_jobs: integer, optional (default = 1)
-            The number of CPUs to use to do the computation. -1 means \
+            The number of CPUs to use to do the computation. -1 means
             'all CPUs', -2 'all CPUs but one', and so on.
         verbose: integer, optional (default = 0)
             Indicate the level of verbosity. By default, nothing is printed.
@@ -279,14 +280,26 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         self
         """
         self.masker_ = check_embedded_nifti_masker(self)
-        self.masker_.n_jobs = 1  # self.n_jobs
-        # Avoid warning with imgs != None
-        # if masker_ has been provided a mask_img
+        self.masker_.n_jobs = self.n_jobs
+
         if self.masker_.mask_img is None:
             self.masker_.fit([X])
         else:
             self.masker_.fit()
-        # miss concatenation, transpose
+
+        if type(self.clustering) == nib.nifti1.Nifti1Image or os.path.isfile(self.clustering):
+            # check that clustering provided fills the mask, if not, reduce the mask
+            if 0 in self.masker_.transform(self.clustering):
+                reduced_mask = _intersect_clustering_mask(
+                    self.clustering, self.masker_.mask_img)
+                self.mask = reduced_mask
+                self.masker_ = check_embedded_nifti_masker(self)
+                self.masker_.n_jobs = self.n_jobs
+                self.masker_.fit()
+                warnings.warn(
+                    "Mask used was bigger than clustering provided. " +
+                    "Its intersection with the clustering was used instead.")
+
         if isinstance(X, (list, np.ndarray)):
             X_ = concat_imgs(X)
         else:

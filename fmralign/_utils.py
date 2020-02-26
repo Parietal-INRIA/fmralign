@@ -1,14 +1,26 @@
+# -*- coding: utf-8 -*-
+import os
 import numpy as np
 import nibabel as nib
 from packaging import version
 from scipy.stats import pearsonr
 from sklearn.cluster import MiniBatchKMeans
-
 import nilearn
-from nilearn.image import smooth_img
+from nilearn.image import smooth_img, index_img, new_img_like
 from nilearn.regions.parcellations import Parcellations
-from nilearn.masking import _apply_mask_fmri
+from nilearn.masking import _apply_mask_fmri, intersect_masks
 from nilearn._utils.niimg_conversions import _check_same_fov
+import warnings
+
+
+def _intersect_clustering_mask(clustering, mask):
+    "Take 3D Niimg clustering and bigger mask, output reduced mask"
+    dat = clustering.get_data()
+    new_ = np.zeros_like(dat)
+    new_[dat > 0] = 1
+    clustering_mask = new_img_like(clustering, new_)
+    return intersect_masks(
+        [clustering_mask, mask], threshold=1, connected=True)
 
 
 def piecewise_transform(labels, estimators, X):
@@ -27,12 +39,13 @@ def piecewise_transform(labels, estimators, X):
     X_transform: nd array (n_features, n_samples)
         Transformed data
     """
-
+    unique_labels = np.unique(labels)
     X_transform = np.zeros_like(X)
-    # Labels are from 1 to n where as estimators are indexed from 0 to n-1
-    for i in np.unique(labels):
-        X_transform[:, labels == i] = estimators[i - 1].transform(
-            X[:, labels == i])
+
+    for i in range(len(unique_labels)):
+        label = unique_labels[i]
+        X_transform[:, labels == label] = estimators[i].transform(
+            X[:, labels == label])
     return X_transform
 
 
@@ -42,6 +55,22 @@ def _remove_empty_labels(labels):
     inverse_vals = - np.ones(labels.max() + 1).astype(np.int)
     inverse_vals[vals] = np.arange(len(vals))
     return inverse_vals[labels]
+
+
+def _check_labels(labels, threshold=1000):
+    """ Check is some parcels are bigger than a certain threshold and raise warning if so
+    """
+    unique_labels, counts = np.unique(
+        labels, return_counts=True)
+
+    if not all(count < threshold for count in counts):
+        warning = "\n Some parcels are more than 1000 voxels wide it can slow down alignment, especially optimal_transport :"
+        for i in range(len(counts)):
+            if counts[i] > threshold:
+                warning += "\n parcel {} : {} voxels".format(
+                    unique_labels[i], counts[i])
+        warnings.warn(warning)
+    pass
 
 
 def _hierarchical_k_means(X, n_clusters, init="k-means++", batch_size=1000,
@@ -110,7 +139,7 @@ def _hierarchical_k_means(X, n_clusters, init="k-means++", batch_size=1000,
     return _remove_empty_labels(fine_labels)
 
 
-def _make_parcellation(imgs, clustering, n_pieces, masker, smoothing_fwhm=5, verbose=0):
+def _make_parcellation(imgs, clustering_index, clustering, n_pieces, masker, smoothing_fwhm=5, verbose=0):
     """Convenience function to use nilearn Parcellation class in our pipeline.
     It is used to find local regions of the brain in which alignment will be later applied.
     For alignment computational efficiency, regions should be of hundreds of voxels.
@@ -119,6 +148,9 @@ def _make_parcellation(imgs, clustering, n_pieces, masker, smoothing_fwhm=5, ver
     ----------
     imgs: Niimgs
         data to cluster
+    clustering_index: list of integers
+        Clustering is performed on a subset of the data chosen randomly
+        in timeframes. This index carries this subset.
     clustering: string or 3D Niimg
         In : {'kmeans', 'ward', 'rena'}, passed to nilearn Parcellations class.
         If you aim for speed, choose k-means (and check kmeans_smoothing_fwhm parameter)
@@ -141,22 +173,31 @@ def _make_parcellation(imgs, clustering, n_pieces, masker, smoothing_fwhm=5, ver
     labels : list of ints (len n_features)
         Parcellation of features in clusters
     """
-    if type(clustering) == nib.nifti1.Nifti1Image:
-        # check image makes suitable labels,
-        # this will return friendly error message if needed
+    # check if clustering is provided
+    if type(clustering) == nib.nifti1.Nifti1Image or os.path.isfile(clustering):
         _check_same_fov(masker.mask_img_, clustering)
-        labels_img = clustering
-    elif clustering == "hierarchical_kmeans":
-        images_to_parcel = imgs
+        labels = _apply_mask_fmri(clustering, masker.mask_img_).astype(int)
+
+    # otherwise check it's needed, if not return 1 everywhere
+    elif n_pieces == 1:
+        labels = np.ones(
+            int(masker.mask_img_.get_fdata().sum()), dtype=np.int8)
+    # otherwise check requested clustering method
+    elif clustering == "hierarchical_kmeans" and n_pieces > 1:
+        imgs_subset = index_img(imgs, clustering_index)
         if smoothing_fwhm is not None:
-            images_to_parcel = smooth_img(imgs, smoothing_fwhm)
-        X = masker.transform(images_to_parcel)
-        labels_ = _hierarchical_k_means(
+            X = masker.transform(smooth_img(imgs_subset, smoothing_fwhm))
+        else:
+            X = masker.transform(imgs_subset)
+        labels = _hierarchical_k_means(
             X.T, n_clusters=n_pieces, verbose=verbose) + 1
-        labels_img = masker.inverse_transform(labels_)
-    elif clustering in ['kmeans', 'ward', 'rena']:
+
+    elif clustering in ['kmeans', 'ward', 'rena'] and n_pieces > 1:
+        imgs_subset = index_img(imgs, clustering_index)
         if clustering == "kmeans" and smoothing_fwhm is not None:
-            images_to_parcel = smooth_img(imgs, smoothing_fwhm)
+            images_to_parcel = smooth_img(imgs_subset, smoothing_fwhm)
+        else:
+            images_to_parcel = imgs_subset
         try:
             parcellation = Parcellations(method=clustering, n_parcels=n_pieces, mask=masker,
                                          scaling=False, n_iter=20, verbose=verbose)
@@ -168,10 +209,21 @@ def _make_parcellation(imgs, clustering, n_pieces, masker, smoothing_fwhm=5, ver
             else:
                 parcellation = Parcellations(
                     method=clustering, n_parcels=n_pieces, mask=masker, verbose=verbose)
-        parcellation.fit(imgs)
-        labels_img = parcellation.labels_img_
+        parcellation.fit(images_to_parcel)
+        labels = _apply_mask_fmri(
+            parcellation.labels_img_, masker.mask_img_).astype(int)
+
     else:
         raise InputError(
             ('Clustering should be "kmeans", "ward", "rena", "hierarchical_kmeans", \
-             or a 3D Niimg'))
-    return _apply_mask_fmri(labels_img, masker.mask_img_).astype(int)
+             or a 3D Niimg, and n_pieces should be an integer ≥ 1'))
+
+    if verbose > 0:
+        unique_labels, counts = np.unique(
+            labels, return_counts=True)
+        print("The alignment will be applied on parcels of sizes {}".format(counts))
+
+    # raise warning if some parcels are bigger than 1000 voxels
+    _check_labels(labels)
+
+    return labels
