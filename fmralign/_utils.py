@@ -6,7 +6,7 @@ from packaging import version
 from scipy.stats import pearsonr
 from sklearn.cluster import MiniBatchKMeans
 import nilearn
-from nilearn.image import smooth_img, index_img
+from nilearn.image import smooth_img, index_img, new_img_like
 from nilearn.regions.parcellations import Parcellations
 from nilearn.masking import _apply_mask_fmri, intersect_masks
 from nilearn._utils.niimg_conversions import _check_same_fov
@@ -15,7 +15,6 @@ import warnings
 
 def _intersect_clustering_mask(clustering, mask):
     "Take 3D Niimg clustering and bigger mask, output reduced mask"
-    from nilearn.image import new_img_like
     dat = clustering.get_data()
     new_ = np.zeros_like(dat)
     new_[dat > 0] = 1
@@ -183,7 +182,7 @@ def _make_parcellation(imgs, clustering_index, clustering, n_pieces, masker, smo
     elif n_pieces == 1:
         labels = np.ones(
             int(masker.mask_img_.get_fdata().sum()), dtype=np.int8)
-    # otherwise check
+    # otherwise check requested clustering method
     elif clustering == "hierarchical_kmeans" and n_pieces > 1:
         imgs_subset = index_img(imgs, clustering_index)
         if smoothing_fwhm is not None:
@@ -217,7 +216,7 @@ def _make_parcellation(imgs, clustering_index, clustering, n_pieces, masker, smo
     else:
         raise InputError(
             ('Clustering should be "kmeans", "ward", "rena", "hierarchical_kmeans", \
-             or a 3D Niimg and n_pieces an integer ≥ 1'))
+             or a 3D Niimg, and n_pieces should be an integer ≥ 1'))
 
     if verbose > 0:
         unique_labels, counts = np.unique(

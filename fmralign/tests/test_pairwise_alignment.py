@@ -61,7 +61,6 @@ def test_pairwise_identity():
         algo.fit(img1, img1)
     assert (algo.mask.get_data() > 0).sum() == (
         clustering.get_data() > 0).sum()
-    algo.transform(img1)
 
 
 def test_models_against_identity():

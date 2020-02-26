@@ -27,7 +27,6 @@ def test_make_parcellation():
     img, mask_img = random_niimg((7, 6, 8, 5))
     indexes = np.arange(img.shape[-1])
     masker = NiftiMasker(mask_img=mask_img).fit()
-    #
 
     methods = ["kmeans", "ward", "hierarchical_kmeans"]
 
