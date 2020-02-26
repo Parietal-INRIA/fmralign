@@ -95,13 +95,20 @@ def fit_one_piece(X_i, Y_i, alignment_method):
                                        OptimalTransportAlignment,
                                        DiagonalAlignment)):
         alignment_algo = clone(alignment_method)
+
+    if not np.count_nonzero(X_i) or not np.count_nonzero(Y_i):
+        warn_msg = ("Empty parcel found. Please check overlap between " +
+                    "provided mask and functional image. Returning " +
+                    "Identity alignment for empty parcel")
+        warnings.warn(warn_msg)
+        alignment_algo = Identity()
     try:
         alignment_algo.fit(X_i, Y_i)
     except UnboundLocalError:
-        warn = "Unrecognized alignment method {}.".format(alignment_method) + \
-               " Please provide a recognized alignment method."
-        raise NotImplementedError(warn)
-
+        warn_msg = ("{} is an unrecognized ".format(alignment_method) +
+                    "alignment method. Please provide a recognized " +
+                    "alignment method.")
+        raise NotImplementedError(warn_msg)
     return alignment_algo
 
 
