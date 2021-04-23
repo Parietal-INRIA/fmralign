@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-from sklearn.utils.testing import assert_array_almost_equal, assert_greater
+from numpy.testing import assert_array_almost_equal
 from scipy.linalg import orthogonal_procrustes
 from fmralign.alignment_methods import scaled_procrustes, \
     optimal_permutation, _voxelwise_signal_projection
 from fmralign.alignment_methods import Identity, DiagonalAlignment, Hungarian,\
-    ScaledOrthogonalAlignment, RidgeAlignment, OptimalTransportAlignment
-from fmralign.tests.utils import assert_class_align_better_than_identity, \
-    zero_mean_coefficient_determination
+    ScaledOrthogonalAlignment, RidgeAlignment, OptimalTransportAlignment, POTAlignment
+from fmralign.tests.utils import zero_mean_coefficient_determination
 
 
 def test_scaled_procrustes_algorithmic():
@@ -147,7 +146,6 @@ def test_all_classes_R_and_pred_shape_and_better_than_identity():
         assert_array_almost_equal(algo.transform(X), X)
     # if trying to learn a fit from array of zeros to zeros (empty parcel)
     # every algo will return a zero matrix
-
     for n_samples, n_features in [(100, 20), (20, 100)]:
         X = np.random.randn(n_samples, n_features)
         Y = np.random.randn(n_samples, n_features)
@@ -173,4 +171,19 @@ def test_all_classes_R_and_pred_shape_and_better_than_identity():
             assert(X_pred.shape == X.shape)
             algo_score = zero_mean_coefficient_determination(
                 Y, X_pred)
-            assert_greater(algo_score, identity_baseline_score)
+            assert algo_score >= identity_baseline_score
+
+
+# %%
+def test_ott_backend():
+    n_samples, n_features = 100, 20
+    epsilon = .1
+    X = np.random.randn(n_samples, n_features)
+    Y = np.random.randn(n_samples, n_features)
+    algo = OptimalTransportAlignment(
+        reg=epsilon, metric="euclidean", tol=1e-5, max_iter=10000)
+    old_implem = POTAlignment(
+        reg=epsilon, metric="euclidean", tol=1e-5, max_iter=10000)
+    algo.fit(X, Y)
+    old_implem.fit(X, Y)
+    assert_array_almost_equal(algo.R, old_implem.R, decimal=3)

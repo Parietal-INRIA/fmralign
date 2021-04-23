@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-from sklearn.utils.testing import assert_array_almost_equal
+from numpy.testing import assert_array_almost_equal
 from nilearn.input_data import NiftiMasker
 import nibabel
 import pytest
@@ -8,8 +8,6 @@ from fmralign.tests.utils import random_niimg
 from fmralign._utils import _make_parcellation, _hierarchical_k_means
 import nilearn
 from packaging import version
-from nilearn._utils.data_gen import generate_fake_fmri
-from itertools import product
 
 
 def test_hierarchical_k_means():
