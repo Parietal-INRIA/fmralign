@@ -1,14 +1,15 @@
 import numpy as np
 import nibabel as nib
 from nilearn.input_data import NiftiMasker
-from sklearn.utils.testing import assert_array_almost_equal
+from numpy.testing import assert_array_almost_equal
 
 from fmralign import metrics
+
 
 def test_score_voxelwise():
     A = np.asarray([[
         [[1, 1.2, 1, 1.2, 1]],
-        [[1, 1, 1, .2, 1]], 
+        [[1, 1, 1, .2, 1]],
         [[1, -1, 1, -1, 1]]
     ]])
     B = np.asarray([[
@@ -23,13 +24,13 @@ def test_score_voxelwise():
 
     # check correlation raw_values
     correlation1 = metrics.score_voxelwise(im_A, im_B,
-                                          masker, loss='corr')
+                                           masker, loss='corr')
     assert_array_almost_equal(correlation1, [1., -0.25, -1])
 
     # check correlation uniform_average
     correlation2 = metrics.score_voxelwise(im_A, im_B,
-                                          masker, loss='corr',
-                                          multioutput='uniform_average')
+                                           masker, loss='corr',
+                                           multioutput='uniform_average')
     assert(correlation2.ndim == 0)
 
     # check R2
@@ -53,7 +54,7 @@ def test_normalized_reconstruction_error():
         [.2, 1, 1, 1, 1],
         [-1, 1, -1, 1, -1]
     ])
-    
+
     avg_norm_rec = metrics.normalized_reconstruction_error(
         A, B, multioutput='uniform_average')
     np.testing.assert_almost_equal(avg_norm_rec, -0.788203)

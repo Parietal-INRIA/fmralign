@@ -332,8 +332,10 @@ def _import_ot():
         return ot
 
 
-class OptimalTransportAlignment(Alignment):
+class POTAlignment(Alignment):
     '''Compute the optimal coupling between X and Y with entropic regularization.
+    Legacy implementation of optimal transport alignment based on POT.
+    Kept to check compatibility of new implementation
 
     Parameters
     ----------
@@ -354,11 +356,13 @@ class OptimalTransportAlignment(Alignment):
     '''
 
     def __init__(self, solver='sinkhorn_epsilon_scaling',
-                 metric='euclidean', reg=1):
+                 metric='euclidean', reg=1, max_iter=1000, tol=1e-3):
         self.ot = _import_ot()
         self.solver = solver
         self.metric = metric
         self.reg = reg
+        self.max_iter = max_iter
+        self.tol = tol
 
     def fit(self, X, Y):
         '''Parameters
@@ -366,7 +370,8 @@ class OptimalTransportAlignment(Alignment):
         X: (n_samples, n_features) nd array
             source data
         Y: (n_samples, n_features) nd array
-            target data'''
+            target data
+            '''
 
         n = len(X.T)
         if n > 5000:
@@ -386,8 +391,57 @@ class OptimalTransportAlignment(Alignment):
                 self.R = self.ot.lp.emd(a, b, M) * n
             else:
                 self.R = self.ot.sinkhorn(
-                    a, b, M, self.reg, method=self.solver) * n
+                    a, b, M, self.reg, method=self.solver, numItermax=self.max_iter, stopThr=self.tol) * n
             return self
+
+    def transform(self, X):
+        """Transform X using optimal coupling computed during fit.
+        """
+        return X.dot(self.R)
+
+
+class OptimalTransportAlignment(Alignment):
+    '''Compute the optimal coupling between X and Y with entropic regularization
+    using a OTT as a backend for acceleration.
+
+    Parameters
+    ----------
+    metric : str(optional)
+        metric used to create transport cost matrix, \
+        see full list in scipy.spatial.distance.cdist doc
+    reg : int (optional)
+        level of entropic regularization
+
+    Attributes
+    ----------
+    R : scipy.sparse.csr_matrix
+        Mixing matrix containing the optimal permutation
+    '''
+
+    def __init__(self, metric='euclidean', reg=1, max_iter=1000, tol=1e-3):
+        self.metric = metric
+        self.reg = reg
+        self.tol = tol
+        self.max_iter = max_iter
+
+    def fit(self, X, Y):
+        '''Parameters
+        --------------
+        X: (n_samples, n_features) nd array
+            source data
+        Y: (n_samples, n_features) nd array
+            target data
+            '''
+        from ott.geometry import geometry
+        from ott.tools import transport
+        n = len(X.T)
+        cost_matrix = cdist(X.T, Y.T, metric=self.metric)
+        geom = geometry.Geometry(cost_matrix=cost_matrix, epsilon=self.reg)
+        P = transport.Transport(
+            geom, max_iterations=self.max_iter, threshold=self.tol)
+        P.solve()
+        self.R = np.asarray(P.matrix * n)
+        return self
 
     def transform(self, X):
         """Transform X using optimal coupling computed during fit.

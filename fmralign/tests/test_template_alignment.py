@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import pytest
-from sklearn.utils.testing import assert_array_almost_equal, assert_greater
-
+from numpy.testing import assert_array_almost_equal
 from nilearn.input_data import NiftiMasker
 from nilearn.image import math_img, concat_imgs, index_img
 
@@ -105,5 +104,5 @@ def test_template_closer_to_target():
         template_data = masker.transform(algo.template)
         template_mean_distance = zero_mean_coefficient_determination(
             avg_data, template_data)
-        assert_greater(template_mean_distance, mean_distance_1)
-        assert_greater(template_mean_distance, mean_distance_2)
+        assert template_mean_distance >= mean_distance_1
+        assert template_mean_distance >= mean_distance_2

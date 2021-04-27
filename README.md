@@ -39,7 +39,7 @@ pip install -e .
 Optionally, if you want to use optimal transport based method, you should also run:
 
 ```
-pip install POT
+pip install ott-jax
 ```
 
 You're up and running!

@@ -2,7 +2,6 @@
 import copy
 import pytest
 import numpy as np
-from sklearn.utils.testing import assert_greater
 from nilearn.input_data import NiftiMasker
 from nilearn.image import new_img_like
 from fmralign.pairwise_alignment import PairwiseAlignment, fit_one_piece
@@ -18,13 +17,6 @@ def test_unsupported_alignment():
     algo = PairwiseAlignment(**args)
     with pytest.raises(NotImplementedError):
         algo.fit(img1, img2)
-
-
-def test_optimal_transport_error_big_parcels():
-    n_voxels, n_features = 6000, 10
-    X, Y = np.ones((n_features, n_voxels)), np.ones((n_features, n_voxels))
-    with pytest.warns(UserWarning):
-        estimator = fit_one_piece(X, Y, "optimal_transport")
 
 
 def test_pairwise_identity():
@@ -87,4 +79,4 @@ def test_models_against_identity():
             algo_score = zero_mean_coefficient_determination(ground_truth,
                                                              masker.transform(
                                                                  im_test))
-            assert_greater(algo_score, identity_baseline_score)
+            assert algo_score >= identity_baseline_score
