@@ -62,6 +62,10 @@ REQUIRED_MODULE_METADATA = (
         'min_version': '0.5.0',
         'required_at_installation': False,
         'install_info': _FMRALIGN_INSTALL_MSG})
+    ('fastsrm', {
+        'min_version': '0.0.4',
+        'required_at_installation': True,
+        'install_info': _FMRALIGN_INSTALL_MSG})
 )
 
 

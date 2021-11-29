@@ -19,6 +19,7 @@ fmralign requires a Python installation and the following dependencies:
 * Matplotlib >= 3.1.1
 * Nibabel >= 2.5.0
 * Nilearn >= 1.5.0
+* FastSRM >= 0.0.4
 
 ### Installation
 
