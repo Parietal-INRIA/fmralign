@@ -66,7 +66,7 @@ plot_roi(resampled_mask_visual, title='Visual regions mask extracted from atlas'
 # 'http://nilearn.github.io/manipulating_images/masker_objects.html'
 #
 
-from nilearn.input_data import NiftiMasker
+from nilearn.maskers import NiftiMasker
 roi_masker = NiftiMasker(mask_img=resampled_mask_visual).fit()
 
 ###############################################################################

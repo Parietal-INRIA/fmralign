@@ -47,7 +47,7 @@ REQUIRED_MODULE_METADATA = (
         'required_at_installation': True,
         'install_info': _FMRALIGN_INSTALL_MSG}),
     ('nilearn', {
-        'min_version': '0.5.2',
+        'min_version': '0.9.0',
         'required_at_installation': True,
         'install_info': _FMRALIGN_INSTALL_MSG}),
     ('matplotlib', {

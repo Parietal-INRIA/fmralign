@@ -44,7 +44,7 @@ imgs, df, mask_img = fetch_ibc_subjects_contrasts(
 #   'http://nilearn.github.io/manipulating_images/masker_objects.html'
 #
 
-from nilearn.input_data import NiftiMasker
+from nilearn.maskers import NiftiMasker
 masker = NiftiMasker(mask_img=mask_img).fit()
 
 ###############################################################################
