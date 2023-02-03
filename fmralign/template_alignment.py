@@ -9,7 +9,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 import numpy as np
 from joblib import (delayed, Memory, Parallel)
 from nilearn.image import index_img, concat_imgs, load_img
-from nilearn.input_data.masker_validation import check_embedded_nifti_masker
+from nilearn.maskers._masker_validation import _check_embedded_nifti_masker
 from fmralign.pairwise_alignment import PairwiseAlignment
 
 
@@ -186,7 +186,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
                  mask=None, smoothing_fwhm=None, standardize=False,
                  detrend=None, target_affine=None, target_shape=None,
                  low_pass=None, high_pass=None, t_r=None,
-                 memory=Memory(cachedir=None), memory_level=0,
+                 memory=Memory(location=None), memory_level=0,
                  n_jobs=1, verbose=0):
         '''
         Parameters
