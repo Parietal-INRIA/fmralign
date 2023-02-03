@@ -315,7 +315,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             if isinstance(imgs[0], (list, np.ndarray)):
                 imgs = [concat_imgs(img) for img in imgs]
 
-        self.masker_ = check_embedded_nifti_masker(self)
+        self.masker_ = _check_embedded_nifti_masker(self)
         self.masker_.n_jobs = self.n_jobs  # self.n_jobs
 
         # if masker_ has been provided a mask_img
