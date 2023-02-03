@@ -173,7 +173,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
                  smoothing_fwhm=None, standardize=False, detrend=False,
                  target_affine=None, target_shape=None, low_pass=None,
                  high_pass=None, t_r=None,
-                 memory=Memory(cachedir=None), memory_level=0,
+                 memory=Memory(location=None), memory_level=0,
                  n_jobs=1, verbose=0):
         """
         If n_pieces > 1, decomposes the images into regions \
