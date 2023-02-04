@@ -279,7 +279,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         -------
         self
         """
-        self.masker_ = check_embedded_nifti_masker(self)
+        self.masker_ = _check_embedded_nifti_masker(self)
         self.masker_.n_jobs = self.n_jobs
 
         if self.masker_.mask_img is None:
@@ -293,7 +293,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
                 reduced_mask = _intersect_clustering_mask(
                     self.clustering, self.masker_.mask_img)
                 self.mask = reduced_mask
-                self.masker_ = check_embedded_nifti_masker(self)
+                self.masker_ = _check_embedded_nifti_masker(self)
                 self.masker_.n_jobs = self.n_jobs
                 self.masker_.fit()
                 warnings.warn(
