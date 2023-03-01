@@ -9,7 +9,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from joblib import (delayed, Memory, Parallel)
 from sklearn.model_selection import ShuffleSplit
 from sklearn.base import clone
-from nilearn.input_data.masker_validation import check_embedded_nifti_masker
+from nilearn.maskers._masker_validation import _check_embedded_nifti_masker
 from nilearn.image import load_img, concat_imgs, index_img
 import nibabel as nib
 from fmralign.alignment_methods import RidgeAlignment, Identity, Hungarian, \
@@ -173,7 +173,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
                  smoothing_fwhm=None, standardize=False, detrend=False,
                  target_affine=None, target_shape=None, low_pass=None,
                  high_pass=None, t_r=None,
-                 memory=Memory(cachedir=None), memory_level=0,
+                 memory=Memory(location=None), memory_level=0,
                  n_jobs=1, verbose=0):
         """
         If n_pieces > 1, decomposes the images into regions \
@@ -279,7 +279,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         -------
         self
         """
-        self.masker_ = check_embedded_nifti_masker(self)
+        self.masker_ = _check_embedded_nifti_masker(self)
         self.masker_.n_jobs = self.n_jobs
 
         if self.masker_.mask_img is None:
@@ -293,7 +293,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
                 reduced_mask = _intersect_clustering_mask(
                     self.clustering, self.masker_.mask_img)
                 self.mask = reduced_mask
-                self.masker_ = check_embedded_nifti_masker(self)
+                self.masker_ = _check_embedded_nifti_masker(self)
                 self.masker_.n_jobs = self.n_jobs
                 self.masker_.fit()
                 warnings.warn(
