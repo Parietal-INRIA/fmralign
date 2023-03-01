@@ -61,7 +61,7 @@ REQUIRED_MODULE_METADATA = (
     ('ott-jax', {
         'min_version': '0.3.0',
         'required_at_installation': True,
-        'install_info': _FMRALIGN_INSTALL_MSG})
+        'install_info': _FMRALIGN_INSTALL_MSG}),
     ('POT', {
         'min_version': '0.5.0',
         'required_at_installation': False,
