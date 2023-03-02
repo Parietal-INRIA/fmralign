@@ -4,7 +4,6 @@
 
 import numpy as np
 import scipy
-from scipy.spatial.distance import cdist
 from scipy import linalg
 from scipy.sparse import diags
 import sklearn
@@ -434,14 +433,15 @@ class OptimalTransportAlignment(Alignment):
             '''
         from ott.geometry import geometry
         from ott.solvers.linear import sinkhorn
+        from ott.geometry.costs import Euclidean
         from ott.problems.linear import linear_problem
 
-        cost_matrix = cdist(X.T, Y.T, metric=self.metric)
+        cost_matrix = Euclidean().all_pairs(x=X.T, y=Y.T)
         geom = geometry.Geometry(cost_matrix=cost_matrix, epsilon=self.reg)
-        problem = linear_problem.LinearProblem(geom, X.T, Y.T)
+        problem = linear_problem.LinearProblem(geom)
 
         solver = sinkhorn.Sinkhorn(
-            geom, max_iterations=self.max_iter, threshold=self.tol, jit=True)
+            geom, max_iterations=self.max_iter, threshold=self.tol)
         self.R = solver(problem).matrix
         return self
 
