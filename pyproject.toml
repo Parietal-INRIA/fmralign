@@ -1,0 +1,40 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fmralign"
+description = "Functional alignment and template estimation for fMRI"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { file="LICENSE" }
+authors = [
+  { name="Elizabeth DuPre", email="emd222@cornell.edu" },
+  { name="Thomas Bazeille"},
+  { name="Bertrand Thirion"},
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "numpy",
+    "pandas",
+    "matplotlib",
+    "scikit-learn",
+    "joblib",
+    "scipy",
+    "nibabel",
+    "nilearn > 0.9.0",
+    "POT",
+    "ott-jax"
+]
+dynamic = ["version"]
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "fmralign/_version.py"
+
+[tool.hatch.metadata]
+allow-direct-references = true
