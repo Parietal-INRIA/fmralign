@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
 """ Module implementing alignment estimators on ndarrays
 """
-
-import numpy as np
 import scipy
-from scipy.spatial.distance import cdist
+import sklearn
+import warnings
+import numpy as np
 from scipy import linalg
 from scipy.sparse import diags
-import sklearn
-from sklearn.base import BaseEstimator, TransformerMixin
+from joblib import Parallel, delayed
+from sklearn.linear_model import RidgeCV
+from scipy.spatial.distance import cdist
 from scipy.optimize import linear_sum_assignment
 from sklearn.metrics.pairwise import pairwise_distances
-from sklearn.linear_model import RidgeCV
-from joblib import Parallel, delayed
-import warnings
+from sklearn.base import BaseEstimator, TransformerMixin
 
 
 def scaled_procrustes(X, Y, scaling=False, primal=None):

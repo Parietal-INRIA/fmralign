@@ -5,12 +5,12 @@ prediction of new subjects unseen images
 # Author: T. Bazeille, B. Thirion
 # License: simplified BSD
 
-from sklearn.base import BaseEstimator, TransformerMixin
 import numpy as np
 from joblib import (delayed, Memory, Parallel)
+from sklearn.base import BaseEstimator, TransformerMixin
+from fmralign.pairwise_alignment import PairwiseAlignment
 from nilearn.image import index_img, concat_imgs, load_img
 from nilearn.maskers._masker_validation import _check_embedded_nifti_masker
-from fmralign.pairwise_alignment import PairwiseAlignment
 
 
 def _rescaled_euclidean_mean(imgs, masker, scale_average=False):

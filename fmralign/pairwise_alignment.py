@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 """ Module for pairwise functional alignment
 """
+import os
 import warnings
 import numpy as np
-import os
-
-from sklearn.base import BaseEstimator, TransformerMixin
+import nibabel as nib
+from sklearn.base import clone
 from joblib import (delayed, Memory, Parallel)
 from sklearn.model_selection import ShuffleSplit
-from sklearn.base import clone
+from sklearn.base import BaseEstimator, TransformerMixin
+
+from nilearn.image import load_img, concat_imgs
 from nilearn.maskers._masker_validation import _check_embedded_nifti_masker
-from nilearn.image import load_img, concat_imgs, index_img
-import nibabel as nib
-from fmralign.alignment_methods import RidgeAlignment, Identity, Hungarian, \
-    ScaledOrthogonalAlignment, OptimalTransportAlignment, DiagonalAlignment
+
+from fmralign import alignment_methods
 from fmralign._utils import _make_parcellation, piecewise_transform, _intersect_clustering_mask
 
 
@@ -79,21 +79,23 @@ def fit_one_piece(X_i, Y_i, alignment_method):
     """
 
     if alignment_method == 'identity':
-        alignment_algo = Identity()
+        alignment_algo = alignment_methods.Identity()
     elif alignment_method == 'scaled_orthogonal':
-        alignment_algo = ScaledOrthogonalAlignment()
+        alignment_algo = alignment_methods.ScaledOrthogonalAlignment()
     elif alignment_method == 'ridge_cv':
-        alignment_algo = RidgeAlignment()
+        alignment_algo = alignment_methods.RidgeAlignment()
     elif alignment_method == 'permutation':
-        alignment_algo = Hungarian()
+        alignment_algo = alignment_methods.Hungarian()
     elif alignment_method == 'optimal_transport':
-        alignment_algo = OptimalTransportAlignment()
+        alignment_algo = alignment_methods.OptimalTransportAlignment()
     elif alignment_method == 'diagonal':
-        alignment_algo = DiagonalAlignment()
-    elif isinstance(alignment_method, (Identity, ScaledOrthogonalAlignment,
-                                       RidgeAlignment, Hungarian,
-                                       OptimalTransportAlignment,
-                                       DiagonalAlignment)):
+        alignment_algo = alignment_methods.DiagonalAlignment()
+    elif isinstance(alignment_method, (alignment_methods.Identity,
+                                       alignment_methods.ScaledOrthogonalAlignment,
+                                       alignment_methods.RidgeAlignment,
+                                       alignment_methods.Hungarian,
+                                       alignment_methods.OptimalTransportAlignment,
+                                       alignment_methods.DiagonalAlignment)):
         alignment_algo = clone(alignment_method)
 
     if not np.count_nonzero(X_i) or not np.count_nonzero(Y_i):
@@ -101,7 +103,7 @@ def fit_one_piece(X_i, Y_i, alignment_method):
                     "provided mask and functional image. Returning " +
                     "Identity alignment for empty parcel")
         warnings.warn(warn_msg)
-        alignment_algo = Identity()
+        alignment_algo = alignment_methods.Identity()
     try:
         alignment_algo.fit(X_i, Y_i)
     except UnboundLocalError:
