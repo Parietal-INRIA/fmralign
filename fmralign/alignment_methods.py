@@ -433,13 +433,13 @@ class OptimalTransportAlignment(Alignment):
             target data
             '''
         from ott.geometry import geometry
-        from ott.tools import transport
+        from ott.solvers.linear import sinkhorn
+        import jax
         n = len(X.T)
         cost_matrix = cdist(X.T, Y.T, metric=self.metric)
         geom = geometry.Geometry(cost_matrix=cost_matrix, epsilon=self.reg)
-        P = transport.Transport(
-            geom, max_iterations=self.max_iter, threshold=self.tol)
-        P.solve()
+        P = jax.jit(sinkhorn.solve)(
+            geom, threshold=self.tol)
         self.R = np.asarray(P.matrix * n)
         return self
 

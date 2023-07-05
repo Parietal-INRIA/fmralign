@@ -52,7 +52,7 @@ def piecewise_transform(labels, estimators, X):
 def _remove_empty_labels(labels):
     '''Remove empty values label values from labels list'''
     vals = np.unique(labels)
-    inverse_vals = - np.ones(labels.max() + 1).astype(np.int)
+    inverse_vals = - np.ones(labels.max() + 1).astype(int)
     inverse_vals[vals] = np.arange(len(vals))
     return inverse_vals[labels]
 
