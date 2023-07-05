@@ -136,7 +136,7 @@ def test_projection_coefficients():
 
 
 def test_all_classes_R_and_pred_shape_and_better_than_identity():
-    from scipy.sparse.csc import csc_matrix
+    from scipy.sparse import csc_matrix
     '''Test all classes on random case'''
     # test on empty data
     X = np.zeros((30, 10))

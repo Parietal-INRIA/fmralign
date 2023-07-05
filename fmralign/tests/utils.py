@@ -1,6 +1,6 @@
 from numpy.testing import assert_array_almost_equal
 from sklearn.metrics import r2_score
-from nilearn.input_data import NiftiMasker
+from nilearn.maskers import NiftiMasker
 import numpy as np
 import nibabel
 

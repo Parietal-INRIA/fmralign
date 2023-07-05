@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from numpy.testing import assert_array_almost_equal
-from nilearn.input_data import NiftiMasker
+from nilearn.maskers import NiftiMasker
 import nibabel
 import pytest
 from fmralign.tests.utils import random_niimg

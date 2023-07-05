@@ -1,6 +1,6 @@
 import numpy as np
 import nibabel as nib
-from nilearn.input_data import NiftiMasker
+from nilearn.maskers import NiftiMasker
 from numpy.testing import assert_array_almost_equal
 
 from fmralign import metrics

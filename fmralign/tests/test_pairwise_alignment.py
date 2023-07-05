@@ -2,7 +2,7 @@
 import copy
 import pytest
 import numpy as np
-from nilearn.input_data import NiftiMasker
+from nilearn.maskers import NiftiMasker
 from nilearn.image import new_img_like
 from fmralign.pairwise_alignment import PairwiseAlignment, fit_one_piece
 from fmralign.tests.utils import (assert_algo_transform_almost_exactly,

@@ -47,7 +47,7 @@ with metadata about each of them. We use the mask provided to define a
 `Nilearn masker <http://nilearn.github.io/manipulating_images/masker_objects.html>`_
 that will keep only relevant data.
 
->>> from nilearn.input_data import NiftiMasker
+>>> from nilearn.maskers import NiftiMasker
 >>> masker = NiftiMasker(mask_img=mask).fit()
 
 
