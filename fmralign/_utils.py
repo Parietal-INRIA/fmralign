@@ -15,7 +15,7 @@ import warnings
 
 def _intersect_clustering_mask(clustering, mask):
     "Take 3D Niimg clustering and bigger mask, output reduced mask"
-    dat = clustering.get_data()
+    dat = clustering.get_fdata().astype(int)
     new_ = np.zeros_like(dat)
     new_[dat > 0] = 1
     clustering_mask = new_img_like(clustering, new_)
