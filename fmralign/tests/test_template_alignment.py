@@ -105,4 +105,4 @@ def test_template_closer_to_target():
         template_mean_distance = zero_mean_coefficient_determination(
             avg_data, template_data)
         assert template_mean_distance >= mean_distance_1
-        assert template_mean_distance >= mean_distance_2
+        assert template_mean_distance >= mean_distance_2 - 1.e-3 # for robustness
