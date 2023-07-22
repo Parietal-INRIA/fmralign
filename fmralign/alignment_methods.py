@@ -4,6 +4,7 @@
 
 import numpy as np
 import scipy
+from scipy.spatial.distance import cdist
 from scipy import linalg
 from scipy.sparse import diags
 import sklearn
@@ -274,7 +275,6 @@ class RidgeAlignment(Alignment):
             target data
         """
         self.R = RidgeCV(alphas=self.alphas, fit_intercept=True,
-                         normalize=False,
                          scoring=sklearn.metrics.SCORERS['r2'],
                          cv=self.cv)
         self.R.fit(X, Y)
@@ -431,18 +431,22 @@ class OptimalTransportAlignment(Alignment):
         Y: (n_samples, n_features) nd array
             target data
             '''
-        from ott.geometry import geometry
+        import jax
+        from ott.geometry import costs, geometry
         from ott.solvers.linear import sinkhorn
-        from ott.geometry.costs import Euclidean
         from ott.problems.linear import linear_problem
 
-        cost_matrix = Euclidean().all_pairs(x=X.T, y=Y.T)
+        if self.metric == 'euclidean':
+            cost_matrix = costs.Euclidean().all_pairs(x=X.T, y=Y.T)
+        else:
+            cost_matrix = cdist(X.T, Y.T, metric=self.metric)
         geom = geometry.Geometry(cost_matrix=cost_matrix, epsilon=self.reg)
         problem = linear_problem.LinearProblem(geom)
 
         solver = sinkhorn.Sinkhorn(
             geom, max_iterations=self.max_iter, threshold=self.tol)
-        self.R = solver(problem).matrix
+        self.R = jax.jit(solver)(problem).matrix
+
         return self
 
     def transform(self, X):
