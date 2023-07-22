@@ -401,7 +401,7 @@ class POTAlignment(Alignment):
 
 class OptimalTransportAlignment(Alignment):
     '''Compute the optimal coupling between X and Y with entropic regularization
-    using a OTT as a backend for acceleration.
+    using a OTT-JAX as a backend for acceleration.
 
     Parameters
     ----------
@@ -413,7 +413,7 @@ class OptimalTransportAlignment(Alignment):
 
     Attributes
     ----------
-    R : scipy.sparse.csr_matrix
+    R : jaxlib.xla_extension.Array
         Mixing matrix containing the optimal permutation
     '''
 
@@ -431,15 +431,22 @@ class OptimalTransportAlignment(Alignment):
         Y: (n_samples, n_features) nd array
             target data
             '''
-        from ott.geometry import geometry
-        from ott.solvers.linear import sinkhorn
         import jax
-        n = len(X.T)
-        cost_matrix = cdist(X.T, Y.T, metric=self.metric)
+        from ott.geometry import costs, geometry
+        from ott.solvers.linear import sinkhorn
+        from ott.problems.linear import linear_problem
+
+        if self.metric == 'euclidean':
+            cost_matrix = costs.Euclidean().all_pairs(x=X.T, y=Y.T)
+        else:
+            cost_matrix = cdist(X.T, Y.T, metric=self.metric)
         geom = geometry.Geometry(cost_matrix=cost_matrix, epsilon=self.reg)
-        P = jax.jit(sinkhorn.solve)(
-            geom, threshold=self.tol)
-        self.R = np.asarray(P.matrix * n)
+        problem = linear_problem.LinearProblem(geom)
+
+        solver = sinkhorn.Sinkhorn(
+            geom, max_iterations=self.max_iter, threshold=self.tol)
+        self.R = jax.jit(solver)(problem).matrix
+
         return self
 
     def transform(self, X):
