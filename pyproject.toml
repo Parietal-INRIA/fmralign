@@ -26,7 +26,7 @@ dependencies = [
     "nibabel",
     "nilearn > 0.9.0",
     "POT",
-    "ott-jax"
+    "ott-jax > 0.3.0"
 ]
 dynamic = ["version"]
 
