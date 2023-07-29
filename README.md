@@ -2,23 +2,11 @@
 [Functional alignment and template estimation library](https://parietal-inria.github.io/fmralign-docs) for functional Magnetic Resonance Imaging (fMRI) data
 
 This library is meant to be a light-weight Python library that handles functional
-alignment tasks. It is compatible with and inspired from [Nilearn](http://nilearn.github.io).
-
+alignment tasks. It is compatible with and inspired by [Nilearn](http://nilearn.github.io).
 Alternative implementations of these ideas can be found in the
 [pymvpa](http://www.pymvpa.org) or [brainiak](http://brainiak.org) packages.
 
 ## Getting Started
-
-### Prerequisites
-
-fmralign requires a Python installation and the following dependencies:
-* Python >= 3.6
-* Numpy >= 1.16.2
-* SciPy >= 1.2.2
-* Scikit-learn >= 0.20
-* Matplotlib >= 3.1.1
-* Nibabel >= 2.5.0
-* Nilearn >= 1.5.0
 
 ### Installation
 

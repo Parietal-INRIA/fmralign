@@ -3,10 +3,8 @@
 import numpy as np
 from numpy.testing import assert_array_almost_equal
 from scipy.linalg import orthogonal_procrustes
-from fmralign.alignment_methods import scaled_procrustes, \
-    optimal_permutation, _voxelwise_signal_projection
-from fmralign.alignment_methods import Identity, DiagonalAlignment, Hungarian,\
-    ScaledOrthogonalAlignment, RidgeAlignment, OptimalTransportAlignment, POTAlignment
+from fmralign.alignment_methods import (scaled_procrustes, optimal_permutation, _voxelwise_signal_projection)
+from fmralign.alignment_methods import (Identity, DiagonalAlignment, Hungarian, ScaledOrthogonalAlignment, RidgeAlignment, OptimalTransportAlignment, POTAlignment)
 from fmralign.tests.utils import zero_mean_coefficient_determination
 
 
