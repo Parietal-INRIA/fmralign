@@ -5,7 +5,7 @@
 This light-weight Python library provides access to a range of functional alignment methods, including Procrustes and Optimal Transport.
 It is compatible with and inspired by [Nilearn](http://nilearn.github.io).
 Alternative implementations of these ideas can be found in the [pymvpa](http://www.pymvpa.org) or [brainiak](http://brainiak.org) packages.
-The [netrep]() library also offers many of the same metrics,though with a more general focus beyond fMRI data.
+The [netrep](https://github.com/ahwillia/netrep) library also offers many of the same metrics,though with a more general focus beyond fMRI data.
 
 ## Getting Started
 
