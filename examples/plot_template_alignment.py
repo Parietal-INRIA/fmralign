@@ -33,8 +33,10 @@ To run this example, you must launch IPython via ``ipython
 #
 
 from fmralign.fetch_example_data import fetch_ibc_subjects_contrasts
+
 imgs, df, mask_img = fetch_ibc_subjects_contrasts(
-    ['sub-01', 'sub-02', 'sub-04', 'sub-05', 'sub-06', 'sub-07'])
+    ["sub-01", "sub-02", "sub-04", "sub-05", "sub-06", "sub-07"]
+)
 
 ###############################################################################
 # Definine a masker
@@ -45,6 +47,7 @@ imgs, df, mask_img = fetch_ibc_subjects_contrasts(
 #
 
 from nilearn.maskers import NiftiMasker
+
 masker = NiftiMasker(mask_img=mask_img).fit()
 
 ###############################################################################
@@ -60,18 +63,19 @@ masker = NiftiMasker(mask_img=mask_img).fit()
 # we make a list of 4D niimgs from our list of list of files containing 3D images
 
 from nilearn.image import concat_imgs
+
 template_train = []
 for i in range(5):
     template_train.append(concat_imgs(imgs[i]))
-target_train = df[df.subject == 'sub-07'][df.acquisition == 'ap'].path.values
+target_train = df[df.subject == "sub-07"][df.acquisition == "ap"].path.values
 
 # For subject sub-07, we split it in two folds:
-#   - target train: sub-07 AP contrasts, used to learn alignment to template
+#   - target train: sub-07 AP contrasts, used to learn alignment to template
 #   - target test: sub-07 PA contrasts, used as a ground truth to score predictions
 # We make a single 4D Niimg from our list of 3D filenames
 
 target_train = concat_imgs(target_train)
-target_test = df[df.subject == 'sub-07'][df.acquisition == 'pa'].path.values
+target_test = df[df.subject == "sub-07"][df.acquisition == "pa"].path.values
 
 ###############################################################################
 # Compute a baseline (average of subjects)
@@ -98,11 +102,13 @@ average_subject = masker.inverse_transform(average_img)
 #     new template space.
 #
 
-from fmralign.template_alignment import TemplateAlignment
 from nilearn.image import index_img
 
+from fmralign.template_alignment import TemplateAlignment
+
 template_estim = TemplateAlignment(
-    n_pieces=150, alignment_method='ridge_cv', mask=masker)
+    n_pieces=150, alignment_method="ridge_cv", mask=masker
+)
 template_estim.fit(template_train)
 
 ###############################################################################
@@ -121,8 +127,9 @@ test_index = range(53, 106)
 # We input the mapping image target_train in a list, we could have input more
 # than one subject for which we'd want to predict : [train_1, train_2 ...]
 
-prediction_from_template = template_estim.transform([target_train], train_index,
-                                                    test_index)
+prediction_from_template = template_estim.transform(
+    [target_train], train_index, test_index
+)
 
 # As a baseline prediction, let's just take the average of activations across subjects.
 
@@ -131,7 +138,7 @@ prediction_from_average = index_img(average_subject, test_index)
 ###############################################################################
 # Score the baseline and the prediction
 # -------------------------------------
-# We use a utility scoring function to measure the voxelwise correlation
+# We use a utility scoring function to measure the voxelwise correlation
 # between the prediction and the ground truth. That is, for each voxel, we
 # measure the correlation between its profile of activation without and with
 # alignment, to see if alignment was able to predict a signal more alike the ground truth.
@@ -142,30 +149,33 @@ from fmralign.metrics import score_voxelwise
 # Now we use this scoring function to compare the correlation of predictions
 # made from group average and from template with the real PA contrasts of sub-07
 
-average_score = masker.inverse_transform(score_voxelwise(
-    target_test, prediction_from_average, masker, loss='corr'))
-template_score = masker.inverse_transform(score_voxelwise(
-    target_test, prediction_from_template[0], masker, loss='corr'))
+average_score = masker.inverse_transform(
+    score_voxelwise(target_test, prediction_from_average, masker, loss="corr")
+)
+template_score = masker.inverse_transform(
+    score_voxelwise(target_test, prediction_from_template[0], masker, loss="corr")
+)
 
 
 ###############################################################################
-# Plotting the measures
+# Plotting the measures
 # ---------------------
 # Finally we plot both scores
 #
 
 from nilearn import plotting
+
 baseline_display = plotting.plot_stat_map(
-    average_score, display_mode="z", vmax=1, cut_coords=[-15, -5])
-baseline_display.title(
-    "Group average correlation wt ground truth")
+    average_score, display_mode="z", vmax=1, cut_coords=[-15, -5]
+)
+baseline_display.title("Group average correlation wt ground truth")
 display = plotting.plot_stat_map(
-    template_score, display_mode="z", cut_coords=[-15, -5], vmax=1)
-display.title(
-    "Template-based prediction correlation wt ground truth")
+    template_score, display_mode="z", cut_coords=[-15, -5], vmax=1
+)
+display.title("Template-based prediction correlation wt ground truth")
 
 ###############################################################################
-# We observe that creating a template and aligning a new subject to it yields
+# We observe that creating a template and aligning a new subject to it yields
 # a prediction that is better correlated with the ground truth than just using
 # the average activations of subjects.
 #

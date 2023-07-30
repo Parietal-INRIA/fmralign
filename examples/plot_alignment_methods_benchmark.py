@@ -29,8 +29,8 @@ To run this example, you must launch IPython via ``ipython
 #
 
 from fmralign.fetch_example_data import fetch_ibc_subjects_contrasts
-files, df, mask = fetch_ibc_subjects_contrasts(
-    ['sub-01', 'sub-02'])
+
+files, df, mask = fetch_ibc_subjects_contrasts(["sub-01", "sub-02"])
 
 
 ###############################################################################
@@ -40,19 +40,24 @@ files, df, mask = fetch_ibc_subjects_contrasts(
 #
 
 from nilearn import datasets, plotting
-from nilearn.image import resample_to_img, load_img, new_img_like
+from nilearn.image import load_img, new_img_like, resample_to_img
+
 atlas_yeo_2011 = datasets.fetch_atlas_yeo_2011()
 atlas = load_img(atlas_yeo_2011.thick_7)
 
-# Select visual cortex, create a mask and resample it to the right resolution
+# Select visual cortex, create a mask and resample it to the right resolution
 
 mask_visual = new_img_like(atlas, atlas.get_fdata() == 1)
-resampled_mask_visual = resample_to_img(
-    mask_visual, mask, interpolation="nearest")
+resampled_mask_visual = resample_to_img(mask_visual, mask, interpolation="nearest")
 
 # Plot the mask we will use
-plotting.plot_roi(resampled_mask_visual, title='Visual regions mask extracted from atlas',
-                  cut_coords=(8, -80, 9), colorbar=True, cmap='Paired')
+plotting.plot_roi(
+    resampled_mask_visual,
+    title="Visual regions mask extracted from atlas",
+    cut_coords=(8, -80, 9),
+    colorbar=True,
+    cmap="Paired",
+)
 
 ###############################################################################
 # Define a masker
@@ -63,12 +68,13 @@ plotting.plot_roi(resampled_mask_visual, title='Visual regions mask extracted fr
 #
 
 from nilearn.maskers import NiftiMasker
+
 roi_masker = NiftiMasker(mask_img=resampled_mask_visual).fit()
 
 ###############################################################################
 # Prepare the data
 # ----------------
-# For each subject, for each task and conditions, our dataset contains two
+# For each subject, for each task and conditions, our dataset contains two
 # independent acquisitions, similar except for one acquisition parameter, the
 # encoding phase used that was either Antero-Posterior (AP) or
 # Postero-Anterior (PA). Although this induces small differences
@@ -81,17 +87,17 @@ roi_masker = NiftiMasker(mask_img=resampled_mask_visual).fit()
 # * source train: AP contrasts for subject sub-01
 # * target train: AP contrasts for subject sub-02
 
-source_train = df[df.subject == 'sub-01'][df.acquisition == 'ap'].path.values
-target_train = df[df.subject == 'sub-02'][df.acquisition == 'ap'].path.values
+source_train = df[df.subject == "sub-01"][df.acquisition == "ap"].path.values
+target_train = df[df.subject == "sub-02"][df.acquisition == "ap"].path.values
 
 # The testing set:
-# * source test: PA contrasts for subject one, used to predict
+# * source test: PA contrasts for subject one, used to predict
 #   the corresponding contrasts of subject sub-01
 # * target test: PA contrasts for subject sub-02, used as a ground truth
 #   to score our predictions
 
-source_test = df[df.subject == 'sub-01'][df.acquisition == 'pa'].path.values
-target_test = df[df.subject == 'sub-02'][df.acquisition == 'pa'].path.values
+source_test = df[df.subject == "sub-01"][df.acquisition == "pa"].path.values
+target_test = df[df.subject == "sub-02"][df.acquisition == "pa"].path.values
 
 ###############################################################################
 # Choose the number of regions for local alignment
@@ -103,6 +109,7 @@ target_test = df[df.subject == 'sub-02'][df.acquisition == 'pa'].path.values
 #
 
 import numpy as np
+
 n_voxels = roi_masker.mask_img_.get_fdata().sum()
 print("The chosen region of interest contains {} voxels".format(n_voxels))
 n_pieces = int(np.round(n_voxels / 200))
@@ -123,25 +130,29 @@ print("We will cluster them in {} regions".format(n_pieces))
 # its correlation with the real signal.
 #
 
-from fmralign.pairwise_alignment import PairwiseAlignment
 from fmralign.metrics import score_voxelwise
-methods = ['identity', 'scaled_orthogonal', 'ridge_cv', 'optimal_transport']
+from fmralign.pairwise_alignment import PairwiseAlignment
+
+methods = ["identity", "scaled_orthogonal", "ridge_cv", "optimal_transport"]
 
 for method in methods:
     alignment_estimator = PairwiseAlignment(
-        alignment_method=method, n_pieces=n_pieces, mask=roi_masker)
+        alignment_method=method, n_pieces=n_pieces, mask=roi_masker
+    )
     alignment_estimator.fit(source_train, target_train)
     target_pred = alignment_estimator.transform(source_test)
 
     # derive correlation between prediction, test
-    method_error = score_voxelwise(target_test, target_pred,
-                                   masker=roi_masker, loss='corr')
+    method_error = score_voxelwise(
+        target_test, target_pred, masker=roi_masker, loss="corr"
+    )
 
     # plot correlation for each method
     aligned_score = roi_masker.inverse_transform(method_error)
     title = "Correlation of prediction after {} alignment".format(method)
-    display = plotting.plot_stat_map(aligned_score, display_mode="z",
-                                     cut_coords=[-15, -5], vmax=1, title=title)
+    display = plotting.plot_stat_map(
+        aligned_score, display_mode="z", cut_coords=[-15, -5], vmax=1, title=title
+    )
 
 ###############################################################################
 # We can observe that all alignment methods perform better than identity

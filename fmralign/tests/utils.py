@@ -1,12 +1,13 @@
+import nibabel
+import numpy as np
+from nilearn.input_data import NiftiMasker
 from numpy.testing import assert_array_almost_equal
 from sklearn.metrics import r2_score
-from nilearn.input_data import NiftiMasker
-import numpy as np
-import nibabel
 
 
-def zero_mean_coefficient_determination(y_true, y_pred, sample_weight=None,
-                                        multioutput="uniform_average"):
+def zero_mean_coefficient_determination(
+    y_true, y_pred, sample_weight=None, multioutput="uniform_average"
+):
     if y_true.ndim == 1:
         y_true = y_true.reshape((-1, 1))
 
@@ -16,7 +17,7 @@ def zero_mean_coefficient_determination(y_true, y_pred, sample_weight=None,
     if sample_weight is not None:
         weight = sample_weight[:, np.newaxis]
     else:
-        weight = 1.
+        weight = 1.0
 
     numerator = (weight * (y_true - y_pred) ** 2).sum(axis=0, dtype=np.float64)
     denominator = (weight * (y_true) ** 2).sum(axis=0, dtype=np.float64)
@@ -24,20 +25,19 @@ def zero_mean_coefficient_determination(y_true, y_pred, sample_weight=None,
     nonzero_numerator = numerator != 0
     valid_score = nonzero_denominator & nonzero_numerator
     output_scores = np.ones([y_true.shape[1]])
-    output_scores[valid_score] = 1 - (numerator[valid_score] /
-                                      denominator[valid_score])
+    output_scores[valid_score] = 1 - (numerator[valid_score] / denominator[valid_score])
     output_scores[nonzero_numerator & ~nonzero_denominator] = 0
 
-    if multioutput == 'raw_values':
+    if multioutput == "raw_values":
         # return scores individually
         return output_scores
-    elif multioutput == 'uniform_average':
+    elif multioutput == "uniform_average":
         # passing None as weights results is uniform mean
         avg_weights = None
-    elif multioutput == 'variance_weighted':
-        avg_weights = (weight * (y_true - np.average(y_true, axis=0,
-                                                     weights=sample_weight))
-                       ** 2).sum(axis=0, dtype=np.float64)
+    elif multioutput == "variance_weighted":
+        avg_weights = (
+            weight * (y_true - np.average(y_true, axis=0, weights=sample_weight)) ** 2
+        ).sum(axis=0, dtype=np.float64)
         # avoid fail on constant y or one-element arrays
         if not np.any(nonzero_denominator):
             if not np.any(nonzero_numerator):
@@ -56,8 +56,7 @@ def assert_class_align_better_than_identity(algo, X, Y):
     """
     print(algo)
     algo.fit(X, Y)
-    identity_baseline_score = zero_mean_coefficient_determination(
-        Y, X)
+    identity_baseline_score = zero_mean_coefficient_determination(Y, X)
     algo_score = zero_mean_coefficient_determination(Y, algo.transform(X))
     assert algo_score >= identity_baseline_score
 
@@ -70,8 +69,9 @@ def assert_algo_transform_almost_exactly(algo, img1, img2, mask=None):
     imtest = algo.transform(img1)
     masker = NiftiMasker(mask_img=mask)
     masker.fit()
-    assert_array_almost_equal(masker.transform(
-        img2), masker.transform(imtest), decimal=6)
+    assert_array_almost_equal(
+        masker.transform(img2), masker.transform(imtest), decimal=6
+    )
 
 
 def random_niimg(shape):
@@ -92,7 +92,9 @@ def assert_model_align_better_than_identity(algo, img1, img2, mask=None):
     masker = NiftiMasker(mask)
     masker.fit()
     identity_baseline_score = zero_mean_coefficient_determination(
-        masker.transform(img2), masker.transform(img1))
+        masker.transform(img2), masker.transform(img1)
+    )
     algo_score = zero_mean_coefficient_determination(
-        masker.transform(img2), masker.transform(im_test))
+        masker.transform(img2), masker.transform(im_test)
+    )
     assert algo_score >= identity_baseline_score

@@ -29,8 +29,8 @@ To run this example, you must launch IPython via ``ipython
 #
 
 from fmralign.fetch_example_data import fetch_ibc_subjects_contrasts
-files, df, mask = fetch_ibc_subjects_contrasts(
-    ['sub-01', 'sub-02'])
+
+files, df, mask = fetch_ibc_subjects_contrasts(["sub-01", "sub-02"])
 
 ###############################################################################
 # Define a masker
@@ -41,6 +41,7 @@ files, df, mask = fetch_ibc_subjects_contrasts(
 #
 
 from nilearn.maskers import NiftiMasker
+
 masker = NiftiMasker(mask_img=mask)
 mask
 masker.fit()
@@ -48,12 +49,12 @@ masker.fit()
 ###############################################################################
 # Prepare the data
 # ----------------
-# For each subject, for each task and conditions, our dataset contains two
+# For each subject, for each task and conditions, our dataset contains two
 # independent acquisitions, similar except for one acquisition parameter, the
 # encoding phase used that was either Antero-Posterior (AP) or Postero-Anterior (PA).
 #
 # Although this induces small differences in the final data, we will take
-# advantage of these "duplicates to create a training and a testing set that
+# advantage of these "duplicates to create a training and a testing set that
 # contains roughly the same signals but acquired totally independently.
 #
 
@@ -61,17 +62,17 @@ masker.fit()
 # * source train: AP contrasts for subject sub-01
 # * target train: AP contrasts for subject sub-02
 
-source_train = df[df.subject == 'sub-01'][df.acquisition == 'ap'].path.values
-target_train = df[df.subject == 'sub-02'][df.acquisition == 'ap'].path.values
+source_train = df[df.subject == "sub-01"][df.acquisition == "ap"].path.values
+target_train = df[df.subject == "sub-02"][df.acquisition == "ap"].path.values
 
 # The testing fold:
-# * source test: PA contrasts for subject sub-01, used to predict
+# * source test: PA contrasts for subject sub-01, used to predict
 #   the corresponding contrasts of subject sub-02
 # * target test: PA contrasts for subject sub-02, used as a ground truth
 #   to score our predictions
 
-source_test = df[df.subject == 'sub-01'][df.acquisition == 'pa'].path.values
-target_test = df[df.subject == 'sub-02'][df.acquisition == 'pa'].path.values
+source_test = df[df.subject == "sub-01"][df.acquisition == "pa"].path.values
+target_test = df[df.subject == "sub-02"][df.acquisition == "pa"].path.values
 
 
 ###############################################################################
@@ -85,8 +86,10 @@ target_test = df[df.subject == 'sub-02'][df.acquisition == 'pa'].path.values
 #
 
 from fmralign.pairwise_alignment import PairwiseAlignment
+
 alignment_estimator = PairwiseAlignment(
-    alignment_method='scaled_orthogonal', n_pieces=150, mask=masker)
+    alignment_method="scaled_orthogonal", n_pieces=150, mask=masker
+)
 # Learn alignment operator from subject 1 to subject 2 on training data
 alignment_estimator.fit(source_train, target_train)
 # Predict test data for subject 2 from subject 1
@@ -95,7 +98,7 @@ target_pred = alignment_estimator.transform(source_test)
 ###############################################################################
 # Score the baseline and the prediction
 # -------------------------------------
-# We use a utility scoring function to measure the voxelwise correlation between
+# We use a utility scoring function to measure the voxelwise correlation between
 # the prediction and the ground truth. That is, for each voxel, we measure the
 # correlation between its profile of activation without and with alignment,
 # to see if alignment was able to predict a signal more alike the ground truth.
@@ -106,23 +109,28 @@ from fmralign.metrics import score_voxelwise
 # Now we use this scoring function to compare the correlation of aligned and
 # original data from sub-01 made with the real PA contrasts of sub-02.
 
-baseline_score = masker.inverse_transform(score_voxelwise(
-    target_test, source_test, masker, loss='corr'))
-aligned_score = masker.inverse_transform(score_voxelwise(
-    target_test, target_pred, masker, loss='corr'))
+baseline_score = masker.inverse_transform(
+    score_voxelwise(target_test, source_test, masker, loss="corr")
+)
+aligned_score = masker.inverse_transform(
+    score_voxelwise(target_test, target_pred, masker, loss="corr")
+)
 
 ###############################################################################
-# Plotting the measures
+# Plotting the measures
 # ---------------------
 # Finally we plot both scores
 #
 
 from nilearn import plotting
+
 baseline_display = plotting.plot_stat_map(
-    baseline_score, display_mode="z", vmax=1, cut_coords=[-15, -5])
+    baseline_score, display_mode="z", vmax=1, cut_coords=[-15, -5]
+)
 baseline_display.title("Baseline correlation wt ground truth")
 display = plotting.plot_stat_map(
-    aligned_score, display_mode="z", cut_coords=[-15, -5], vmax=1)
+    aligned_score, display_mode="z", cut_coords=[-15, -5], vmax=1
+)
 display.title("Prediction correlation wt ground truth")
 
 ###############################################################################
