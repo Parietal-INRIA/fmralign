@@ -198,7 +198,7 @@ class DiagonalAlignment(Alignment):
 
 
 class ScaledOrthogonalAlignment(Alignment):
-    """Compute a orthogonal mixing matrix R and a scaling sc such that Frobenius norm \
+    """Compute a orthogonal mixing matrix R and a scaling sc such that Frobenius norm
     ||sc RX - Y||^2 is minimized.
 
     Parameters
@@ -237,7 +237,7 @@ class ScaledOrthogonalAlignment(Alignment):
 
 
 class RidgeAlignment(Alignment):
-    """ Compute a scikit-estimator R using a mixing matrix M s.t Frobenius \
+    """Compute a scikit-estimator R using a mixing matrix M s.t Frobenius
     norm || XM - Y ||^2 + alpha * ||M||^2 is minimized with cross-validation
 
     Parameters
@@ -245,13 +245,13 @@ class RidgeAlignment(Alignment):
     R : scikit-estimator from sklearn.linear_model.RidgeCV
         with methods fit, predict
     alpha : numpy array of shape [n_alphas]
-        Array of alpha values to try. Regularization strength; \
-        must be a positive float. Regularization improves the conditioning \
-        of the problem and reduces the variance of the estimates. \
-        Larger values specify stronger regularization. Alpha corresponds to \
+        Array of alpha values to try. Regularization strength;
+        must be a positive float. Regularization improves the conditioning
+        of the problem and reduces the variance of the estimates.
+        Larger values specify stronger regularization. Alpha corresponds to
         ``C^-1`` in other models such as LogisticRegression or LinearSVC.
     cv : int, cross-validation generator or an iterable, optional
-        Determines the cross-validation splitting strategy.\
+        Determines the cross-validation splitting strategy.
         Possible inputs for cv are:
         -None, to use the efficient Leave-One-Out cross-validation
         - integer, to specify the number of folds.
@@ -404,7 +404,7 @@ class OptimalTransportAlignment(Alignment):
     Parameters
     ----------
     metric : str(optional)
-        metric used to create transport cost matrix, \
+        metric used to create transport cost matrix,
         see full list in scipy.spatial.distance.cdist doc
     reg : int (optional)
         level of entropic regularization

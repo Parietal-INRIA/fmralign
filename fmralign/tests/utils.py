@@ -51,7 +51,7 @@ def zero_mean_coefficient_determination(
 
 
 def assert_class_align_better_than_identity(algo, X, Y):
-    """ Tests that the given algorithm align ndarrays X into Y better than \
+    """Tests that the given algorithm align ndarrays X into Y better than
     identity. This alignment is measured through r2 score.
     """
     print(algo)
@@ -62,8 +62,8 @@ def assert_class_align_better_than_identity(algo, X, Y):
 
 
 def assert_algo_transform_almost_exactly(algo, img1, img2, mask=None):
-    """ Tests that the given algorithm manage to transform almost exactly Nifti\
-     image img1 into Nifti Image img2
+    """Tests that the given algorithm manage to transform almost exactly Nifti
+    image img1 into Nifti Image img2
     """
     algo.fit(img1, img2)
     imtest = algo.transform(img1)
@@ -75,7 +75,7 @@ def assert_algo_transform_almost_exactly(algo, img1, img2, mask=None):
 
 
 def random_niimg(shape):
-    """ Produces a random nifti image of shape (shape) and the appropriate \
+    """Produces a random nifti image of shape (shape) and the appropriate
     mask to use it.
     """
     im = nibabel.Nifti1Image(np.random.random_sample(shape), np.eye(4))
@@ -84,7 +84,7 @@ def random_niimg(shape):
 
 
 def assert_model_align_better_than_identity(algo, img1, img2, mask=None):
-    """ Tests that the given algorithm align Nifti image img1 into Nifti \
+    """Tests that the given algorithm align Nifti image img1 into Nifti
     Image img2 better than identity. Proficiency is measured through r2 score.
     """
     algo.fit(img1, img2)

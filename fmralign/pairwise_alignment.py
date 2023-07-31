@@ -185,7 +185,7 @@ def fit_one_parcellation(
 
 class PairwiseAlignment(BaseEstimator, TransformerMixin):
     """
-    Decompose the source and target images into regions and align corresponding \
+    Decompose the source and target images into regions and align corresponding
     regions independently.
     """
 
@@ -210,9 +210,9 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         verbose=0,
     ):
         """
-        If n_pieces > 1, decomposes the images into regions \
+        If n_pieces > 1, decomposes the images into regions
         and align each source/target region independantly.
-        If n_bags > 1, this parcellation process is applied multiple time \
+        If n_bags > 1, this parcellation process is applied multiple time
         and the resulting models are bagged.
 
         Parameters
