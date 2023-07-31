@@ -2,6 +2,7 @@
 
 import numpy as np
 from numpy.testing import assert_array_almost_equal
+from scipy.sparse import csc_matrix
 from scipy.linalg import orthogonal_procrustes
 
 from fmralign.alignment_methods import (
@@ -139,8 +140,6 @@ def test_projection_coefficients():
 
 
 def test_all_classes_R_and_pred_shape_and_better_than_identity():
-    from scipy.sparse.csc import csc_matrix
-
     """Test all classes on random case"""
     # test on empty data
     X = np.zeros((30, 10))
