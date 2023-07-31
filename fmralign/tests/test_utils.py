@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 import nibabel
-import nilearn
 import numpy as np
 import pytest
 from nilearn.input_data import NiftiMasker
 from numpy.testing import assert_array_almost_equal
-from packaging import version
 
 from fmralign._utils import _hierarchical_k_means, _make_parcellation
 from fmralign.tests.utils import random_niimg
@@ -27,14 +25,7 @@ def test_make_parcellation():
     indexes = np.arange(img.shape[-1])
     masker = NiftiMasker(mask_img=mask_img).fit()
 
-    methods = ["kmeans", "ward", "hierarchical_kmeans"]
-
-    # check rena only if nilearn version allow it
-    if version.parse(nilearn.__version__) <= version.parse("0.5.2"):
-        with pytest.raises(Exception):
-            assert _make_parcellation(img, "rena", n_pieces, masker)
-    else:
-        methods.append("rena")
+    methods = ["kmeans", "ward", "hierarchical_kmeans", "rena"]
 
     for clustering_method in methods:
         # check n_pieces = 1 gives out ones of right shape
