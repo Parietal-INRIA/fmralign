@@ -3,6 +3,7 @@
 """
 import warnings
 
+import ot
 import numpy as np
 import scipy
 import sklearn
@@ -312,42 +313,18 @@ class Hungarian(Alignment):
         return X.dot(self.R.toarray())
 
 
-def _import_ot():
-    """Import the optional dependency ot (POT module) if installed or give
-    back a clear error message to the user if not installed
-    """
-    try:
-        import ot
-    except ImportError:
-        from fmralign.version import REQUIRED_MODULE_METADATA
-
-        for module, metadata in REQUIRED_MODULE_METADATA:
-            if module == "POT":
-                POT_min_version = metadata["min_version"]
-        raise ImportError(
-            "To use optimal transport solver, POT module(v > {}) \
-            is necessary but not installed by default with fmralign. To install \
-            it run 'pip install POT'".format(
-                POT_min_version
-            )
-        )
-    else:
-        return ot
-
-
 class POTAlignment(Alignment):
-    """Compute the optimal coupling between X and Y with entropic regularization.
-    Legacy implementation of optimal transport alignment based on POT.
-    Kept to check compatibility of new implementation
+    """Compute the optimal coupling between X and Y with entropic regularization,
+    using the pure Python POT (https://pythonot.github.io/) package.
 
     Parameters
     ----------
     solver : str (optional)
-        solver from POT called to find optimal coupling 'sinkhorn', \
-        'greenkhorn', 'sinkhorn_stabilized','sinkhorn_epsilon_scaling', 'exact' \
+        solver from POT called to find optimal coupling 'sinkhorn',
+        'greenkhorn', 'sinkhorn_stabilized','sinkhorn_epsilon_scaling', 'exact'
         see POT/ot/bregman on Github for source code of solvers
-    metric : str(optional)
-        metric used to create transport cost matrix, \
+    metric : str (optional)
+        metric used to create transport cost matrix,
         see full list in scipy.spatial.distance.cdist doc
     reg : int (optional)
         level of entropic regularization
@@ -366,7 +343,6 @@ class POTAlignment(Alignment):
         max_iter=1000,
         tol=1e-3,
     ):
-        self.ot = _import_ot()
         self.solver = solver
         self.metric = metric
         self.reg = reg
@@ -400,10 +376,10 @@ class POTAlignment(Alignment):
             M = cdist(X.T, Y.T, metric=self.metric)
 
             if self.solver == "exact":
-                self.R = self.ot.lp.emd(a, b, M) * n
+                self.R = ot.lp.emd(a, b, M) * n
             else:
                 self.R = (
-                    self.ot.sinkhorn(
+                    ot.sinkhorn(
                         a,
                         b,
                         M,
