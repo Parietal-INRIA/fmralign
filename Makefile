@@ -20,14 +20,6 @@ help:
 
 
 install:
-	rm -rf _build/doctrees _build/nistats.github.io
-	# first clone the nistats.github.io repo because it may ask
-	# for password and we don't want to delay this long build in
-	# the middle of it
-	# --no-checkout just fetches the root folder without content
-	# --depth 1 is a speed optimization since we don't need the
-	# history prior to the last commit
-
 	git clone --no-checkout --depth 1 https://github.com/Parietal-INRIA/fmralign.github.io.git build/fmralign.github.io
 	touch build/fmralign.github.io/.nojekyll
 	make html

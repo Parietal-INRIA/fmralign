@@ -3,14 +3,11 @@ import os
 import warnings
 
 import nibabel as nib
-import nilearn
 import numpy as np
 from nilearn._utils.niimg_conversions import _check_same_fov
 from nilearn.image import index_img, new_img_like, smooth_img
 from nilearn.masking import _apply_mask_fmri, intersect_masks
 from nilearn.regions.parcellations import Parcellations
-from packaging import version
-from scipy.stats import pearsonr
 from sklearn.cluster import MiniBatchKMeans
 
 
@@ -176,7 +173,6 @@ def _make_parcellation(
         If you aim for speed, choose k-means (and check kmeans_smoothing_fwhm parameter)
         If you want spatially connected and/or reproducible regions use 'ward'
         If you want balanced clusters (especially from timeseries) used 'hierarchical_kmeans'
-        For 'rena', need nilearn > 0.5.2
         If 3D Niimg, image used as predefined clustering, n_pieces is ignored
     n_pieces: int
         number of different labels
@@ -216,41 +212,24 @@ def _make_parcellation(
             images_to_parcel = smooth_img(imgs_subset, smoothing_fwhm)
         else:
             images_to_parcel = imgs_subset
-        try:
-            parcellation = Parcellations(
-                method=clustering,
-                n_parcels=n_pieces,
-                mask=masker,
-                scaling=False,
-                n_iter=20,
-                verbose=verbose,
-            )
-        except TypeError:
-            if clustering == "rena" and (
-                version.parse(nilearn.__version__) <= version.parse("0.5.2")
-            ):
-                raise InputError(
-                    (
-                        'ReNA algorithm is only available in Nilearn version > 0.5.2. \
-                     Your version is {}. If you want to use ReNA, please run "pip install nilearn --upgrade"'.format(
-                            nilearn.__version__
-                        )
-                    )
-                )
-            else:
-                parcellation = Parcellations(
-                    method=clustering, n_parcels=n_pieces, mask=masker, verbose=verbose
-                )
+        parcellation = Parcellations(
+            method=clustering,
+            n_parcels=n_pieces,
+            mask=masker,
+            scaling=False,
+            n_iter=20,
+            verbose=verbose,
+        )
         parcellation.fit(images_to_parcel)
         labels = _apply_mask_fmri(parcellation.labels_img_, masker.mask_img_).astype(
             int
         )
 
     else:
-        raise InputError(
+        raise ValueError(
             (
-                'Clustering should be "kmeans", "ward", "rena", "hierarchical_kmeans", \
-             or a 3D Niimg, and n_pieces should be an integer ≥ 1'
+                'Clustering should be "kmeans", "ward", "rena", "hierarchical_kmeans", '
+                "or a 3D Niimg, and n_pieces should be an integer ≥ 1"
             )
         )
 
