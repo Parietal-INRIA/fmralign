@@ -4,8 +4,7 @@ from scipy.stats import pearsonr
 from sklearn.metrics import r2_score
 
 
-def score_voxelwise(ground_truth, prediction, masker, loss,
-                    multioutput='raw_values'):
+def score_voxelwise(ground_truth, prediction, masker, loss, multioutput="raw_values"):
     """
     Calculates loss function for predicted, ground truth
     arrays. Supported scores are R2, correlation, and normalized
@@ -52,22 +51,29 @@ def score_voxelwise(ground_truth, prediction, masker, loss,
     if loss is "R2":
         score = r2_score(X_gt, X_pred, multioutput=multioutput)
     elif loss is "n_reconstruction_err":
-        score = normalized_reconstruction_error(
-            X_gt, X_pred, multioutput=multioutput)
+        score = normalized_reconstruction_error(X_gt, X_pred, multioutput=multioutput)
     elif loss is "corr":
-        score = np.array([pearsonr(X_gt[:, vox], X_pred[:, vox])[0]  # pearsonr returns both rho and p
-                          for vox in range(X_pred.shape[1])])
+        score = np.array(
+            [
+                pearsonr(X_gt[:, vox], X_pred[:, vox])[
+                    0
+                ]  # pearsonr returns both rho and p
+                for vox in range(X_pred.shape[1])
+            ]
+        )
         if multioutput == "uniform_average":
             score = np.mean(score)
     else:
         raise NameError(
-            "Unknown loss. Recognized values are 'R2', 'corr', or 'reconstruction_err'")
+            "Unknown loss. Recognized values are 'R2', 'corr', or 'reconstruction_err'"
+        )
     # if the calculated score is less than -1, return -1
     return np.maximum(score, -1)
 
 
-def normalized_reconstruction_error(y_true, y_pred, sample_weights=None,
-                                    multioutput='raw_values'):
+def normalized_reconstruction_error(
+    y_true, y_pred, sample_weights=None, multioutput="raw_values"
+):
     """
     Calculates the normalized reconstruction error
     as defined by Bazeille and colleagues (2019).
@@ -114,19 +120,18 @@ def normalized_reconstruction_error(y_true, y_pred, sample_weights=None,
     denominator = ((y_true) ** 2).sum(axis=0, dtype=np.float64)
 
     # Include only non-zero values
-    nonzero_denominator = (denominator != 0)
-    nonzero_numerator = (numerator != 0)
-    valid_score = (nonzero_denominator & nonzero_numerator)
+    nonzero_denominator = denominator != 0
+    nonzero_numerator = numerator != 0
+    valid_score = nonzero_denominator & nonzero_numerator
 
     # Calculate reconstruction error
     output_scores = np.ones([y_true.shape[-1]])
-    output_scores[valid_score] = 1 - (numerator[valid_score] /
-                                      denominator[valid_score])
-    if multioutput == 'raw_values':
+    output_scores[valid_score] = 1 - (numerator[valid_score] / denominator[valid_score])
+    if multioutput == "raw_values":
         # return scores individually
         return output_scores
 
-    elif multioutput == 'uniform_average':
+    elif multioutput == "uniform_average":
         # passing None as weights yields uniform average
         return np.average(output_scores, weights=None)
 

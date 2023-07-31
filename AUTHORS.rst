@@ -25,4 +25,7 @@ fmralign is also supported by `Digiteo <https://digiteo.fr>`_
 
 Citing Nilearn
 --------------------
-This package can be lightweight and efficient because it relies on great toolboxes (Nilearn, Scikit Learn). A huge amount of work goes into nilearn. In addition, the Parietal team needs the citations to the paper in order to justify paying a software engineer on the project. To guarantee the future of the toolkit, if you use it, please cite `this paper <https://hal.inria.fr/hal-01093971>`_ .
+This package can be lightweight and efficient because it relies on great toolboxes (Nilearn, Scikit Learn).
+A huge amount of work goes into nilearn.
+In addition, the Parietal team needs the citations to the paper in order to justify paying a software engineer on the project.
+To guarantee the future of the toolkit, if you use it, please cite `this paper <https://hal.inria.fr/hal-01093971>`_ .

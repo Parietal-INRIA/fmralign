@@ -1,24 +1,27 @@
 # -*- coding: utf-8 -*-
 """ Module for pairwise functional alignment
 """
-import warnings
-import numpy as np
 import os
+import warnings
 
-from sklearn.base import BaseEstimator, TransformerMixin
-from joblib import (delayed, Memory, Parallel)
-from sklearn.model_selection import ShuffleSplit
-from sklearn.base import clone
-from nilearn.maskers._masker_validation import _check_embedded_nifti_masker
-from nilearn.image import load_img, concat_imgs, index_img
 import nibabel as nib
-from fmralign.alignment_methods import RidgeAlignment, Identity, Hungarian, \
-    ScaledOrthogonalAlignment, OptimalTransportAlignment, DiagonalAlignment
-from fmralign._utils import _make_parcellation, piecewise_transform, _intersect_clustering_mask
+import numpy as np
+from joblib import Memory, Parallel, delayed
+from nilearn.image import concat_imgs, load_img
+from nilearn.maskers._masker_validation import _check_embedded_nifti_masker
+from sklearn.base import BaseEstimator, TransformerMixin, clone
+from sklearn.model_selection import ShuffleSplit
+
+from fmralign import alignment_methods
+from fmralign._utils import (
+    _intersect_clustering_mask,
+    _make_parcellation,
+    piecewise_transform,
+)
 
 
 def generate_Xi_Yi(labels, X, Y, masker, verbose):
-    """ Generate source and target data X_i and Y_i for each piece i.
+    """Generate source and target data X_i and Y_i for each piece i.
 
     Parameters
     ----------
@@ -50,14 +53,13 @@ def generate_Xi_Yi(labels, X, Y, masker, verbose):
         label = unique_labels[k]
         i = label == labels
         if (k + 1) % 25 == 0 and verbose > 0:
-            print("Fitting parcel: " + str(k + 1) +
-                  "/" + str(len(unique_labels)))
+            print("Fitting parcel: " + str(k + 1) + "/" + str(len(unique_labels)))
         # should return X_i Y_i
         yield X_[:, i], Y_[:, i]
 
 
 def fit_one_piece(X_i, Y_i, alignment_method):
-    """ Align source and target data in one piece i, X_i and Y_i, using
+    """Align source and target data in one piece i, X_i and Y_i, using
     alignment method and learn transformation to map X to Y.
 
     Parameters
@@ -78,44 +80,63 @@ def fit_one_piece(X_i, Y_i, alignment_method):
         Instance of alignment estimator class fitted for X_i, Y_i
     """
 
-    if alignment_method == 'identity':
-        alignment_algo = Identity()
-    elif alignment_method == 'scaled_orthogonal':
-        alignment_algo = ScaledOrthogonalAlignment()
-    elif alignment_method == 'ridge_cv':
-        alignment_algo = RidgeAlignment()
-    elif alignment_method == 'permutation':
-        alignment_algo = Hungarian()
-    elif alignment_method == 'optimal_transport':
-        alignment_algo = OptimalTransportAlignment()
-    elif alignment_method == 'diagonal':
-        alignment_algo = DiagonalAlignment()
-    elif isinstance(alignment_method, (Identity, ScaledOrthogonalAlignment,
-                                       RidgeAlignment, Hungarian,
-                                       OptimalTransportAlignment,
-                                       DiagonalAlignment)):
+    if alignment_method == "identity":
+        alignment_algo = alignment_methods.Identity()
+    elif alignment_method == "scaled_orthogonal":
+        alignment_algo = alignment_methods.ScaledOrthogonalAlignment()
+    elif alignment_method == "ridge_cv":
+        alignment_algo = alignment_methods.RidgeAlignment()
+    elif alignment_method == "permutation":
+        alignment_algo = alignment_methods.Hungarian()
+    elif alignment_method == "optimal_transport":
+        alignment_algo = alignment_methods.OptimalTransportAlignment()
+    elif alignment_method == "diagonal":
+        alignment_algo = alignment_methods.DiagonalAlignment()
+    elif isinstance(
+        alignment_method,
+        (
+            alignment_methods.Identity,
+            alignment_methods.ScaledOrthogonalAlignment,
+            alignment_methods.RidgeAlignment,
+            alignment_methods.Hungarian,
+            alignment_methods.OptimalTransportAlignment,
+            alignment_methods.DiagonalAlignment,
+        ),
+    ):
         alignment_algo = clone(alignment_method)
 
     if not np.count_nonzero(X_i) or not np.count_nonzero(Y_i):
-        warn_msg = ("Empty parcel found. Please check overlap between " +
-                    "provided mask and functional image. Returning " +
-                    "Identity alignment for empty parcel")
+        warn_msg = (
+            "Empty parcel found. Please check overlap between "
+            + "provided mask and functional image. Returning "
+            + "Identity alignment for empty parcel"
+        )
         warnings.warn(warn_msg)
-        alignment_algo = Identity()
+        alignment_algo = alignment_methods.Identity()
     try:
         alignment_algo.fit(X_i, Y_i)
     except UnboundLocalError:
-        warn_msg = ("{} is an unrecognized ".format(alignment_method) +
-                    "alignment method. Please provide a recognized " +
-                    "alignment method.")
+        warn_msg = (
+            "{} is an unrecognized ".format(alignment_method)
+            + "alignment method. Please provide a recognized "
+            + "alignment method."
+        )
         raise NotImplementedError(warn_msg)
     return alignment_algo
 
 
-def fit_one_parcellation(X_, Y_, alignment_method, masker, n_pieces,
-                         clustering, clustering_index,
-                         n_jobs, verbose):
-    """ Create one parcellation of n_pieces and align each source and target
+def fit_one_parcellation(
+    X_,
+    Y_,
+    alignment_method,
+    masker,
+    n_pieces,
+    clustering,
+    clustering_index,
+    n_jobs,
+    verbose,
+):
+    """Create one parcellation of n_pieces and align each source and target
     data in one piece i, X_i and Y_i, using alignment method
     and learn transformation to map X to Y.
 
@@ -150,13 +171,13 @@ def fit_one_parcellation(X_, Y_, alignment_method, masker, n_pieces,
         Instance of alignment estimator class fitted for X_i, Y_i
     """
     # choose indexes maybe with index_img to not
-    labels = _make_parcellation(X_, clustering_index, clustering,
-                                n_pieces, masker, verbose=verbose)
+    labels = _make_parcellation(
+        X_, clustering_index, clustering, n_pieces, masker, verbose=verbose
+    )
 
     fit = Parallel(n_jobs, prefer="threads", verbose=verbose)(
-        delayed(fit_one_piece)(
-            X_i, Y_i, alignment_method
-        ) for X_i, Y_i in generate_Xi_Yi(labels, X_, Y_, masker, verbose)
+        delayed(fit_one_piece)(X_i, Y_i, alignment_method)
+        for X_i, Y_i in generate_Xi_Yi(labels, X_, Y_, masker, verbose)
     )
 
     return labels, fit
@@ -168,13 +189,26 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
     regions independently.
     """
 
-    def __init__(self, alignment_method, n_pieces=1,
-                 clustering='kmeans', n_bags=1, mask=None,
-                 smoothing_fwhm=None, standardize=False, detrend=False,
-                 target_affine=None, target_shape=None, low_pass=None,
-                 high_pass=None, t_r=None,
-                 memory=Memory(location=None), memory_level=0,
-                 n_jobs=1, verbose=0):
+    def __init__(
+        self,
+        alignment_method,
+        n_pieces=1,
+        clustering="kmeans",
+        n_bags=1,
+        mask=None,
+        smoothing_fwhm=None,
+        standardize=False,
+        detrend=False,
+        target_affine=None,
+        target_shape=None,
+        low_pass=None,
+        high_pass=None,
+        t_r=None,
+        memory=Memory(location=None),
+        memory_level=0,
+        n_jobs=1,
+        verbose=0,
+    ):
         """
         If n_pieces > 1, decomposes the images into regions \
         and align each source/target region independantly.
@@ -287,18 +321,22 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         else:
             self.masker_.fit()
 
-        if type(self.clustering) == nib.nifti1.Nifti1Image or os.path.isfile(self.clustering):
+        if type(self.clustering) == nib.nifti1.Nifti1Image or os.path.isfile(
+            self.clustering
+        ):
             # check that clustering provided fills the mask, if not, reduce the mask
             if 0 in self.masker_.transform(self.clustering):
                 reduced_mask = _intersect_clustering_mask(
-                    self.clustering, self.masker_.mask_img)
+                    self.clustering, self.masker_.mask_img
+                )
                 self.mask = reduced_mask
                 self.masker_ = _check_embedded_nifti_masker(self)
                 self.masker_.n_jobs = self.n_jobs
                 self.masker_.fit()
                 warnings.warn(
-                    "Mask used was bigger than clustering provided. " +
-                    "Its intersection with the clustering was used instead.")
+                    "Mask used was bigger than clustering provided. "
+                    + "Its intersection with the clustering was used instead."
+                )
 
         if isinstance(X, (list, np.ndarray)):
             X_ = concat_imgs(X)
@@ -310,15 +348,22 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
             Y_ = load_img(Y)
 
         self.fit_, self.labels_ = [], []
-        rs = ShuffleSplit(n_splits=self.n_bags,
-                          test_size=.8, random_state=0)
+        rs = ShuffleSplit(n_splits=self.n_bags, test_size=0.8, random_state=0)
 
-        outputs = Parallel(n_jobs=self.n_jobs, prefer="threads",
-                           verbose=self.verbose)(
+        outputs = Parallel(n_jobs=self.n_jobs, prefer="threads", verbose=self.verbose)(
             delayed(fit_one_parcellation)(
-                X_, Y_, self.alignment_method, self.masker_, self.n_pieces,
-                self.clustering, clustering_index, self.n_jobs, self.verbose)
-            for clustering_index, _ in rs.split(range(X_.shape[-1])))
+                X_,
+                Y_,
+                self.alignment_method,
+                self.masker_,
+                self.n_pieces,
+                self.clustering,
+                clustering_index,
+                self.n_jobs,
+                self.verbose,
+            )
+            for clustering_index, _ in rs.split(range(X_.shape[-1]))
+        )
         # change split
         self.labels_ = [output[0] for output in outputs]
         self.fit_ = [output[1] for output in outputs]
@@ -344,8 +389,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
 
         X_transform = np.zeros_like(X_)
         for i in range(self.n_bags):
-            X_transform += piecewise_transform(
-                self.labels_[i], self.fit_[i], X_)
+            X_transform += piecewise_transform(self.labels_[i], self.fit_[i], X_)
 
         X_transform /= self.n_bags
 
@@ -353,7 +397,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
 
     # Make inherited function harmless
     def fit_transform(self):
-        """Parent method not applicable here. Will raise AttributeError if called.
-        """
+        """Parent method not applicable here. Will raise AttributeError if called."""
         raise AttributeError(
-            "type object 'PairwiseAlignment' has no attribute 'fit_transform'")
+            "type object 'PairwiseAlignment' has no attribute 'fit_transform'"
+        )

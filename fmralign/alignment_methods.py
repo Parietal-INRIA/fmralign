@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
 """ Module implementing alignment estimators on ndarrays
 """
+import warnings
 
+import ot
 import numpy as np
 import scipy
-from scipy.spatial.distance import cdist
-from scipy import linalg
-from scipy.sparse import diags
 import sklearn
-from sklearn.base import BaseEstimator, TransformerMixin
-from scipy.optimize import linear_sum_assignment
-from sklearn.metrics.pairwise import pairwise_distances
-from sklearn.linear_model import RidgeCV
 from joblib import Parallel, delayed
-import warnings
+from scipy import linalg
+from scipy.optimize import linear_sum_assignment
+from scipy.sparse import diags
+from scipy.spatial.distance import cdist
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.linear_model import RidgeCV
+from sklearn.metrics.pairwise import pairwise_distances
 
 
 def scaled_procrustes(X, Y, scaling=False, primal=None):
@@ -52,7 +53,7 @@ def scaled_procrustes(X, Y, scaling=False, primal=None):
     if primal:
         A = Y.T.dot(X)
         if A.shape[0] == A.shape[1]:
-            A += + 1.e-18 * np.eye(A.shape[0])
+            A += +1.0e-18 * np.eye(A.shape[0])
         U, s, V = linalg.svd(A, full_matrices=0)
         R = U.dot(V)
     else:  # "dual" mode
@@ -87,8 +88,7 @@ def optimal_permutation(X, Y):
     dist = pairwise_distances(X.T, Y.T)
     u = linear_sum_assignment(dist)
     u = np.array(list(zip(*u)))
-    permutation = scipy.sparse.csr_matrix(
-        (np.ones(X.shape[1]), (u[:, 0], u[:, 1]))).T
+    permutation = scipy.sparse.csr_matrix((np.ones(X.shape[1]), (u[:, 0], u[:, 1]))).T
     return permutation
 
 
@@ -110,10 +110,10 @@ def _projection(x, y):
     if (x == 0).all():
         return 0
     else:
-        return np.dot(x, y) / np.linalg.norm(x)**2
+        return np.dot(x, y) / np.linalg.norm(x) ** 2
 
 
-def _voxelwise_signal_projection(X, Y, n_jobs=1, parallel_backend='threading'):
+def _voxelwise_signal_projection(X, Y, n_jobs=1, parallel_backend="threading"):
     """Compute D, list of scalar d_i minimizing :
         ||d_i * x_i - y_i|| for every x_i, y_i in X, Y
 
@@ -129,9 +129,10 @@ def _voxelwise_signal_projection(X, Y, n_jobs=1, parallel_backend='threading'):
     D: list of ints
         List of optimal scaling factors
     """
-    return Parallel(n_jobs, parallel_backend)(delayed(_projection)(
-        voxel_source, voxel_target)
-        for voxel_source, voxel_target in zip(X, Y))
+    return Parallel(n_jobs, parallel_backend)(
+        delayed(_projection)(voxel_source, voxel_target)
+        for voxel_source, voxel_target in zip(X, Y)
+    )
 
 
 class Alignment(BaseEstimator, TransformerMixin):
@@ -146,8 +147,7 @@ class Alignment(BaseEstimator, TransformerMixin):
 
 
 class Identity(Alignment):
-    """Compute no alignment, used as baseline for benchmarks : RX = X.
-    """
+    """Compute no alignment, used as baseline for benchmarks : RX = X."""
 
     def transform(self, X):
         """returns X"""
@@ -155,7 +155,7 @@ class Identity(Alignment):
 
 
 class DiagonalAlignment(Alignment):
-    '''Compute the voxelwise projection factor between X and Y.
+    """Compute the voxelwise projection factor between X and Y.
 
     Parameters
     ----------
@@ -170,30 +170,30 @@ class DiagonalAlignment(Alignment):
     -----------
     R : scipy.sparse.diags
         Scaling matrix containing the optimal shrinking factor for every voxel
-    '''
+    """
 
-    def __init__(self, n_jobs=1, parallel_backend='threading'):
+    def __init__(self, n_jobs=1, parallel_backend="threading"):
         self.n_jobs = n_jobs
         self.parallel_backend = parallel_backend
 
     def fit(self, X, Y):
-        '''
+        """
 
         Parameters
         --------------
         X: (n_samples, n_features) nd array
             source data
         Y: (n_samples, n_features) nd array
-            target data'''
+            target data"""
         shrinkage_coefficients = _voxelwise_signal_projection(
-            X.T, Y.T, self.n_jobs, self.parallel_backend)
+            X.T, Y.T, self.n_jobs, self.parallel_backend
+        )
 
         self.R = diags(shrinkage_coefficients)
         return
 
     def transform(self, X):
-        """Transform X using optimal coupling computed during fit.
-        """
+        """Transform X using optimal coupling computed during fit."""
         return self.R.dot(X.T).T
 
 
@@ -217,7 +217,7 @@ class ScaledOrthogonalAlignment(Alignment):
         self.scale = 1
 
     def fit(self, X, Y):
-        """ Fit orthogonal R s.t. ||sc XR - Y||^2
+        """Fit orthogonal R s.t. ||sc XR - Y||^2
 
         Parameters
         -----------
@@ -232,8 +232,7 @@ class ScaledOrthogonalAlignment(Alignment):
         return self
 
     def transform(self, X):
-        """Transform X using optimal transform computed during fit.
-        """
+        """Transform X using optimal transform computed during fit."""
         return X.dot(self.R)
 
 
@@ -265,7 +264,7 @@ class RidgeAlignment(Alignment):
         self.cv = cv
 
     def fit(self, X, Y):
-        """ Fit R s.t. || XR - Y ||^2 + alpha ||R||^2 is minimized with cv
+        """Fit R s.t. || XR - Y ||^2 + alpha ||R||^2 is minimized with cv
 
         Parameters
         -----------
@@ -274,76 +273,58 @@ class RidgeAlignment(Alignment):
         Y: (n_samples, n_features) nd array
             target data
         """
-        self.R = RidgeCV(alphas=self.alphas, fit_intercept=True,
-                         scoring=sklearn.metrics.SCORERS['r2'],
-                         cv=self.cv)
+        self.R = RidgeCV(
+            alphas=self.alphas,
+            fit_intercept=True,
+            scoring=sklearn.metrics.SCORERS["r2"],
+            cv=self.cv,
+        )
         self.R.fit(X, Y)
         return self
 
     def transform(self, X):
-        """Transform X using optimal transform computed during fit.
-        """
+        """Transform X using optimal transform computed during fit."""
         return self.R.predict(X)
 
 
 class Hungarian(Alignment):
-    '''Compute the optimal permutation matrix of X toward Y
+    """Compute the optimal permutation matrix of X toward Y
 
     Attributes
     ----------
     R : scipy.sparse.csr_matrix
         Mixing matrix containing the optimal permutation
-    '''
+    """
 
     def fit(self, X, Y):
-        '''
+        """
 
         Parameters
         -----------
         X: (n_samples, n_features) nd array
             source data
         Y: (n_samples, n_features) nd array
-            target data'''
+            target data"""
         self.R = optimal_permutation(X, Y).T
         return self
 
     def transform(self, X):
-        """Transform X using optimal permutation computed during fit.
-        """
+        """Transform X using optimal permutation computed during fit."""
         return X.dot(self.R.toarray())
 
 
-def _import_ot():
-    '''Import the optional dependency ot (POT module) if installed or give
-    back a clear error message to the user if not installed
-    '''
-    try:
-        import ot
-    except ImportError:
-        from fmralign.version import REQUIRED_MODULE_METADATA
-        for module, metadata in REQUIRED_MODULE_METADATA:
-            if module == 'POT':
-                POT_min_version = metadata['min_version']
-        raise ImportError("To use optimal transport solver, POT module(v > {}) \
-            is necessary but not installed by default with fmralign. To install \
-            it run 'pip install POT'".format(POT_min_version))
-    else:
-        return ot
-
-
 class POTAlignment(Alignment):
-    '''Compute the optimal coupling between X and Y with entropic regularization.
-    Legacy implementation of optimal transport alignment based on POT.
-    Kept to check compatibility of new implementation
+    """Compute the optimal coupling between X and Y with entropic regularization,
+    using the pure Python POT (https://pythonot.github.io/) package.
 
     Parameters
     ----------
     solver : str (optional)
-        solver from POT called to find optimal coupling 'sinkhorn', \
-        'greenkhorn', 'sinkhorn_stabilized','sinkhorn_epsilon_scaling', 'exact' \
+        solver from POT called to find optimal coupling 'sinkhorn',
+        'greenkhorn', 'sinkhorn_stabilized','sinkhorn_epsilon_scaling', 'exact'
         see POT/ot/bregman on Github for source code of solvers
-    metric : str(optional)
-        metric used to create transport cost matrix, \
+    metric : str (optional)
+        metric used to create transport cost matrix,
         see full list in scipy.spatial.distance.cdist doc
     reg : int (optional)
         level of entropic regularization
@@ -352,11 +333,16 @@ class POTAlignment(Alignment):
     ----------
     R : scipy.sparse.csr_matrix
         Mixing matrix containing the optimal permutation
-    '''
+    """
 
-    def __init__(self, solver='sinkhorn_epsilon_scaling',
-                 metric='euclidean', reg=1, max_iter=1000, tol=1e-3):
-        self.ot = _import_ot()
+    def __init__(
+        self,
+        solver="sinkhorn_epsilon_scaling",
+        metric="euclidean",
+        reg=1,
+        max_iter=1000,
+        tol=1e-3,
+    ):
         self.solver = solver
         self.metric = metric
         self.reg = reg
@@ -364,20 +350,23 @@ class POTAlignment(Alignment):
         self.tol = tol
 
     def fit(self, X, Y):
-        '''Parameters
+        """Parameters
         --------------
         X: (n_samples, n_features) nd array
             source data
         Y: (n_samples, n_features) nd array
             target data
-            '''
+        """
 
         n = len(X.T)
         if n > 5000:
             warnings.warn(
-                'One parcel is {} voxels. As optimal transport on this region '.format(n) +
-                'would take too much time, no alignment was performed on it. ' +
-                'Decrease parcel size to have intended behavior of alignment.')
+                "One parcel is {} voxels. As optimal transport on this region ".format(
+                    n
+                )
+                + "would take too much time, no alignment was performed on it. "
+                + "Decrease parcel size to have intended behavior of alignment."
+            )
             self.R = np.eye(n)
             return self
         else:
@@ -386,21 +375,30 @@ class POTAlignment(Alignment):
 
             M = cdist(X.T, Y.T, metric=self.metric)
 
-            if self.solver == 'exact':
-                self.R = self.ot.lp.emd(a, b, M) * n
+            if self.solver == "exact":
+                self.R = ot.lp.emd(a, b, M) * n
             else:
-                self.R = self.ot.sinkhorn(
-                    a, b, M, self.reg, method=self.solver, numItermax=self.max_iter, stopThr=self.tol) * n
+                self.R = (
+                    ot.sinkhorn(
+                        a,
+                        b,
+                        M,
+                        self.reg,
+                        method=self.solver,
+                        numItermax=self.max_iter,
+                        stopThr=self.tol,
+                    )
+                    * n
+                )
             return self
 
     def transform(self, X):
-        """Transform X using optimal coupling computed during fit.
-        """
+        """Transform X using optimal coupling computed during fit."""
         return X.dot(self.R)
 
 
 class OptimalTransportAlignment(Alignment):
-    '''Compute the optimal coupling between X and Y with entropic regularization
+    """Compute the optimal coupling between X and Y with entropic regularization
     using a OTT-JAX as a backend for acceleration.
 
     Parameters
@@ -415,28 +413,28 @@ class OptimalTransportAlignment(Alignment):
     ----------
     R : jaxlib.xla_extension.Array
         Mixing matrix containing the optimal permutation
-    '''
+    """
 
-    def __init__(self, metric='euclidean', reg=1, max_iter=1000, tol=1e-3):
+    def __init__(self, metric="euclidean", reg=1, max_iter=1000, tol=1e-3):
         self.metric = metric
         self.reg = reg
         self.tol = tol
         self.max_iter = max_iter
 
     def fit(self, X, Y):
-        '''Parameters
+        """Parameters
         --------------
         X: (n_samples, n_features) nd array
             source data
         Y: (n_samples, n_features) nd array
             target data
-            '''
+        """
         import jax
         from ott.geometry import costs, geometry
-        from ott.solvers.linear import sinkhorn
         from ott.problems.linear import linear_problem
+        from ott.solvers.linear import sinkhorn
 
-        if self.metric == 'euclidean':
+        if self.metric == "euclidean":
             cost_matrix = costs.Euclidean().all_pairs(x=X.T, y=Y.T)
         else:
             cost_matrix = cdist(X.T, Y.T, metric=self.metric)
@@ -444,12 +442,12 @@ class OptimalTransportAlignment(Alignment):
         problem = linear_problem.LinearProblem(geom)
 
         solver = sinkhorn.Sinkhorn(
-            geom, max_iterations=self.max_iter, threshold=self.tol)
+            geom, max_iterations=self.max_iter, threshold=self.tol
+        )
         self.R = jax.jit(solver)(problem).matrix
 
         return self
 
     def transform(self, X):
-        """Transform X using optimal coupling computed during fit.
-        """
+        """Transform X using optimal coupling computed during fit."""
         return X.dot(self.R)

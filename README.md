@@ -1,34 +1,23 @@
 # fmralign
-[Functional alignment and template estimation library](https://parietal-inria.github.io/fmralign-docs) for functional Magnetic Resonance Imaging (fMRI) data
 
-This library is meant to be a light-weight Python library that handles functional
-alignment tasks. It is compatible with and inspired from [Nilearn](http://nilearn.github.io).
+[Functional alignment for fMRI](https://parietal-inria.github.io/fmralign-docs) (functional Magnetic Resonance Imaging) data.
 
-Alternative implementations of these ideas can be found in the
-[pymvpa](http://www.pymvpa.org) or [brainiak](http://brainiak.org) packages.
+This light-weight Python library provides access to a range of functional alignment methods, including Procrustes and Optimal Transport.
+It is compatible with and inspired by [Nilearn](http://nilearn.github.io).
+Alternative implementations of these ideas can be found in the [pymvpa](http://www.pymvpa.org) or [brainiak](http://brainiak.org) packages.
+The [netrep](https://github.com/ahwillia/netrep) library also offers many of the same metrics,though with a more general focus beyond fMRI data.
 
 ## Getting Started
 
-### Prerequisites
-
-fmralign requires a Python installation and the following dependencies:
-* Python >= 3.6
-* Numpy >= 1.16.2
-* SciPy >= 1.2.2
-* Scikit-learn >= 0.20
-* Matplotlib >= 3.1.1
-* Nibabel >= 2.5.0
-* Nilearn >= 1.5.0
-
 ### Installation
 
-Open a terminal window, go the location where you want to install it. Then run:
+You can access the latest stable version of fmralign directly with the PyPi package installer:
 
 ```
 pip install fmralign
 ```
 
-Or if you want the latest version available (for example to develop):
+For development or bleeding-edge features, fmralign can also be installed directly from source:
 
 ```
 git clone https://github.com/Parietal-INRIA/fmralign.git
@@ -36,13 +25,11 @@ cd fmralign
 pip install -e .
 ```
 
-Optionally, if you want to use optimal transport based method, you should also run:
+Note that if you want to use the JAX-accelerated optimal transport methods, you should also run:
 
 ```
-pip install ott-jax
+pip install fmralign .[jax]
 ```
-
-You're up and running!
 
 ### Documentation
 
