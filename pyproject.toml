@@ -24,7 +24,7 @@ dependencies = [
     "joblib",
     "scipy",
     "nibabel",
-    "nilearn > 0.9.0",
+    "nilearn@git+https://github.com/nilearn/nilearn#egg=main",
     "POT"
 ]
 dynamic = ["version"]
