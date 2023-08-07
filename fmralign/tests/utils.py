@@ -1,6 +1,6 @@
 import nibabel
 import numpy as np
-from numpy.random import Generator
+from numpy.random import default_rng
 from nilearn.maskers import NiftiMasker
 from numpy.testing import assert_array_almost_equal
 
@@ -78,8 +78,9 @@ def random_niimg(shape):
     """Produces a random nifti image of shape (shape) and the appropriate
     mask to use it.
     """
+    rng = default_rng()
     im = nibabel.Nifti1Image(
-        Generator.random(size=shape, dtype="float32"),
+        rng.random(size=shape, dtype="float32"),
         np.eye(4),
     )
     mask_img = nibabel.Nifti1Image(np.ones(shape[0:3]), np.eye(4))
