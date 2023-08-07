@@ -276,7 +276,7 @@ class RidgeAlignment(Alignment):
         self.R = RidgeCV(
             alphas=self.alphas,
             fit_intercept=True,
-            scoring=sklearn.metrics.r2_score,
+            scoring="r2",
             cv=self.cv,
         )
         self.R.fit(X, Y)

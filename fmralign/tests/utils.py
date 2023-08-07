@@ -2,7 +2,6 @@ import nibabel
 import numpy as np
 from nilearn.maskers import NiftiMasker
 from numpy.testing import assert_array_almost_equal
-from sklearn.metrics import r2_score
 
 
 def zero_mean_coefficient_determination(
