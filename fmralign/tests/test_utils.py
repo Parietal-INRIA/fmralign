@@ -2,7 +2,7 @@
 import nibabel
 import numpy as np
 import pytest
-from nilearn.input_data import NiftiMasker
+from nilearn.maskers import NiftiMasker
 from numpy.testing import assert_array_almost_equal
 
 from fmralign._utils import _hierarchical_k_means, _make_parcellation

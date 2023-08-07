@@ -141,7 +141,7 @@ Plot the mask we  use
 
 Define a masker
 ---------------
->>> from nilearn.input_data import NiftiMasker
+>>> from nilearn.maskers import NiftiMasker
 >>> roi_masker = NiftiMasker(mask_img=mask).fit()
 
 

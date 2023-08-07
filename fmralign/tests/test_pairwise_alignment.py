@@ -4,7 +4,7 @@ import copy
 import numpy as np
 import pytest
 from nilearn.image import new_img_like
-from nilearn.input_data import NiftiMasker
+from nilearn.maskers import NiftiMasker
 
 from fmralign.pairwise_alignment import PairwiseAlignment, fit_one_piece
 from fmralign.tests.utils import (
