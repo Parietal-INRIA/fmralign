@@ -438,13 +438,14 @@ class OptimalTransportAlignment(Alignment):
             cost_matrix = costs.Euclidean().all_pairs(x=X.T, y=Y.T)
         else:
             cost_matrix = cdist(X.T, Y.T, metric=self.metric)
+
         geom = geometry.Geometry(cost_matrix=cost_matrix, epsilon=self.reg)
         problem = linear_problem.LinearProblem(geom)
-
         solver = sinkhorn.Sinkhorn(
             geom, max_iterations=self.max_iter, threshold=self.tol
         )
-        self.R = jax.jit(solver)(problem).matrix
+        P = jax.jit(solver)(problem)
+        self.R = np.asarray(P.matrix * len(X.T))
 
         return self
 
