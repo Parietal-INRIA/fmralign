@@ -361,11 +361,9 @@ class POTAlignment(Alignment):
         n = len(X.T)
         if n > 5000:
             warnings.warn(
-                "One parcel is {} voxels. As optimal transport on this region ".format(
-                    n
-                )
-                + "would take too much time, no alignment was performed on it. "
-                + "Decrease parcel size to have intended behavior of alignment."
+                f"One parcel is {n} voxels. As optimal transport on this region "
+                "would take too much time, no alignment was performed on it. "
+                "Decrease parcel size to have intended behavior of alignment."
             )
             self.R = np.eye(n)
             return self

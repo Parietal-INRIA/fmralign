@@ -6,7 +6,7 @@ import pytest
 from nilearn.image import new_img_like
 from nilearn.maskers import NiftiMasker
 
-from fmralign.pairwise_alignment import PairwiseAlignment, fit_one_piece
+from fmralign.pairwise_alignment import PairwiseAlignment
 from fmralign.tests.utils import (
     assert_algo_transform_almost_exactly,
     random_niimg,

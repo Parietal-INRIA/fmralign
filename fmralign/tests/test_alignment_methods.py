@@ -172,10 +172,10 @@ def test_all_classes_R_and_pred_shape_and_better_than_identity():
         ]:
             algo.fit(X, Y)
             # test that permutation matrix shape is (20, 20) except for Ridge
-            if type(algo.R) == csc_matrix:
+            if isinstance(algo.R, csc_matrix):
                 R = algo.R.toarray()
                 assert R.shape == (n_features, n_features)
-            elif type(algo) != RidgeAlignment:
+            elif not isinstance(algo, RidgeAlignment):
                 R = algo.R
                 assert R.shape == (n_features, n_features)
             # test pred shape and loss improvement compared to identity

@@ -108,8 +108,8 @@ def fit_one_piece(X_i, Y_i, alignment_method):
     if not np.count_nonzero(X_i) or not np.count_nonzero(Y_i):
         warn_msg = (
             "Empty parcel found. Please check overlap between "
-            + "provided mask and functional image. Returning "
-            + "Identity alignment for empty parcel"
+            "provided mask and functional image. Returning "
+            "Identity alignment for empty parcel"
         )
         warnings.warn(warn_msg)
         alignment_algo = alignment_methods.Identity()
@@ -117,9 +117,9 @@ def fit_one_piece(X_i, Y_i, alignment_method):
         alignment_algo.fit(X_i, Y_i)
     except UnboundLocalError:
         warn_msg = (
-            "{} is an unrecognized ".format(alignment_method)
-            + "alignment method. Please provide a recognized "
-            + "alignment method."
+            f"{alignment_method} is an unrecognized "
+            "alignment method. Please provide a recognized "
+            "alignment method."
         )
         raise NotImplementedError(warn_msg)
     return alignment_algo
@@ -321,7 +321,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         else:
             self.masker_.fit()
 
-        if type(self.clustering) == nib.nifti1.Nifti1Image or os.path.isfile(
+        if isinstance(self.clustering, nib.nifti1.Nifti1Image) or os.path.isfile(
             self.clustering
         ):
             # check that clustering provided fills the mask, if not, reduce the mask

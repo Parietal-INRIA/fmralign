@@ -457,8 +457,8 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             and all(i < template_length for i in train_index)
         ):
             raise ValueError(
-                "Template has {} images but you provided a greater index in"
-                "train_index or test_index.".format(template_length)
+                f"Template has {template_length} images but you provided a "
+                "greater index in train_index or test_index."
             )
 
         fitted_mappings = Parallel(self.n_jobs, prefer="threads", verbose=self.verbose)(
