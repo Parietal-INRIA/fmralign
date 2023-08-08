@@ -170,7 +170,6 @@ def test_all_classes_R_and_pred_shape_and_better_than_identity():
             Hungarian(),
             DiagonalAlignment(),
         ]:
-            # print(algo)
             algo.fit(X, Y)
             # test that permutation matrix shape is (20, 20) except for Ridge
             if type(algo.R) == csc_matrix:

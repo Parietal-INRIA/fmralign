@@ -54,7 +54,6 @@ def assert_class_align_better_than_identity(algo, X, Y):
     """Tests that the given algorithm align ndarrays X into Y better than
     identity. This alignment is measured through r2 score.
     """
-    print(algo)
     algo.fit(X, Y)
     identity_baseline_score = zero_mean_coefficient_determination(Y, X)
     algo_score = zero_mean_coefficient_determination(Y, algo.transform(X))

@@ -84,7 +84,6 @@ def test_models_against_identity():
         "diagonal",
     ]:
         for clustering in ["kmeans", "hierarchical_kmeans"]:
-            print(alignment_method, clustering)
             algo = PairwiseAlignment(
                 alignment_method=alignment_method,
                 mask=masker,
