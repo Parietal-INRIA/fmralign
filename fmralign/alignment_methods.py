@@ -198,7 +198,7 @@ class DiagonalAlignment(Alignment):
 
 
 class ScaledOrthogonalAlignment(Alignment):
-    """Compute a orthogonal mixing matrix R and a scaling sc such that Frobenius norm \
+    """Compute a orthogonal mixing matrix R and a scaling sc such that Frobenius norm
     ||sc RX - Y||^2 is minimized.
 
     Parameters
@@ -237,7 +237,7 @@ class ScaledOrthogonalAlignment(Alignment):
 
 
 class RidgeAlignment(Alignment):
-    """ Compute a scikit-estimator R using a mixing matrix M s.t Frobenius \
+    """Compute a scikit-estimator R using a mixing matrix M s.t Frobenius
     norm || XM - Y ||^2 + alpha * ||M||^2 is minimized with cross-validation
 
     Parameters
@@ -245,13 +245,13 @@ class RidgeAlignment(Alignment):
     R : scikit-estimator from sklearn.linear_model.RidgeCV
         with methods fit, predict
     alpha : numpy array of shape [n_alphas]
-        Array of alpha values to try. Regularization strength; \
-        must be a positive float. Regularization improves the conditioning \
-        of the problem and reduces the variance of the estimates. \
-        Larger values specify stronger regularization. Alpha corresponds to \
+        Array of alpha values to try. Regularization strength;
+        must be a positive float. Regularization improves the conditioning
+        of the problem and reduces the variance of the estimates.
+        Larger values specify stronger regularization. Alpha corresponds to
         ``C^-1`` in other models such as LogisticRegression or LinearSVC.
     cv : int, cross-validation generator or an iterable, optional
-        Determines the cross-validation splitting strategy.\
+        Determines the cross-validation splitting strategy.
         Possible inputs for cv are:
         -None, to use the efficient Leave-One-Out cross-validation
         - integer, to specify the number of folds.
@@ -276,7 +276,7 @@ class RidgeAlignment(Alignment):
         self.R = RidgeCV(
             alphas=self.alphas,
             fit_intercept=True,
-            scoring=sklearn.metrics.SCORERS["r2"],
+            scoring="r2",
             cv=self.cv,
         )
         self.R.fit(X, Y)
@@ -361,11 +361,9 @@ class POTAlignment(Alignment):
         n = len(X.T)
         if n > 5000:
             warnings.warn(
-                "One parcel is {} voxels. As optimal transport on this region ".format(
-                    n
-                )
-                + "would take too much time, no alignment was performed on it. "
-                + "Decrease parcel size to have intended behavior of alignment."
+                f"One parcel is {n} voxels. As optimal transport on this region "
+                "would take too much time, no alignment was performed on it. "
+                "Decrease parcel size to have intended behavior of alignment."
             )
             self.R = np.eye(n)
             return self
@@ -404,7 +402,7 @@ class OptimalTransportAlignment(Alignment):
     Parameters
     ----------
     metric : str(optional)
-        metric used to create transport cost matrix, \
+        metric used to create transport cost matrix,
         see full list in scipy.spatial.distance.cdist doc
     reg : int (optional)
         level of entropic regularization
@@ -438,13 +436,14 @@ class OptimalTransportAlignment(Alignment):
             cost_matrix = costs.Euclidean().all_pairs(x=X.T, y=Y.T)
         else:
             cost_matrix = cdist(X.T, Y.T, metric=self.metric)
+
         geom = geometry.Geometry(cost_matrix=cost_matrix, epsilon=self.reg)
         problem = linear_problem.LinearProblem(geom)
-
         solver = sinkhorn.Sinkhorn(
             geom, max_iterations=self.max_iter, threshold=self.tol
         )
-        self.R = jax.jit(solver)(problem).matrix
+        P = jax.jit(solver)(problem)
+        self.R = np.asarray(P.matrix * len(X.T))
 
         return self
 

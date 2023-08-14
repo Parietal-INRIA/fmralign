@@ -48,11 +48,11 @@ def score_voxelwise(ground_truth, prediction, masker, loss, multioutput="raw_val
     X_gt = masker.transform(ground_truth)
     X_pred = masker.transform(prediction)
 
-    if loss is "R2":
+    if loss == "R2":
         score = r2_score(X_gt, X_pred, multioutput=multioutput)
-    elif loss is "n_reconstruction_err":
+    elif loss == "n_reconstruction_err":
         score = normalized_reconstruction_error(X_gt, X_pred, multioutput=multioutput)
-    elif loss is "corr":
+    elif loss == "corr":
         score = np.array(
             [
                 pearsonr(X_gt[:, vox], X_pred[:, vox])[

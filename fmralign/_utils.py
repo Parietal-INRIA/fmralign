@@ -13,7 +13,7 @@ from sklearn.cluster import MiniBatchKMeans
 
 def _intersect_clustering_mask(clustering, mask):
     "Take 3D Niimg clustering and bigger mask, output reduced mask"
-    dat = clustering.get_data()
+    dat = clustering.get_fdata()
     new_ = np.zeros_like(dat)
     new_[dat > 0] = 1
     clustering_mask = new_img_like(clustering, new_)
@@ -61,9 +61,7 @@ def _check_labels(labels, threshold=1000):
         warning = "\n Some parcels are more than 1000 voxels wide it can slow down alignment, especially optimal_transport :"
         for i in range(len(counts)):
             if counts[i] > threshold:
-                warning += "\n parcel {} : {} voxels".format(
-                    unique_labels[i], counts[i]
-                )
+                warning += f"\n parcel {unique_labels[i]} : {counts[i]} voxels"
         warnings.warn(warning)
     pass
 
@@ -190,7 +188,7 @@ def _make_parcellation(
         Parcellation of features in clusters
     """
     # check if clustering is provided
-    if type(clustering) == nib.nifti1.Nifti1Image or os.path.isfile(clustering):
+    if isinstance(clustering, nib.nifti1.Nifti1Image) or os.path.isfile(clustering):
         _check_same_fov(masker.mask_img_, clustering)
         labels = _apply_mask_fmri(clustering, masker.mask_img_).astype(int)
 
@@ -235,7 +233,7 @@ def _make_parcellation(
 
     if verbose > 0:
         unique_labels, counts = np.unique(labels, return_counts=True)
-        print("The alignment will be applied on parcels of sizes {}".format(counts))
+        print(f"The alignment will be applied on parcels of sizes {counts}")
 
     # raise warning if some parcels are bigger than 1000 voxels
     _check_labels(labels)

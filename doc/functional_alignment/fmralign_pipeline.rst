@@ -4,10 +4,9 @@
 Functional alignment pipeline
 =======================================
 
-As seen in the :ref:`previous section <functional_alignment_intro.rst>`, functional alignment searches for a transform \
-between images of two or several subjects in order to match voxels which have \
-similar profile of activation. This section explains how this transform
-is found in fmralign to make the process easy, efficient and scalable.
+As seen in the :ref:`previous section <functional_alignment_intro.rst>`,
+functional alignment searches for a transform between images of two or several subjects in order to match voxels which have similar profile of activation.
+This section explains how this transform is found in fmralign to make the process easy, efficient and scalable.
 
 We compare various methods of alignment on a pairwise alignment problem for `Individual Brain Charting <https://project.inria.fr/IBC/>`_ subjects.
 For each subject, we have a lot of functional informations in the form of several task-based contrast per subject.
@@ -24,16 +23,16 @@ Local functional alignment
    :scale: 25
    :align: right
 
-Aligning images of various size is not always easy because when we search a \
-transformation for `n` voxels yields at least a complexity of :math:`n^2`. Moreover, \
-finding just one transformation for similarity of functional signal in the whole \
+Aligning images of various size is not always easy because when we search a
+transformation for `n` voxels yields at least a complexity of :math:`n^2`. Moreover,
+finding just one transformation for similarity of functional signal in the whole
 brain could create unrealistic correspondances, for example inter-hemispheric.
 
-To avoid these issues, we keep alignment local, i.e. on local and functionally meaningful regions. \
-Thus, in a first step cluster the voxels in the image into `n_pieces` sub-regions, based on functional information. \
-Then we find local alignment on each parcel and we recompose the global matrix from these. \
+To avoid these issues, we keep alignment local, i.e. on local and functionally meaningful regions.
+Thus, in a first step cluster the voxels in the image into `n_pieces` sub-regions, based on functional information.
+Then we find local alignment on each parcel and we recompose the global matrix from these.
 
-With this technique, it is possible to find quickly sensible alignment even for full-brain images in 2mm resolution. The \
+With this technique, it is possible to find quickly sensible alignment even for full-brain images in 2mm resolution. The
 parcellation chosen can obviously have an impact. We recommend 'ward' to have spatially compact and reproducible clusters.
 
 .. warning::
@@ -142,17 +141,17 @@ Plot the mask we  use
 
 Define a masker
 ---------------
->>> from nilearn.input_data import NiftiMasker
+>>> from nilearn.maskers import NiftiMasker
 >>> roi_masker = NiftiMasker(mask_img=mask).fit()
 
 
 Prepare the data
 -------------------
-For each subject, for each task and conditions, our dataset contains two \
-independent acquisitions, similar except for one acquisition parameter, the \
+For each subject, for each task and conditions, our dataset contains two
+independent acquisitions, similar except for one acquisition parameter, the
 encoding phase used that was either Antero-Posterior (AP) or Postero-Anterior (PA).
-Although this induces small differences in the final data, we will take \
-advantage of these "duplicates" to create a training and a testing set that \
+Although this induces small differences in the final data, we will take
+advantage of these "duplicates" to create a training and a testing set that
 contains roughly the same signals but acquired independently.
 
 
@@ -164,9 +163,9 @@ The training fold, used to learn alignment from source subject toward target:
 >>> target_train = df[df.subject == 'sub-02'][df.acquisition == 'ap'].path.values
 
 The testing fold:
-  * source test: PA contrasts for subject 'sub-01', used to predict \
+  * source test: PA contrasts for subject 'sub-01', used to predict
     the corresponding contrasts of subject 'sub-02'
-  * target test: PA contrasts for subject 'sub-02', used as a ground truth \
+  * target test: PA contrasts for subject 'sub-02', used as a ground truth
     to score our predictions
 
 >>> source_test = df[df.subject == 'sub-01'][df.acquisition == 'pa'].path.values

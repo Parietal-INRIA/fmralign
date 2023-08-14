@@ -1,8 +1,8 @@
 import nibabel
 import numpy as np
-from nilearn.input_data import NiftiMasker
+from numpy.random import default_rng
+from nilearn.maskers import NiftiMasker
 from numpy.testing import assert_array_almost_equal
-from sklearn.metrics import r2_score
 
 
 def zero_mean_coefficient_determination(
@@ -51,10 +51,9 @@ def zero_mean_coefficient_determination(
 
 
 def assert_class_align_better_than_identity(algo, X, Y):
-    """ Tests that the given algorithm align ndarrays X into Y better than \
+    """Tests that the given algorithm align ndarrays X into Y better than
     identity. This alignment is measured through r2 score.
     """
-    print(algo)
     algo.fit(X, Y)
     identity_baseline_score = zero_mean_coefficient_determination(Y, X)
     algo_score = zero_mean_coefficient_determination(Y, algo.transform(X))
@@ -62,8 +61,8 @@ def assert_class_align_better_than_identity(algo, X, Y):
 
 
 def assert_algo_transform_almost_exactly(algo, img1, img2, mask=None):
-    """ Tests that the given algorithm manage to transform almost exactly Nifti\
-     image img1 into Nifti Image img2
+    """Tests that the given algorithm manage to transform almost exactly Nifti
+    image img1 into Nifti Image img2
     """
     algo.fit(img1, img2)
     imtest = algo.transform(img1)
@@ -75,16 +74,20 @@ def assert_algo_transform_almost_exactly(algo, img1, img2, mask=None):
 
 
 def random_niimg(shape):
-    """ Produces a random nifti image of shape (shape) and the appropriate \
+    """Produces a random nifti image of shape (shape) and the appropriate
     mask to use it.
     """
-    im = nibabel.Nifti1Image(np.random.random_sample(shape), np.eye(4))
+    rng = default_rng()
+    im = nibabel.Nifti1Image(
+        rng.random(size=shape, dtype="float32"),
+        np.eye(4),
+    )
     mask_img = nibabel.Nifti1Image(np.ones(shape[0:3]), np.eye(4))
     return im, mask_img
 
 
 def assert_model_align_better_than_identity(algo, img1, img2, mask=None):
-    """ Tests that the given algorithm align Nifti image img1 into Nifti \
+    """Tests that the given algorithm align Nifti image img1 into Nifti
     Image img2 better than identity. Proficiency is measured through r2 score.
     """
     algo.fit(img1, img2)
