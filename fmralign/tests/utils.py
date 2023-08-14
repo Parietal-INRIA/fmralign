@@ -8,7 +8,22 @@ from numpy.testing import assert_array_almost_equal
 def zero_mean_coefficient_determination(
     y_true, y_pred, sample_weight=None, multioutput="uniform_average"
 ):
-    """ """
+    """
+    Calculate ratio for y_true, y_pred distance to y_true.
+    Optimally weights that calculation by provided sample weights.
+
+    Parameters
+    ----------
+    y_true: (n_samples, n_features) nd array
+        Observed y values
+    y_pred: (n_samples, n_features) nd array
+        Predicted y values
+    sample_weight: (n_samples) nd array
+        Weighting for each sample.
+        Must have matching n_samples as y_true.
+    mutlioutput: str
+        Must be in ["raw_values", "uniform_average", "variance_weighted"]
+    """
     if y_true.ndim == 1:
         y_true = y_true.reshape((-1, 1))
 
@@ -77,9 +92,7 @@ def assert_algo_transform_almost_exactly(algo, img1, img2, mask=None):
 
 
 def random_niimg(shape):
-    """
-    Produces a random nifti image and corresponding mask.
-    """
+    """Produces a random NIfTI image and corresponding mask."""
     rng = default_rng()
     im = nibabel.Nifti1Image(
         rng.random(size=shape, dtype="float32"),
