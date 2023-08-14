@@ -111,9 +111,9 @@ target_test = df[df.subject == "sub-02"][df.acquisition == "pa"].path.values
 import numpy as np
 
 n_voxels = roi_masker.mask_img_.get_fdata().sum()
-print("The chosen region of interest contains {} voxels".format(n_voxels))
+print(f"The chosen region of interest contains {n_voxels} voxels")
 n_pieces = int(np.round(n_voxels / 200))
-print("We will cluster them in {} regions".format(n_pieces))
+print(f"We will cluster them in {n_pieces} regions")
 
 ###############################################################################
 # Define the estimators, fit them and do a prediction
@@ -149,7 +149,7 @@ for method in methods:
 
     # plot correlation for each method
     aligned_score = roi_masker.inverse_transform(method_error)
-    title = "Correlation of prediction after {} alignment".format(method)
+    title = f"Correlation of prediction after {method} alignment"
     display = plotting.plot_stat_map(
         aligned_score, display_mode="z", cut_coords=[-15, -5], vmax=1, title=title
     )

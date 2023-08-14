@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 from nilearn.image import concat_imgs, index_img, math_img
-from nilearn.input_data import NiftiMasker
+from nilearn.maskers import NiftiMasker
 from numpy.testing import assert_array_almost_equal
 
 from fmralign.template_alignment import TemplateAlignment, _rescaled_euclidean_mean

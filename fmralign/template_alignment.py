@@ -223,8 +223,8 @@ def _predict_from_template_and_mapping(template, test_index, mapping):
 
 class TemplateAlignment(BaseEstimator, TransformerMixin):
     """
-    Decompose the source images into regions and summarize subjects information \
-    in a template, then use pairwise alignment to predict \
+    Decompose the source images into regions and summarize subjects information
+    in a template, then use pairwise alignment to predict
     new contrast for target subject.
     """
 
@@ -371,10 +371,10 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         # Check if the input is a list, if list of lists, concatenate each subjects
         # data into one unique image.
         if not isinstance(imgs, (list, np.ndarray)) or len(imgs) < 2:
-            raise InputError(
-                "The method TemplateAlignment.fit() need a list input. \
-                             Each element of the list (Niimg-like or list of Niimgs) \
-                             is the data for one subject."
+            raise ValueError(
+                "The method TemplateAlignment.fit() need a list input. "
+                "Each element of the list (Niimg-like or list of Niimgs) "
+                "is the data for one subject."
             )
         else:
             if isinstance(imgs[0], (list, np.ndarray)):
@@ -431,24 +431,24 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
 
         """
         if not isinstance(imgs, (list, np.ndarray)):
-            raise InputError(
-                "The method TemplateAlignment.transform() need a list input. \
-                             Each element of the list (Niimg-like or list of Niimgs) \
-                             is the data used to align one new subject with images \
-                             indexed by train_index."
+            raise ValueError(
+                "The method TemplateAlignment.transform() need a list input. "
+                "Each element of the list (Niimg-like or list of Niimgs) "
+                "is the data used to align one new subject with images "
+                "indexed by train_index."
             )
         else:
             if isinstance(imgs[0], (list, np.ndarray)) and len(imgs[0]) != len(
                 train_index
             ):
                 raise ValueError(
-                    " Each element of imgs (Niimg-like or list of Niimgs) \
-                                 should have the same length as the length of train_index."
+                    "Each element of imgs (Niimg-like or list of Niimgs) "
+                    "should have the same length as the length of train_index."
                 )
             elif load_img(imgs[0]).shape[-1] != len(train_index):
                 raise ValueError(
-                    " Each element of imgs (Niimg-like or list of Niimgs) \
-                    should have the same length as the length of train_index."
+                    "Each element of imgs (Niimg-like or list of Niimgs) "
+                    "should have the same length as the length of train_index."
                 )
 
         template_length = self.template.shape[-1]
@@ -457,10 +457,8 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             and all(i < template_length for i in train_index)
         ):
             raise ValueError(
-                "Template has {} images but you provided a greater index in \
-                train_index or test_index.".format(
-                    template_length
-                )
+                f"Template has {template_length} images but you provided a "
+                "greater index in train_index or test_index."
             )
 
         fitted_mappings = Parallel(self.n_jobs, prefer="threads", verbose=self.verbose)(

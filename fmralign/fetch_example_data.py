@@ -42,7 +42,7 @@ def fetch_ibc_subjects_contrasts(subjects, data_dir=None, verbose=1):
     nilearn.datasets.fetch_localizer_contrasts
     """
     # The URLs can be retrieved from the nilearn account on OSF
-    if subjects is "all":
+    if subjects == "all":
         subjects = [
             "sub-%02d" % i for i in [1, 2, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15]
         ]
