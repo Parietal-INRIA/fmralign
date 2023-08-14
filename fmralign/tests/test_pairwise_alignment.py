@@ -87,7 +87,7 @@ def test_models_against_identity():
             algo = PairwiseAlignment(
                 alignment_method=alignment_method,
                 mask=masker,
-                clustering=clustering,
+                method=clustering,
                 n_pieces=2,
                 n_bags=1,
                 n_jobs=1,
