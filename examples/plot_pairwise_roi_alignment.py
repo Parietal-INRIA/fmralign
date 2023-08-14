@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Pairwise functional alignment on a ROI
+
+"""
+Pairwise functional alignment on a ROI.
 ===================================================================
 
 In this tutorial, we focus here on a single Region of Interest (ROI). On this

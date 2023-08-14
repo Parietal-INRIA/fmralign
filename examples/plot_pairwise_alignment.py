@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Pairwise functional alignment
+
+"""
+Pairwise functional alignment.
 ===================================================================
 
 In this tutorial, we show how to better predict new contrasts for a target

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Template-based prediction
+
+"""
+Template-based prediction.
 ================================================================================
 
 In this tutorial, we show how to better predict new contrasts for a target
