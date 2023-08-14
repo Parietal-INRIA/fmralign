@@ -149,7 +149,7 @@ class Identity(Alignment):
     """Compute no alignment, used as baseline for benchmarks : RX = X."""
 
     def transform(self, X):
-        """returns X"""
+        """Returns X"""
         return X
 
 

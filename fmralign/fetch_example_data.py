@@ -43,9 +43,7 @@ def fetch_ibc_subjects_contrasts(subjects, data_dir=None, verbose=1):
     """
     # The URLs can be retrieved from the nilearn account on OSF
     if subjects == "all":
-        subjects = [
-            "sub-%02d" % i for i in [1, 2, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15]
-        ]
+        subjects = ["sub-{i:02d}" for i in [1, 2, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15]]
     dataset_name = "ibc"
     data_dir = _get_dataset_dir(dataset_name, data_dir=data_dir, verbose=verbose)
 
@@ -97,14 +95,14 @@ def fetch_ibc_subjects_contrasts(subjects, data_dir=None, verbose=1):
     opts = {"uncompress": True}
     files = []
     for subject in subjects:
-        url = "https://osf.io/%s/download" % url_keys[subject]
+        url = f"https://osf.io/{url_keys[subject]}/download"
         filenames = [
-            (os.path.join(subject, "%s_ap.nii.gz" % condition), url, opts)
+            (os.path.join(subject, f"{condition}_ap.nii.gz"), url, opts)
             for condition in conditions
         ]
         filenames.extend(
             [
-                (os.path.join(subject, "%s_pa.nii.gz" % condition), url, opts)
+                (os.path.join(subject, f"{condition}_pa.nii.gz"), url, opts)
                 for condition in conditions
             ]
         )
