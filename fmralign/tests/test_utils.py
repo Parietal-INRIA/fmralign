@@ -2,7 +2,7 @@
 import nibabel
 import numpy as np
 import pytest
-from nilearn.input_data import NiftiMasker
+from nilearn.maskers import NiftiMasker
 
 from fmralign._utils import _make_parcellation
 from fmralign.tests.utils import random_niimg

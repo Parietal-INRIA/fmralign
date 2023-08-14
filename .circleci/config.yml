@@ -23,13 +23,6 @@ jobs:
       - run: echo 'export PATH="$HOME/miniconda3/bin:$PATH"' >> $BASH_ENV
       - run: |
           source activate testenv
-          conda install pot nilearn sphinx numpydoc sphinx-gallery -c conda-forge -yq
-          conda install jax jaxlib chex
-          conda install -c conda-forge ott-jax
-          pip install .
-          set -o pipefail && pytest 2>&1 | tee log.txt
-      - run: |
-          source activate testenv
           pwd
           ls
           set -o pipefail && make html 2>&1 | tee log.txt
