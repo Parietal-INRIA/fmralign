@@ -46,7 +46,6 @@ def test_pairwise_identity():
     data_mask = copy.deepcopy(mask_img.get_fdata())
     data_mask[0] = 0
     # create ground truth
-    clustering_mask = new_img_like(mask_img, data_mask)
     data_clust = copy.deepcopy(data_mask)
     data_clust[1] = 3
     # create 2-parcels clustering, smaller than background

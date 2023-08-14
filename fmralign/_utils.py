@@ -8,7 +8,6 @@ from nilearn._utils.niimg_conversions import _check_same_fov
 from nilearn.image import index_img, new_img_like, smooth_img
 from nilearn.masking import _apply_mask_fmri, intersect_masks
 from nilearn.regions.parcellations import Parcellations
-from sklearn.cluster import MiniBatchKMeans
 
 
 def _intersect_clustering_mask(clustering, mask):
@@ -58,7 +57,10 @@ def _check_labels(labels, threshold=1000):
     unique_labels, counts = np.unique(labels, return_counts=True)
 
     if not all(count < threshold for count in counts):
-        warning = "\n Some parcels are more than 1000 voxels wide it can slow down alignment, especially optimal_transport :"
+        warning = (
+            "\n Some parcels are more than 1000 voxels wide it can slow down alignment,"
+            "especially optimal_transport :"
+        )
         for i in range(len(counts)):
             if counts[i] > threshold:
                 warning += f"\n parcel {unique_labels[i]} : {counts[i]} voxels"

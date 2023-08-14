@@ -9,7 +9,8 @@ from fmralign.tests.utils import random_niimg
 
 
 def test_make_parcellation():
-    # make_parcellation is built on Nilearn which already has several test for its Parcellation class
+    # make_parcellation is built on Nilearn which already
+    # has several test for its Parcellation class
     # here we test just the call of the API is right on a simple example
     img, mask_img = random_niimg((7, 6, 8, 5))
     indexes = np.arange(img.shape[-1])

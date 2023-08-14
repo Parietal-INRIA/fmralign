@@ -415,7 +415,8 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         Parameters
         ----------
         imgs: List of 3D Niimg-like objects
-            Target subjects known data. Every img must have length (number of sample) train_index.
+            Target subjects known data.
+            Every img must have length (number of sample) train_index.
         train_index: list of ints
             Indexes of the 3D samples used to map each img to the template.
             Every index should be smaller than the number of images in the template.
@@ -427,7 +428,8 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         Returns
         -------
         predicted_imgs: List of 3D Niimg-like objects
-            Target subjects predicted data. Each Niimg has the same length as the list test_index
+            Target subjects predicted data.
+            Each Niimg has the same length as the list test_index
 
         """
         if not isinstance(imgs, (list, np.ndarray)):

@@ -6,7 +6,6 @@ import warnings
 import ot
 import numpy as np
 import scipy
-import sklearn
 from joblib import Parallel, delayed
 from scipy import linalg
 from scipy.optimize import linear_sum_assignment
