@@ -129,10 +129,12 @@ def _make_parcellation(
         try:
             parcellation.fit(images_to_parcel)
         except ValueError as err:
-            raise Exception(
+            errmsg = (
                 f"Clustering method {clustering} should be supported by "
                 "nilearn.regions.Parcellation or a 3D Niimg."
-            ) from err
+            )
+            err.args += (errmsg,)
+            raise err
         labels = _apply_mask_fmri(parcellation.labels_img_, masker.mask_img_).astype(
             int
         )
