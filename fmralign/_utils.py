@@ -66,92 +66,6 @@ def _check_labels(labels, threshold=1000):
     pass
 
 
-def _hierarchical_k_means(
-    X,
-    n_clusters,
-    init="k-means++",
-    batch_size=1000,
-    n_init=10,
-    max_no_improvement=10,
-    verbose=0,
-    random_state=0,
-):
-    """Use a recursive k-means to cluster X
-    Parameters
-    ----------
-    X: nd array (n_samples, n_features)
-        Data to cluster
-
-    n_clusters: int,
-        The number of clusters to find.
-
-    init : {'k-means++', 'random' or an ndarray}
-        Method for initialization, defaults to 'k-means++':
-        'k-means++' : selects initial cluster centers for k-mean
-        clustering in a smart way to speed up convergence. See section
-        Notes in k_init for more details.
-        'random': choose k observations (rows) at random from data for
-        the initial centroids.
-        If an ndarray is passed, it should be of shape (n_clusters, n_features)
-        and gives the initial centers.
-
-    batch_size : int, optional, default: 100
-        Size of the mini batches. (Kmeans performed through MiniBatchKMeans)
-
-    n_init : int, default=3
-        Number of random initializations that are tried.
-        In contrast to KMeans, the algorithm is only run once, using the
-        best of the ``n_init`` initializations as measured by inertia.
-
-    max_no_improvement : int, default: 10
-        Control early stopping based on the consecutive number of mini
-        batches that does not yield an improvement on the smoothed inertia.
-        To disable convergence detection based on inertia, set
-        max_no_improvement to None.
-
-    random_state : int, RandomState instance or None (default)
-        Determines random number generation for centroid initialization and
-        random reassignment. Use an int to make the randomness deterministic.
-        See :term:`Glossary <random_state>`.
-    Returns
-    -------
-    labels : list of ints (len n_features)
-        Parcellation of features in clusters
-    """
-
-    n_big_clusters = int(np.sqrt(n_clusters))
-    mbk = MiniBatchKMeans(
-        init=init,
-        n_clusters=n_big_clusters,
-        batch_size=batch_size,
-        n_init=n_init,
-        max_no_improvement=max_no_improvement,
-        verbose=verbose,
-        random_state=random_state,
-    ).fit(X)
-    coarse_labels = mbk.labels_
-    fine_labels = np.zeros_like(coarse_labels)
-    q = 0
-    for i in range(n_big_clusters):
-        n_small_clusters = int(
-            n_clusters * np.sum(coarse_labels == i) * 1.0 / X.shape[0]
-        )
-        n_small_clusters = np.maximum(1, n_small_clusters)
-        mbk = MiniBatchKMeans(
-            init=init,
-            n_clusters=n_small_clusters,
-            batch_size=batch_size,
-            n_init=n_init,
-            max_no_improvement=max_no_improvement,
-            verbose=verbose,
-            random_state=random_state,
-        ).fit(X[coarse_labels == i])
-        fine_labels[coarse_labels == i] = q + mbk.labels_
-        q += n_small_clusters
-
-    return _remove_empty_labels(fine_labels)
-
-
 def _make_parcellation(
     imgs, clustering_index, clustering, n_pieces, masker, smoothing_fwhm=5, verbose=0
 ):
@@ -167,7 +81,6 @@ def _make_parcellation(
         Clustering is performed on a subset of the data chosen randomly
         in timeframes. This index carries this subset.
     clustering: string or 3D Niimg
-        In : {'kmeans', 'ward', 'rena'}, passed to nilearn Parcellations class.
         If you aim for speed, choose k-means (and check kmeans_smoothing_fwhm parameter)
         If you want spatially connected and/or reproducible regions use 'ward'
         If you want balanced clusters (especially from timeseries) used 'hierarchical_kmeans'
@@ -195,18 +108,13 @@ def _make_parcellation(
     # otherwise check it's needed, if not return 1 everywhere
     elif n_pieces == 1:
         labels = np.ones(int(masker.mask_img_.get_fdata().sum()), dtype=np.int8)
-    # otherwise check requested clustering method
-    elif clustering == "hierarchical_kmeans" and n_pieces > 1:
-        imgs_subset = index_img(imgs, clustering_index)
-        if smoothing_fwhm is not None:
-            X = masker.transform(smooth_img(imgs_subset, smoothing_fwhm))
-        else:
-            X = masker.transform(imgs_subset)
-        labels = _hierarchical_k_means(X.T, n_clusters=n_pieces, verbose=verbose) + 1
 
-    elif clustering in ["kmeans", "ward", "rena"] and n_pieces > 1:
+    # otherwise check requested clustering method
+    elif isinstance(clustering, str) and n_pieces > 1:
         imgs_subset = index_img(imgs, clustering_index)
-        if clustering == "kmeans" and smoothing_fwhm is not None:
+        if (clustering in ["kmeans", "hierarchical_kmeans"]) and (
+            smoothing_fwhm is not None
+        ):
             images_to_parcel = smooth_img(imgs_subset, smoothing_fwhm)
         else:
             images_to_parcel = imgs_subset
@@ -218,17 +126,17 @@ def _make_parcellation(
             n_iter=20,
             verbose=verbose,
         )
-        parcellation.fit(images_to_parcel)
+        try:
+            parcellation.fit(images_to_parcel)
+        except ValueError as err:
+            errmsg = (
+                f"Clustering method {clustering} should be supported by "
+                "nilearn.regions.Parcellation or a 3D Niimg."
+            )
+            err.args += (errmsg,)
+            raise err
         labels = _apply_mask_fmri(parcellation.labels_img_, masker.mask_img_).astype(
             int
-        )
-
-    else:
-        raise ValueError(
-            (
-                'Clustering should be "kmeans", "ward", "rena", "hierarchical_kmeans", '
-                "or a 3D Niimg, and n_pieces should be an integer ≥ 1"
-            )
         )
 
     if verbose > 0:

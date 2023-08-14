@@ -68,8 +68,8 @@ def test_pairwise_identity():
 
 
 def test_models_against_identity():
-    img1, mask_img = random_niimg((7, 6, 8, 5))
-    img2, _ = random_niimg((7, 6, 8, 5))
+    img1, mask_img = random_niimg((7, 6, 8, 10))
+    img2, _ = random_niimg((7, 6, 8, 10))
     masker = NiftiMasker(mask_img=mask_img)
     masker.fit()
     ground_truth = masker.transform(img2)

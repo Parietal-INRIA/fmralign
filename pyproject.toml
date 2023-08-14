@@ -55,7 +55,7 @@ test = [
 ]
 # Useful for development
 dev = [
-  "nilearn[jax,doc,test]",
+  "fmralign[jax,doc,test]",
   "isort",
   "flynt",
   "black",
