@@ -18,7 +18,7 @@ from sklearn.metrics.pairwise import pairwise_distances
 def scaled_procrustes(X, Y, scaling=False, primal=None):
     """
     Compute a mixing matrix R and a scaling sc such that Frobenius norm
-    ||sc RX - Y||^2 is minimized and R is an orthogonal matrix.
+    ||sc RX - Y||^2 is minimized and R is an orthogonal matrix
 
     Parameters
     ----------
@@ -71,7 +71,7 @@ def scaled_procrustes(X, Y, scaling=False, primal=None):
 
 def optimal_permutation(X, Y):
     """
-    Compute the optmal permutation matrix of X toward Y
+    Compute the optmal permutation matrix of X toward Y.
 
     Parameters
     ----------
@@ -94,7 +94,7 @@ def optimal_permutation(X, Y):
 
 def _projection(x, y):
     """
-    Compute scalar d minimizing ||dx-y||
+    Compute scalar d minimizing ||dx-y||.
 
     Parameters
     ----------

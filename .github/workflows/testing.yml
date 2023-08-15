@@ -28,7 +28,7 @@ jobs:
           pip install -e .[jax,doc,test]
       - name: Flake8
         run: |
-          python -m pip install --upgrade pip flake8 flake8-docstrings flake8-use-fstring
+          python -m pip install --upgrade pip flake8 flake8-use-fstring
           flake8 --verbose .
       - name: Test with pytest
         run: |
