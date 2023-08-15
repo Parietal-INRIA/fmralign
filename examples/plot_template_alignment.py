@@ -2,7 +2,7 @@
 
 """
 Template-based prediction.
-================================================================================
+==========================
 
 In this tutorial, we show how to better predict new contrasts for a target
 subject using many source subjects corresponding contrasts. For this purpose,

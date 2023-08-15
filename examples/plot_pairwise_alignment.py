@@ -2,7 +2,7 @@
 
 """
 Pairwise functional alignment.
-===================================================================
+==============================
 
 In this tutorial, we show how to better predict new contrasts for a target
 subject using source subject corresponding contrasts and data in common.
