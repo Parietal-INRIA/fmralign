@@ -35,8 +35,6 @@ jax = ["jax", "ott-jax > 0.3.0"]
 # For building the documentation
 doc = [
   "coverage",
-  "flake8",
-  "flake8-docstrings",
   "myst-parser",
   "numpydoc",
   "ruamel.yaml",
@@ -59,6 +57,7 @@ dev = [
   "isort",
   "flynt",
   "black",
+  "flake8",
   "flake8-use-fstring",
 ]
 

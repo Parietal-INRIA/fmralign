@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Alignment methods benchmark (pairwise ROI case)
-===================================================================
+
+"""
+Alignment methods benchmark (pairwise ROI case).
+================================================
 
 In this tutorial, we compare various methods of alignment on a pairwise alignment
 problem for Individual Brain Charting subjects. For each subject, we have a lot

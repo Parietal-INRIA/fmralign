@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
-""" Module implementing alignment estimators on ndarrays
-"""
+"""Module implementing alignment estimators on ndarrays."""
 import warnings
 
 import ot
 import numpy as np
 import scipy
-import sklearn
 from joblib import Parallel, delayed
 from scipy import linalg
 from scipy.optimize import linear_sum_assignment
@@ -18,8 +16,9 @@ from sklearn.metrics.pairwise import pairwise_distances
 
 
 def scaled_procrustes(X, Y, scaling=False, primal=None):
-    """Compute a mixing matrix R and a scaling sc such that Frobenius norm
-    ||sc RX - Y||^2 is minimized and R is an orthogonal matrix.
+    """
+    Compute a mixing matrix R and a scaling sc such that Frobenius norm
+    ||sc RX - Y||^2 is minimized and R is an orthogonal matrix
 
     Parameters
     ----------
@@ -71,7 +70,8 @@ def scaled_procrustes(X, Y, scaling=False, primal=None):
 
 
 def optimal_permutation(X, Y):
-    """Compute the optmal permutation matrix of X toward Y
+    """
+    Compute the optmal permutation matrix of X toward Y.
 
     Parameters
     ----------
@@ -93,7 +93,8 @@ def optimal_permutation(X, Y):
 
 
 def _projection(x, y):
-    """Compute scalar d minimizing ||dx-y||
+    """
+    Compute scalar d minimizing ||dx-y||.
 
     Parameters
     ----------
@@ -114,8 +115,9 @@ def _projection(x, y):
 
 
 def _voxelwise_signal_projection(X, Y, n_jobs=1, parallel_backend="threading"):
-    """Compute D, list of scalar d_i minimizing :
-        ||d_i * x_i - y_i|| for every x_i, y_i in X, Y
+    """
+    Compute D, list of scalar d_i minimizing :
+    ||d_i * x_i - y_i|| for every x_i, y_i in X, Y
 
     Parameters
     ----------
@@ -150,12 +152,13 @@ class Identity(Alignment):
     """Compute no alignment, used as baseline for benchmarks : RX = X."""
 
     def transform(self, X):
-        """returns X"""
+        """Returns X"""
         return X
 
 
 class DiagonalAlignment(Alignment):
-    """Compute the voxelwise projection factor between X and Y.
+    """
+    Compute the voxelwise projection factor between X and Y.
 
     Parameters
     ----------
@@ -184,7 +187,8 @@ class DiagonalAlignment(Alignment):
         X: (n_samples, n_features) nd array
             source data
         Y: (n_samples, n_features) nd array
-            target data"""
+            target data
+        """
         shrinkage_coefficients = _voxelwise_signal_projection(
             X.T, Y.T, self.n_jobs, self.parallel_backend
         )
@@ -198,8 +202,9 @@ class DiagonalAlignment(Alignment):
 
 
 class ScaledOrthogonalAlignment(Alignment):
-    """Compute a orthogonal mixing matrix R and a scaling sc such that Frobenius norm
-    ||sc RX - Y||^2 is minimized.
+    """
+    Compute a orthogonal mixing matrix R and a scaling sc.
+    These are calculated such that Frobenius norm ||sc RX - Y||^2 is minimized.
 
     Parameters
     -----------
@@ -217,7 +222,8 @@ class ScaledOrthogonalAlignment(Alignment):
         self.scale = 1
 
     def fit(self, X, Y):
-        """Fit orthogonal R s.t. ||sc XR - Y||^2
+        """
+        Fit orthogonal R s.t. ||sc XR - Y||^2
 
         Parameters
         -----------
@@ -237,7 +243,8 @@ class ScaledOrthogonalAlignment(Alignment):
 
 
 class RidgeAlignment(Alignment):
-    """Compute a scikit-estimator R using a mixing matrix M s.t Frobenius
+    """
+    Compute a scikit-estimator R using a mixing matrix M s.t Frobenius
     norm || XM - Y ||^2 + alpha * ||M||^2 is minimized with cross-validation
 
     Parameters
@@ -264,7 +271,8 @@ class RidgeAlignment(Alignment):
         self.cv = cv
 
     def fit(self, X, Y):
-        """Fit R s.t. || XR - Y ||^2 + alpha ||R||^2 is minimized with cv
+        """
+        Fit R s.t. || XR - Y ||^2 + alpha ||R||^2 is minimized with cv
 
         Parameters
         -----------
@@ -288,7 +296,8 @@ class RidgeAlignment(Alignment):
 
 
 class Hungarian(Alignment):
-    """Compute the optimal permutation matrix of X toward Y
+    """
+    Compute the optimal permutation matrix of X toward Y
 
     Attributes
     ----------
@@ -314,7 +323,8 @@ class Hungarian(Alignment):
 
 
 class POTAlignment(Alignment):
-    """Compute the optimal coupling between X and Y with entropic regularization,
+    """
+    Compute the optimal coupling between X and Y with entropic regularization,
     using the pure Python POT (https://pythonot.github.io/) package.
 
     Parameters
@@ -350,7 +360,9 @@ class POTAlignment(Alignment):
         self.tol = tol
 
     def fit(self, X, Y):
-        """Parameters
+        """
+
+        Parameters
         --------------
         X: (n_samples, n_features) nd array
             source data
@@ -396,7 +408,8 @@ class POTAlignment(Alignment):
 
 
 class OptimalTransportAlignment(Alignment):
-    """Compute the optimal coupling between X and Y with entropic regularization
+    """
+    Compute the optimal coupling between X and Y with entropic regularization
     using a OTT-JAX as a backend for acceleration.
 
     Parameters
@@ -420,7 +433,9 @@ class OptimalTransportAlignment(Alignment):
         self.max_iter = max_iter
 
     def fit(self, X, Y):
-        """Parameters
+        """
+
+        Parameters
         --------------
         X: (n_samples, n_features) nd array
             source data

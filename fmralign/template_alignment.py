@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-""" Module for functional template inference using functional alignment on Niimgs and
-prediction of new subjects unseen images
+"""
+Module for functional template inference.
+Uses functional alignment on Niimgs and predicts new subjects' unseen images.
 """
 # Author: T. Bazeille, B. Thirion
 # License: simplified BSD
@@ -15,7 +16,8 @@ from fmralign.pairwise_alignment import PairwiseAlignment
 
 
 def _rescaled_euclidean_mean(imgs, masker, scale_average=False):
-    """Make the Euclidian average of images
+    """
+    Make the Euclidian average of images.
 
     Parameters
     ----------
@@ -60,9 +62,11 @@ def _align_images_to_template(
     n_jobs,
     verbose,
 ):
-    """Convenience function : for a list of images, return the list
-    of estimators (PairwiseAlignment instances) aligning each of them to a
-    common target, the template. All arguments are used in PairwiseAlignment
+    """
+    Convenience function.
+    For a list of images, return the list of estimators (PairwiseAlignment instances)
+    aligning each of them to a common target, the template.
+    All arguments are used in PairwiseAlignment.
     """
     aligned_imgs = []
     for img in imgs:
@@ -96,7 +100,9 @@ def _create_template(
     n_jobs,
     verbose,
 ):
-    """Create template through alternate minimization.  Compute iteratively :
+    """
+    Create template through alternate minimization.
+    Compute iteratively :
     * T minimizing sum(||R_i X_i-T||) which is the mean of aligned images (RX_i)
     * align initial images to new template T
         (find transform R_i minimizing ||R_i X_i-T|| for each img X_i)
@@ -161,7 +167,8 @@ def _map_template_to_image(
     n_jobs,
     verbose,
 ):
-    """Learn alignment operator from the template toward new images.
+    """
+    Learn alignment operator from the template toward new images.
 
     Parameters
     ----------
@@ -198,7 +205,8 @@ def _map_template_to_image(
 
 
 def _predict_from_template_and_mapping(template, test_index, mapping):
-    """From a template, and an alignment estimator, predict new contrasts
+    """
+    From a template and an alignment estimator, predict new contrasts.
 
     Parameters
     ----------
@@ -407,15 +415,17 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             self.template.to_filename(self.save_template)
 
     def transform(self, imgs, train_index, test_index):
-        """Learn alignment between new subject and template calculated during fit,
-        then predicts other conditions for this new subject.
+        """
+        Learn alignment between new subject and template calculated during fit,
+        then predict other conditions for this new subject.
         Alignment is learnt between imgs and conditions in the template indexed by train_index.
         Prediction correspond to conditions in the template index by test_index.
 
         Parameters
         ----------
         imgs: List of 3D Niimg-like objects
-            Target subjects known data. Every img must have length (number of sample) train_index.
+            Target subjects known data.
+            Every img must have length (number of sample) train_index.
         train_index: list of ints
             Indexes of the 3D samples used to map each img to the template.
             Every index should be smaller than the number of images in the template.
@@ -427,7 +437,8 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         Returns
         -------
         predicted_imgs: List of 3D Niimg-like objects
-            Target subjects predicted data. Each Niimg has the same length as the list test_index
+            Target subjects predicted data.
+            Each Niimg has the same length as the list test_index
 
         """
         if not isinstance(imgs, (list, np.ndarray)):

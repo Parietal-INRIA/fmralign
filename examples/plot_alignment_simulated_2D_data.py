@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Alignment on simulated 2D data
-===================================================================
+
+"""
+Alignment on simulated 2D data.
+===============================
 
 As we mentionned several times, we search for a transformation, let's call it
 `R`, between the source subject data `X` and the target data `Y`. `X` and `Y`

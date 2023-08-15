@@ -6,8 +6,8 @@ from sklearn.metrics import r2_score
 
 def score_voxelwise(ground_truth, prediction, masker, loss, multioutput="raw_values"):
     """
-    Calculates loss function for predicted, ground truth
-    arrays. Supported scores are R2, correlation, and normalized
+    Calculate loss function for predicted, ground truth arrays.
+    Supported scores are R2, correlation, and normalized
     reconstruction error (Bazeille et al., 2019)
 
     Parameters
@@ -75,9 +75,7 @@ def normalized_reconstruction_error(
     y_true, y_pred, sample_weights=None, multioutput="raw_values"
 ):
     """
-    Calculates the normalized reconstruction error
-    as defined by Bazeille and colleagues (2019).
-
+    Calculate the normalized reconstruction error as defined by Bazeille et al (2019).
     A perfect prediction yields a value of 1.
 
     Parameters
@@ -138,12 +136,8 @@ def normalized_reconstruction_error(
 
 def reconstruction_ratio(aligned_error, identity_error):
     """
-    Calculates the reconstruction error
-    as defined by Bazeille and
-    colleagues (2019).
-
-    A value greater than 0 indicates that
-    voxels are predicted better by aligned data
+    Calculate the reconstruction ratio as defined by Bazeille et al (2019).
+    A value greater than 0 indicates that voxels are predicted better by aligned data
     than by raw data.
 
     Parameters

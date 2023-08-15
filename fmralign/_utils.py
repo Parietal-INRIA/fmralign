@@ -8,11 +8,10 @@ from nilearn._utils.niimg_conversions import _check_same_fov
 from nilearn.image import index_img, new_img_like, smooth_img
 from nilearn.masking import _apply_mask_fmri, intersect_masks
 from nilearn.regions.parcellations import Parcellations
-from sklearn.cluster import MiniBatchKMeans
 
 
 def _intersect_clustering_mask(clustering, mask):
-    "Take 3D Niimg clustering and bigger mask, output reduced mask"
+    """Take 3D Niimg clustering and bigger mask, output reduced mask."""
     dat = clustering.get_fdata()
     new_ = np.zeros_like(dat)
     new_[dat > 0] = 1
@@ -21,7 +20,9 @@ def _intersect_clustering_mask(clustering, mask):
 
 
 def piecewise_transform(labels, estimators, X):
-    """Apply a piecewise transform to X:
+    """
+    Apply a piecewise transform to X.
+
     Parameters
     ----------
     labels: list of ints (len n_features)
@@ -46,7 +47,7 @@ def piecewise_transform(labels, estimators, X):
 
 
 def _remove_empty_labels(labels):
-    """Remove empty values label values from labels list"""
+    """Remove empty values label values from labels list."""
     vals = np.unique(labels)
     inverse_vals = -np.ones(labels.max() + 1).astype(int)
     inverse_vals[vals] = np.arange(len(vals))
@@ -54,11 +55,14 @@ def _remove_empty_labels(labels):
 
 
 def _check_labels(labels, threshold=1000):
-    """Check is some parcels are bigger than a certain threshold and raise warning if so"""
+    """Check if any parcels are bigger than set threshold."""
     unique_labels, counts = np.unique(labels, return_counts=True)
 
     if not all(count < threshold for count in counts):
-        warning = "\n Some parcels are more than 1000 voxels wide it can slow down alignment, especially optimal_transport :"
+        warning = (
+            "\n Some parcels are more than 1000 voxels wide it can slow down alignment,"
+            "especially optimal_transport :"
+        )
         for i in range(len(counts)):
             if counts[i] > threshold:
                 warning += f"\n parcel {unique_labels[i]} : {counts[i]} voxels"
@@ -69,7 +73,8 @@ def _check_labels(labels, threshold=1000):
 def _make_parcellation(
     imgs, clustering_index, clustering, n_pieces, masker, smoothing_fwhm=5, verbose=0
 ):
-    """Convenience function to use nilearn Parcellation class in our pipeline.
+    """
+    Use nilearn Parcellation class in our pipeline.
     It is used to find local regions of the brain in which alignment will be later applied.
     For alignment computational efficiency, regions should be of hundreds of voxels.
 
