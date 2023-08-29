@@ -1,6 +1,6 @@
 ---
 # Workflow to build the documentation.
-name: Documentation builder
+name: Build docs
 on:
     push:
         branches:
@@ -12,7 +12,7 @@ jobs:
   # Steps to build the documentation.
     build_docs:
     # This prevents this workflow from running on a fork.
-        if: github.repository == 'nilearn/nilearn'
+        if: github.repository == 'parietal-INRIA/fmralign'
         runs-on: ubuntu-latest
         timeout-minutes: 360
         defaults:
@@ -26,7 +26,7 @@ jobs:
                 key: source-cache-${{ runner.os }}-${{ github.run_id }}
                 restore-keys: |
                     source-cache-${{ runner.os }}
-        -   name: Checkout nilearn
+        -   name: Checkout fmralign
             uses: actions/checkout@v3
             with:
           # If pull request, checkout HEAD commit with all commit history
@@ -36,7 +36,7 @@ jobs:
             run: |
                 set -x
                 if ! git remote -v | grep upstream; then
-                  git remote add upstream https://github.com/nilearn/nilearn.git
+                  git remote add upstream https://github.com/parietal-INRIA/fmralign.git
                 fi
                 git fetch upstream
         -   name: Merge with upstream
@@ -52,7 +52,9 @@ jobs:
       # Set up environment
         -   name: Install apt packages
             run: |
-                ./build_tools/github/build_docs_apt_dependencies.sh
+                sudo -E apt-get -yq update
+                sudo -E apt-get -yq --no-install-suggests --no-install-recommends install \
+                    dvipng texlive-latex-base texlive-latex-extra
         -   name: Setup conda
             uses: conda-incubator/setup-miniconda@v2
             with:
@@ -62,7 +64,14 @@ jobs:
                 channels: conda-forge
         -   name: Install packages in conda env
             run: |
-                ./build_tools/github/build_docs_dependencies.sh
+                conda init bash
+                echo "conda version = $(conda --version)"
+                conda create -n testenv
+                conda install -n testenv -yq python=3.9
+                source activate testenv
+                python -m pip install --user --upgrade --progress-bar off pip
+                # See pyproject.toml for dependency group options
+                python -m pip install .[jax,test,doc]
 
       # Run the doc build. 
         -   name: Build docs
