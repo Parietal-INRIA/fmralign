@@ -1,6 +1,6 @@
 ---
 # Workflow to build the documentation.
-name: Build docs
+name: Build documentation
 on:
     push:
         branches:
