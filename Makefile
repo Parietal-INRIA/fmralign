@@ -1,23 +1,53 @@
-# Minimal makefile for Sphinx documentation
+# Makefile for Sphinx documentation
 #
 
 # You can set these variables from the command line.
-SPHINXOPTS    =
+SPHINXOPTS    = -v
 SPHINXBUILD   = sphinx-build
-SOURCEDIR     = source
-BUILDDIR      = build
+BUILDDIR      = _build
 
-# Put it first so that "make" without argument is like "make help".
+.PHONY: help html dirhtml htmlhelp
+
 help:
-	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	@echo "Please use \`make <target>' where <target> is one of"
+	@echo "  html      to make standalone HTML files"
+	@echo "  dirhtml   to make HTML files named index.html in directories"
+	@echo "  htmlhelp  to make HTML files and a HTML help project"
 
-.PHONY: help Makefile
 
-# Catch-all target: route all unknown targets to Sphinx using the new
-# "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
-%: Makefile
-	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+force_html: force html
 
+force:
+	find . -name \*.rst -exec touch {} \;
+
+html:
+	# These two lines make the build a bit more lengthy, and the
+	# the embedding of images more robust
+	rm -rf $(BUILDDIR)/html/_images
+	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
+	touch $(BUILDDIR)/html/.nojekyll
+	@echo
+	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
+
+html-strict:
+	# Build html documentation using a strict mode: Warnings are
+	# considered as errors.
+	make check
+	touch $(BUILDDIR)/html/.nojekyll
+	@echo
+	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
+
+dirhtml:
+	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
+	touch $(BUILDDIR)/dirhtml .nojekyll
+	@echo
+	@echo "Build finished. The HTML pages are in $(BUILDDIR)/dirhtml."
+
+htmlhelp:
+	$(SPHINXBUILD) -b htmlhelp $(ALLSPHINXOPTS) $(BUILDDIR)/htmlhelp
+	@echo
+	@echo "Build finished; now you can run HTML Help Workshop with the" \
+	      ".hhp project file in $(BUILDDIR)/htmlhelp."
 
 install:
 	git clone --no-checkout --depth 1 https://github.com/Parietal-INRIA/fmralign.github.io.git build/fmralign.github.io

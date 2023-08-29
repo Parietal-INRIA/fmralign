@@ -1,14 +1,12 @@
 @ECHO OFF
 
 pushd %~dp0
-
 REM Command file for Sphinx documentation
 
-if "%SPHINXBUILD%" == "" (
-	set SPHINXBUILD=sphinx-build
-)
+set SPHINXBUILD=sphinx-build
 set SOURCEDIR=source
-set BUILDDIR=build
+set BUILDDIR=_build
+set ALLSPHINXOPTS=-d %BUILDDIR%/doctrees %SPHINXOPTS% .
 
 if "%1" == "" goto help
 
@@ -25,11 +23,36 @@ if errorlevel 9009 (
 	exit /b 1
 )
 
-%SPHINXBUILD% -M %1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS%
-goto end
+if "%1" == "help" (
+	:help
+	echo.Please use `make ^<target^>` where ^<target^> is one of
+	echo.  html      to make standalone HTML files
+	echo.  dirhtml   to make HTML files named index.html in directories
+	echo.  htmlhelp  to make HTML files and a HTML help project
+	goto end
+)
 
-:help
-%SPHINXBUILD% -M help %SOURCEDIR% %BUILDDIR% %SPHINXOPTS%
+if "%1" == "html" (
+	%SPHINXBUILD% -b html %ALLSPHINXOPTS% %BUILDDIR%/html
+	echo.
+	echo.Build finished. The HTML pages are in %BUILDDIR%/html.
+	goto end
+)
+
+if "%1" == "dirhtml" (
+	%SPHINXBUILD% -b dirhtml %ALLSPHINXOPTS% %BUILDDIR%/dirhtml
+	echo.
+	echo.Build finished. The HTML pages are in %BUILDDIR%/dirhtml.
+	goto end
+)
+
+if "%1" == "htmlhelp" (
+	%SPHINXBUILD% -b htmlhelp %ALLSPHINXOPTS% %BUILDDIR%/htmlhelp
+	echo.
+	echo.Build finished; now you can run HTML Help Workshop with the ^
+.hhp project file in %BUILDDIR%/htmlhelp.
+	goto end
+)
 
 :end
 popd
