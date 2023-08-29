@@ -1,0 +1,88 @@
+---
+# Workflow to build the documentation.
+name: Build docs
+on:
+    push:
+        branches:
+        -   main
+    pull_request:
+        branches:
+        -   '*'
+jobs:
+  # Steps to build the documentation.
+    build_docs:
+    # This prevents this workflow from running on a fork.
+        if: github.repository == 'parietal-INRIA/fmralign'
+        runs-on: ubuntu-latest
+        timeout-minutes: 360
+        defaults:
+            run:
+                shell: bash -el {0}
+        steps:
+        -   name: Source caching
+            uses: actions/cache@v3
+            with:
+                path: .git
+                key: source-cache-${{ runner.os }}-${{ github.run_id }}
+                restore-keys: |
+                    source-cache-${{ runner.os }}
+        -   name: Checkout fmralign
+            uses: actions/checkout@v3
+            with:
+          # If pull request, checkout HEAD commit with all commit history
+                ref: ${{ github.event.pull_request.head.sha }}
+                fetch-depth: 0
+        -   name: Complete checkout
+            run: |
+                set -x
+                if ! git remote -v | grep upstream; then
+                  git remote add upstream https://github.com/parietal-INRIA/fmralign.git
+                fi
+                git fetch upstream
+        -   name: Merge with upstream
+            run: |
+                set -x
+                echo $(git log -1 --pretty=%B) | tee gitlog.txt
+                echo "gitlog.txt = $(cat gitlog.txt)"
+                echo $GITHUB_REF_NAME | tee merge.txt
+                if [ "$GITHUB_REF_NAME" != "main" ]; then
+                    echo "Merging $(cat merge.txt)";
+                    git pull --ff-only upstream "refs/pull/$(cat merge.txt)";
+                fi
+      # Set up environment
+        -   name: Install apt packages
+            run: |
+                sudo -E apt-get -yq update
+                sudo -E apt-get -yq --no-install-suggests --no-install-recommends install \
+                    dvipng texlive-latex-base texlive-latex-extra
+        -   name: Setup conda
+            uses: conda-incubator/setup-miniconda@v2
+            with:
+                auto-activate-base: true
+                activate-environment: ''
+                miniconda-version: latest
+                channels: conda-forge
+        -   name: Install packages in conda env
+            run: |
+                conda init bash
+                echo "conda version = $(conda --version)"
+                conda create -n testenv
+                conda install -n testenv -yq python=3.9
+                source activate testenv
+                python -m pip install --user --upgrade --progress-bar off pip
+                # See pyproject.toml for dependency group options
+                python -m pip install .[jax,test,doc]
+
+      # Run the doc build. 
+        -   name: Build docs
+            run: |
+                source activate testenv
+                echo "Conda active env = $CONDA_DEFAULT_ENV";
+                cd doc;
+                set -o pipefail;
+                make html | tee log.txt;
+        -   name: Upload documentation
+            uses: actions/upload-artifact@v3
+            with:
+                name: doc
+                path: doc/_build/html
