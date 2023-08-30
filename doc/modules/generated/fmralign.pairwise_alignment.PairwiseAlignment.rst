@@ -1,4 +1,4 @@
-
+﻿
 .. note::
 
    This page is a reference documentation. It only explains the class
@@ -12,7 +12,7 @@ fmralign.pairwise_alignment.PairwiseAlignment
 .. currentmodule:: fmralign.pairwise_alignment
 
 .. autoclass:: PairwiseAlignment
-   :inherited-members:
+   :no-inherited-members:
 
    
    .. automethod:: __init__

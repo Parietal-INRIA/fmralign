@@ -15,8 +15,8 @@ Both have 20 voxels (points) characterized by 2 samples (images). And the
 alignment we search for is the matching of both distibutions, optimally in
 some sense.
 
-To run this example, you must launch IPython via ``ipython
---matplotlib`` in a terminal, or use ``jupyter-notebook``.
+To run this example, you must launch IPython via ``ipython --matplotlib``
+in a terminal, or use ``jupyter-notebook``.
 
 .. contents:: **Contents**
     :local:
@@ -34,7 +34,7 @@ To run this example, you must launch IPython via ``ipython
 #   * _plot2D_samples_mat to plot 2D alignment matrix as matching between distributions.
 #   * _plot_distributions_and_alignment to plot both the distributions and the matchings
 # Now you can skip this part.
-#
+
 import math
 
 import matplotlib.pyplot as plt
@@ -131,8 +131,6 @@ def _plot_distributions_and_alignment(
 # a S shape. Here the dimension of our distributions will `(n_points, 2)`
 # since we want to be able to plot each voxel in a point. In real cases
 # however we have tens or hundreds of observations that characterize each point.
-#
-
 
 n_points = 20
 origin_index = int(n_points / 2 - 1)
@@ -172,7 +170,6 @@ _plot_distributions_and_alignment(X, Y, R=R_identity, title="Initial Matching", 
 # idea of alignment is to find a transform, let's call it `R`, between the
 # source `X` and the target `Y` that will handle that. Now we will showcase
 # on our simple 2D example different kind of transformation we can look for.
-#
 
 from fmralign.alignment_methods import (
     OptimalTransportAlignment,
@@ -186,7 +183,6 @@ from fmralign.alignment_methods import (
 # The first idea proposed in Haxby, 2011 was to compute an orthogonal mixing
 # matrix `R` and a scaling `sc` such that Frobenius norm: math:
 # ` | |sc RX - Y | | ^ 2` is minimized.
-#
 
 scaled_orthogonal_alignment = ScaledOrthogonalAlignment()
 scaled_orthogonal_alignment.fit(X.T, Y.T)
@@ -206,7 +202,6 @@ _plot_mixing_matrix(R=scaled_orthogonal_alignment.R.T, title="Orthogonal mixing 
 # penalize its L2 norm. This is a ridge regression, which means we search `R`
 # such that Frobenius  norm :math:`|| XR - Y ||^2 + alpha * ||R||^2`
 # is minimized with cross-validation.
-#
 
 ridge_alignment = RidgeAlignment(alphas=[0.01, 0.1], cv=2).fit(X.T, Y.T)
 
@@ -214,6 +209,7 @@ _plot_distributions_and_alignment(
     X, Y, R=ridge_alignment.R.coef_, title="Ridge between distributions", thr=0.1
 )
 _plot_mixing_matrix(R=ridge_alignment.R.coef_, title="Ridge coefficients")
+
 ###############################################################################
 # Optimal Transport alignment
 # ---------------------------
@@ -224,7 +220,6 @@ _plot_mixing_matrix(R=ridge_alignment.R.coef_, title="Ridge coefficients")
 # optimal coupling between `X` and `Y` with entropic regularization.
 # This way of finding a transform uses more geometrical information from the
 # distributions.
-#
 
 ot_alignment = OptimalTransportAlignment(reg=0.1)
 ot_alignment.fit(X.T, Y.T)

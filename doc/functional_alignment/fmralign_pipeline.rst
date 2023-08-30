@@ -1,10 +1,10 @@
 .. fmralign_pipeline:
 
-=======================================
+=============================
 Functional alignment pipeline
-=======================================
+=============================
 
-As seen in the :ref:`previous section <functional_alignment_intro.rst>`,
+As seen in the :ref:`previous section <introduction.rst>`,
 functional alignment searches for a transform between images of two or several subjects in order to match voxels which have similar profile of activation.
 This section explains how this transform is found in fmralign to make the process easy, efficient and scalable.
 
@@ -17,7 +17,7 @@ We will just work here on a ROI.
     :depth: 1
 
 Local functional alignment
-==================================
+==========================
 
 .. figure:: ../images/alignment_pipeline.png
    :scale: 25
@@ -43,7 +43,7 @@ parcellation chosen can obviously have an impact. We recommend 'ward' to have sp
 
 
 Alignment methods on a region
-==================================
+=============================
 
 .. topic:: **Full code example on 2D simulated data**
 
@@ -62,7 +62,7 @@ We show below a 2D example, with 2 distributions: `X` in green, `Y` in red. Both
    :align: left
 
 Orthogonal alignment (Procrustes)
-----------------------------------
+---------------------------------
 The first idea proposed in Haxby, 2011 was to compute an orthogonal mixing
 matrix `R` and a scaling `sc` such that Frobenius norm :math:`||sc RX - Y||^2` is minimized.
 
@@ -73,7 +73,7 @@ matrix `R` and a scaling `sc` such that Frobenius norm :math:`||sc RX - Y||^2` i
    :align: left
 
 Ridge alignment
-----------------------------------
+---------------
 Another simple idea to regularize the transform `R` searched for is to penalize its L2 norm. This is a ridge regression, which means we search `R` such that Frobenius  norm :math:`|| XR - Y ||^2 + alpha * ||R||^2` is minimized with cross-validation.
 
 .. figure:: ../auto_examples/images/sphx_glr_plot_alignment_simulated_2D_data_005.png
@@ -84,7 +84,7 @@ Another simple idea to regularize the transform `R` searched for is to penalize 
 
 
 Optimal Transport alignment
-----------------------------------
+---------------------------
 Finally this package comes with a new method that build on the Wasserstein distance which is well-suited for this problem. This is the framework of Optimal Transport that search to transport all signal from `X` to `Y`
 while minimizign the overall cost of this transport. `R` is here the optimal coupling between `X` and `Y` with entropic regularization.
 
@@ -96,7 +96,7 @@ while minimizign the overall cost of this transport. `R` is here the optimal cou
 
 
 Comparing those methods on a region of interest
-=================================================
+===============================================
 
 .. topic:: **Full code example**
 
@@ -107,7 +107,7 @@ Now let's compare the performance of these various methods on our simple example
 the prediction of left-out data for a new subject from another subjects data.
 
 Loading the data
-------------------------------
+----------------
 We begin with the retrieval of images from two `Individual Brain Charting <https://project.inria.fr/IBC/>`_ subjects :
 
 >>> from fmralign.fetch_example_data import fetch_ibc_subjects_contrasts
@@ -117,7 +117,7 @@ Here `files` is the list of paths for each subject and `df` is a pandas Datafram
 with metadata about each of them.
 
 Extract a mask for the visual cortex from Yeo Atlas
-----------------------------------------------------
+---------------------------------------------------
 
 >>> from nilearn import datasets, plotting
 >>> from nilearn.image import resample_to_img, load_img, new_img_like
@@ -146,7 +146,7 @@ Define a masker
 
 
 Prepare the data
--------------------
+----------------
 For each subject, for each task and conditions, our dataset contains two
 independent acquisitions, similar except for one acquisition parameter, the
 encoding phase used that was either Antero-Posterior (AP) or Postero-Anterior (PA).
@@ -172,7 +172,7 @@ The testing fold:
 >>> target_test = df[df.subject == 'sub-02'][df.acquisition == 'pa'].path.values
 
 Define the estimators, fit them and do a prediction
----------------------------------------------------------------------------
+---------------------------------------------------
 To proceed with alignment we use the class PairwiseAlignment with the masker we created before.
 
 First we choose a suitable number of regions such that each regions is approximately 200 voxels wide.

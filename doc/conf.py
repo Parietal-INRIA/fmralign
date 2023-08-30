@@ -10,15 +10,18 @@
 
 import os
 import sys
-
 import sphinx
+import sphinx_gallery
+
+import fmralign
+
+current_version = fmralign.__version__
 
 # If extensions (or modules to document with autodoc) are in another
 # directory, add these directories to sys.path here. If the directory
 # is relative to the documentation root, use os.path.abspath to make it
 # absolute, like shown here.
 sys.path.insert(0, os.path.abspath("sphinxext"))
-import sphinx_gallery
 
 # We also add the directory just above to enable local imports of fmralign
 sys.path.insert(0, os.path.abspath(".."))
@@ -28,12 +31,7 @@ sys.path.insert(0, os.path.abspath(".."))
 
 # General information about the project.
 project = "fmralign"
-copyright = "The fmralign developers 2018-2019"
-author = "The fmralign developers"
-# The short X.Y version
-version = "0.0"
-# The full version, including alpha/beta/rc tags
-release = "0.0.1"
+copyright = "fmralign developers 2018-2023"
 
 
 # -- General configuration ---------------------------------------------------
@@ -100,12 +98,12 @@ pygments_style = "sphinx"
 
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
 # Sphinx are currently 'default' and 'sphinxdoc'.
-html_theme = "fmralign"
+html_theme = "classic"
 
 # The style sheet to use for HTML and HTML Help pages. A file of that name
 # must exist either in Sphinx' static/ path, or in one of the custom paths
 # given in html_static_path.
-html_style = "nature.css"
+# html_style = "nature.css"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -113,8 +111,7 @@ html_style = "nature.css"
 # html_theme_options = {'oldversion':False, 'collapsiblesidebar': False}
 
 # Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = ["themes"]
-
+# html_theme_path = ["themes"]
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -125,7 +122,7 @@ html_short_title = "fmralign"
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = "logos/nilearn-logo.png"
+html_logo = ""
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -175,98 +172,39 @@ html_show_sourcelink = False
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "fmraligndoc"
-
-
-# -- Options for LaTeX output ------------------------------------------------
-
-latex_elements = {
-    # The paper size ('letterpaper' or 'a4paper').
-    #
-    # 'papersize': 'letterpaper',
-    # The font size ('10pt', '11pt' or '12pt').
-    #
-    # 'pointsize': '10pt',
-    # Additional stuff for the LaTeX preamble.
-    #
-    # 'preamble': '',
-    # Latex figure (float) alignment
-    #
-    # 'figure_align': 'htbp',
-}
-
-# Grouping the document tree into LaTeX files. List of tuples
-# (source start file, target name, title,
-#  author, documentclass [howto, manual, or own class]).
-latex_documents = [
-    (
-        master_doc,
-        "fmralign.tex",
-        "fmralign Documentation",
-        "T. Bazeille, B. Thirion",
-        "manual",
-    ),
-]
-
-
-# -- Options for manual page output ------------------------------------------
-
-# One entry per manual page. List of tuples
-# (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "fmralign", "fmralign Documentation", [author], 1)]
-
-
-# -- Options for Texinfo output ----------------------------------------------
-
-# Grouping the document tree into Texinfo files. List of tuples
-# (source start file, target name, title, author,
-#  dir menu entry, description, category)
-texinfo_documents = [
-    (
-        master_doc,
-        "fmralign",
-        "fmralign Documentation",
-        author,
-        "fmralign",
-        "One line description of project.",
-        "Miscellaneous",
-    ),
-]
-
-
-# -- Options for Epub output -------------------------------------------------
-
-# Bibliographic Dublin Core info.
-epub_title = project
-
-# The unique identifier of the text. This can be a ISBN number
-# or the project homepage.
-#
-# epub_identifier = ''
-
-# A unique identification for the text.
-#
-# epub_uid = ''
-
-# A list of files that should not be packed into the epub file.
-epub_exclude_files = ["search.html"]
-
+htmlhelp_basename = "PythonScientific"
 
 # -- Extension configuration -------------------------------------------------
 numpydoc_show_class_members = False
 
-_python_doc_base = "http://docs.python.org/3.7"
-"""
+_python_doc_base = "http://docs.python.org/3.9"
+
+# Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
-    'python': (_python_doc_base, None),
-    'numpy': ('http://docs.scipy.org/doc/numpy', None),
-    'scipy': ('http://docs.scipy.org/doc/scipy/reference', None),
-    'matplotlib': ('http://matplotlib.org/', None),
-    'nipy': ('http://nipy.org/nibabel', None),
-    'nilearn': ('http://nilearn.github.io', None),
-    'nibabel': ('http://nipy.org/nibabel', None),
-    'sklearn': ('http://scikit-learn.org/stable', None),
-    'patsy': ('http://patsy.readthedocs.io/en/latest/', None),
-    'pandas': ('http://pandas.pydata.org/pandas-docs/stable/', None),
+    "python": (_python_doc_base, None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "scipy": ("https://scipy.github.io/devdocs/", None),
+    "matplotlib": ("https://matplotlib.org/stable/", None),
+    "sklearn": ("https://scikit-learn.org/stable/", None),
+    "nibabel": ("https://nipy.org/nibabel", None),
+    "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
+    "nistats": ("https://nistats.github.io", None),
+    "joblib": ("https://joblib.readthedocs.io/en/latest/", None),
 }
-"""
+
+extlinks = {
+    "sklearn": ("https://scikit-learn.org/stable/%s", None),
+    "inria": ("https://team.inria.fr/%s", None),
+    "nilearn-gh": ("https://github.com/nilearn/nilearn/%s", None),
+    "neurostars": ("https://neurostars.org/tag/nilearn/%s", None),
+    "nipy": ("https://nipy.org/%s", None),
+}
+
+# Check intersphinx reference targets exist
+nitpicky = True
+# Temporary solution to nilearn/nilearn#3800
+# See also scikit-learn/scikit-learn#26761
+nitpick_ignore = [
+    ("py:class", "pipeline.Pipeline"),
+    ("py:class", "utils.metadata_routing.MetadataRequest"),
+]

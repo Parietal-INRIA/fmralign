@@ -12,8 +12,8 @@ contrast per subject. We will just work here on a ROI.
 We mostly rely on python common packages and on nilearn to handle functional
 data in a clean fashion.
 
-To run this example, you must launch IPython via ``ipython
---matplotlib`` in a terminal, or use ``jupyter-notebook``.
+To run this example, you must launch IPython via ``ipython --matplotlib`` in 
+a terminal, or use ``jupyter-notebook``.
 
 .. contents:: **Contents**
     :local:
@@ -28,7 +28,6 @@ To run this example, you must launch IPython via ``ipython
 # We download the images for subjects sub-01 and sub-02.
 # Files is the list of paths for each subjects.
 # df is a dataframe with metadata about each of them.
-#
 
 from fmralign.fetch_example_data import fetch_ibc_subjects_contrasts
 
@@ -39,7 +38,6 @@ files, df, mask = fetch_ibc_subjects_contrasts(["sub-01", "sub-02"])
 # Extract a mask for the visual cortex from Yeo Atlas
 # ---------------------------------------------------
 # First, we fetch and plot the complete atlas
-#
 
 from nilearn import datasets, plotting
 from nilearn.image import load_img, new_img_like, resample_to_img
@@ -67,7 +65,6 @@ plotting.plot_roi(
 # We define a nilearn masker that will be used to handle relevant data.
 # For more information, visit :
 # 'http://nilearn.github.io/manipulating_images/masker_objects.html'
-#
 
 from nilearn.maskers import NiftiMasker
 
@@ -83,7 +80,6 @@ roi_masker = NiftiMasker(mask_img=resampled_mask_visual).fit()
 # in the final data, we will take  advantage of these pseudo-duplicates to
 # create a training and a testing set that contains roughly the same signals
 # but acquired independently.
-#
 
 # The training set, used to learn alignment from source subject toward target:
 # * source train: AP contrasts for subject sub-01
@@ -108,7 +104,6 @@ target_test = df[df.subject == "sub-02"][df.acquisition == "pa"].path.values
 # regions so that each of them is approximately 200 voxels wide. Then our
 # estimator will first make a functional clustering of voxels based on train
 # data to divide them into meaningful regions.
-#
 
 import numpy as np
 
@@ -130,7 +125,6 @@ print(f"We will cluster them in {n_pieces} regions")
 #   *  we also include identity (no alignment) as a baseline.
 # Then for each method we define the estimator fit it, predict the new image and plot
 # its correlation with the real signal.
-#
 
 from fmralign.metrics import score_voxelwise
 from fmralign.pairwise_alignment import PairwiseAlignment
@@ -161,6 +155,5 @@ for method in methods:
 # (no alignment). Ridge is the best performing method, followed by Optimal
 # Transport. If you use Ridge though, be careful about the smooth predictions
 # it yields.
-#
 
 # sphinx_gallery_thumbnail_number = 5
