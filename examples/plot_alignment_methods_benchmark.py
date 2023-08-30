@@ -12,7 +12,7 @@ contrast per subject. We will just work here on a ROI.
 We mostly rely on python common packages and on nilearn to handle functional
 data in a clean fashion.
 
-To run this example, you must launch IPython via ``ipython --matplotlib`` in 
+To run this example, you must launch IPython via ``ipython --matplotlib`` in
 a terminal, or use ``jupyter-notebook``.
 
 .. contents:: **Contents**
