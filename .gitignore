@@ -58,6 +58,8 @@ coverage.xml
 .pytest_cache/
 
 # Sphinx documentation
+doc/_build/
+doc/auto_examples/
 source/_build/
 source/auto_examples/
 

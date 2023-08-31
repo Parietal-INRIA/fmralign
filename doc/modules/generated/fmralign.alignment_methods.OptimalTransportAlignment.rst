@@ -1,4 +1,4 @@
-
+﻿
 .. note::
 
    This page is a reference documentation. It only explains the class
@@ -12,7 +12,7 @@ fmralign.alignment_methods.OptimalTransportAlignment
 .. currentmodule:: fmralign.alignment_methods
 
 .. autoclass:: OptimalTransportAlignment
-   :inherited-members:
+   :no-inherited-members:
 
    
    .. automethod:: __init__

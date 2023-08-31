@@ -1,4 +1,4 @@
-
+﻿
 .. note::
 
    This page is a reference documentation. It only explains the class
@@ -12,7 +12,7 @@ fmralign.template_alignment.TemplateAlignment
 .. currentmodule:: fmralign.template_alignment
 
 .. autoclass:: TemplateAlignment
-   :inherited-members:
+   :no-inherited-members:
 
    
    .. automethod:: __init__

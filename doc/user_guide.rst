@@ -2,7 +2,7 @@
 .. _user_guide:
 
 User guide: table of contents
-==============================
+=============================
 
 .. include:: includes/big_toc_css.rst
 
@@ -13,6 +13,6 @@ User guide: table of contents
 .. toctree::
    :numbered:
 
-   introduction.rst
+   overview.rst
    functional_alignment/index.rst
    modules/reference.rst
