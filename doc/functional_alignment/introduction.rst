@@ -1,8 +1,8 @@
 .. for doctests to run, we need to define variables that are define in
    the literal includes
     >>> # if need to do something
-..
-.. introduction:
+
+.. _introduction:
 
 =======================================
 An introduction to functional alignment

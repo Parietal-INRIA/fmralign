@@ -4,7 +4,7 @@
 Functional alignment pipeline
 =============================
 
-As seen in the :ref:`previous section <introduction.rst>`,
+As seen in the :ref:`previous section <introduction>`,
 functional alignment searches for a transform between images of two or several subjects in order to match voxels which have similar profile of activation.
 This section explains how this transform is found in fmralign to make the process easy, efficient and scalable.
 

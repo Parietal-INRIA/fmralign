@@ -10,8 +10,6 @@
 
 import os
 import sys
-import sphinx
-import sphinx_gallery
 
 import fmralign
 
@@ -78,7 +76,7 @@ plot_gallery = "True"
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = "en"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -98,7 +96,7 @@ pygments_style = "sphinx"
 
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
 # Sphinx are currently 'default' and 'sphinxdoc'.
-html_theme = "classic"
+html_theme = "fmralign"
 
 # The style sheet to use for HTML and HTML Help pages. A file of that name
 # must exist either in Sphinx' static/ path, or in one of the custom paths
@@ -111,7 +109,7 @@ html_theme = "classic"
 # html_theme_options = {'oldversion':False, 'collapsiblesidebar': False}
 
 # Add any paths that contain custom themes here, relative to this directory.
-# html_theme_path = ["themes"]
+html_theme_path = ["themes"]
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
