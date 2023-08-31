@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Module implementing alignment estimators on ndarrays."""
 import warnings
+
 import numpy as np
 import scipy
 from joblib import Parallel, delayed
@@ -11,13 +12,10 @@ from scipy.spatial.distance import cdist
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.linear_model import RidgeCV
 from sklearn.metrics.pairwise import pairwise_distances
-from .hyperalignment.piecewise_alignment import PiecewiseAlignment
-from .hyperalignment.linalg import safe_svd, svd_pca
 
-import jax
-from ott.geometry import costs, geometry
-from ott.problems.linear import linear_problem
-from ott.solvers.linear import sinkhorn
+# Fast implementation for parallelized computing
+from fmralign.hyperalignment.linalg import safe_svd, svd_pca
+from fmralign.hyperalignment.piecewise_alignment import PiecewiseAlignment
 
 
 def scaled_procrustes(X, Y, scaling=False, primal=None):
@@ -448,6 +446,10 @@ class OptimalTransportAlignment(Alignment):
         Y: (n_samples, n_features) nd array
             target data
         """
+        import jax
+        from ott.geometry import costs, geometry
+        from ott.problems.linear import linear_problem
+        from ott.solvers.linear import sinkhorn
 
         if self.metric == "euclidean":
             cost_matrix = costs.Euclidean().all_pairs(x=X.T, y=Y.T)
@@ -471,7 +473,7 @@ class OptimalTransportAlignment(Alignment):
 
 class IndividualizedNeuralTuning(Alignment):
     """
-    Method of alignment based on the Individualized Neural Tuning model, by Feilong Ma et al. (2023).
+    Method of alignment based on the Individualized Neural Tuning model.
     It works on 4D fMRI data, and is based on the assumption that the neural response to a stimulus is shared across subjects.
     It uses searchlight/parcelation alignment to denoise the data, and then computes the stimulus response matrix.
     See article : https://doi.org/10.1162/imag_a_00032
@@ -489,10 +491,14 @@ class IndividualizedNeuralTuning(Alignment):
         Parameters:
         --------
 
-        - decomp_method (str): The decomposition method to use. Default is None.
-        - alignment_method (str): The alignment method to use. Can be either "searchlight" or "parcelation", Default is "searchlight".
-        - n_components (int): The number of latent dimensions to use in the shared stimulus information matrix. Default is None.
-        - n_jobs (int): The number of parallel jobs to run. Default is -1.
+        decomp_method : str
+             The decomposition method to use. If None, "pca" will be used. Can be ["pca", "procrustes"] Default is None.
+        alignment_method : str
+             The alignment method to use. Can be either "searchlight" or "parcelation", Default is "searchlight".
+        n_components : int
+             The number of latent dimensions to use in the shared stimulus information matrix. Default is None.
+        n_jobs : int
+             The number of parallel jobs to run. Default is -1.
 
         Returns:
         --------
@@ -507,10 +513,7 @@ class IndividualizedNeuralTuning(Alignment):
         if alignment_method == "parcelation":
             self.parcels = None
 
-        elif (
-            alignment_method == "searchlight"
-            or alignment_method == "ensemble_searchlight"
-        ):
+        elif alignment_method == "searchlight":
             self.searchlights = None
             self.distances = None
             self.radius = None
@@ -531,9 +534,12 @@ class IndividualizedNeuralTuning(Alignment):
 
         Parameters:
         --------
-        - shared_response (array-like): The shared response matrix.
-        - target (array-like): The target matrix.
-        - latent_dim (int, optional): The number of latent dimensions (if PCA is used). Defaults to None.
+        shared_response : array-like
+             The shared response matrix.
+        target : array-like
+             The target matrix.
+        latent_dim : int, optional
+             The number of latent dimensions (if PCA is used). Defaults to None.
 
         Returns:
         --------
@@ -551,11 +557,16 @@ class IndividualizedNeuralTuning(Alignment):
 
         Parameters:
         --------
-        - full_signal (numpy.ndarray): The full signal of shape (n_t, n_s).
-        - n_t (int): The number of time points.
-        - n_s (int): The number of subjects.
-        - latent_dim (int, optional): The number of latent dimensions to use. Defaults to None.
-        - scaling (bool, optional): Whether to scale the stimulus matrix sources. Defaults to True.
+        full_signal : numpy.ndarray
+             The full signal of shape (n_t, n_s).
+        n_t : int
+             The number of time points.
+        n_s : int
+             The number of subjects.
+        latent_dim : int, optional
+             The number of latent dimensions to use. Defaults to None.
+        scaling : bool, optional
+             Whether to scale the stimulus matrix sources. Defaults to True.
         """
         if scaling:
             U = svd_pca(full_signal)
@@ -575,12 +586,14 @@ class IndividualizedNeuralTuning(Alignment):
 
         Parameters:
         --------
-        - shared_response (numpy.ndarray): The shared response of shape (n_t, n_t) or (n_t, latent_dim).
-        - individual_tuning (numpy.ndarray): The individual tuning of shape (latent_dim, n_v) or (n_t, n_v).
+        shared_response : numpy.ndarray
+             The shared response of shape (n_t, n_t) or (n_t, latent_dim).
+        individual_tuning : numpy.ndarray
+             The individual tuning of shape (latent_dim, n_v) or (n_t, n_v).
 
         Returns:
         --------
-            numpy.ndarray: The reconstructed signal of shape (n_t, n_v) (same shape as the original signal)
+        numpy.ndarray: The reconstructed signal of shape (n_t, n_v) (same shape as the original signal)
         """
         return (shared_response @ individual_tuning).astype(np.float32)
 
@@ -600,27 +613,27 @@ class IndividualizedNeuralTuning(Alignment):
         Parameters:
         --------
 
-        - X (array-like):
+        X : array-like
             The training data of shape (n_subjects, n_samples, n_voxels).
-        - searchlights (array-like):
+        searchlights : array-like
             The searchlight indices for each subject, of shape (n_s, n_searchlights).
-        - parcels (array-like):
+        parcels : array-like
             The parcel indices for each subject, of shape (n_s, n_parcels) (if not using searchlights)
-        - dists (array-like):
+        dists : array-like
             The distances of vertices to the center of their searchlight, of shape (n_searchlights, n_vertices_sl)
-        - radius (int, optional):
+        radius : int(optional)
             The radius of the searchlight sphere, in milimeters. Defaults to 20.
-        - tuning (bool, optional):
+        tuning :bool(optional)
             Whether to compute the tuning weights. Defaults to True.
-        - verbose (bool, optional):
+        verbose : bool(optional)
             Whether to print progress information. Defaults to True.
-        - id (str, optional):
+        id : str(optional)
             An identifier for caching purposes. Defaults to None.
 
         Returns:
         --------
 
-        - self (IndividualizedNeuralTuning):
+        self : Instance of IndividualizedNeuralTuning)
             The fitted model.
         """
 
@@ -641,7 +654,10 @@ class IndividualizedNeuralTuning(Alignment):
             self.radius = radius
 
         denoiser = PiecewiseAlignment(
-            alignment_method=self.alignment_method, n_jobs=self.n_jobs, verbose=verbose
+            alignment_method=self.alignment_method,
+            template_kind=self.decomp_method,
+            n_jobs=self.n_jobs,
+            verbose=verbose,
         )
         self.denoised_signal = denoiser.fit_transform(
             X_,
@@ -673,12 +689,14 @@ class IndividualizedNeuralTuning(Alignment):
 
         Parameters:
         --------
-        - X (array-like): The test data of shape (n_subjects, n_samples, n_voxels).
-        - verbose (bool, optional): Whether to print progress information. Defaults to False.
+        X : array-like
+            The test data of shape (n_subjects, n_samples, n_voxels).
+        verbose : bool(optional)
+            Whether to print progress information. Defaults to False.
 
         Returns:
         --------
-        - array-like: The transformed data of shape (n_subjects, n_samples, n_voxels).
+        array-like: The transformed data of shape (n_subjects, n_samples, n_voxels).
         """
 
         full_signal = np.concatenate(X, axis=1, dtype=np.float32)

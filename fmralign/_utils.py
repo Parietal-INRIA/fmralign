@@ -71,13 +71,7 @@ def _check_labels(labels, threshold=1000):
 
 
 def _make_parcellation(
-    imgs,
-    clustering_index,
-    clustering,
-    n_pieces,
-    masker,
-    smoothing_fwhm=5,
-    verbose=0,
+    imgs, clustering_index, clustering, n_pieces, masker, smoothing_fwhm=5, verbose=0
 ):
     """
     Use nilearn Parcellation class in our pipeline.
@@ -146,7 +140,6 @@ def _make_parcellation(
             )
             err.args += (errmsg,)
             raise err
-
         labels = apply_mask_fmri(parcellation.labels_img_, masker.mask_img_).astype(int)
 
     if verbose > 0:

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Hyperalignment-base prediction using the IndividualNeuralTuning Model.
+Hyperalignment-base prediction using Feilong Ma's IndividualNeuralTuning Model.
 See article : https://doi.org/10.1162/imag_a_00032
 
 ==========================
@@ -23,10 +23,7 @@ To run this example, you must launch IPython via ``ipython
     :depth: 1
 
 """
-# %%
-import warnings
 
-warnings.filterwarnings("ignore")
 ###############################################################################
 # Retrieve the data
 # -----------------
@@ -42,18 +39,11 @@ warnings.filterwarnings("ignore")
 from fmralign.fetch_example_data import fetch_ibc_subjects_contrasts
 
 imgs, df, mask_img = fetch_ibc_subjects_contrasts(
-    [
-        "sub-01",
-        "sub-02",
-        "sub-04",
-        "sub-05",
-        "sub-06",
-        "sub-07",
-    ],
+    ["sub-01", "sub-02", "sub-04", "sub-05", "sub-06", "sub-07"]
 )
 
 ###############################################################################
-# Define a masker
+# Definine a masker
 # -----------------
 # We define a nilearn masker that will be used to handle relevant data.
 #   For more information, visit :
@@ -92,7 +82,6 @@ target_train = concat_imgs(target_train)
 target_train_data = masker.transform(target_train)
 target_test = df[df.subject == "sub-07"][df.acquisition == "pa"].path.values
 
-
 ###############################################################################
 # Compute a baseline (average of subjects)
 # ----------------------------------------
@@ -110,8 +99,8 @@ average_subject = masker.inverse_transform(average_img)
 # Create a template from the training subjects.
 # ---------------------------------------------
 # We define an estimator using the class TemplateAlignment:
-#   * We align the whole brain through multiple local alignments.
-#   * These alignments are calculated on a parcellation of the brain in 100 pieces,
+#   * We align the whole brain through 'multiple' local alignments.
+#   * These alignments are calculated on a parcellation of the brain in 150 pieces,
 #     this parcellation creates group of functionnally similar voxels.
 #   * The template is created iteratively, aligning all subjects data into a
 #     common space, from which the template is inferred and aligning again to this
@@ -119,8 +108,16 @@ average_subject = masker.inverse_transform(average_img)
 #
 
 from nilearn.image import index_img
-from fmralign.alignment_methods import IndividualizedNeuralTuning
-from fmralign.hyperalignment.regions import compute_parcels
+from fastsrm.identifiable_srm import IdentifiableFastSRM as SRM
+
+
+train_index = range(53)
+model = SRM(n_components=20, n_iter=500)
+
+train_imgs = np.array(masked_imgs)[:, train_index, :]
+train_imgs = [x.T for x in train_imgs]
+model.fit(train_imgs)
+
 
 ###############################################################################
 # Predict new data for left-out subject
@@ -131,36 +128,23 @@ from fmralign.hyperalignment.regions import compute_parcels
 # For each train subject and for the template, the AP contrasts are sorted from
 # 0, to 53, and then the PA contrasts from 53 to 106.
 #
-
-train_index = range(53)
 test_index = range(53, 106)
-full_index = range(106)
 
-train_data = np.array(masked_imgs)[:, train_index, :]
-test_data = np.array(masked_imgs)[:, full_index, :]
-target_test_masked = np.array(masked_imgs)[:, test_index, :]
+test_imgs = np.array(masked_imgs)[:, test_index, :][:-1]
+test_imgs = [x.T for x in test_imgs]
 
+model2 = SRM(n_components=20, n_iter=500)
+shared_response = model2.fit_transform(test_imgs)
 
-parcels = compute_parcels(niimg=template_train[0], mask=masker, n_parcels=100, n_jobs=5)
-model = IndividualizedNeuralTuning(
-    n_jobs=8, alignment_method="parcellation", n_components=None
-)
-model.fit(train_data, parcels=parcels, verbose=False)
-train_stimulus = np.copy(model.shared_response)
-train_tuning = np.linalg.pinv(train_stimulus) @ model.denoised_signal[-1]
-model_bis = IndividualizedNeuralTuning(
-    n_jobs=8, alignment_method="parcellation", n_components=None
-)
-model_bis.fit(test_data, parcels=parcels, verbose=False)
-test_stimulus = np.copy(model_bis.shared_response)
-# %%
 # We input the mapping image target_train in a list, we could have input more
 # than one subject for which we'd want to predict : [train_1, train_2 ...]
 
-stimulus_ = np.copy(model_bis.shared_response)
-prediction_from_template = stimulus_[test_index] @ train_tuning
-prediction_from_template = masker.inverse_transform(prediction_from_template)
+prediction_from_template = model.inverse_transform(
+    shared_response, subjects_indexes=[5]
+)
 
+prediction_from_template = prediction_from_template[0].T
+prediction_from_template = [masker.inverse_transform(prediction_from_template)]
 
 # As a baseline prediction, let's just take the average of activations across subjects.
 
@@ -174,21 +158,26 @@ prediction_from_average = index_img(average_subject, test_index)
 # measure the correlation between its profile of activation without and with
 # alignment, to see if alignment was able to predict a signal more alike the ground truth.
 #
-# %%
+
 from fmralign.metrics import score_voxelwise
 
 # Now we use this scoring function to compare the correlation of predictions
 # made from group average and from template with the real PA contrasts of sub-07
 
-
 average_score = masker.inverse_transform(
-    score_voxelwise(target_test, prediction_from_average, masker, loss="corr")
+    C_avg := score_voxelwise(target_test, prediction_from_average, masker, loss="corr")
 )
 
+# I choose abs value in reference to the work we did with the INT
 template_score = masker.inverse_transform(
-    score_voxelwise(target_test, prediction_from_template, masker, loss="corr")
+    C_temp := score_voxelwise(
+        target_test, prediction_from_template[0], masker, loss="corr"
+    )
 )
 
+print("============Mean correlation============")
+print(f"Baseline : {np.mean(C_avg)}")
+print(f"Template : {np.mean(C_temp)}")
 
 ###############################################################################
 # Plotting the measures
@@ -196,7 +185,6 @@ template_score = masker.inverse_transform(
 # Finally we plot both scores
 #
 
-# %%
 from nilearn import plotting
 
 baseline_display = plotting.plot_stat_map(
@@ -206,7 +194,7 @@ baseline_display.title("Group average correlation wt ground truth")
 display = plotting.plot_stat_map(
     template_score, display_mode="z", cut_coords=[-15, -5], vmax=1
 )
-display.title("INT prediction correlation wt ground truth")
+display.title("SRM-based prediction correlation wt ground truth")
 
 ###############################################################################
 # We observe that creating a template and aligning a new subject to it yields
@@ -215,5 +203,3 @@ display.title("INT prediction correlation wt ground truth")
 #
 
 plotting.show()
-
-# %%

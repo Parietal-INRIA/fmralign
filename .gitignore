@@ -1,3 +1,5 @@
+.DS_Store
+
 # hatchling
 fmralign/_version.py
 fmarlign/__pycache__
@@ -93,4 +95,3 @@ venv.bak/
 
 # Rope project settings
 .ropeproject
-examples/plot_srm_alignment.py
