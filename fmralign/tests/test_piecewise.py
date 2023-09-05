@@ -1,10 +1,11 @@
-from multiviewica import multiviewica
 import pytest
+
 import numpy as np
 from sklearn.base import clone
 from nilearn.input_data import NiftiMasker
-from fmralign.piecewise import PiecewiseModel, Identity
 from fastsrm.identifiable_srm import IdentifiableFastSRM
+
+from fmralign.piecewise import PiecewiseModel, Identity
 
 
 def to_niimgs(X, dim):
@@ -45,22 +46,19 @@ masker = NiftiMasker(mask_img=mask).fit()
 
 train_data, test_data = {}, {}
 for i in range(n_subjects):
-    train_data[i] = masker.inverse_transform(
-        np.random.rand(n_timeframes_align, 8)
-    )
-    test_data[i] = masker.inverse_transform(
-        np.random.rand(n_timeframes_test, 8)
-    )
+    train_data[i] = masker.inverse_transform(np.random.rand(n_timeframes_align, 8))
+    test_data[i] = masker.inverse_transform(np.random.rand(n_timeframes_test, 8))
 masker = NiftiMasker(mask_img=mask).fit()
 
 n_components = 3
 
 
-srm = IdentifiableFastSRM(n_components=n_components, aggregate=None) 
+srm = IdentifiableFastSRM(n_components=n_components, aggregate=None)
 algos_to_test = [
     # "identity",
     IdentifiableFastSRM(n_components=n_components, aggregate=None),
 ]
+
 
 @pytest.mark.parametrize("algo", algos_to_test)
 def test_output_no_clustering(algo):
@@ -104,9 +102,7 @@ def test_output_no_clustering(algo):
     assert np.shape(psrm.fit_) == (n_bags, n_pieces)
     np.testing.assert_almost_equal(psrm.reduced_sr[0][0], srm_SR)
 
-    algo.add_subjects(
-        [masker.transform(list(train_data.values())[-1]).T], srm_SR
-    )
+    algo.add_subjects([masker.transform(list(train_data.values())[-1]).T], srm_SR)
     psrm.add_subjects([list(train_data.values())[-1]])
 
     np.testing.assert_almost_equal(psrm.reduced_sr[0][0], srm_SR)
@@ -128,9 +124,7 @@ def test_identity():
         [masker.transform(x).T for x in list(train_data.values())[:-1]]
     )
     id.add_subjects([masker.transform(list(train_data.values())[-1]).T], id_SR)
-    srm_aligned_test = id.transform(
-        [masker.transform(y).T for y in list(test_data.values())]
-    )
+    _ = id.transform([masker.transform(y).T for y in list(test_data.values())])
     # Check identity SRM just returns the data
     np.testing.assert_almost_equal(
         id_SR.shape,
@@ -197,10 +191,7 @@ def test_wrongshape(algo):
         S1 = np.array(
             [
                 clone(algo).fit_transform(
-                    [
-                        masker.transform(x).T[cluster == i]
-                        for x in [X1, X2, X3, X4]
-                    ]
+                    [masker.transform(x).T[cluster == i] for x in [X1, X2, X3, X4]]
                 )
                 for i in [1, 2]
             ]

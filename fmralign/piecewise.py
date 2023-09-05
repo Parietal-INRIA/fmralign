@@ -5,19 +5,19 @@ Implementation from fastSRM is taken from H. Richard
 # Author: T. Bazeille
 # License: simplified BSD
 
-from nilearn.image import load_img
-from sklearn.base import BaseEstimator, TransformerMixin
+import os
+import warnings
+
 import numpy as np
+import nibabel as nib
+from sklearn.base import clone
 from joblib import delayed, Parallel
 from nilearn.image import concat_imgs, load_img
-from nilearn.input_data.masker_validation import check_embedded_nifti_masker
+from sklearn.model_selection import ShuffleSplit
+from sklearn.base import BaseEstimator, TransformerMixin
+from nilearn.maskers._masker_validation import _check_embedded_nifti_masker
 
 from ._utils import _make_parcellation, _intersect_clustering_mask
-from sklearn.model_selection import ShuffleSplit
-from sklearn.base import clone
-import nibabel as nib
-import warnings
-import os
 
 
 class Identity(BaseEstimator, TransformerMixin):
@@ -41,7 +41,7 @@ class Identity(BaseEstimator, TransformerMixin):
 
 
 def generate_X_is(labels, X_list, masker, verbose):
-    """ Generate source and target data X_i and Y_i for each piece i.
+    """Generate source and target data X_i and Y_i for each piece i.
 
     Parameters
     ----------
@@ -73,16 +73,14 @@ def generate_X_is(labels, X_list, masker, verbose):
         label = unique_labels[k]
         i = label == labels
         if (k + 1) % 25 == 0 and verbose > 0:
-            print(
-                "Fitting parcel: " + str(k + 1) + "/" + str(len(unique_labels))
-            )
+            print("Fitting parcel: " + str(k + 1) + "/" + str(len(unique_labels)))
         # should return X_i Y_i
 
         yield [X_[:, i].T for X_ in masked_X_list]
 
 
 def fit_one_piece(piece_X_list, method):
-    """ Align source and target data in one piece i, X_i and Y_i, using
+    """Align source and target data in one piece i, X_i and Y_i, using
     alignment method and learn transformation to map X to Y.
 
     Parameters
@@ -109,17 +107,17 @@ def fit_one_piece(piece_X_list, method):
         from fastsrm.identifiable_srm import IdentifiableFastSRM
 
         # if isinstance(method, (FastSRM, MultiViewICA, AdaptiveMultiViewICA)):
-        if isinstance(
-            method, (IdentifiableFastSRM)
-        ):
+        if isinstance(method, (IdentifiableFastSRM)):
             alignment_algo = clone(method)
             if hasattr(alignment_algo, "aggregate"):
                 alignment_algo.aggregate = None
             if np.shape(piece_X_list)[1] < alignment_algo.n_components:
                 alignment_algo.n_components = np.shape(piece_X_list)[1]
         else:
-            warn_msg = "Method not recognized, should be 'identity' or an instance of \
-                      FastSRM, MultiViewICA or AdaptiveMultiViewICA"
+            warn_msg = (
+                "Method not recognized, should be 'identity' or an instance of "
+                "FastSRM, MultiViewICA or AdaptiveMultiViewICA"
+            )
             NotImplementedError(warn_msg)
     # dirty monkey patching to avoid having n_components > n_voxels in any
     #  piece which would yield a bug in add_subjects()
@@ -142,7 +140,7 @@ def fit_one_parcellation(
     n_jobs,
     verbose,
 ):
-    """ Create one parcellation of n_pieces and align each source and target
+    """Create one parcellation of n_pieces and align each source and target
     data in one piece i, X_i and Y_i, using alignment method
     and learn transformation to map X to Y.
 
@@ -314,16 +312,16 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
         # Check if the input is a list, if list of lists, concatenate each subjects
         # data into one unique image.
         if not isinstance(imgs, (list, np.ndarray)) or len(imgs) < 2:
-            raise InputError(
-                "The method TemplateAlignment.fit() need a list input. \
-                             Each element of the list (Niimg-like or list of Niimgs) \
-                             is the data for one subject."
+            raise ValueError(
+                "The method TemplateAlignment.fit() need a list as input. "
+                "Each element of the list (Niimg-like or list of Niimgs) "
+                "is the data for one subject."
             )
         else:
             if isinstance(imgs[0], (list, np.ndarray)):
                 imgs = [concat_imgs(img) for img in imgs]
 
-        self.masker_ = check_embedded_nifti_masker(self)
+        self.masker_ = _check_embedded_nifti_masker(self)
         self.masker_.n_jobs = self.n_jobs  # self.n_jobs
 
         # if masker_ has been provided a mask_img
@@ -332,7 +330,7 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
         else:
             self.masker_.fit()
 
-        if type(self.clustering) == nib.nifti1.Nifti1Image or os.path.isfile(
+        if isinstance(self.clustering, nib.nifti1.Nifti1Image) or os.path.isfile(
             self.clustering
         ):
             # check that clustering provided fills the mask, if not, reduce the mask
@@ -341,7 +339,7 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
                     self.clustering, self.masker_.mask_img
                 )
                 self.mask = reduced_mask
-                self.masker_ = check_embedded_nifti_masker(self)
+                self.masker_ = _check_embedded_nifti_masker(self)
                 self.masker_.n_jobs = self.n_jobs
                 self.masker_.fit()
                 warnings.warn(
@@ -351,9 +349,7 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
 
         rs = ShuffleSplit(n_splits=self.n_bags, test_size=0.8, random_state=0)
 
-        outputs = Parallel(
-            n_jobs=self.n_jobs, prefer="threads", verbose=self.verbose
-        )(
+        outputs = Parallel(n_jobs=self.n_jobs, prefer="threads", verbose=self.verbose)(
             delayed(fit_one_parcellation)(
                 imgs,
                 self.srm,
@@ -364,9 +360,7 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
                 self.n_jobs,
                 self.verbose,
             )
-            for clustering_index, _ in rs.split(
-                range(load_img(imgs[0]).shape[-1])
-            )
+            for clustering_index, _ in rs.split(range(load_img(imgs[0]).shape[-1]))
         )
 
         self.labels_ = [output[0] for output in outputs]
@@ -375,10 +369,8 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
         return self
 
     def add_subjects(self, imgs):
-        """ Add subject without recalculating SR"""
-        for labels, srm, reduced_sr in zip(
-            self.labels_, self.fit_, self.reduced_sr
-        ):
+        """Add subject without recalculating SR"""
+        for labels, srm, reduced_sr in zip(self.labels_, self.fit_, self.reduced_sr):
             for X_i, piece_srm, piece_sr in zip(
                 list(generate_X_is(labels, imgs, self.masker_, self.verbose)),
                 srm,
@@ -432,9 +424,7 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
         unique_labels = np.unique(self.labels_[0])
         n_comps = self.srm.n_components
         n_subs = len(self.fit_[0][0].basis_list)
-        full_basis_list = np.zeros(
-            shape=(n_subs, len(self.labels_[0]), n_comps)
-        )
+        full_basis_list = np.zeros(shape=(n_subs, len(self.labels_[0]), n_comps))
 
         for k in range(len(unique_labels)):
             label = unique_labels[k]
