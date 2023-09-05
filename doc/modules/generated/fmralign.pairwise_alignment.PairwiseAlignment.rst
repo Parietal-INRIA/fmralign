@@ -1,4 +1,4 @@
-
+﻿
 .. note::
 
    This page is a reference documentation. It only explains the class
@@ -6,19 +6,19 @@
    :ref:`user guide <user_guide>` for the big picture.
 
 
-fmralign.alignment_methods.Identity
-===================================
+fmralign.pairwise_alignment.PairwiseAlignment
+=============================================
 
-.. currentmodule:: fmralign.alignment_methods
+.. currentmodule:: fmralign.pairwise_alignment
 
-.. autoclass:: Identity
-   :inherited-members:
+.. autoclass:: PairwiseAlignment
+   :no-inherited-members:
 
    
    .. automethod:: __init__
    
 
-.. include:: fmralign.alignment_methods.Identity.examples
+.. include:: fmralign.pairwise_alignment.PairwiseAlignment.examples
 
 .. raw:: html
 

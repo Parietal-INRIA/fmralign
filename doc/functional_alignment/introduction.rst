@@ -1,8 +1,8 @@
 .. for doctests to run, we need to define variables that are define in
    the literal includes
     >>> # if need to do something
-..
-.. functional_alignment_intro:
+
+.. _introduction:
 
 =======================================
 An introduction to functional alignment
@@ -25,7 +25,7 @@ In this documentation we use a subset of `Individual Brain Charting dataset <htt
 
 
 Inter subject variability in fMRI
-==================================
+=================================
 In order to better understand brain function, many dataset acquire precise individual
 functional images. Some rely on task and contrasts with a semantic,
 (`Human Connectome Project <http://www.humanconnectomeproject.org/>`_ , `Individual Brain Charting <https://project.inria.fr/IBC/>`_),
@@ -47,7 +47,7 @@ with metadata about each of them. We use the mask provided to define a
 `Nilearn masker <http://nilearn.github.io/manipulating_images/masker_objects.html>`_
 that will keep only relevant data.
 
->>> from nilearn.input_data import NiftiMasker
+>>> from nilearn.maskers import NiftiMasker
 >>> masker = NiftiMasker(mask_img=mask).fit()
 
 
@@ -85,7 +85,7 @@ which illustrate that functional signals are widely different between subject
 even in simple and narrow experimental settings.
 
 Functional alignment
-=====================
+====================
 
 The core idea of functional alignment is to handle this variablity by learning a transformation
 from one subject to another.
@@ -104,7 +104,7 @@ The say we have the 'AP' images in common for both subjects, we only have 'PA' i
 and we want to predict it for sub-02.
 
 Learning the transformation and predicting new data
-----------------------------------------------------
+---------------------------------------------------
 
 As we want to learn the transformation on 'AP' images, we should retrieve these images we left aside a moment ago :
 

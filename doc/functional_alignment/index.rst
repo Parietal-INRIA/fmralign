@@ -16,5 +16,5 @@ functional characteristics across subjects or to improve `decoding <https://nile
 
 .. toctree::
 
-   functional_alignment_intro.rst
+   introduction.rst
    fmralign_pipeline.rst

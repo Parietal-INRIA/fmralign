@@ -1,4 +1,4 @@
-
+﻿
 .. note::
 
    This page is a reference documentation. It only explains the class
@@ -6,19 +6,19 @@
    :ref:`user guide <user_guide>` for the big picture.
 
 
-fmralign.template_alignment.TemplateAlignment
-=============================================
+fmralign.alignment_methods.Identity
+===================================
 
-.. currentmodule:: fmralign.template_alignment
+.. currentmodule:: fmralign.alignment_methods
 
-.. autoclass:: TemplateAlignment
-   :inherited-members:
+.. autoclass:: Identity
+   :no-inherited-members:
 
    
    .. automethod:: __init__
    
 
-.. include:: fmralign.template_alignment.TemplateAlignment.examples
+.. include:: fmralign.alignment_methods.Identity.examples
 
 .. raw:: html
 

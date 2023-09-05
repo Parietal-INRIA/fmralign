@@ -1,4 +1,4 @@
-
+﻿
 .. note::
 
    This page is a reference documentation. It only explains the class
@@ -6,19 +6,19 @@
    :ref:`user guide <user_guide>` for the big picture.
 
 
-fmralign.alignment_methods.RidgeAlignment
-=========================================
+fmralign.alignment_methods.Hungarian
+====================================
 
 .. currentmodule:: fmralign.alignment_methods
 
-.. autoclass:: RidgeAlignment
-   :inherited-members:
+.. autoclass:: Hungarian
+   :no-inherited-members:
 
    
    .. automethod:: __init__
    
 
-.. include:: fmralign.alignment_methods.RidgeAlignment.examples
+.. include:: fmralign.alignment_methods.Hungarian.examples
 
 .. raw:: html
 

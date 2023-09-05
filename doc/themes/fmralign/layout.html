@@ -9,13 +9,13 @@
     :author: Jaques Grobler
     :license: BSD
 #}
-{% extends "sphinxdoc/layout.html" %}
+{% extends "basic/layout.html" %}
 
 {%- block doctype -%}
 <!DOCTYPE html>
 {%- endblock %}
 
-{% set title = 'fmralign: fMRI alignment' %}
+{% set title = '' %}
 
 {# Disable navigation bar at the bottom of the page #}
 {% block relbar2 %}
@@ -39,7 +39,7 @@
 {% block extrahead %}
 <meta content="True" name="HandheldFriendly">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-<meta name="keywords" content="nistats, neuroimaging, python, neuroscience, statistics">
+<meta name="keywords" content="neuroimaging, python, neuroscience, statistics">
 
 
 {# Stick the navigation bar to the top of the window when scrolling #}

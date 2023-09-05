@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Alignment methods benchmark (pairwise ROI case)
-===================================================================
+
+"""
+Alignment methods benchmark (pairwise ROI case).
+================================================
 
 In this tutorial, we compare various methods of alignment on a pairwise alignment
 problem for Individual Brain Charting subjects. For each subject, we have a lot
@@ -10,8 +12,8 @@ contrast per subject. We will just work here on a ROI.
 We mostly rely on python common packages and on nilearn to handle functional
 data in a clean fashion.
 
-To run this example, you must launch IPython via ``ipython
---matplotlib`` in a terminal, or use ``jupyter-notebook``.
+To run this example, you must launch IPython via ``ipython --matplotlib`` in
+a terminal, or use ``jupyter-notebook``.
 
 .. contents:: **Contents**
     :local:
@@ -26,33 +28,36 @@ To run this example, you must launch IPython via ``ipython
 # We download the images for subjects sub-01 and sub-02.
 # Files is the list of paths for each subjects.
 # df is a dataframe with metadata about each of them.
-#
 
 from fmralign.fetch_example_data import fetch_ibc_subjects_contrasts
-files, df, mask = fetch_ibc_subjects_contrasts(
-    ['sub-01', 'sub-02'])
+
+files, df, mask = fetch_ibc_subjects_contrasts(["sub-01", "sub-02"])
 
 
 ###############################################################################
 # Extract a mask for the visual cortex from Yeo Atlas
 # ---------------------------------------------------
 # First, we fetch and plot the complete atlas
-#
 
 from nilearn import datasets, plotting
-from nilearn.image import resample_to_img, load_img, new_img_like
+from nilearn.image import load_img, new_img_like, resample_to_img
+
 atlas_yeo_2011 = datasets.fetch_atlas_yeo_2011()
 atlas = load_img(atlas_yeo_2011.thick_7)
 
-# Select visual cortex, create a mask and resample it to the right resolution
+# Select visual cortex, create a mask and resample it to the right resolution
 
 mask_visual = new_img_like(atlas, atlas.get_fdata() == 1)
-resampled_mask_visual = resample_to_img(
-    mask_visual, mask, interpolation="nearest")
+resampled_mask_visual = resample_to_img(mask_visual, mask, interpolation="nearest")
 
 # Plot the mask we will use
-plotting.plot_roi(resampled_mask_visual, title='Visual regions mask extracted from atlas',
-                  cut_coords=(8, -80, 9), colorbar=True, cmap='Paired')
+plotting.plot_roi(
+    resampled_mask_visual,
+    title="Visual regions mask extracted from atlas",
+    cut_coords=(8, -80, 9),
+    colorbar=True,
+    cmap="Paired",
+)
 
 ###############################################################################
 # Define a masker
@@ -60,38 +65,37 @@ plotting.plot_roi(resampled_mask_visual, title='Visual regions mask extracted fr
 # We define a nilearn masker that will be used to handle relevant data.
 # For more information, visit :
 # 'http://nilearn.github.io/manipulating_images/masker_objects.html'
-#
 
-from nilearn.input_data import NiftiMasker
+from nilearn.maskers import NiftiMasker
+
 roi_masker = NiftiMasker(mask_img=resampled_mask_visual).fit()
 
 ###############################################################################
 # Prepare the data
 # ----------------
-# For each subject, for each task and conditions, our dataset contains two
+# For each subject, for each task and conditions, our dataset contains two
 # independent acquisitions, similar except for one acquisition parameter, the
 # encoding phase used that was either Antero-Posterior (AP) or
 # Postero-Anterior (PA). Although this induces small differences
 # in the final data, we will take  advantage of these pseudo-duplicates to
 # create a training and a testing set that contains roughly the same signals
 # but acquired independently.
-#
 
 # The training set, used to learn alignment from source subject toward target:
 # * source train: AP contrasts for subject sub-01
 # * target train: AP contrasts for subject sub-02
 
-source_train = df[df.subject == 'sub-01'][df.acquisition == 'ap'].path.values
-target_train = df[df.subject == 'sub-02'][df.acquisition == 'ap'].path.values
+source_train = df[df.subject == "sub-01"][df.acquisition == "ap"].path.values
+target_train = df[df.subject == "sub-02"][df.acquisition == "ap"].path.values
 
 # The testing set:
-# * source test: PA contrasts for subject one, used to predict
+# * source test: PA contrasts for subject one, used to predict
 #   the corresponding contrasts of subject sub-01
 # * target test: PA contrasts for subject sub-02, used as a ground truth
 #   to score our predictions
 
-source_test = df[df.subject == 'sub-01'][df.acquisition == 'pa'].path.values
-target_test = df[df.subject == 'sub-02'][df.acquisition == 'pa'].path.values
+source_test = df[df.subject == "sub-01"][df.acquisition == "pa"].path.values
+target_test = df[df.subject == "sub-02"][df.acquisition == "pa"].path.values
 
 ###############################################################################
 # Choose the number of regions for local alignment
@@ -100,13 +104,13 @@ target_test = df[df.subject == 'sub-02'][df.acquisition == 'pa'].path.values
 # regions so that each of them is approximately 200 voxels wide. Then our
 # estimator will first make a functional clustering of voxels based on train
 # data to divide them into meaningful regions.
-#
 
 import numpy as np
+
 n_voxels = roi_masker.mask_img_.get_fdata().sum()
-print("The chosen region of interest contains {} voxels".format(n_voxels))
+print(f"The chosen region of interest contains {n_voxels} voxels")
 n_pieces = int(np.round(n_voxels / 200))
-print("We will cluster them in {} regions".format(n_pieces))
+print(f"We will cluster them in {n_pieces} regions")
 
 ###############################################################################
 # Define the estimators, fit them and do a prediction
@@ -121,33 +125,35 @@ print("We will cluster them in {} regions".format(n_pieces))
 #   *  we also include identity (no alignment) as a baseline.
 # Then for each method we define the estimator fit it, predict the new image and plot
 # its correlation with the real signal.
-#
 
-from fmralign.pairwise_alignment import PairwiseAlignment
 from fmralign.metrics import score_voxelwise
-methods = ['identity', 'scaled_orthogonal', 'ridge_cv', 'optimal_transport']
+from fmralign.pairwise_alignment import PairwiseAlignment
+
+methods = ["identity", "scaled_orthogonal", "ridge_cv", "optimal_transport"]
 
 for method in methods:
     alignment_estimator = PairwiseAlignment(
-        alignment_method=method, n_pieces=n_pieces, mask=roi_masker)
+        alignment_method=method, n_pieces=n_pieces, mask=roi_masker
+    )
     alignment_estimator.fit(source_train, target_train)
     target_pred = alignment_estimator.transform(source_test)
 
     # derive correlation between prediction, test
-    method_error = score_voxelwise(target_test, target_pred,
-                                   masker=roi_masker, loss='corr')
+    method_error = score_voxelwise(
+        target_test, target_pred, masker=roi_masker, loss="corr"
+    )
 
     # plot correlation for each method
     aligned_score = roi_masker.inverse_transform(method_error)
-    title = "Correlation of prediction after {} alignment".format(method)
-    display = plotting.plot_stat_map(aligned_score, display_mode="z",
-                                     cut_coords=[-15, -5], vmax=1, title=title)
+    title = f"Correlation of prediction after {method} alignment"
+    display = plotting.plot_stat_map(
+        aligned_score, display_mode="z", cut_coords=[-15, -5], vmax=1, title=title
+    )
 
 ###############################################################################
 # We can observe that all alignment methods perform better than identity
 # (no alignment). Ridge is the best performing method, followed by Optimal
 # Transport. If you use Ridge though, be careful about the smooth predictions
 # it yields.
-#
 
 # sphinx_gallery_thumbnail_number = 5

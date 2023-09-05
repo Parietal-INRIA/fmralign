@@ -1,4 +1,4 @@
-
+﻿
 .. note::
 
    This page is a reference documentation. It only explains the class
@@ -6,19 +6,19 @@
    :ref:`user guide <user_guide>` for the big picture.
 
 
-fmralign.pairwise_alignment.PairwiseAlignment
-=============================================
+fmralign.alignment_methods.DiagonalAlignment
+============================================
 
-.. currentmodule:: fmralign.pairwise_alignment
+.. currentmodule:: fmralign.alignment_methods
 
-.. autoclass:: PairwiseAlignment
-   :inherited-members:
+.. autoclass:: DiagonalAlignment
+   :no-inherited-members:
 
    
    .. automethod:: __init__
    
 
-.. include:: fmralign.pairwise_alignment.PairwiseAlignment.examples
+.. include:: fmralign.alignment_methods.DiagonalAlignment.examples
 
 .. raw:: html
 

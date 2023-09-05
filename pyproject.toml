@@ -1,0 +1,74 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fmralign"
+description = "Functional alignment for fMRI"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file="LICENSE" }
+authors = [
+  { name="Elizabeth DuPre", email="emd222@cornell.edu" },
+  { name="Thomas Bazeille"},
+  { name="Bertrand Thirion"},
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "numpy",
+    "pandas",
+    "matplotlib",
+    "scikit-learn",
+    "joblib",
+    "scipy",
+    "nibabel",
+    "nilearn@git+https://github.com/nilearn/nilearn#egg=1b11edf5789813d20995e7744bc58f3a2b6bc4ea",
+    "POT"
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+# To use JAX-accelerated Optimal Transport
+jax = ["jax", "ott-jax > 0.3.0"]
+# For building the documentation
+doc = [
+  "coverage",
+  "myst-parser",
+  "numpydoc",
+  "ruamel.yaml",
+  "sphinx",
+  "sphinx-copybutton",
+  "sphinx-design",
+  "sphinx-gallery",
+  "sphinxcontrib-bibtex",
+  "sphinxext-opengraph",
+]
+# For running unit and docstring tests
+test = [
+  "coverage",
+  "pytest>=6.0.0",
+  "pytest-cov",
+]
+# Useful for development
+dev = [
+  "fmralign[jax,doc,test]",
+  "isort",
+  "flynt",
+  "black",
+  "flake8",
+  "flake8-use-fstring",
+]
+
+[tool.isort]
+profile = "black"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "fmralign/_version.py"
+
+[tool.hatch.metadata]
+allow-direct-references = true
