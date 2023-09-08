@@ -2,7 +2,7 @@ import pytest
 
 import numpy as np
 from sklearn.base import clone
-from nilearn.input_data import NiftiMasker
+from nilearn.maskers import NiftiMasker
 from fastsrm.identifiable_srm import IdentifiableFastSRM
 
 from fmralign.piecewise import PiecewiseModel, Identity
@@ -15,7 +15,7 @@ def to_niimgs(X, dim):
     p = np.prod(dim)
     assert len(dim) == 3
     assert X.shape[-1] <= p
-    mask = np.zeros(p).astype(np.bool)
+    mask = np.zeros(p).astype(bool)
     mask[: X.shape[-1]] = 1
     assert mask.sum() == X.shape[1]
     mask = mask.reshape(dim)
@@ -25,7 +25,7 @@ def to_niimgs(X, dim):
     affine = np.eye(4)
     return (
         nibabel.Nifti1Image(X, affine),
-        nibabel.Nifti1Image(mask.astype(np.float), affine),
+        nibabel.Nifti1Image(mask.astype(float), affine),
     )
 
 
