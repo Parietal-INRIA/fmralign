@@ -80,27 +80,22 @@ def generate_X_is(labels, X_list, masker, verbose):
 
 
 def fit_one_piece(piece_X_list, method):
-    """Align source and target data in one piece i, X_i and Y_i, using
-    alignment method and learn transformation to map X to Y.
+    """Fit SRM on group source data in one piece i, piece_X_list, using
+    alignment method.
 
     Parameters
     ----------
-    X_i: ndarray
-        Source data for piece i (shape : n_samples, n_features)
-    Y_i: ndarray
-        Target data for piece i (shape : n_samples, n_features)
-    alignment_method: string
-        Algorithm used to perform alignment between X_i and Y_i :
-        - either 'identity', 'scaled_orthogonal', 'optimal_transport',
-        'ridge_cv', 'permutation', 'diagonal'
-        - or an instance of one of alignment classes
-            (imported from functional_alignment.alignment_methods)
+    piece_X_list: ndarray
+        Source data for piece i (shape : n_subjects, n_samples, n_features)
+    method: string
+        Algorithm used to perform groupwise alignment on piece_X_list :
+        - either 'identity',
+        - or an instance of IdentifiableFastSRM alignment class (imported from fastsrm)
     Returns
     -------
     alignment_algo
-        Instance of alignment estimator class fitted for X_i, Y_i
+        Instance of alignment estimator class fit on
     """
-
     if method == "identity":
         alignment_algo = Identity()
     else:
@@ -115,13 +110,13 @@ def fit_one_piece(piece_X_list, method):
                 alignment_algo.n_components = np.shape(piece_X_list)[1]
         else:
             warn_msg = (
-                "Method not recognized, should be 'identity' or an instance of "
-                "FastSRM, MultiViewICA or AdaptiveMultiViewICA"
+                "Method not recognized, should be 'identity' "
+                "or an instance of IdentifiableFastSRM"
             )
             NotImplementedError(warn_msg)
-    # dirty monkey patching to avoid having n_components > n_voxels in any
-    #  piece which would yield a bug in add_subjects()
 
+    # dirty monkey patching to avoid having n_components > n_voxels in any
+    # piece which would yield a bug in add_subjects()
     reduced_SR = alignment_algo.fit(piece_X_list).transform(piece_X_list)
 
     if len(reduced_SR) == len(piece_X_list):
@@ -140,20 +135,18 @@ def fit_one_parcellation(
     n_jobs,
     verbose,
 ):
-    """Create one parcellation of n_pieces and align each source and target
-    data in one piece i, X_i and Y_i, using alignment method
-    and learn transformation to map X to Y.
+    """Create parcellation of n_pieces and align one piece i in group source
+    data piece_X_list, using SRM alignment instance.
 
     Parameters
     ----------
     X_: Niimg-like object
         Source data
-    alignment_method: string
-        algorithm used to perform alignment between each region of X_ and Y_
+    srm : FastSRM instance
     masker: instance of NiftiMasker or MultiNiftiMasker
         Masker to be used on the data. For more information see:
         http://nilearn.github.io/manipulating_images/masker_objects.html
-    n_pieces: n_pieces: int,
+    n_pieces: integer
         Number of regions in which the data is parcellated for alignment
     clustering: string or 3D Niimg
         method used to perform parcellation of data.
@@ -193,9 +186,8 @@ def fit_one_parcellation(
 
 class PiecewiseModel(BaseEstimator, TransformerMixin):
     """
-    Decompose the source images into regions and summarize subjects information \
-    in a SR, then use alignment to predict \
-    new contrast for target(s) subject.
+    Decompose the source images into regions and summarize subjects information
+    in a SR, then use alignment to predict new contrast for target(s) subject.
     """
 
     def __init__(
@@ -381,12 +373,19 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
 
     def transform(self, imgs):
         """
+        Parameters
+        ----------
         imgs : list of Niimgs or string (paths). Masked shape : n_voxels, n_timeframes
 
-        reshaped_aligned =
+        Returns
+        -------
+        reshaped_aligned
 
         !!!Not implemented for n_bags>1
         """
+        if self.n_bags > 1:
+            warnings.warn("n_bags > 1 is not yet supported for this method.")
+
         n_comps = self.srm.n_components
         aligned_imgs = []
         for labels, srm in zip(self.labels_, self.fit_):
