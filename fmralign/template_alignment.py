@@ -13,6 +13,7 @@ from nilearn.maskers._masker_validation import _check_embedded_nifti_masker
 from sklearn.base import BaseEstimator, TransformerMixin
 
 from fmralign.pairwise_alignment import PairwiseAlignment
+from hyperalignment.hyperalignment import HyperAlignment
 
 
 def _rescaled_euclidean_mean(imgs, masker, scale_average=False):
@@ -376,6 +377,15 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             Length : n_samples
 
         """
+        if self.alignment_method == "hyperalignment":
+            self.model = HyperAlignment(
+                n_jobs=self.n_jobs,
+            )
+
+            return self.model.fit(
+                imgs, self.masker_, self.masker_.mask_img_, verbose=self.verbose
+            )
+
         # Check if the input is a list, if list of lists, concatenate each subjects
         # data into one unique image.
         if not isinstance(imgs, (list, np.ndarray)) or len(imgs) < 2:
@@ -441,6 +451,9 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             Each Niimg has the same length as the list test_index
 
         """
+        if self.alignment_method == "hyperalignment":
+            return self.model.transform(imgs, verbose=self.verbose)
+
         if not isinstance(imgs, (list, np.ndarray)):
             raise ValueError(
                 "The method TemplateAlignment.transform() need a list input. "
