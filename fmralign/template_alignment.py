@@ -266,7 +266,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         alignment_method: string
             Algorithm used to perform alignment between X_i and Y_i :
             * either 'identity', 'scaled_orthogonal', 'optimal_transport',
-            'ridge_cv', 'permutation', 'diagonal'
+            'ridge_cv', 'permutation', 'diagonal', 'pcha', 'slha'
             * or an instance of one of alignment classes (imported from
             functional_alignment.alignment_methods)
         n_pieces: int, optional (default = 1)
@@ -377,11 +377,22 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             Length : n_samples
 
         """
-        if self.alignment_method == "hyperalignment":
+
+        # Alignment method is hyperalignment (too different from other methods)
+        if self.alignment_method == "slha":
             self.model = HyperAlignment(
+                method="searchlight",
                 n_jobs=self.n_jobs,
             )
+            return self.model.fit(
+                imgs, self.masker_, self.masker_.mask_img_, verbose=self.verbose
+            )
 
+        elif self.alignment_method == "pcha":
+            self.model = HyperAlignment(
+                method="parcels",
+                n_jobs=self.n_jobs,
+            )
             return self.model.fit(
                 imgs, self.masker_, self.masker_.mask_img_, verbose=self.verbose
             )
