@@ -9,7 +9,7 @@ Uses functional alignment on Niimgs and predicts new subjects' unseen images.
 import numpy as np
 from joblib import Memory, Parallel, delayed
 from nilearn.image import concat_imgs, index_img, load_img
-from nilearn.maskers._masker_validation import _check_embedded_nifti_masker
+from nilearn._utils.masker_validation import check_embedded_masker
 from sklearn.base import BaseEstimator, TransformerMixin
 
 from fmralign.pairwise_alignment import PairwiseAlignment
@@ -388,7 +388,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             if isinstance(imgs[0], (list, np.ndarray)):
                 imgs = [concat_imgs(img) for img in imgs]
 
-        self.masker_ = _check_embedded_nifti_masker(self)
+        self.masker_ = check_embedded_masker(self)
         self.masker_.n_jobs = self.n_jobs  # self.n_jobs
 
         # if masker_ has been provided a mask_img
