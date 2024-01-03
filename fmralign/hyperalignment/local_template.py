@@ -20,7 +20,7 @@ def PCA_decomposition(X, max_npc=None, flavor="sklearn", adjust_ns=False, demean
 
     Parameters
     ----------
-    dss : ndarray of shape (ns, nt, nv)
+    X : ndarray of shape (ns, nt, nv)
     max_npc : integer or None
     flavor : {'sklearn', 'svd'}
     adjust_ns : bool
@@ -101,12 +101,12 @@ def compute_PCA_template(X, sl=None, max_npc=None, flavor="sklearn", demean=Fals
         The PCA template array of shape (n_samples, n_features, n_components).
     """
     if sl is not None:
-        dss = X[:, :, sl]
+        X = X[:, :, sl]
     else:
-        dss = X
-    max_npc = min(dss.shape[1], dss.shape[2])
+        X = X
+    max_npc = min(X.shape[1], X.shape[2])
     XX, cc = PCA_decomposition(
-        dss, max_npc=max_npc, flavor=flavor, adjust_ns=True, demean=demean
+        X, max_npc=max_npc, flavor=flavor, adjust_ns=True, demean=demean
     )
     return XX.astype(np.float32)
 
@@ -118,7 +118,7 @@ def compute_procrustes_template(
     scaling=False,
     zscore_common=True,
     level2_iter=1,
-    dss2=None,
+    X2=None,
     debug=False,
 ):
     """
@@ -131,7 +131,7 @@ def compute_procrustes_template(
         scaling (bool, optional): Whether to allow scaling in the Procrustes alignment. Defaults to False.
         zscore_common (bool, optional): Whether to z-score the aligned data to have zero mean and unit variance. Defaults to True.
         level2_iter (int, optional): The number of iterations for the level 2 alignment. Defaults to 1.
-        dss2 (ndarray or None, optional): The second set of input data array of shape (n_samples, n_features, n_regions). Only used for level 2 alignment. Defaults to None.
+        X2 (ndarray or None, optional): The second set of input data array of shape (n_samples, n_features, n_regions). Only used for level 2 alignment. Defaults to None.
         debug (bool, optional): Whether to display progress bars during alignment. Defaults to False.
 
     Returns:
@@ -141,7 +141,7 @@ def compute_procrustes_template(
     if region is not None:
         X = X[:, :, region]
     common_space = np.copy(X[0])
-    aligned_dss = [X[0]]
+    aligned_X = [X[0]]
     if debug:
         iter = tqdm(X[1:])
         iter.set_description("Computing procrustes alignment (level 1)...")
@@ -152,12 +152,12 @@ def compute_procrustes_template(
         aligned_ds = ds.dot(T)
         if zscore_common:
             aligned_ds = np.nan_to_num(zscore(aligned_ds, axis=0))
-        aligned_dss.append(aligned_ds)
+        aligned_X.append(aligned_ds)
         common_space = (common_space + aligned_ds) * 0.5
         if zscore_common:
             common_space = np.nan_to_num(zscore(common_space, axis=0))
 
-    aligned_dss2 = []
+    aligned_X2 = []
 
     if debug:
         iter2 = tqdm(range(level2_iter))
@@ -167,25 +167,25 @@ def compute_procrustes_template(
 
     for level2 in iter2:
         common_space = np.zeros_like(X[0])
-        for ds in aligned_dss:
+        for ds in aligned_X:
             common_space += ds
         for i, ds in enumerate(X):
-            reference = (common_space - aligned_dss[i]) / float(len(X) - 1)
+            reference = (common_space - aligned_X[i]) / float(len(X) - 1)
             if zscore_common:
                 reference = np.nan_to_num(zscore(reference, axis=0))
             T = procrustes(ds, reference, reflection=reflection, scaling=scaling)
-            if level2 == level2_iter - 1 and dss2 is not None:
-                aligned_dss2.append(dss2[i].dot(T))
-            aligned_dss[i] = ds.dot(T)
+            if level2 == level2_iter - 1 and X2 is not None:
+                aligned_X2.append(X2[i].dot(T))
+            aligned_X[i] = ds.dot(T)
 
-    common_space = np.sum(aligned_dss, axis=0)
+    common_space = np.sum(aligned_X, axis=0)
     if zscore_common:
         common_space = np.nan_to_num(zscore(common_space, axis=0))
     else:
         common_space /= float(len(X))
-    if dss2 is not None:
-        common_space2 = np.zeros_like(dss2[0])
-        for ds in aligned_dss2:
+    if X2 is not None:
+        common_space2 = np.zeros_like(X2[0])
+        for ds in aligned_X2:
             common_space2 += ds
         if zscore_common:
             common_space2 = np.nan_to_num(zscore(common_space2, axis=0))
@@ -210,7 +210,7 @@ def compute_template(
     ----------
     Parameters:
 
-       - dss (ndarray): The input datasets.
+       - X (ndarray): The input datasets.
        - region (ndarray or None): The region indices for searchlight or region-based template computation.
        - sl (ndarray or None): The searchlight indices for searchlight-based template computation.
        - region (int or None, optional): The index of the region to consider. If None, all regions are considered (or searchlights). Defaults to None.
@@ -244,10 +244,10 @@ def compute_template(
 
     if common_topography:
         if region is not None:
-            dss_ = X[:, :, region]
+            X_ = X[:, :, region]
         else:
-            dss_ = np.copy(X)
-        ns, nt, nv = dss_.shape
-        T = procrustes(np.tile(tmpl, (ns, 1)), dss_.reshape(ns * nt, nv))
+            X_ = np.copy(X)
+        ns, nt, nv = X_.shape
+        T = procrustes(np.tile(tmpl, (ns, 1)), X_.reshape(ns * nt, nv))
         tmpl = tmpl @ T
     return tmpl.astype(np.float32)
