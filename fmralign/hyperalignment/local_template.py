@@ -15,9 +15,7 @@ from .linalg import safe_svd
 from .linalg import procrustes
 
 
-def PCA_decomposition(
-    X, max_npc=None, flavor="sklearn", adjust_ns=False, demean=True
-):
+def PCA_decomposition(X, max_npc=None, flavor="sklearn", adjust_ns=False, demean=True):
     """Decompose concatenated data matrices using PCA/SVD.
 
     Parameters
@@ -53,9 +51,7 @@ def PCA_decomposition(
                     random_state=0,
                 )
                 if adjust_ns:
-                    XX = U[:, :max_npc] * (
-                        s[np.newaxis, :max_npc] / np.sqrt(ns)
-                    )
+                    XX = U[:, :max_npc] * (s[np.newaxis, :max_npc] / np.sqrt(ns))
                 else:
                     XX = U[:, :max_npc] * (s[np.newaxis, :max_npc])
                 cc = Vt[:max_npc].reshape(-1, ns, nv)
@@ -80,9 +76,7 @@ def PCA_decomposition(
         raise NotImplementedError
 
 
-def compute_PCA_template(
-    X, sl=None, max_npc=None, flavor="sklearn", demean=False
-):
+def compute_PCA_template(X, sl=None, max_npc=None, flavor="sklearn", demean=False):
     """
     Compute the PCA template from the input data.
 

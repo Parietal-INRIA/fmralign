@@ -43,11 +43,14 @@ def safe_svd(X, remove_mean=True):
         Unitary matrix.
     """
     if remove_mean:
-        X = X - X.mean(axis=0, keepdims=True)
+        X_ = X - X.mean(axis=0, keepdims=True)
+    else:
+        X_ = X.copy()
     try:
-        U, s, Vt = svd(X, full_matrices=False)
+        U, s, Vt = svd(X_, full_matrices=False)
     except LinAlgError:
-        U, s, Vt = svd(X, full_matrices=False, lapack_driver="gesvd")
+        U, s, Vt = svd(X_, full_matrices=False, lapack_driver="gesvd")
+    del X_
     return U, s, Vt
 
 
