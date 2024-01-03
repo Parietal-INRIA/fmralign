@@ -1,3 +1,5 @@
+"""Some functions to generate toy fMRI data using shared stimulus information."""
+
 import numpy as np
 from fastsrm.srm import projection
 
@@ -34,6 +36,10 @@ def generate_dummy_signal(
         Standard deviation of weights.
     SNR : float
         Signal-to-noise ratio.
+    generative_method : str, default="custom"
+        Method for generating data. Options are "custom", "fastsrm".
+    seed : int
+        Random seed.
 
 
     Returns
@@ -71,15 +77,11 @@ def generate_dummy_signal(
         S_train = np.sqrt(Sigma)[:, None] * rng.randn(n_t, latent_dim)
         S_test = np.sqrt(Sigma)[:, None] * rng.randn(n_t, latent_dim)
 
-    elif generative_method == "multiviewica":
-        S_train = np.random.laplace(size=(n_t, latent_dim))
-        S_test = np.random.laplace(size=(n_t, latent_dim))
-
     # Generate indiivdual spatial components
     data_train, data_test = [], []
     Ts = []
     for _ in range(n_s):
-        if generative_method == "custom" or generative_method == "multiviewica":
+        if generative_method == "custom":
             W = T_mean + T_std * np.random.randn(latent_dim, n_v)
         else:
             W = projection(rng.randn(latent_dim, n_v))
@@ -113,6 +115,7 @@ def generate_dummy_searchlights(
     n_searchlights: int,
     n_v: int,
     radius: int,
+    sl_size: int = 5,
     seed: int = 0,
 ):
     """Generate dummy searchlights for testing INT model
@@ -125,17 +128,19 @@ def generate_dummy_searchlights(
         Number of voxels.
     radius : int
         Radius of searchlights.
+    sl_size : int, default=5
+        Size of each searchlight (easier for dummy signal generation).
     seed : int
         Random seed.
 
     Returns
     -------
-    searchlights : ndarray of shape (n_searchlights, 5)
+    searchlights : ndarray of shape (n_searchlights, sl_size)
         Searchlights.
-    dists : ndarray of shape (n_searchlights, 5)
+    dists : ndarray of shape (n_searchlights, sl_size)
         Distances.
     """
     rng = np.random.RandomState(seed=seed)
-    searchlights = rng.randint(n_v, size=(n_searchlights, 5))
+    searchlights = rng.randint(n_v, size=(n_searchlights, sl_size))
     dists = rng.randint(radius, size=searchlights.shape)
     return searchlights, dists
