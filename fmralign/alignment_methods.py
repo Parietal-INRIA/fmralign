@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Module implementing alignment estimators on ndarrays."""
 import warnings
-
-import ott
 import numpy as np
 import scipy
 from joblib import Parallel, delayed
@@ -377,6 +375,7 @@ class POTAlignment(Alignment):
         Y: (n_samples, n_features) nd array
             target data
         """
+        import ot
 
         n = len(X.T)
         if n > 5000:
@@ -394,10 +393,10 @@ class POTAlignment(Alignment):
             M = cdist(X.T, Y.T, metric=self.metric)
 
             if self.solver == "exact":
-                self.R = ott.lp.emd(a, b, M) * n
+                self.R = ot.lp.emd(a, b, M) * n
             else:
                 self.R = (
-                    ott.sinkhorn(
+                    ot.sinkhorn(
                         a,
                         b,
                         M,
