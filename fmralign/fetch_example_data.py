@@ -2,7 +2,7 @@
 import os
 
 import pandas as pd
-from nilearn.datasets.utils import _fetch_files, _get_dataset_dir
+from nilearn.datasets._utils import fetch_files, get_dataset_dir
 
 
 def fetch_ibc_subjects_contrasts(subjects, data_dir=None, verbose=1):
@@ -34,7 +34,7 @@ def fetch_ibc_subjects_contrasts(subjects, data_dir=None, verbose=1):
         Path to the mask to be used on the data
     Notes
     ------
-    This function is a caller to nilearn.datasets.utils._fetch_files in order
+    This function is a caller to nilearn.datasets._utils.fetch_files in order
     to simplify examples reading and understanding for fmralign.
     See Also
     ---------
@@ -47,13 +47,11 @@ def fetch_ibc_subjects_contrasts(subjects, data_dir=None, verbose=1):
             "sub-{i:02d}" for i in [1, 2, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15]
         ]
     dataset_name = "ibc"
-    data_dir = _get_dataset_dir(
-        dataset_name, data_dir=data_dir, verbose=verbose
-    )
+    data_dir = get_dataset_dir(dataset_name, data_dir=data_dir, verbose=verbose)
 
     # download or retrieve metadatas, put it in a dataframe,
     # list all condition and specify path to the right directory
-    metadata_path = _fetch_files(
+    metadata_path = fetch_files(
         data_dir,
         [
             (
@@ -73,7 +71,7 @@ def fetch_ibc_subjects_contrasts(subjects, data_dir=None, verbose=1):
     metadata_df = metadata_df[metadata_df.subject.isin(subjects)]
 
     # download / retrieve mask niimg and find its path
-    mask = _fetch_files(
+    mask = fetch_files(
         data_dir,
         [
             (
@@ -118,5 +116,5 @@ def fetch_ibc_subjects_contrasts(subjects, data_dir=None, verbose=1):
                 for condition in conditions
             ]
         )
-        files.append(_fetch_files(data_dir, filenames, verbose=verbose))
+        files.append(fetch_files(data_dir, filenames, verbose=verbose))
     return files, metadata_df, mask
