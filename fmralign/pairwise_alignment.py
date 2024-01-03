@@ -53,7 +53,9 @@ def generate_Xi_Yi(labels, X, Y, masker, verbose):
         label = unique_labels[k]
         i = label == labels
         if (k + 1) % 25 == 0 and verbose > 0:
-            print("Fitting parcel: " + str(k + 1) + "/" + str(len(unique_labels)))
+            print(
+                "Fitting parcel: " + str(k + 1) + "/" + str(len(unique_labels))
+            )
         # should return X_i Y_i
         yield X_[:, i], Y_[:, i]
 
@@ -321,9 +323,9 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         else:
             self.masker_.fit()
 
-        if isinstance(self.clustering, nib.nifti1.Nifti1Image) or os.path.isfile(
-            self.clustering
-        ):
+        if isinstance(
+            self.clustering, nib.nifti1.Nifti1Image
+        ) or os.path.isfile(self.clustering):
             # check that clustering provided fills the mask, if not, reduce the mask
             if 0 in self.masker_.transform(self.clustering):
                 reduced_mask = _intersect_clustering_mask(
@@ -350,7 +352,9 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         self.fit_, self.labels_ = [], []
         rs = ShuffleSplit(n_splits=self.n_bags, test_size=0.8, random_state=0)
 
-        outputs = Parallel(n_jobs=self.n_jobs, prefer="threads", verbose=self.verbose)(
+        outputs = Parallel(
+            n_jobs=self.n_jobs, prefer="threads", verbose=self.verbose
+        )(
             delayed(fit_one_parcellation)(
                 X_,
                 Y_,
@@ -389,7 +393,9 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
 
         X_transform = np.zeros_like(X_)
         for i in range(self.n_bags):
-            X_transform += piecewise_transform(self.labels_[i], self.fit_[i], X_)
+            X_transform += piecewise_transform(
+                self.labels_[i], self.fit_[i], X_
+            )
 
         X_transform /= self.n_bags
 

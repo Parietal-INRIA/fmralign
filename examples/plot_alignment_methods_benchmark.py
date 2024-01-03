@@ -48,7 +48,9 @@ atlas = load_img(atlas_yeo_2011.thick_7)
 # Select visual cortex, create a mask and resample it to the right resolution
 
 mask_visual = new_img_like(atlas, atlas.get_fdata() == 1)
-resampled_mask_visual = resample_to_img(mask_visual, mask, interpolation="nearest")
+resampled_mask_visual = resample_to_img(
+    mask_visual, mask, interpolation="nearest"
+)
 
 # Plot the mask we will use
 plotting.plot_roi(
@@ -147,7 +149,11 @@ for method in methods:
     aligned_score = roi_masker.inverse_transform(method_error)
     title = f"Correlation of prediction after {method} alignment"
     display = plotting.plot_stat_map(
-        aligned_score, display_mode="z", cut_coords=[-15, -5], vmax=1, title=title
+        aligned_score,
+        display_mode="z",
+        cut_coords=[-15, -5],
+        vmax=1,
+        title=title,
     )
 
 ###############################################################################

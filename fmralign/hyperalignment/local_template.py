@@ -15,7 +15,9 @@ from .linalg import safe_svd
 from .linalg import procrustes
 
 
-def PCA_decomposition(X, max_npc=None, flavor="sklearn", adjust_ns=False, demean=True):
+def PCA_decomposition(
+    X, max_npc=None, flavor="sklearn", adjust_ns=False, demean=True
+):
     """Decompose concatenated data matrices using PCA/SVD.
 
     Parameters
@@ -51,7 +53,9 @@ def PCA_decomposition(X, max_npc=None, flavor="sklearn", adjust_ns=False, demean
                     random_state=0,
                 )
                 if adjust_ns:
-                    XX = U[:, :max_npc] * (s[np.newaxis, :max_npc] / np.sqrt(ns))
+                    XX = U[:, :max_npc] * (
+                        s[np.newaxis, :max_npc] / np.sqrt(ns)
+                    )
                 else:
                     XX = U[:, :max_npc] * (s[np.newaxis, :max_npc])
                 cc = Vt[:max_npc].reshape(-1, ns, nv)
@@ -76,7 +80,9 @@ def PCA_decomposition(X, max_npc=None, flavor="sklearn", adjust_ns=False, demean
         raise NotImplementedError
 
 
-def compute_PCA_template(X, sl=None, max_npc=None, flavor="sklearn", demean=False):
+def compute_PCA_template(
+    X, sl=None, max_npc=None, flavor="sklearn", demean=False
+):
     """
     Compute the PCA template from the input data.
 
@@ -97,7 +103,7 @@ def compute_PCA_template(X, sl=None, max_npc=None, flavor="sklearn", demean=Fals
     Returns:
     --------
 
-    ndarray:
+    XX (ndarray):
         The PCA template array of shape (n_samples, n_features, n_components).
     """
     if sl is not None:
@@ -143,17 +149,17 @@ def compute_procrustes_template(
     common_space = np.copy(X[0])
     aligned_X = [X[0]]
     if debug:
-        iter = tqdm(X[1:])
-        iter.set_description("Computing procrustes alignment (level 1)...")
+        iter_X = tqdm(X[1:])
+        iter_X.set_description("Computing procrustes alignment (level 1)...")
     else:
-        iter = X[1:]
-    for ds in iter:
-        T = procrustes(ds, common_space, reflection=reflection, scaling=scaling)
-        aligned_ds = ds.dot(T)
+        iter_X = X[1:]
+    for x in iter_X:
+        T = procrustes(x, common_space, reflection=reflection, scaling=scaling)
+        aligned_x = x.dot(T)
         if zscore_common:
-            aligned_ds = np.nan_to_num(zscore(aligned_ds, axis=0))
-        aligned_X.append(aligned_ds)
-        common_space = (common_space + aligned_ds) * 0.5
+            aligned_x = np.nan_to_num(zscore(aligned_x, axis=0))
+        aligned_X.append(aligned_x)
+        common_space = (common_space + aligned_x) * 0.5
         if zscore_common:
             common_space = np.nan_to_num(zscore(common_space, axis=0))
 
@@ -167,16 +173,16 @@ def compute_procrustes_template(
 
     for level2 in iter2:
         common_space = np.zeros_like(X[0])
-        for ds in aligned_X:
-            common_space += ds
-        for i, ds in enumerate(X):
+        for x in aligned_X:
+            common_space += x
+        for i, x in enumerate(X):
             reference = (common_space - aligned_X[i]) / float(len(X) - 1)
             if zscore_common:
                 reference = np.nan_to_num(zscore(reference, axis=0))
-            T = procrustes(ds, reference, reflection=reflection, scaling=scaling)
+            T = procrustes(x, reference, reflection=reflection, scaling=scaling)
             if level2 == level2_iter - 1 and X2 is not None:
                 aligned_X2.append(X2[i].dot(T))
-            aligned_X[i] = ds.dot(T)
+            aligned_X[i] = x.dot(T)
 
     common_space = np.sum(aligned_X, axis=0)
     if zscore_common:
@@ -185,8 +191,8 @@ def compute_procrustes_template(
         common_space /= float(len(X))
     if X2 is not None:
         common_space2 = np.zeros_like(X2[0])
-        for ds in aligned_X2:
-            common_space2 += ds
+        for x in aligned_X2:
+            common_space2 += x
         if zscore_common:
             common_space2 = np.nan_to_num(zscore(common_space2, axis=0))
         else:

@@ -42,7 +42,9 @@ def piecewise_transform(labels, estimators, X):
 
     for i in range(len(unique_labels)):
         label = unique_labels[i]
-        X_transform[:, labels == label] = estimators[i].transform(X[:, labels == label])
+        X_transform[:, labels == label] = estimators[i].transform(
+            X[:, labels == label]
+        )
     return X_transform
 
 
@@ -71,7 +73,13 @@ def _check_labels(labels, threshold=1000):
 
 
 def _make_parcellation(
-    imgs, clustering_index, clustering, n_pieces, masker, smoothing_fwhm=5, verbose=0
+    imgs,
+    clustering_index,
+    clustering,
+    n_pieces,
+    masker,
+    smoothing_fwhm=5,
+    verbose=0,
 ):
     """
     Use nilearn Parcellation class in our pipeline.
@@ -106,7 +114,9 @@ def _make_parcellation(
         Parcellation of features in clusters
     """
     # check if clustering is provided
-    if isinstance(clustering, nib.nifti1.Nifti1Image) or os.path.isfile(clustering):
+    if isinstance(clustering, nib.nifti1.Nifti1Image) or os.path.isfile(
+        clustering
+    ):
         _check_same_fov(masker.mask_img_, clustering)
         labels = _apply_mask_fmri(clustering, masker.mask_img_).astype(int)
 
@@ -140,9 +150,9 @@ def _make_parcellation(
             )
             err.args += (errmsg,)
             raise err
-        labels = _apply_mask_fmri(parcellation.labels_img_, masker.mask_img_).astype(
-            int
-        )
+        labels = _apply_mask_fmri(
+            parcellation.labels_img_, masker.mask_img_
+        ).astype(int)
 
     if verbose > 0:
         unique_labels, counts = np.unique(labels, return_counts=True)

@@ -132,7 +132,9 @@ def _create_template(
     aligned_imgs = imgs
     template_history = []
     for iter in range(n_iter):
-        template = _rescaled_euclidean_mean(aligned_imgs, masker, scale_template)
+        template = _rescaled_euclidean_mean(
+            aligned_imgs, masker, scale_template
+        )
         if 0 < iter < n_iter - 1:
             template_history.append(template)
         aligned_imgs = _align_images_to_template(
@@ -477,7 +479,9 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
                 "greater index in train_index or test_index."
             )
 
-        fitted_mappings = Parallel(self.n_jobs, prefer="threads", verbose=self.verbose)(
+        fitted_mappings = Parallel(
+            self.n_jobs, prefer="threads", verbose=self.verbose
+        )(
             delayed(_map_template_to_image)(
                 img,
                 train_index,
@@ -495,7 +499,9 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             for img in imgs
         )
 
-        predicted_imgs = Parallel(self.n_jobs, prefer="threads", verbose=self.verbose)(
+        predicted_imgs = Parallel(
+            self.n_jobs, prefer="threads", verbose=self.verbose
+        )(
             delayed(_predict_from_template_and_mapping)(
                 self.template, test_index, mapping
             )

@@ -29,7 +29,12 @@ def test_pairwise_identity():
     args_list = [
         {"alignment_method": "identity", "mask": mask_img},
         {"alignment_method": "identity", "n_pieces": 3, "mask": mask_img},
-        {"alignment_method": "identity", "n_pieces": 3, "n_bags": 4, "mask": mask_img},
+        {
+            "alignment_method": "identity",
+            "n_pieces": 3,
+            "n_bags": 4,
+            "mask": mask_img,
+        },
         {
             "alignment_method": "identity",
             "n_pieces": 3,
@@ -58,7 +63,9 @@ def test_pairwise_identity():
     )
     with pytest.warns(UserWarning):
         algo.fit(img1, img1)
-    assert (algo.mask.get_fdata() > 0).sum() == (clustering.get_fdata() > 0).sum()
+    assert (algo.mask.get_fdata() > 0).sum() == (
+        clustering.get_fdata() > 0
+    ).sum()
 
     # test warning raised if parcel is 0 :
     null_im = new_img_like(img1, np.zeros_like(img1.get_fdata()))

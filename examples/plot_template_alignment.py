@@ -155,7 +155,9 @@ average_score = masker.inverse_transform(
     score_voxelwise(target_test, prediction_from_average, masker, loss="corr")
 )
 template_score = masker.inverse_transform(
-    score_voxelwise(target_test, prediction_from_template[0], masker, loss="corr")
+    score_voxelwise(
+        target_test, prediction_from_template[0], masker, loss="corr"
+    )
 )
 
 

@@ -94,7 +94,9 @@ def optimal_permutation(X, Y):
     dist = pairwise_distances(X.T, Y.T)
     u = linear_sum_assignment(dist)
     u = np.array(list(zip(*u)))
-    permutation = scipy.sparse.csr_matrix((np.ones(X.shape[1]), (u[:, 0], u[:, 1]))).T
+    permutation = scipy.sparse.csr_matrix(
+        (np.ones(X.shape[1]), (u[:, 0], u[:, 1]))
+    ).T
     return permutation
 
 
@@ -589,7 +591,9 @@ class Hyperalignment(Alignment):
 
         # check for cached data
         try:
-            self.denoised_signal = np.load(self.path + "/train_data_denoised.npy")
+            self.denoised_signal = np.load(
+                self.path + "/train_data_denoised.npy"
+            )
             if verbose:
                 print("Loaded denoised data from cache")
 
@@ -651,7 +655,9 @@ class Hyperalignment(Alignment):
             print("Predict : Computing stimulus matrix...")
 
         if self.decomp_method is None:
-            S = stimulus_estimator(full_signal, self.n_t, self.n_s, self.latent_dim)
+            S = stimulus_estimator(
+                full_signal, self.n_t, self.n_s, self.latent_dim
+            )
 
         if verbose:
             print("Predict : stimulus matrix shape: ", S.shape)

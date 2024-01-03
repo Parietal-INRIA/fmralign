@@ -161,7 +161,9 @@ _plot_distributions_and_alignment(X, Y, title="Example distibutions")
 Y = np.roll(Y, 6, axis=0)
 # We plot them and observe that their initial matching is wrong
 R_identity = np.eye(n_points, dtype=np.float64)
-_plot_distributions_and_alignment(X, Y, R=R_identity, title="Initial Matching", thr=0.1)
+_plot_distributions_and_alignment(
+    X, Y, R=R_identity, title="Initial Matching", thr=0.1
+)
 
 ###############################################################################
 # Alignment : finding the right transform
@@ -193,7 +195,9 @@ _plot_distributions_and_alignment(
     title="Procrustes between distributions",
     thr=0.1,
 )
-_plot_mixing_matrix(R=scaled_orthogonal_alignment.R.T, title="Orthogonal mixing matrix")
+_plot_mixing_matrix(
+    R=scaled_orthogonal_alignment.R.T, title="Orthogonal mixing matrix"
+)
 
 ###############################################################################
 # Ridge alignment
@@ -206,7 +210,11 @@ _plot_mixing_matrix(R=scaled_orthogonal_alignment.R.T, title="Orthogonal mixing 
 ridge_alignment = RidgeAlignment(alphas=[0.01, 0.1], cv=2).fit(X.T, Y.T)
 
 _plot_distributions_and_alignment(
-    X, Y, R=ridge_alignment.R.coef_, title="Ridge between distributions", thr=0.1
+    X,
+    Y,
+    R=ridge_alignment.R.coef_,
+    title="Ridge between distributions",
+    thr=0.1,
 )
 _plot_mixing_matrix(R=ridge_alignment.R.coef_, title="Ridge coefficients")
 

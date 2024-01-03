@@ -43,9 +43,13 @@ def fetch_ibc_subjects_contrasts(subjects, data_dir=None, verbose=1):
     """
     # The URLs can be retrieved from the nilearn account on OSF
     if subjects == "all":
-        subjects = ["sub-{i:02d}" for i in [1, 2, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15]]
+        subjects = [
+            "sub-{i:02d}" for i in [1, 2, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15]
+        ]
     dataset_name = "ibc"
-    data_dir = _get_dataset_dir(dataset_name, data_dir=data_dir, verbose=verbose)
+    data_dir = _get_dataset_dir(
+        dataset_name, data_dir=data_dir, verbose=verbose
+    )
 
     # download or retrieve metadatas, put it in a dataframe,
     # list all condition and specify path to the right directory
@@ -62,14 +66,22 @@ def fetch_ibc_subjects_contrasts(subjects, data_dir=None, verbose=1):
     )
     metadata_df = pd.read_csv(metadata_path[0])
     conditions = metadata_df.condition.unique()
-    metadata_df["path"] = metadata_df["path"].str.replace("path_to_dir", data_dir)
+    metadata_df["path"] = metadata_df["path"].str.replace(
+        "path_to_dir", data_dir
+    )
     # filter the dataframe to return only rows relevant for subjects argument
     metadata_df = metadata_df[metadata_df.subject.isin(subjects)]
 
     # download / retrieve mask niimg and find its path
     mask = _fetch_files(
         data_dir,
-        [("gm_mask_3mm.nii.gz", "https://osf.io/yvju3/download", {"uncompress": True})],
+        [
+            (
+                "gm_mask_3mm.nii.gz",
+                "https://osf.io/yvju3/download",
+                {"uncompress": True},
+            )
+        ],
         verbose=verbose,
     )[0]
 

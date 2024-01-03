@@ -94,19 +94,27 @@ def test_scaled_procrustes_on_simple_exact_cases():
     assert_array_almost_equal(R_test.T, R)
 
     """Scaled Matrix"""
-    X = np.array([[1.0, 2.0, 3.0, 4.0], [5.0, 3.0, 4.0, 6.0], [7.0, 8.0, -5.0, -2.0]])
+    X = np.array(
+        [[1.0, 2.0, 3.0, 4.0], [5.0, 3.0, 4.0, 6.0], [7.0, 8.0, -5.0, -2.0]]
+    )
 
     X = X - X.mean(axis=1, keepdims=True)
 
     Y = 2 * X
     Y = Y - Y.mean(axis=1, keepdims=True)
 
-    assert_array_almost_equal(scaled_procrustes(X.T, Y.T, scaling=True)[0], np.eye(3))
+    assert_array_almost_equal(
+        scaled_procrustes(X.T, Y.T, scaling=True)[0], np.eye(3)
+    )
     assert_array_almost_equal(scaled_procrustes(X.T, Y.T, scaling=True)[1], 2)
 
     """3D Rotation"""
     R = np.array(
-        [[1.0, 0.0, 0.0], [0.0, np.cos(1), -np.sin(1)], [0.0, np.sin(1), np.cos(1)]]
+        [
+            [1.0, 0.0, 0.0],
+            [0.0, np.cos(1), -np.sin(1)],
+            [0.0, np.sin(1), np.cos(1)],
+        ]
     )
     X = np.random.rand(3, 4)
     X = X - X.mean(axis=1, keepdims=True)
@@ -209,7 +217,9 @@ def test_ott_backend():
     algo = OptimalTransportAlignment(
         reg=epsilon, metric="euclidean", tol=1e-5, max_iter=10000
     )
-    old_implem = POTAlignment(reg=epsilon, metric="euclidean", tol=1e-5, max_iter=10000)
+    old_implem = POTAlignment(
+        reg=epsilon, metric="euclidean", tol=1e-5, max_iter=10000
+    )
     algo.fit(X, Y)
     old_implem.fit(X, Y)
     assert_array_almost_equal(algo.R, old_implem.R, decimal=3)

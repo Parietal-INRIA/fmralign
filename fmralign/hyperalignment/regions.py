@@ -418,7 +418,9 @@ def piece_procrustes(
         array-like: The transformation matrix T.
 
     """
-    sl_func = functools.partial(procrustes, reflection=reflection, scaling=scaling)
+    sl_func = functools.partial(
+        procrustes, reflection=reflection, scaling=scaling
+    )
     T = iter_hyperalignment(
         X,
         Y,

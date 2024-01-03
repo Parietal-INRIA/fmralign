@@ -41,7 +41,9 @@ def zero_mean_coefficient_determination(
     nonzero_numerator = numerator != 0
     valid_score = nonzero_denominator & nonzero_numerator
     output_scores = np.ones([y_true.shape[1]])
-    output_scores[valid_score] = 1 - (numerator[valid_score] / denominator[valid_score])
+    output_scores[valid_score] = 1 - (
+        numerator[valid_score] / denominator[valid_score]
+    )
     output_scores[nonzero_numerator & ~nonzero_denominator] = 0
 
     if multioutput == "raw_values":
@@ -52,7 +54,8 @@ def zero_mean_coefficient_determination(
         avg_weights = None
     elif multioutput == "variance_weighted":
         avg_weights = (
-            weight * (y_true - np.average(y_true, axis=0, weights=sample_weight)) ** 2
+            weight
+            * (y_true - np.average(y_true, axis=0, weights=sample_weight)) ** 2
         ).sum(axis=0, dtype=np.float64)
         # avoid fail on constant y or one-element arrays
         if not np.any(nonzero_denominator):

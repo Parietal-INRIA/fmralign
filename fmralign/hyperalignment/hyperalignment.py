@@ -67,7 +67,9 @@ class HyperAlignment(INT):
             )
 
         elif self.method == "parcellation":
-            raise NotImplementedError("Parcellation method not implemented yet.")
+            raise NotImplementedError(
+                "Parcellation method not implemented yet."
+            )
 
         if isinstance(imgs, np.ndarray):
             X = imgs

@@ -126,7 +126,9 @@ class INT(BaseEstimator, TransformerMixin):
 
         # check for cached data
         try:
-            self.denoised_signal = np.load(self.path + "/train_data_denoised.npy")
+            self.denoised_signal = np.load(
+                self.path + "/train_data_denoised.npy"
+            )
             if verbose:
                 print("Loaded denoised data from cache")
 
@@ -191,7 +193,9 @@ class INT(BaseEstimator, TransformerMixin):
             print("Predict : Computing stimulus matrix...")
 
         if self.decomp_method is None:
-            S = stimulus_estimator(full_signal, self.n_t, self.n_s, self.latent_dim)
+            S = stimulus_estimator(
+                full_signal, self.n_t, self.n_s, self.latent_dim
+            )
 
         if verbose:
             print("Predict : stimulus matrix shape: ", S.shape)
