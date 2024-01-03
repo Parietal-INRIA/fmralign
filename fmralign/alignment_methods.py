@@ -2,7 +2,7 @@
 """Module implementing alignment estimators on ndarrays."""
 import warnings
 
-import ot
+import ott
 import numpy as np
 import scipy
 from joblib import Parallel, delayed
@@ -16,6 +16,11 @@ from sklearn.metrics.pairwise import pairwise_distances
 import os
 from .hyperalignment.regions_alignment import RegionAlignment
 from .hyperalignment.linalg import safe_svd, svd_pca
+
+import jax
+from ott.geometry import costs, geometry
+from ott.problems.linear import linear_problem
+from ott.solvers.linear import sinkhorn
 
 
 def scaled_procrustes(X, Y, scaling=False, primal=None):
@@ -389,10 +394,10 @@ class POTAlignment(Alignment):
             M = cdist(X.T, Y.T, metric=self.metric)
 
             if self.solver == "exact":
-                self.R = ot.lp.emd(a, b, M) * n
+                self.R = ott.lp.emd(a, b, M) * n
             else:
                 self.R = (
-                    ot.sinkhorn(
+                    ott.sinkhorn(
                         a,
                         b,
                         M,
@@ -445,10 +450,6 @@ class OptimalTransportAlignment(Alignment):
         Y: (n_samples, n_features) nd array
             target data
         """
-        import jax
-        from ott.geometry import costs, geometry
-        from ott.problems.linear import linear_problem
-        from ott.solvers.linear import sinkhorn
 
         if self.metric == "euclidean":
             cost_matrix = costs.Euclidean().all_pairs(x=X.T, y=Y.T)
