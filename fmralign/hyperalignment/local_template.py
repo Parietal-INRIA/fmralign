@@ -35,9 +35,6 @@ def PCA_decomposition(X, max_npc=None, flavor="sklearn", adjust_ns=False, demean
     """
     ns, nt, nv = X.shape
     X = X.transpose(1, 0, 2).reshape(nt, ns * nv).astype(np.float32)
-    if max_npc is not None:
-        # max_npc = min(max_npc, min(X.shape[0], X.shape[1]))
-        pass
     if flavor == "sklearn":
         try:
             if demean:
