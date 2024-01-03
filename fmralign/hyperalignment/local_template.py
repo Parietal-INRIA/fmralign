@@ -12,7 +12,7 @@ from sklearn.utils.extmath import randomized_svd
 from tqdm import tqdm
 
 from .linalg import safe_svd
-from .procrustes import procrustes
+from .linalg import procrustes
 
 
 def PCA_decomposition(X, max_npc=None, flavor="sklearn", adjust_ns=False, demean=True):

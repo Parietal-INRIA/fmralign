@@ -15,7 +15,7 @@ from nilearn._utils.niimg_conversions import (
     _safe_get_data,
 )
 from tqdm import tqdm
-from .procrustes import procrustes
+from .linalg import procrustes
 from .linalg import ridge
 from .local_template import compute_template
 from fmralign._utils import _make_parcellation
