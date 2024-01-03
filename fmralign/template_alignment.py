@@ -11,9 +11,7 @@ from joblib import Memory, Parallel, delayed
 from nilearn.image import concat_imgs, index_img, load_img
 from nilearn.maskers._masker_validation import _check_embedded_nifti_masker
 from sklearn.base import BaseEstimator, TransformerMixin
-
 from fmralign.pairwise_alignment import PairwiseAlignment
-from hyperalignment.hyperalignment import HyperAlignment
 
 
 def _rescaled_euclidean_mean(imgs, masker, scale_average=False):
@@ -379,23 +377,6 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         """
 
         # Alignment method is hyperalignment (too different from other methods)
-        if self.alignment_method == "slha":
-            self.model = HyperAlignment(
-                method="searchlight",
-                n_jobs=self.n_jobs,
-            )
-            return self.model.fit(
-                imgs, self.masker_, self.masker_.mask_img_, verbose=self.verbose
-            )
-
-        elif self.alignment_method == "pcha":
-            self.model = HyperAlignment(
-                method="parcels",
-                n_jobs=self.n_jobs,
-            )
-            return self.model.fit(
-                imgs, self.masker_, self.masker_.mask_img_, verbose=self.verbose
-            )
 
         # Check if the input is a list, if list of lists, concatenate each subjects
         # data into one unique image.
