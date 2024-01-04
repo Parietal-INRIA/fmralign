@@ -470,7 +470,7 @@ class OptimalTransportAlignment(Alignment):
         return X.dot(self.R)
 
 
-class Hyperalignment(Alignment):
+class IndividualizedNeuralTuning(Alignment):
     def __init__(
         self,
         tmpl_kind="pca",
@@ -479,10 +479,12 @@ class Hyperalignment(Alignment):
         alignment_method="searchlight",
         id=None,
         cache=True,
-        n_jobs=-1,
+        n_jobs=1,
     ):
         """
-        Initialize the IndividualizedNeuralTuning object.
+        Method of alignment based on the Individualized Neural Tuning model, by Feilong Ma et al. (2023).
+        It uses searchlight/parcelation alignment to denoise the data, and then computes the stimulus response matrix.
+        See article : https://doi.org/10.1162/imag_a_00032
 
         Parameters:
         --------

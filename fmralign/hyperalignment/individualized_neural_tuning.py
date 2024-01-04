@@ -1,17 +1,20 @@
 """
 A wrapper for the IndividualTuningModel class to be used in fmralign (taking Nifti1 images as input).
 """
-from .model import INT
+from .model import INTEstimator
 from .regions import compute_searchlights
 from nilearn.maskers import NiftiMasker
 from nibabel import Nifti1Image
 import numpy as np
 
 
-class HyperAlignment(INT):
+class IndividualizedNeuralTuning(INTEstimator):
     def __init__(self, method="searchlight", n_jobs=-1):
         """
-        Initialize the Hyperalignment object.
+        A wrapper for the IndividualTuningModel class to be used in fmralign (taking Nifti1 images as input).
+        Method of alignment based on the Individualized Neural Tuning model, by Feilong Ma et al. (2023).
+        It uses searchlight/parcelation alignment to denoise the data, and then computes the stimulus response matrix.
+        See article : https://doi.org/10.1162/imag_a_00032
 
         Parameters:
         --------

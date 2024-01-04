@@ -19,7 +19,7 @@ from fmralign.alignment_methods import (
     POTAlignment,
     RidgeAlignment,
     ScaledOrthogonalAlignment,
-    Hyperalignment as INT,
+    IndividualizedNeuralTuning as INT,
     _voxelwise_signal_projection,
     optimal_permutation,
     scaled_procrustes,
