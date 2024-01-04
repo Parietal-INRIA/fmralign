@@ -94,9 +94,7 @@ def optimal_permutation(X, Y):
     dist = pairwise_distances(X.T, Y.T)
     u = linear_sum_assignment(dist)
     u = np.array(list(zip(*u)))
-    permutation = scipy.sparse.csr_matrix(
-        (np.ones(X.shape[1]), (u[:, 0], u[:, 1]))
-    ).T
+    permutation = scipy.sparse.csr_matrix((np.ones(X.shape[1]), (u[:, 0], u[:, 1]))).T
     return permutation
 
 
@@ -544,7 +542,7 @@ class Hyperalignment(Alignment):
         searchlights=None,
         parcels=None,
         dists=None,
-        radius: int = 20,
+        radius=20,
         verbose=True,
     ):
         """
@@ -591,9 +589,7 @@ class Hyperalignment(Alignment):
 
         # check for cached data
         try:
-            self.denoised_signal = np.load(
-                self.path + "/train_data_denoised.npy"
-            )
+            self.denoised_signal = np.load(self.path + "/train_data_denoised.npy")
             if verbose:
                 print("Loaded denoised data from cache")
 
@@ -613,8 +609,6 @@ class Hyperalignment(Alignment):
             # Clear memory of the SearchlightAlignment object
             denoiser = None
 
-        iterm = range(self.n_s)
-
         # Stimulus matrix computation
         if self.decomp_method is None:
             full_signal = np.concatenate(self.denoised_signal, axis=1)
@@ -628,7 +622,7 @@ class Hyperalignment(Alignment):
                     self.denoised_signal[i],
                     latent_dim=self.latent_dim,
                 )
-                for i in iterm
+                for i in range(self.n_s)
             )
 
         return self
@@ -655,9 +649,7 @@ class Hyperalignment(Alignment):
             print("Predict : Computing stimulus matrix...")
 
         if self.decomp_method is None:
-            S = stimulus_estimator(
-                full_signal, self.n_t, self.n_s, self.latent_dim
-            )
+            S = stimulus_estimator(full_signal, self.n_t, self.n_s, self.latent_dim)
 
         if verbose:
             print("Predict : stimulus matrix shape: ", S.shape)
@@ -666,24 +658,6 @@ class Hyperalignment(Alignment):
             reconstruct_signal(S, T_est) for T_est in self.tuning_data
         ]
         return np.array(reconstructed_signal, dtype=np.float32)
-
-    def get_shared_stimulus(self):
-        """
-        Returns the shared stimulus used for individualized neural tuning.
-
-        Returns:
-            The shared stimulus of shape (n_t, latent_dim) or (n_t, n_t).
-        """
-        return self.shared_response
-
-    def get_tuning_matrices(self):
-        """
-        Returns the tuning matrices as a NumPy array.
-
-        Returns:
-            numpy.ndarray: The tuning matrices of shape (n_s, latent_dim, n_v) or (n_s, n_t, n_v).
-        """
-        return np.array(self.tuning_data)
 
     def clean_cache(self, id):
         """
@@ -720,8 +694,6 @@ def tuning_estimator(shared_response, target, latent_dim=None):
         array-like: The estimated tuning weights.
 
     """
-    if latent_dim is None:
-        return np.linalg.inv(shared_response).dot(target)
     return np.linalg.pinv(shared_response).dot(target).astype(np.float32)
 
 
@@ -736,7 +708,7 @@ def stimulus_estimator(full_signal, n_t, n_s, latent_dim=None):
         latent_dim (int, optional): The number of latent dimensions. Defaults to None.
 
     Returns:
-        np.ndarray: The estimated shared response.
+        stimulus (np.ndarray): The stimulus response of shape (n_t, latent_dim) or (n_t, n_t).
     """
     if latent_dim is not None and latent_dim < n_t:
         U = svd_pca(full_signal)
@@ -744,8 +716,9 @@ def stimulus_estimator(full_signal, n_t, n_s, latent_dim=None):
     else:
         U, _, _ = safe_svd(full_signal)
 
-    shared_response = np.sqrt(n_s) * U
-    return shared_response.astype(np.float32)
+    stimulus = np.sqrt(n_s) * U
+    stimulus = stimulus.astype(np.float32)
+    return stimulus
 
 
 def reconstruct_signal(shared_response, individual_tuning):

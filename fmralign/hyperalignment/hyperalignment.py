@@ -25,7 +25,6 @@ class HyperAlignment(INT):
         super().__init__(n_jobs=n_jobs)
         self.mask_img = None
         self.masker = None
-        self.preds = []
         self.method = method
 
     def fit(
@@ -100,7 +99,8 @@ class HyperAlignment(INT):
 
         X = self.masker.fit_transform(imgs)
         Y = super().transform(X, verbose=verbose)
+        preds = []
         for y in Y:
-            self.preds.append(self.masker.inverse_transform(y))
+            preds.append(self.masker.inverse_transform(y))
 
-        return self.preds
+        return preds

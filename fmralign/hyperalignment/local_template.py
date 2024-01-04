@@ -15,14 +15,19 @@ from .linalg import safe_svd
 from .linalg import procrustes
 
 
-def PCA_decomposition(X, max_npc=None, flavor="sklearn", adjust_ns=False, demean=True):
+def PCA_decomposition(
+    X, n_components=None, flavor="sklearn", adjust_ns=False, demean=True
+):
     """Decompose concatenated data matrices using PCA/SVD.
 
     Parameters
     ----------
     X : ndarray of shape (ns, nt, nv)
-    max_npc : integer or None
+        The input data array.
+    n_components : int or None
+        The number of components to keep. If None, all components are kept.
     flavor : {'sklearn', 'svd'}
+        Wethter to use sklearn or the custom SVD implementation.
     adjust_ns : bool
         Whether to adjust the variance of the output so that it doesn't increase with the number of subjects.
     demean : bool
@@ -38,7 +43,7 @@ def PCA_decomposition(X, max_npc=None, flavor="sklearn", adjust_ns=False, demean
     if flavor == "sklearn":
         try:
             if demean:
-                pca = PCA(n_components=max_npc, random_state=0)
+                pca = PCA(n_components=n_components, random_state=0)
                 XX = pca.fit_transform(X)
                 cc = pca.components_.reshape(-1, ns, nv)
                 if adjust_ns:
@@ -47,19 +52,21 @@ def PCA_decomposition(X, max_npc=None, flavor="sklearn", adjust_ns=False, demean
             else:
                 U, s, Vt = randomized_svd(
                     X,
-                    (max_npc if max_npc is not None else min(X.shape)),
+                    (n_components if n_components is not None else min(X.shape)),
                     random_state=0,
                 )
                 if adjust_ns:
-                    XX = U[:, :max_npc] * (s[np.newaxis, :max_npc] / np.sqrt(ns))
+                    XX = U[:, :n_components] * (
+                        s[np.newaxis, :n_components] / np.sqrt(ns)
+                    )
                 else:
-                    XX = U[:, :max_npc] * (s[np.newaxis, :max_npc])
-                cc = Vt[:max_npc].reshape(-1, ns, nv)
+                    XX = U[:, :n_components] * (s[np.newaxis, :n_components])
+                cc = Vt[:n_components].reshape(-1, ns, nv)
                 return XX.astype(np.float32), cc
         except:  # noqa: E722
             return PCA_decomposition(
                 X,
-                max_npc=max_npc,
+                n_components=n_components,
                 flavor="svd",
                 adjust_ns=adjust_ns,
                 demean=demean,
@@ -67,10 +74,10 @@ def PCA_decomposition(X, max_npc=None, flavor="sklearn", adjust_ns=False, demean
     elif flavor == "svd":
         U, s, Vt = safe_svd(X)
         if adjust_ns:
-            XX = U[:, :max_npc] * (s[np.newaxis, :max_npc] / np.sqrt(ns))
+            XX = U[:, :n_components] * (s[np.newaxis, :n_components] / np.sqrt(ns))
         else:
-            XX = U[:, :max_npc] * (s[np.newaxis, :max_npc])
-        cc = Vt[:max_npc].reshape(-1, ns, nv)
+            XX = U[:, :n_components] * (s[np.newaxis, :n_components])
+        cc = Vt[:n_components].reshape(-1, ns, nv)
         return XX.astype(np.float32), cc
     else:
         raise NotImplementedError
@@ -106,7 +113,7 @@ def compute_PCA_template(X, sl=None, max_npc=None, flavor="sklearn", demean=Fals
         X = X
     max_npc = min(X.shape[1], X.shape[2])
     XX, cc = PCA_decomposition(
-        X, max_npc=max_npc, flavor=flavor, adjust_ns=True, demean=demean
+        X, n_components=max_npc, flavor=flavor, adjust_ns=True, demean=demean
     )
     return XX.astype(np.float32)
 

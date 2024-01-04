@@ -34,9 +34,9 @@ class INT(BaseEstimator, TransformerMixin):
         None
         """
 
-        self.n_s = None
-        self.n_t = None
-        self.n_v = None
+        self.n_subjects = None
+        self.n_timepoints = None
+        self.n_voxels = None
         self.labels = None
         self.alphas = None
         self.alignment_method = alignment_method
@@ -112,10 +112,10 @@ class INT(BaseEstimator, TransformerMixin):
 
         X_train_ = np.array(X_train, copy=True, dtype=np.float32)
 
-        self.n_s, self.n_t, self.n_v = X_train_.shape
+        self.n_subjects, self.n_timepoints, self.n_voxels = X_train_.shape
 
-        self.tuning_data = np.empty(self.n_s, dtype=np.float32)
-        self.denoised_signal = np.empty(self.n_s, dtype=np.float32)
+        self.tuning_data = np.empty(self.n_subjects, dtype=np.float32)
+        self.denoised_signal = np.empty(self.n_subjects, dtype=np.float32)
 
         if searchlights is None:
             self.regions = parcels
@@ -126,9 +126,7 @@ class INT(BaseEstimator, TransformerMixin):
 
         # check for cached data
         try:
-            self.denoised_signal = np.load(
-                self.path + "/train_data_denoised.npy"
-            )
+            self.denoised_signal = np.load(self.path + "/train_data_denoised.npy")
             if verbose:
                 print("Loaded denoised data from cache")
 
@@ -148,7 +146,7 @@ class INT(BaseEstimator, TransformerMixin):
             # Clear memory of the SearchlightAlignment object
             denoiser = None
 
-        iterm = range(self.n_s)
+        iterm = range(self.n_subjects)
 
         if verbose:
             iterm = tqdm(iterm)
@@ -157,7 +155,7 @@ class INT(BaseEstimator, TransformerMixin):
         if self.decomp_method is None:
             full_signal = np.concatenate(self.denoised_signal, axis=1)
             self.shared_response = stimulus_estimator(
-                full_signal, self.n_t, self.n_s, self.latent_dim
+                full_signal, self.n_timepoints, self.n_subjects, self.latent_dim
             )
 
             self.tuning_data = Parallel(n_jobs=self.n_jobs)(
@@ -193,35 +191,17 @@ class INT(BaseEstimator, TransformerMixin):
             print("Predict : Computing stimulus matrix...")
 
         if self.decomp_method is None:
-            S = stimulus_estimator(
-                full_signal, self.n_t, self.n_s, self.latent_dim
+            stimulus_ = stimulus_estimator(
+                full_signal, self.n_timepoints, self.n_subjects, self.latent_dim
             )
 
         if verbose:
-            print("Predict : stimulus matrix shape: ", S.shape)
+            print("Predict : stimulus matrix shape: ", stimulus_.shape)
 
         reconstructed_signal = [
-            reconstruct_signal(S, T_est) for T_est in self.tuning_data
+            reconstruct_signal(stimulus_, T_est) for T_est in self.tuning_data
         ]
         return np.array(reconstructed_signal, dtype=np.float32)
-
-    def get_shared_stimulus(self):
-        """
-        Returns the shared stimulus used for individualized neural tuning.
-
-        Returns:
-            The shared stimulus of shape (n_t, latent_dim) or (n_t, n_t).
-        """
-        return self.shared_response
-
-    def get_tuning_matrices(self):
-        """
-        Returns the tuning matrices as a NumPy array.
-
-        Returns:
-            numpy.ndarray: The tuning matrices of shape (n_s, latent_dim, n_v) or (n_s, n_t, n_v).
-        """
-        return np.array(self.tuning_data)
 
     def clean_cache(self, id):
         """
@@ -246,12 +226,12 @@ def tuning_estimator(shared_response, target, latent_dim=None):
 
     Parameters:
     --------
-        - shared_response (array-like):
-            The shared response matrix.
-        - target (array-like):
-            The target matrix.
-        - latent_dim (int, optional):
-            The number of latent dimensions. Defaults to None.
+    - shared_response (array-like):
+        The shared response matrix.
+    - target (array-like):
+        The target matrix.
+    - latent_dim (int, optional):
+        The number of latent dimensions. Defaults to None.
 
     Returns:
     --------
