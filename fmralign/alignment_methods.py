@@ -483,6 +483,7 @@ class IndividualizedNeuralTuning(Alignment):
     ):
         """
         Method of alignment based on the Individualized Neural Tuning model, by Feilong Ma et al. (2023).
+        It works on 4D fMRI data, and is based on the assumption that the neural response to a stimulus is shared across subjects.
         It uses searchlight/parcelation alignment to denoise the data, and then computes the stimulus response matrix.
         See article : https://doi.org/10.1162/imag_a_00032
 
@@ -614,12 +615,12 @@ class IndividualizedNeuralTuning(Alignment):
         # Stimulus matrix computation
         if self.decomp_method is None:
             full_signal = np.concatenate(self.denoised_signal, axis=1)
-            self.shared_response = stimulus_estimator(
+            self.shared_response = _stimulus_estimator(
                 full_signal, self.n_t, self.n_s, self.latent_dim
             )
 
             self.tuning_data = Parallel(n_jobs=self.n_jobs)(
-                delayed(tuning_estimator)(
+                delayed(_tuning_estimator)(
                     self.shared_response,
                     self.denoised_signal[i],
                     latent_dim=self.latent_dim,
@@ -651,13 +652,15 @@ class IndividualizedNeuralTuning(Alignment):
             print("Predict : Computing stimulus matrix...")
 
         if self.decomp_method is None:
-            S = stimulus_estimator(full_signal, self.n_t, self.n_s, self.latent_dim)
+            stimulus_ = _stimulus_estimator(
+                full_signal, self.n_t, self.n_s, self.latent_dim
+            )
 
         if verbose:
-            print("Predict : stimulus matrix shape: ", S.shape)
+            print("Predict : stimulus matrix shape: ", stimulus_.shape)
 
         reconstructed_signal = [
-            reconstruct_signal(S, T_est) for T_est in self.tuning_data
+            _reconstruct_signal(stimulus_, T_est) for T_est in self.tuning_data
         ]
         return np.array(reconstructed_signal, dtype=np.float32)
 
@@ -678,7 +681,7 @@ class IndividualizedNeuralTuning(Alignment):
 # Computing decomposition
 
 
-def tuning_estimator(shared_response, target, latent_dim=None):
+def _tuning_estimator(shared_response, target, latent_dim=None):
     """
     Estimate the tuning weights for individualized neural tuning.
 
@@ -699,7 +702,7 @@ def tuning_estimator(shared_response, target, latent_dim=None):
     return np.linalg.pinv(shared_response).dot(target).astype(np.float32)
 
 
-def stimulus_estimator(full_signal, n_t, n_s, latent_dim=None):
+def _stimulus_estimator(full_signal, n_t, n_s, latent_dim=None):
     """
     Estimates the stimulus response using the given parameters.
 
@@ -723,7 +726,7 @@ def stimulus_estimator(full_signal, n_t, n_s, latent_dim=None):
     return stimulus
 
 
-def reconstruct_signal(shared_response, individual_tuning):
+def _reconstruct_signal(shared_response, individual_tuning):
     """
     Reconstructs the signal using the shared response and individual tuning.
 
