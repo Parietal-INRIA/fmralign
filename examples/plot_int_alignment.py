@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 """
-Template-based prediction.
+Hyperalignment-base prediction using Feilong Ma's IndividualNeuralTuning Model.
+See article : https://doi.org/10.1162/imag_a_00032
+
 ==========================
 
 In this tutorial, we show how to better predict new contrasts for a target
@@ -209,7 +211,7 @@ baseline_display.title("Group average correlation wt ground truth")
 display = plotting.plot_stat_map(
     template_score, display_mode="z", cut_coords=[-15, -5], vmax=1, cmap="hot"
 )
-display.title("Template-based prediction correlation wt ground truth")
+display.title("Hyperalignment-based prediction correlation wt ground truth")
 
 ###############################################################################
 # We observe that creating a template and aligning a new subject to it yields
