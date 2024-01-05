@@ -11,7 +11,6 @@ from scipy.spatial.distance import cdist
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.linear_model import RidgeCV
 from sklearn.metrics.pairwise import pairwise_distances
-import os
 from .hyperalignment.regions_alignment import RegionAlignment
 from .hyperalignment.linalg import safe_svd, svd_pca
 
@@ -484,8 +483,6 @@ class IndividualizedNeuralTuning(Alignment):
         decomp_method=None,
         n_components=None,
         alignment_method="searchlight",
-        id=None,
-        cache=False,
         n_jobs=1,
     ):
         """
@@ -528,20 +525,6 @@ class IndividualizedNeuralTuning(Alignment):
         self.tmpl_kind = template
         self.latent_dim = n_components
         self.n_jobs = n_jobs
-        self.cache = cache
-
-        if cache:
-            if id is None:
-                self.id = "default"
-            else:
-                self.id = id
-
-            path = os.path.join(os.getcwd(), f"cache/int/{self.id}")
-            # Check if cache folder exists
-            if not os.path.exists(path):
-                os.makedirs(path)
-
-            self.path = path
 
     #######################################################################################
     # Computing decomposition
@@ -659,27 +642,20 @@ class IndividualizedNeuralTuning(Alignment):
             self.distances = dists
             self.radius = radius
 
-        # check for cached data
-        try:
-            self.denoised_signal = np.load(self.path + "/train_data_denoised.npy")
-            if verbose:
-                print("Loaded denoised data from cache")
-
-        except:  # noqa: E722
-            denoiser = RegionAlignment(
-                alignment_method=self.alignment_method,
-                n_jobs=self.n_jobs,
-                verbose=verbose,
-                path=self.path,
-            )
-            self.denoised_signal = denoiser.fit_transform(
-                X_train_,
-                regions=self.regions,
-                dists=dists,
-                radius=radius,
-            )
-            # Clear memory of the SearchlightAlignment object
-            denoiser = None
+        denoiser = RegionAlignment(
+            alignment_method=self.alignment_method,
+            n_jobs=self.n_jobs,
+            verbose=verbose,
+            path=self.path,
+        )
+        self.denoised_signal = denoiser.fit_transform(
+            X_train_,
+            regions=self.regions,
+            dists=dists,
+            radius=radius,
+        )
+        # Clear memory of the SearchlightAlignment object
+        denoiser = None
 
         # Stimulus matrix computation
         if self.decomp_method is None:
@@ -731,15 +707,3 @@ class IndividualizedNeuralTuning(Alignment):
             self._reconstruct_signal(stimulus_, T_est) for T_est in self.tuning_data
         ]
         return np.array(reconstructed_signal, dtype=np.float32)
-
-    def clean_cache(self, id):
-        """
-        Removes the cache file associated with the given ID.
-
-        Args:
-            id (int): The ID of the cache file to be removed.
-        """
-        try:
-            os.remove("cache")
-        except:  # noqa: E722
-            print("No cache to remove")

@@ -5,7 +5,6 @@ from .regions import (
     piece_ridge,
     searchlight_weights,
 )
-import os
 from joblib import Parallel, delayed
 
 
@@ -34,7 +33,6 @@ class RegionAlignment(BaseEstimator, TransformerMixin):
         alignment_method="searchlight_ridge",
         template_kind="searchlight_pca",
         verbose=True,
-        path="cache/int/",
         cache=True,
         n_jobs=-1,
     ):
@@ -51,13 +49,6 @@ class RegionAlignment(BaseEstimator, TransformerMixin):
         self.distances = None
         self.radius = None
         self.weights = None
-        self.path = path
-        self.cache = (path is not None) and (cache)
-
-        if self.cache:
-            # Check if cache folder exists
-            if not os.path.exists(self.path):
-                os.makedirs(self.path)
 
     def compute_linear_transformation(self, x_i, template, i: int = 0, save=True):
         """Compute the linear transformation W_i for a given subject.
@@ -75,28 +66,14 @@ class RegionAlignment(BaseEstimator, TransformerMixin):
         Xhat : ndarray of shape (n_samples, n_voxels)
             The denoised estimation signal for each subject.
         """
-        try:
-            W_p = np.load(self.path + (f"/train_data_W_{i}.npy"))
-            if self.verbose:
-                print(f"Loaded W_{i} from cache")
-            x_hat = template.dot(W_p)
-            del W_p
-            return x_hat
 
-        except:  # noqa E722
-            if self.verbose:
-                print(f"No cache found, computing W_{i}")
-
-            x_hat = piece_ridge(
-                X=x_i,
-                Y=template,
-                regions=self.regions,
-                weights=self.weights,
-                verbose=self.verbose,
-            )
-
-            if self.cache:
-                np.save(self.path + (f"/train_data_W_{i}.npy"), x_hat)
+        x_hat = piece_ridge(
+            X=x_i,
+            Y=template,
+            regions=self.regions,
+            weights=self.weights,
+            verbose=self.verbose,
+        )
         return x_hat
 
     def fit_transform(
@@ -135,15 +112,6 @@ class RegionAlignment(BaseEstimator, TransformerMixin):
         if self.verbose:
             print(f"[{self.FUNC}] Shape of input data: ", X.shape)
 
-        try:
-            self.Xhat = np.load(self.path + "/train_data_denoised.npy")
-            if self.verbose:
-                print(f"[{self.FUNC}] Loaded denoised data from cache")
-            return self.Xhat
-        except:  # noqa E722
-            if self.verbose:
-                print(f"[{self.FUNC}] No cache found, computing denoised data")
-
         self.n_s, self.n_t, self.n_v = X.shape
         self.regions = regions
         self.FUNC = "ParcelAlignment"
@@ -157,56 +125,23 @@ class RegionAlignment(BaseEstimator, TransformerMixin):
         if self.verbose:
             print(f"[{self.FUNC}]Computing global template M ...")
 
-        try:
-            sl_template = np.load(self.path + ("/train_data_template.npy"))
-            if self.verbose:
-                print("Loaded template from cache")
-        except:  # noqa E722
-            if self.verbose:
-                print(f"[{self.FUNC}] No cache found, computing template")
-            if dists is None or radius is None:
-                self.weights = None
-            else:
-                self.weights = searchlight_weights(
-                    searchlights=regions, dists=dists, radius=radius
-                )
-            sl_template = template(
-                X,
-                regions=regions,
-                n_jobs=self.n_jobs,
-                template_kind=self.template_kind,
-                verbose=self.verbose,
-                weights=self.weights,
+        if dists is None or radius is None:
+            self.weights = None
+        else:
+            self.weights = searchlight_weights(
+                searchlights=regions, dists=dists, radius=radius
             )
-
-        if self.cache:
-            np.save(self.path + ("/train_data_template.npy"), sl_template)
-            if self.verbose:
-                print(f"[{self.FUNC}] Saved template to cache")
+        sl_template = template(
+            X,
+            regions=regions,
+            n_jobs=self.n_jobs,
+            template_kind=self.template_kind,
+            verbose=self.verbose,
+            weights=self.weights,
+        )
 
         self.Xhat = Parallel(n_jobs=self.n_jobs)(
             delayed(self.compute_linear_transformation)(X[i], sl_template, i)
             for i in range(self.n_s)
         )
-
-        if id is None:
-            id = np.random.randint(0, 1000000)
-
-        if self.cache:
-            np.save(self.path + ("/train_data_denoised.npy"), self.Xhat)
-
         return np.array(self.Xhat)
-
-    def get_linear_transformations(self):
-        """Return the linear transformations W_1, ... W_p for each subject.
-        ----------
-        Returns
-        -------
-        W : list of ndarray of shape (n_voxels, n_voxels)
-            The linear transformations W_1, ... W_p for each subject.
-        """
-        return np.array(self.W)
-
-    def get_denoised_estimation(self):
-        """Return the denoised estimations B_1, ... B_p for each subject."""
-        return self.Xhat
