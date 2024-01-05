@@ -30,13 +30,20 @@ class IndividualizedNeuralTuning(BaseINT):
 
         Parameters:
         -----------
-
-        - tmpl_kind (str): The type of template used for alignment. Default is "pca".
-        - decomp_method (str): The decomposition method used for template construction. Default is None.
-        - alignment_method (str): The alignment method used. Default is "searchlight".
-        - n_pieces (int): The number of pieces to divide the data into if using parcelation. Default is 150.
-        - radius (int): The radius of the searchlight sphere in millimeters. Default is 20.
-        - latent_dim (int): The number of latent dimensions to use. Default is None.
+        - tmpl_kind (str):
+            The type of template used for alignment. Default is "pca".
+        - decomp_method (str):
+            The decomposition method used for template construction. Default is None.
+        - alignment_method (str) in ["searchlight", "parcellation"]:
+            The alignment method used. Default is "searchlight".
+        - n_pieces (int): The number of pieces to divide the data into if using parcellation. Default is 150.
+        - radius (int):
+            The radius of the searchlight sphere in millimeters.
+            Only used if alignment_method is "searchlight".
+            Default is 20.
+        - n_components (int):
+            The number of latent dimensions to use. If None, all the components are used.
+            Default is None.
         - n_jobs (int): The number of parallel jobs to run. Default is 1.
         """
         super().__init__(

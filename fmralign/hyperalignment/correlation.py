@@ -201,10 +201,14 @@ def thread_compute_correlation(X, Y, i, j):
     Compute the correlation between two time series X_i and Y_i.
 
     Parameters:
-       - X (ndarray): Array of shape (n_samples, n_features) representing the first time series.
-       - Y (ndarray): Array of shape (n_samples, n_features) representing the second time series.
-       - i (int): Index of the first time series.
-       - j (int): Index of the second time series.
+    - X (ndarray):
+        ndrray of shape (n_samples, n_features) representing the first time series.
+    - Y (ndarray):
+        ndrray of shape (n_samples, n_features) representing the second time series.
+    - i (int):
+        Index of the first time series.
+    - j (int):
+        Index of the second time series.
 
     Returns:
     diff_TR_corr (ndarray): Array of shape (n_samples * (n_samples - 1),) containing the correlations between different time points.

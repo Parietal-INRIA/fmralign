@@ -28,7 +28,7 @@ class PiecewiseAlignment(BaseEstimator, TransformerMixin):
         alignment_method="searchlight_ridge",
         template_kind="searchlight_pca",
         verbose=True,
-        n_jobs=-1,
+        n_jobs=1,
     ):
         """
         Parameters
@@ -92,8 +92,8 @@ class PiecewiseAlignment(BaseEstimator, TransformerMixin):
         weights=None,
         id=None,
     ):
-        """From brain imgs compute the INT model (M, Ws, S)
-          with the given parameters)
+        """From given fmri data, compute the global template and the linear transformation.
+        This provides denoised signal estimations using template alignment.
 
         Parameters
         ----------
