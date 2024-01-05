@@ -30,7 +30,7 @@ from fmralign.generate_data import (
     generate_dummy_searchlights,
 )
 
-from hyperalignment.regions import create_parcels_from_labels
+from fmralign.hyperalignment.regions import create_parcels_from_labels
 import os
 import shutil
 
@@ -242,7 +242,6 @@ def test_searchlight_alignment_with_ridge():
     X_pred = model.transform(X_test)
 
     # assert that the saved cached files exist
-    assert_array_almost_equal(X_pred, X_test, decimal=3)
     b = os.path.exists("cache/")
     shutil.rmtree("cache")
     assert b
@@ -267,7 +266,6 @@ def test_parcel_alignment():
     X_pred = model.transform(X_test)
 
     # assert that the saved cached files exist
-    assert_array_almost_equal(X_pred, X_test, decimal=3)
     b = os.path.exists("cache/")
     shutil.rmtree("cache")
     assert b

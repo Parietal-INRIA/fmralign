@@ -1,15 +1,23 @@
 """
 A wrapper for the IndividualTuningModel class to be used in fmralign (taking Nifti1 images as input).
 """
-from .model import INTEstimator
-from .regions import compute_searchlights
+from fmralign.alignment_methods import IndividualizedNeuralTuning as BaseINT
+from .regions import compute_searchlights, compute_parcels
 from nilearn.maskers import NiftiMasker
 from nibabel import Nifti1Image
 import numpy as np
 
 
-class IndividualizedNeuralTuning(INTEstimator):
-    def __init__(self, method="searchlight", n_jobs=-1):
+class IndividualizedNeuralTuning(BaseINT):
+    def __init__(
+        self,
+        tmpl_kind="pca",
+        decomp_method=None,
+        alignment_method="searchlight",
+        n_pieces=150,
+        radius=20,
+        n_jobs=1,
+    ):
         """
         A wrapper for the IndividualTuningModel class to be used in fmralign (taking Nifti1 images as input).
         Method of alignment based on the Individualized Neural Tuning model, by Feilong Ma et al. (2023).
@@ -19,22 +27,31 @@ class IndividualizedNeuralTuning(INTEstimator):
         Parameters:
         --------
         - method (str): The method used for hyperalignment. Can be either "searchlight" or "parcellation". Default is "searchlight".
-        - n_jobs (int): The number of parallel jobs to run. Default is -1, which uses all available processors.
+        - n_jobs (int): The number of parallel jobs to run. Default is 1.
+        - n_pieces (int): The number of pieces to divide the brain into. Default is 150.
+        - radius (int): The radius of the searchlight in millimeters. Default is 20.
 
         Returns:
         --------
         None
         """
-        super().__init__(n_jobs=n_jobs)
+        super().__init__(
+            tmpl_kind=tmpl_kind,
+            decomp_method=decomp_method,
+            alignment_method=alignment_method,
+            n_jobs=n_jobs,
+        )
+        self.n_pieces = n_pieces
+        self.radius = radius
         self.mask_img = None
         self.masker = None
-        self.method = method
 
     def fit(
         self,
         imgs,
         masker: NiftiMasker = None,
         mask_img: Nifti1Image = None,
+        tuning: bool = True,
         y=None,
         verbose=0,
     ):
@@ -45,12 +62,14 @@ class IndividualizedNeuralTuning(INTEstimator):
 
         Parameters
         ----------
-        imgs : list of Nifti1Image or np.ndarray
+        imgs : list of Nifti1Image
             The images to be fit.
         masker : NiftiMasker
             The masker to be used to transform the images into the common space.
         mask_img : Nifti1Image
             The mask to be used to transform the images into the common space.
+        tuning : bool
+            Whether to perform tuning or not.
         y : None
             Not used.
         verbose : int
@@ -62,21 +81,31 @@ class IndividualizedNeuralTuning(INTEstimator):
         self.mask_img = mask_img
         self.masker = masker
 
-        if self.method == "searchlight":
-            data, searchlights, dists = compute_searchlights(
+        X = np.array([masker.transform(img) for img in imgs])
+
+        if self.alignment_method == "searchlight":
+            _, searchlights, dists = compute_searchlights(
                 niimg=imgs[0],
                 mask_img=mask_img,
             )
+            super().fit(
+                X,
+                searchlights,
+                dists,
+                radius=self.radius,
+                tuning=tuning,
+                verbose=verbose,
+            )
 
-        elif self.method == "parcellation":
-            raise NotImplementedError("Parcellation method not implemented yet.")
+        elif self.alignment_method == "parcellation":
+            parcels = compute_parcels(
+                niimg=imgs[0],
+                mask=masker.mask_img,
+                n_parcels=self.n_pieces,
+                n_jobs=self.n_jobs,
+            )
+            super().fit(X, parcels=parcels, tuning=tuning, verbose=verbose)
 
-        if isinstance(imgs, np.ndarray):
-            X = imgs
-        else:
-            X = data
-
-        super().fit(X, searchlights, dists, verbose=verbose)
         return self
 
     def transform(self, imgs, y=None, verbose=0):

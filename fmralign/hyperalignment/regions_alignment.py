@@ -59,9 +59,7 @@ class RegionAlignment(BaseEstimator, TransformerMixin):
             if not os.path.exists(self.path):
                 os.makedirs(self.path)
 
-    def compute_linear_transformation(
-        self, x_i, template, i: int = 0, save=True
-    ):
+    def compute_linear_transformation(self, x_i, template, i: int = 0, save=True):
         """Compute the linear transformation W_i for a given subject.
         ----------
         Parameters

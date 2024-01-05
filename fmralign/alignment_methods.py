@@ -478,7 +478,7 @@ class IndividualizedNeuralTuning(Alignment):
         latent_dim=None,
         alignment_method="searchlight",
         id=None,
-        cache=True,
+        cache=False,
         n_jobs=1,
     ):
         """
@@ -506,7 +506,7 @@ class IndividualizedNeuralTuning(Alignment):
         self.labels = None
         self.alphas = None
         self.alignment_method = alignment_method
-        if alignment_method == "parcel":
+        if alignment_method == "parcelation":
             self.parcels = None
 
         elif (
@@ -546,6 +546,7 @@ class IndividualizedNeuralTuning(Alignment):
         parcels=None,
         dists=None,
         radius=20,
+        tuning=True,
         verbose=True,
     ):
         """
@@ -564,6 +565,8 @@ class IndividualizedNeuralTuning(Alignment):
             The distances of vertices to the center of their searchlight, of shape (n_searchlights, n_vertices_sl)
         - radius (int, optional):
             The radius of the searchlight sphere, in milimeters. Defaults to 20.
+        - tuning (bool, optional):
+            Whether to compute the tuning weights. Defaults to True.
         - verbose (bool, optional):
             Whether to print progress information. Defaults to True.
         - id (str, optional):
@@ -618,15 +621,15 @@ class IndividualizedNeuralTuning(Alignment):
             self.shared_response = _stimulus_estimator(
                 full_signal, self.n_t, self.n_s, self.latent_dim
             )
-
-            self.tuning_data = Parallel(n_jobs=self.n_jobs)(
-                delayed(_tuning_estimator)(
-                    self.shared_response,
-                    self.denoised_signal[i],
-                    latent_dim=self.latent_dim,
+            if tuning:
+                self.tuning_data = Parallel(n_jobs=self.n_jobs)(
+                    delayed(_tuning_estimator)(
+                        self.shared_response,
+                        self.denoised_signal[i],
+                        latent_dim=self.latent_dim,
+                    )
+                    for i in range(self.n_s)
                 )
-                for i in range(self.n_s)
-            )
 
         return self
 

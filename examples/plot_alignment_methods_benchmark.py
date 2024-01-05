@@ -48,9 +48,7 @@ atlas = load_img(atlas_yeo_2011.thick_7)
 # Select visual cortex, create a mask and resample it to the right resolution
 
 mask_visual = new_img_like(atlas, atlas.get_fdata() == 1)
-resampled_mask_visual = resample_to_img(
-    mask_visual, mask, interpolation="nearest"
-)
+resampled_mask_visual = resample_to_img(mask_visual, mask, interpolation="nearest")
 
 # Plot the mask we will use
 plotting.plot_roi(
@@ -131,7 +129,13 @@ print(f"We will cluster them in {n_pieces} regions")
 from fmralign.metrics import score_voxelwise
 from fmralign.pairwise_alignment import PairwiseAlignment
 
-methods = ["identity", "scaled_orthogonal", "ridge_cv", "optimal_transport"]
+methods = [
+    "identity",
+    "scaled_orthogonal",
+    "ridge_cv",
+    "optimal_transport",
+    "individualized_neural_tuning",
+]
 
 for method in methods:
     alignment_estimator = PairwiseAlignment(

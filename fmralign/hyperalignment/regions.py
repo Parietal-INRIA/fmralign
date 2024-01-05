@@ -12,7 +12,7 @@ import warnings
 from sklearn import neighbors
 from scipy.spatial import distance_matrix
 from nilearn._utils.niimg_conversions import (
-    _safe_get_data,
+    safe_get_data,
 )
 from tqdm import tqdm
 from .linalg import procrustes
@@ -66,7 +66,9 @@ def compute_parcels(
         print("[Loading/Parcel] : Parcellating...")
 
     if isinstance(mask, Nifti1Image):
-        mask = NiftiMasker(mask_img=mask, standardize=True)
+        mask = NiftiMasker(
+            mask_img=mask, standardize=True, smoothing_fwhm=smoothing_fwhm
+        )
     # Parcellation
     indexes = [1]
     labels = _make_parcellation(
@@ -150,21 +152,21 @@ def _apply_mask_and_get_affinity(
             target_shape=niimg.shape[:3],
             interpolation="nearest",
         )
-        mask, _ = masking._load_mask_img(mask_img)
+        mask, _ = masking.load_mask_img(mask_img)
         mask_coords = list(zip(*np.where(mask != 0)))
 
-        X = masking._apply_mask_fmri(niimg, mask_img)
+        X = masking.apply_mask_fmri(niimg, mask_img)
 
     elif niimg is not None:
         affine = niimg.affine
-        if np.isnan(np.sum(_safe_get_data(niimg))):
+        if np.isnan(np.sum(safe_get_data(niimg))):
             warnings.warn(
                 "The imgs you have fed into fit_transform() contains NaN "
                 "values which will be converted to zeroes."
             )
-            X = _safe_get_data(niimg, True).reshape([-1, niimg.shape[3]]).T
+            X = safe_get_data(niimg, True).reshape([-1, niimg.shape[3]]).T
         else:
-            X = _safe_get_data(niimg).reshape([-1, niimg.shape[3]]).T
+            X = safe_get_data(niimg).reshape([-1, niimg.shape[3]]).T
 
         mask_coords = list(np.ndindex(niimg.shape[:3]))
 
@@ -290,7 +292,7 @@ def compute_searchlights(
         process_mask_img = mask_img
 
     # Compute world coordinates of the seeds
-    process_mask, process_mask_affine = masking._load_mask_img(process_mask_img)
+    process_mask, process_mask_affine = masking.load_mask_img(process_mask_img)
     process_mask_coords = np.where(process_mask != 0)
     process_mask_coords = coord_transform(
         process_mask_coords[0],
