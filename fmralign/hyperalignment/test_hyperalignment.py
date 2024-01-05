@@ -27,8 +27,8 @@ def test_int_fit_predict():
     dists = [np.ones((300,))]
 
     # Test INT on the two parts of the data (ie different runs of the experiment)
-    int1 = INT(latent_dim=6)
-    int2 = INT(latent_dim=6)
+    int1 = INT(n_components=6)
+    int2 = INT(n_components=6)
     int1.fit(
         X_train=X_train, searchlights=searchlights, dists=dists
     )  # S is provided if we cheat and know the ground truth
@@ -88,8 +88,8 @@ def test_int_with_searchlight():
     )
 
     # Test INT on the two parts of the data (ie different runs of the experiment)
-    int1 = INT(latent_dim=6)
-    int2 = INT(latent_dim=6)
+    int1 = INT(n_components=6)
+    int2 = INT(n_components=6)
     int1.fit(X_train=X_train, searchlights=searchlights, dists=dists, radius=5)
     int2.fit(X_test, searchlights=searchlights, dists=dists, radius=5)
     X_pred = int1.transform(X_test)

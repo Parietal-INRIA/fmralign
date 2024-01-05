@@ -471,28 +471,32 @@ class OptimalTransportAlignment(Alignment):
 
 
 class IndividualizedNeuralTuning(Alignment):
+    """
+    Method of alignment based on the Individualized Neural Tuning model, by Feilong Ma et al. (2023).
+    It works on 4D fMRI data, and is based on the assumption that the neural response to a stimulus is shared across subjects.
+    It uses searchlight/parcelation alignment to denoise the data, and then computes the stimulus response matrix.
+    See article : https://doi.org/10.1162/imag_a_00032
+    """
+
     def __init__(
         self,
-        tmpl_kind="pca",
+        template="pca",
         decomp_method=None,
-        latent_dim=None,
+        n_components=None,
         alignment_method="searchlight",
         id=None,
         cache=False,
         n_jobs=1,
     ):
         """
-        Method of alignment based on the Individualized Neural Tuning model, by Feilong Ma et al. (2023).
-        It works on 4D fMRI data, and is based on the assumption that the neural response to a stimulus is shared across subjects.
-        It uses searchlight/parcelation alignment to denoise the data, and then computes the stimulus response matrix.
-        See article : https://doi.org/10.1162/imag_a_00032
-
+        Initialize the IndividualizedNeuralTuning object.
         Parameters:
         --------
 
-        - tmpl_kind (str): The type of template to use for alignment. Default is "pca".
+        - template (str): The type of template to use for alignment. Default is "pca".
         - decomp_method (str): The decomposition method to use. Default is None.
-        - latent_dim (int): The number of latent dimensions to use in the shared stimulus information matrix. Default is None.
+        - alignment_method (str): The alignment method to use. Can be either "searchlight" or "parcelation", Default is "searchlight".
+        - n_components (int): The number of latent dimensions to use in the shared stimulus information matrix. Default is None.
         - n_jobs (int): The number of parallel jobs to run. Default is -1.
 
         Returns:
@@ -521,8 +525,8 @@ class IndividualizedNeuralTuning(Alignment):
         self.tuning_data = []
         self.denoised_signal = []
         self.decomp_method = decomp_method
-        self.tmpl_kind = tmpl_kind
-        self.latent_dim = latent_dim
+        self.tmpl_kind = template
+        self.latent_dim = n_components
         self.n_jobs = n_jobs
         self.cache = cache
 
@@ -538,6 +542,68 @@ class IndividualizedNeuralTuning(Alignment):
                 os.makedirs(path)
 
             self.path = path
+
+    #######################################################################################
+    # Computing decomposition
+
+    @staticmethod
+    def _tuning_estimator(shared_response, target):
+        """
+        Estimate the tuning weights for individualized neural tuning.
+
+        Parameters:
+        --------
+            - shared_response (array-like):
+                The shared response matrix.
+            - target (array-like):
+                The target matrix.
+            - latent_dim (int, optional):
+                The number of latent dimensions. Defaults to None.
+
+        Returns:
+        --------
+            array-like: The estimated tuning weights.
+
+        """
+        return np.linalg.pinv(shared_response).dot(target).astype(np.float32)
+
+    @staticmethod
+    def _stimulus_estimator(full_signal, n_t, n_s, latent_dim=None):
+        """
+        Estimates the stimulus response using the given parameters.
+
+        Args:
+            full_signal (np.ndarray): The full signal data.
+            n_t (int): The number of time points.
+            n_s (int): The number of stimuli.
+            latent_dim (int, optional): The number of latent dimensions. Defaults to None.
+
+        Returns:
+            stimulus (np.ndarray): The stimulus response of shape (n_t, latent_dim) or (n_t, n_t).
+        """
+        if latent_dim is not None and latent_dim < n_t:
+            U = svd_pca(full_signal)
+            U = U[:, :latent_dim]
+        else:
+            U, _, _ = safe_svd(full_signal)
+
+        stimulus = np.sqrt(n_s) * U
+        stimulus = stimulus.astype(np.float32)
+        return stimulus
+
+    @staticmethod
+    def _reconstruct_signal(shared_response, individual_tuning):
+        """
+        Reconstructs the signal using the shared response and individual tuning.
+
+        Args:
+            shared_response (numpy.ndarray): The shared response of shape (n_t, n_t) or (n_t, latent_dim).
+            individual_tuning (numpy.ndarray): The individual tuning of shape (latent_dim, n_v) or (n_t, n_v).
+
+        Returns:
+            numpy.ndarray: The reconstructed signal of shape (n_t, n_v) (same shape as the original signal)
+        """
+        return (shared_response @ individual_tuning).astype(np.float32)
 
     def fit(
         self,
@@ -618,15 +684,14 @@ class IndividualizedNeuralTuning(Alignment):
         # Stimulus matrix computation
         if self.decomp_method is None:
             full_signal = np.concatenate(self.denoised_signal, axis=1)
-            self.shared_response = _stimulus_estimator(
+            self.shared_response = self._stimulus_estimator(
                 full_signal, self.n_t, self.n_s, self.latent_dim
             )
             if tuning:
                 self.tuning_data = Parallel(n_jobs=self.n_jobs)(
-                    delayed(_tuning_estimator)(
+                    delayed(self._tuning_estimator)(
                         self.shared_response,
                         self.denoised_signal[i],
-                        latent_dim=self.latent_dim,
                     )
                     for i in range(self.n_s)
                 )
@@ -655,7 +720,7 @@ class IndividualizedNeuralTuning(Alignment):
             print("Predict : Computing stimulus matrix...")
 
         if self.decomp_method is None:
-            stimulus_ = _stimulus_estimator(
+            stimulus_ = self._stimulus_estimator(
                 full_signal, self.n_t, self.n_s, self.latent_dim
             )
 
@@ -663,7 +728,7 @@ class IndividualizedNeuralTuning(Alignment):
             print("Predict : stimulus matrix shape: ", stimulus_.shape)
 
         reconstructed_signal = [
-            _reconstruct_signal(stimulus_, T_est) for T_est in self.tuning_data
+            self._reconstruct_signal(stimulus_, T_est) for T_est in self.tuning_data
         ]
         return np.array(reconstructed_signal, dtype=np.float32)
 
@@ -678,66 +743,3 @@ class IndividualizedNeuralTuning(Alignment):
             os.remove("cache")
         except:  # noqa: E722
             print("No cache to remove")
-
-
-#######################################################################################
-# Computing decomposition
-
-
-def _tuning_estimator(shared_response, target, latent_dim=None):
-    """
-    Estimate the tuning weights for individualized neural tuning.
-
-    Parameters:
-    --------
-        - shared_response (array-like):
-            The shared response matrix.
-        - target (array-like):
-            The target matrix.
-        - latent_dim (int, optional):
-            The number of latent dimensions. Defaults to None.
-
-    Returns:
-    --------
-        array-like: The estimated tuning weights.
-
-    """
-    return np.linalg.pinv(shared_response).dot(target).astype(np.float32)
-
-
-def _stimulus_estimator(full_signal, n_t, n_s, latent_dim=None):
-    """
-    Estimates the stimulus response using the given parameters.
-
-    Args:
-        full_signal (np.ndarray): The full signal data.
-        n_t (int): The number of time points.
-        n_s (int): The number of stimuli.
-        latent_dim (int, optional): The number of latent dimensions. Defaults to None.
-
-    Returns:
-        stimulus (np.ndarray): The stimulus response of shape (n_t, latent_dim) or (n_t, n_t).
-    """
-    if latent_dim is not None and latent_dim < n_t:
-        U = svd_pca(full_signal)
-        U = U[:, :latent_dim]
-    else:
-        U, _, _ = safe_svd(full_signal)
-
-    stimulus = np.sqrt(n_s) * U
-    stimulus = stimulus.astype(np.float32)
-    return stimulus
-
-
-def _reconstruct_signal(shared_response, individual_tuning):
-    """
-    Reconstructs the signal using the shared response and individual tuning.
-
-    Args:
-        shared_response (numpy.ndarray): The shared response of shape (n_t, n_t) or (n_t, latent_dim).
-        individual_tuning (numpy.ndarray): The individual tuning of shape (latent_dim, n_v) or (n_t, n_v).
-
-    Returns:
-        numpy.ndarray: The reconstructed signal of shape (n_t, n_v) (same shape as the original signal)
-    """
-    return (shared_response @ individual_tuning).astype(np.float32)

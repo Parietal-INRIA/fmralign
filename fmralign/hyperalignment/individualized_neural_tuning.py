@@ -1,6 +1,3 @@
-"""
-A wrapper for the IndividualTuningModel class to be used in fmralign (taking Nifti1 images as input).
-"""
 from fmralign.alignment_methods import IndividualizedNeuralTuning as BaseINT
 from .regions import compute_searchlights, compute_parcels
 from nilearn.maskers import NiftiMasker
@@ -9,40 +6,48 @@ import numpy as np
 
 
 class IndividualizedNeuralTuning(BaseINT):
+    """
+    Wrapper for the IndividualTuningModel class to be used in fmralign with Niimg objects.
+    Preprocessing and searchlight/parcellation alignment are done without any user input.
+
+    Method of alignment based on the Individualized Neural Tuning model, by Feilong Ma et al. (2023).
+    It uses searchlight/parcelation alignment to denoise the data, and then computes the stimulus response matrix.
+    See article : https://doi.org/10.1162/imag_a_00032
+    """
+
     def __init__(
         self,
-        tmpl_kind="pca",
+        template="pca",
         decomp_method=None,
         alignment_method="searchlight",
         n_pieces=150,
-        radius=20,
+        searchlight_radius=20,
+        n_components=None,
         n_jobs=1,
     ):
         """
-        A wrapper for the IndividualTuningModel class to be used in fmralign (taking Nifti1 images as input).
-        Method of alignment based on the Individualized Neural Tuning model, by Feilong Ma et al. (2023).
-        It uses searchlight/parcelation alignment to denoise the data, and then computes the stimulus response matrix.
-        See article : https://doi.org/10.1162/imag_a_00032
+        Initialize the IndividualizedNeuralTuning object.
 
         Parameters:
-        --------
-        - method (str): The method used for hyperalignment. Can be either "searchlight" or "parcellation". Default is "searchlight".
-        - n_jobs (int): The number of parallel jobs to run. Default is 1.
-        - n_pieces (int): The number of pieces to divide the brain into. Default is 150.
-        - radius (int): The radius of the searchlight in millimeters. Default is 20.
+        -----------
 
-        Returns:
-        --------
-        None
+        - tmpl_kind (str): The type of template used for alignment. Default is "pca".
+        - decomp_method (str): The decomposition method used for template construction. Default is None.
+        - alignment_method (str): The alignment method used. Default is "searchlight".
+        - n_pieces (int): The number of pieces to divide the data into if using parcelation. Default is 150.
+        - radius (int): The radius of the searchlight sphere in millimeters. Default is 20.
+        - latent_dim (int): The number of latent dimensions to use. Default is None.
+        - n_jobs (int): The number of parallel jobs to run. Default is 1.
         """
         super().__init__(
-            tmpl_kind=tmpl_kind,
+            template=template,
             decomp_method=decomp_method,
+            n_components=n_components,
             alignment_method=alignment_method,
             n_jobs=n_jobs,
         )
         self.n_pieces = n_pieces
-        self.radius = radius
+        self.radius = searchlight_radius
         self.mask_img = None
         self.masker = None
 
