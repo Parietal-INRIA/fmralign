@@ -236,7 +236,7 @@ def test_searchlight_alignment_with_ridge():
     )
 
     model = INT(n_jobs=5)
-    model.fit(X_train, searchlights, dists, radius=radius)
+    model.fit(X_train, searchlights=searchlights, dists=dists, radius=radius)
     X_pred = model.transform(X_test)
     assert X_pred.shape == X_test.shape
 

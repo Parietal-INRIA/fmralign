@@ -643,10 +643,7 @@ class IndividualizedNeuralTuning(Alignment):
             self.radius = radius
 
         denoiser = PiecewiseAlignment(
-            alignment_method=self.alignment_method,
-            n_jobs=self.n_jobs,
-            verbose=verbose,
-            path=self.path,
+            alignment_method=self.alignment_method, n_jobs=self.n_jobs, verbose=verbose
         )
         self.denoised_signal = denoiser.fit_transform(
             X_train_,
