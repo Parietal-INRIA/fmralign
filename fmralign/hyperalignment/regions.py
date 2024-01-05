@@ -1,4 +1,8 @@
-"""Utilities for computing searchlights. Adapted from nilearn.\n
+"""Utilities for computing searchlights. Adapted from ```nilearn```.\n
+See the ```nilearn``` documentation for more details:
+- https://nilearn.github.io/modules/generated/nilearn.regions.Parcellations.html
+- https://nilearn.github.io/dev/modules/generated/nilearn.decoding.SearchLight.html
+
 Author: Denis Fouchard, INRIA Saclay, MIND, 2023.
 """
 

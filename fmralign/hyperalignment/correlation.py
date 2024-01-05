@@ -1,3 +1,6 @@
+"""Some tools to compute correlation matrices. Functions in this module are
+meant to be used as a test for the hyperalignment algorithm only."""
+
 import numpy as np
 from scipy.stats import spearmanr
 from sklearn.metrics import pairwise_distances

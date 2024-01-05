@@ -31,8 +31,6 @@ from fmralign.generate_data import (
 )
 
 from fmralign.hyperalignment.regions import create_parcels_from_labels
-import os
-import shutil
 
 
 def test_scaled_procrustes_algorithmic():
@@ -237,14 +235,9 @@ def test_searchlight_alignment_with_ridge():
         n_t=n_time_points, n_v=n_voxels, n_s=n_subjects
     )
 
-    model = INT(n_jobs=5, cache=True)
+    model = INT(n_jobs=5)
     model.fit(X_train, searchlights, dists, radius=radius)
     X_pred = model.transform(X_test)
-
-    # assert that the saved cached files exist
-    b = os.path.exists("cache/")
-    shutil.rmtree("cache")
-    assert b
     assert X_pred.shape == X_test.shape
 
 
@@ -261,17 +254,7 @@ def test_parcel_alignment():
         n_t=n_time_points, n_v=n_voxels, n_s=n_subjects
     )
 
-    model = INT(n_jobs=5, alignment_method="parcel", cache=True)
+    model = INT(n_jobs=5, alignment_method="parcel")
     model.fit(X_train, parcels=parcels)
     X_pred = model.transform(X_test)
-
-    # assert that the saved cached files exist
-    b = os.path.exists("cache/")
-    shutil.rmtree("cache")
-    assert b
     assert X_pred.shape == X_test.shape
-
-
-# Cleaning up the cache folder
-if os.path.exists("cache/"):
-    shutil.rmtree("cache")

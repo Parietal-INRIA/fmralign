@@ -1,3 +1,9 @@
+"""Piecewise alignment model. This model decomposes the data into regions (pieces).
+Those can either be searchlights or parcels (computed with standard parcellation algorithms).
+See the ```nilearn``` documentation for more details:
+- https://nilearn.github.io/modules/generated/nilearn.regions.Parcellations.html
+- https://nilearn.github.io/dev/modules/generated/nilearn.decoding.SearchLight.html
+"""
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 from .regions import (
@@ -8,24 +14,13 @@ from .regions import (
 from joblib import Parallel, delayed
 
 
-class RegionAlignment(BaseEstimator, TransformerMixin):
+class PiecewiseAlignment(BaseEstimator, TransformerMixin):
     """Searchlight alignment model. This model decomposes the data into a
     global template and a linear transformation for each subject.
-    The global template is computed using a searchlight approach.
+    The global template is computed using a searchlight/parcellation approach.
     The linear transformation is computed using a ridge regression.
     This step is enssential to the hyperalignment model, as it is
-    used as a denoiser for the data.
-    Parameters
-    ----------
-    alignment_method : str, default="ridge"
-        The alignment method to use. Can be "ridge" or "ensemble_ridge".
-    template_kind : str, default="pca"
-        The kind of template to use. Can be "pca" or "mean".
-    demean : bool, default=False
-        Whether to demean the data before alignment.
-    verbose : bool, default=True
-        Whether to display progress bar.
-    n_jobs : int, default=-1
+    used to remove noise from the raw data.
     """
 
     def __init__(
@@ -33,9 +28,21 @@ class RegionAlignment(BaseEstimator, TransformerMixin):
         alignment_method="searchlight_ridge",
         template_kind="searchlight_pca",
         verbose=True,
-        cache=True,
         n_jobs=-1,
     ):
+        """
+        Parameters
+        ----------
+        alignment_method : str, default="ridge"
+            The alignment method to use. Can be "ridge" or "ensemble_ridge".
+        template_kind : str, default="pca"
+            The kind of template to use. Can be "pca" or "mean".
+        demean : bool, default=False
+            Whether to demean the data before alignment.
+        verbose : bool, default=True
+            Whether to display progress bar.
+        n_jobs : int, default=-1
+        """
         self.W = []
         self.Xhat = []
         self.n_s = None
@@ -50,12 +57,12 @@ class RegionAlignment(BaseEstimator, TransformerMixin):
         self.radius = None
         self.weights = None
 
-    def compute_linear_transformation(self, x_i, template, i: int = 0, save=True):
-        """Compute the linear transformation W_i for a given subject.
-        ----------
+    def compute_linear_transformation(self, data, template, i: int = 0, save=True):
+        """Compute the linear transformation for a given subject provided the global template.
+
         Parameters
         ----------
-        x_i : ndarray of shape (n_samples, n_voxels)
+        data : ndarray of shape (n_samples, n_voxels)
             The brain images for one subject.
             Those are the B_1, ..., B_n in the paper.
         template : ndarray of shape (n_samples, n_voxels)
@@ -68,7 +75,7 @@ class RegionAlignment(BaseEstimator, TransformerMixin):
         """
 
         x_hat = piece_ridge(
-            X=x_i,
+            X=data,
             Y=template,
             regions=self.regions,
             weights=self.weights,

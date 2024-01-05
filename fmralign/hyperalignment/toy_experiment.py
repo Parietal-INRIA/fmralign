@@ -56,8 +56,8 @@ searchlights, dists = generate_dummy_searchlights(n_searchlights=12, n_v=n_v, ra
 
 #############################################################################
 # Test INT on the two parts of the data (ie different runs of the experiment)
-int1 = INT(n_components=latent_dim, decomp_method=decomposition_method, cache=False)
-int2 = INT(n_components=latent_dim, decomp_method=decomposition_method, cache=False)
+int1 = INT(n_components=latent_dim, decomp_method=decomposition_method)
+int2 = INT(n_components=latent_dim, decomp_method=decomposition_method)
 int_first_part = int1.fit(
     data_run_1,
     searchlights=searchlights,

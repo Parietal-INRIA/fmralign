@@ -11,7 +11,7 @@ from scipy.spatial.distance import cdist
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.linear_model import RidgeCV
 from sklearn.metrics.pairwise import pairwise_distances
-from .hyperalignment.regions_alignment import RegionAlignment
+from .hyperalignment.piecewise_alignment import PiecewiseAlignment
 from .hyperalignment.linalg import safe_svd, svd_pca
 
 import jax
@@ -642,7 +642,7 @@ class IndividualizedNeuralTuning(Alignment):
             self.distances = dists
             self.radius = radius
 
-        denoiser = RegionAlignment(
+        denoiser = PiecewiseAlignment(
             alignment_method=self.alignment_method,
             n_jobs=self.n_jobs,
             verbose=verbose,
