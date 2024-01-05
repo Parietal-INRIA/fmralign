@@ -237,7 +237,7 @@ def test_searchlight_alignment_with_ridge():
         n_t=n_time_points, n_v=n_voxels, n_s=n_subjects
     )
 
-    model = INT()
+    model = INT(n_jobs=5, cache=True)
     model.fit(X_train, searchlights, dists, radius=radius)
     X_pred = model.transform(X_test)
 
@@ -261,7 +261,7 @@ def test_parcel_alignment():
         n_t=n_time_points, n_v=n_voxels, n_s=n_subjects
     )
 
-    model = INT(n_jobs=-1, alignment_method="parcel")
+    model = INT(n_jobs=5, alignment_method="parcel", cache=True)
     model.fit(X_train, parcels=parcels)
     X_pred = model.transform(X_test)
 

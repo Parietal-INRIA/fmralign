@@ -77,6 +77,7 @@ target_train = df[df.subject == "sub-07"][df.acquisition == "ap"].path.values
 # We make a single 4D Niimg from our list of 3D filenames
 
 target_train = concat_imgs(target_train)
+target_train_data = masker.transform(target_train)
 target_test = df[df.subject == "sub-07"][df.acquisition == "pa"].path.values
 
 ###############################################################################
@@ -105,17 +106,30 @@ average_subject = masker.inverse_transform(average_img)
 #
 
 from nilearn.image import index_img
-
 from fmralign.alignment_methods import IndividualizedNeuralTuning
+from fmralign.hyperalignment.regions import compute_parcels, compute_searchlights
 
-from fmralign.hyperalignment.regions import compute_parcels
-
-parcels = compute_parcels(niimg=template_train[0], mask=masker, n_parcels=150, n_jobs=5)
 
 train_index = range(53)
-model = IndividualizedNeuralTuning(n_jobs=5, alignment_method="parcelation")
-model.fit(np.array(masked_imgs)[:, train_index, :], parcels=parcels, verbose=1)
-stimulus = model.shared_response
+model = IndividualizedNeuralTuning(n_jobs=10, alignment_method="parcelation")
+
+if False:  # Use Parcellation
+    parcels = compute_parcels(
+        niimg=template_train[0], mask=masker, n_parcels=1000, n_jobs=5
+    )
+    model.fit(np.array(masked_imgs)[:, train_index, :], parcels=parcels, verbose=False)
+else:
+    _, searchlights, dists = compute_searchlights(
+        niimg=template_train[0], mask_img=masker.mask_img, n_jobs=5
+    )
+    model.fit(
+        np.array(masked_imgs)[:, train_index, :],
+        searchlights=searchlights,
+        dists=dists,
+        verbose=False,
+    )
+
+train_stimulus = np.copy(model.shared_response)
 
 
 ###############################################################################
@@ -127,19 +141,27 @@ stimulus = model.shared_response
 # For each train subject and for the template, the AP contrasts are sorted from
 # 0, to 53, and then the PA contrasts from 53 to 106.
 #
-
-train_index = range(53)
 test_index = range(53, 106)
+if False:
+    model.fit(np.array(masked_imgs)[:, test_index, :], parcels=parcels, verbose=False)
+    test_stimulus = np.copy(model.shared_response)
+
+else:
+    model.fit(
+        np.array(masked_imgs)[:, test_index, :],
+        searchlights=searchlights,
+        dists=dists,
+        verbose=False,
+    )
+    test_stimulus = np.copy(model.shared_response)
+
 
 # We input the mapping image target_train in a list, we could have input more
 # than one subject for which we'd want to predict : [train_1, train_2 ...]
-target_train_array = np.array([masker.transform(target_train)[train_index]])
 
-prediction_from_template = model.fit(target_train_array, parcels=parcels, verbose=1)
-tuning_target = model.tuning_data
+tuning_target = np.linalg.pinv(train_stimulus[train_index, :]) @ target_train_data
 
-prediction_from_template = stimulus @ tuning_target[0]
-prediction_from_template = prediction_from_template[test_index, :]
+prediction_from_template = test_stimulus @ tuning_target
 prediction_from_template = [masker.inverse_transform(prediction_from_template)]
 
 # As a baseline prediction, let's just take the average of activations across subjects.
@@ -161,10 +183,14 @@ from fmralign.metrics import score_voxelwise
 # made from group average and from template with the real PA contrasts of sub-07
 
 average_score = masker.inverse_transform(
-    score_voxelwise(target_test, prediction_from_average, masker, loss="corr")
+    np.abs(score_voxelwise(target_test, prediction_from_average, masker, loss="corr"))
 )
+
+# I choose abs value in reference to the work we did with the INT
 template_score = masker.inverse_transform(
-    score_voxelwise(target_test, prediction_from_template[0], masker, loss="corr")
+    np.abs(
+        score_voxelwise(target_test, prediction_from_template[0], masker, loss="corr")
+    )
 )
 
 
@@ -177,11 +203,11 @@ template_score = masker.inverse_transform(
 from nilearn import plotting
 
 baseline_display = plotting.plot_stat_map(
-    average_score, display_mode="z", vmax=1, cut_coords=[-15, -5]
+    average_score, display_mode="z", vmax=1, cut_coords=[-15, -5], cmap="hot"
 )
 baseline_display.title("Group average correlation wt ground truth")
 display = plotting.plot_stat_map(
-    template_score, display_mode="z", cut_coords=[-15, -5], vmax=1
+    template_score, display_mode="z", cut_coords=[-15, -5], vmax=1, cmap="hot"
 )
 display.title("Template-based prediction correlation wt ground truth")
 
