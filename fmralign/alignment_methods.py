@@ -548,7 +548,7 @@ class IndividualizedNeuralTuning(Alignment):
             array-like: The estimated tuning weights.
 
         """
-        return np.linalg.pinv(shared_response).dot(target).astype(np.float32)
+        return np.linalg.pinv(shared_response) @ target
 
     @staticmethod
     def _stimulus_estimator(full_signal, n_t, n_s, latent_dim=None):

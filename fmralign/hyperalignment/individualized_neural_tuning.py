@@ -10,7 +10,7 @@ class IndividualizedNeuralTuning(BaseINT):
     Wrapper for the IndividualTuningModel class to be used in fmralign with Niimg objects.
     Preprocessing and searchlight/parcellation alignment are done without any user input.
 
-    Method of alignment based on the Individualized Neural Tuning model, by Feilong Ma et al. (2023).
+    Method of alignment based on the Individualized Neural Tuning model.
     It uses searchlight/parcelation alignment to denoise the data, and then computes the stimulus response matrix.
     See article : https://doi.org/10.1162/imag_a_00032
     """

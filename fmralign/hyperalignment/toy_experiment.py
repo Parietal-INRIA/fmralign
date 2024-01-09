@@ -23,12 +23,12 @@ sys.path.append(file_dir)
 
 
 n_s = 10
-n_t = 200
+n_t = 100
 n_v = 200
 S_std = 1
 T_std = 1
 SNR = 100
-latent_dim = 6  # if None, latent_dim = n_t
+latent_dim = None  # if None, latent_dim = n_t
 decomposition_method = None  # if None, SVD is used
 
 
@@ -50,9 +50,18 @@ decomposition_method = None  # if None, SVD is used
     latent_dim=latent_dim,
     SNR=SNR,
     seed=0,
+    generative_method="fastsrm",
 )
 
-searchlights, dists = generate_dummy_searchlights(n_searchlights=12, n_v=n_v, radius=5)
+SEARCHLIGHT = False
+
+if SEARCHLIGHT:
+    searchlights, dists = generate_dummy_searchlights(
+        n_searchlights=12, n_v=n_v, radius=5
+    )
+else:
+    searchlights = [np.arange(n_v)]
+    dists = [np.zeros((n_v,))]
 
 #############################################################################
 # Test INT on the two parts of the data (ie different runs of the experiment)
@@ -138,6 +147,9 @@ ax[0, 2].scatter(
 ax[0, 2].set_title("MDS of tunning matrices, dim=2")
 
 # Stimulus matrix
+
+print("stimulus_pred_run_1.shape", stimulus_pred_run_1.shape)
+print("stimulus_run_1.shape", stimulus_run_1.shape)
 
 correlation_stimulus_true_est_first_part = stimulus_correlation(
     stimulus_pred_run_1.T, stimulus_run_1.T

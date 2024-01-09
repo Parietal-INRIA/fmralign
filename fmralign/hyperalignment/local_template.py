@@ -1,7 +1,6 @@
 """ Local template computation functions. Those functions are part of the warp hyperalignment
 introducted by Feilong Ma et al. 2023. The functions are adapted from the original code and
 adapted for more general regionations approches.
-Authors: Feilong Ma (Haxby lab, Dartmouth College), Denis Fouchard (MIND, INRIA Saclay).
 """
 
 

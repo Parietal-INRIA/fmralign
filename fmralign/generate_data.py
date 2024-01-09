@@ -77,11 +77,18 @@ def generate_dummy_signal(
         S_train = np.sqrt(Sigma)[:, None] * rng.randn(n_t, latent_dim)
         S_test = np.sqrt(Sigma)[:, None] * rng.randn(n_t, latent_dim)
 
+    elif generative_method == "multiviewica":
+        S_train = np.random.laplace(size=(n_t, latent_dim))
+        S_test = np.random.laplace(size=(n_t, latent_dim))
+
+    else:
+        raise ValueError("Unknown generative method")
+
     # Generate indiivdual spatial components
     data_train, data_test = [], []
     Ts = []
     for _ in range(n_s):
-        if generative_method == "custom":
+        if generative_method == "custom" or generative_method == "multiviewica":
             W = T_mean + T_std * np.random.randn(latent_dim, n_v)
         else:
             W = projection(rng.randn(latent_dim, n_v))

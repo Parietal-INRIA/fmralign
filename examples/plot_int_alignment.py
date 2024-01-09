@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Hyperalignment-base prediction using Feilong Ma's IndividualNeuralTuning Model.
+Hyperalignment-base prediction using the IndividualNeuralTuning Model.
 See article : https://doi.org/10.1162/imag_a_00032
 
 ==========================
@@ -113,11 +113,13 @@ from fmralign.hyperalignment.regions import compute_parcels, compute_searchlight
 
 
 train_index = range(53)
-model = IndividualizedNeuralTuning(n_jobs=10, alignment_method="parcelation")
+model = IndividualizedNeuralTuning(
+    n_jobs=10, alignment_method="parcelation", n_components=20
+)
 
-if False:  # Use Parcellation
+if True:  # Use Parcellation
     parcels = compute_parcels(
-        niimg=template_train[0], mask=masker, n_parcels=1000, n_jobs=5
+        niimg=template_train[0], mask=masker, n_parcels=200, n_jobs=5
     )
     model.fit(np.array(masked_imgs)[:, train_index, :], parcels=parcels, verbose=False)
 else:
@@ -144,7 +146,7 @@ train_stimulus = np.copy(model.shared_response)
 # 0, to 53, and then the PA contrasts from 53 to 106.
 #
 test_index = range(53, 106)
-if False:
+if True:
     model.fit(np.array(masked_imgs)[:, test_index, :], parcels=parcels, verbose=False)
     test_stimulus = np.copy(model.shared_response)
 
@@ -185,14 +187,12 @@ from fmralign.metrics import score_voxelwise
 # made from group average and from template with the real PA contrasts of sub-07
 
 average_score = masker.inverse_transform(
-    np.abs(score_voxelwise(target_test, prediction_from_average, masker, loss="corr"))
+    score_voxelwise(target_test, prediction_from_average, masker, loss="corr")
 )
 
 # I choose abs value in reference to the work we did with the INT
 template_score = masker.inverse_transform(
-    np.abs(
-        score_voxelwise(target_test, prediction_from_template[0], masker, loss="corr")
-    )
+    score_voxelwise(target_test, prediction_from_template[0], masker, loss="corr")
 )
 
 
@@ -205,11 +205,11 @@ template_score = masker.inverse_transform(
 from nilearn import plotting
 
 baseline_display = plotting.plot_stat_map(
-    average_score, display_mode="z", vmax=1, cut_coords=[-15, -5], cmap="hot"
+    average_score, display_mode="z", vmax=1, cut_coords=[-15, -5]
 )
 baseline_display.title("Group average correlation wt ground truth")
 display = plotting.plot_stat_map(
-    template_score, display_mode="z", cut_coords=[-15, -5], vmax=1, cmap="hot"
+    template_score, display_mode="z", cut_coords=[-15, -5], vmax=1
 )
 display.title("Hyperalignment-based prediction correlation wt ground truth")
 

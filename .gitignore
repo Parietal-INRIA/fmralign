@@ -93,3 +93,4 @@ venv.bak/
 
 # Rope project settings
 .ropeproject
+examples/plot_srm_alignment.py
