@@ -81,7 +81,7 @@ def PCA_decomposition(
         raise NotImplementedError
 
 
-def compute_PCA_template(X, sl=None, max_npc=None, flavor="sklearn", demean=False):
+def compute_PCA_template(X, sl=None, n_components=None, flavor="sklearn", demean=False):
     """
     Compute the PCA template from the input data.
 
@@ -92,7 +92,7 @@ def compute_PCA_template(X, sl=None, max_npc=None, flavor="sklearn", demean=Fals
         The input data array of shape (n_samples, n_features, n_timepoints).
     - sl (slice, optional):
         The slice of timepoints to consider. Defaults to None.
-    - max_npc (int, optional):
+    - n_components (int, optional):
         The maximum number of principal components to keep. Defaults to None.
     - flavor (str, optional):
         The flavor of PCA algorithm to use. Defaults to "sklearn".
@@ -109,11 +109,24 @@ def compute_PCA_template(X, sl=None, max_npc=None, flavor="sklearn", demean=Fals
         X = X[:, :, sl]
     else:
         X = X
-    max_npc = min(X.shape[1], X.shape[2])
+    n_components = min(X.shape[1], X.shape[2])
     XX, cc = PCA_decomposition(
-        X, n_components=max_npc, flavor=flavor, adjust_ns=True, demean=demean
+        X, n_components=n_components, flavor=flavor, adjust_ns=True, demean=demean
     )
     return XX.astype(np.float32)
+
+
+def compute_PCA_var1_template(
+    dss, sl=None, n_components=None, flavor="sklearn", demean=True
+):
+    if sl is not None:
+        dss = dss[:, :, sl]
+    XX, cc = PCA_decomposition(
+        dss, n_components=n_components, flavor=flavor, adjust_ns=False, demean=demean
+    )
+    w = np.sqrt(np.sum(cc**2, axis=2)).mean(axis=1)
+    XX *= w[np.newaxis]
+    return XX
 
 
 def compute_procrustes_template(
@@ -124,7 +137,6 @@ def compute_procrustes_template(
     zscore_common=True,
     level2_iter=1,
     X2=None,
-    debug=False,
 ):
     """
     Compute the Procrustes template for a given set of data.
@@ -195,8 +207,8 @@ def compute_procrustes_template(
 def compute_template(
     X,
     region,
-    kind="searchlight_pca",
-    max_npc=None,
+    kind="pca",
+    n_components=150,
     common_topography=True,
     demean=True,
 ):
@@ -211,7 +223,7 @@ def compute_template(
        - sl (ndarray or None): The searchlight indices for searchlight-based template computation.
        - region (int or None, optional): The index of the region to consider. If None, all regions are considered (or searchlights). Defaults to None.
        - kind (str): The type of template computation algorithm to use. Can be "pca", "pcav1", "pcav2", or "cls".
-       - max_npc (int or None): The maximum number of principal components to use for PCA-based template computation.
+       - n_components (int or None): The maximum number of principal components to use for PCA-based template computation.
        - common_topography (bool): Whether to enforce common topography across datasets.
        - demean (bool): Whether to demean the datasets before template computation.
 
@@ -220,9 +232,9 @@ def compute_template(
         tmpl : The computed template on all parcels (or searchlights).
     """
     mapping = {
-        "searchlight_pca": compute_PCA_template,
-        "parcels_pca": compute_PCA_template,
-        "cls": compute_procrustes_template,
+        "pca": compute_PCA_template,
+        "pcav1": compute_PCA_var1_template,
+        "procrustes": compute_procrustes_template,
     }
 
     if kind == "procrustes":
@@ -234,7 +246,7 @@ def compute_template(
             zscore_common=True,
         )
     elif kind in mapping:
-        tmpl = mapping[kind](X, sl=region, max_npc=max_npc, demean=demean)
+        tmpl = mapping[kind](X, sl=region, n_components=n_components, demean=demean)
     else:
         raise ValueError("Unknown template kind")
 

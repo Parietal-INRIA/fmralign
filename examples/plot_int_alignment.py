@@ -23,7 +23,10 @@ To run this example, you must launch IPython via ``ipython
     :depth: 1
 
 """
+# %%
+import warnings
 
+warnings.filterwarnings("ignore")
 ###############################################################################
 # Retrieve the data
 # -----------------
@@ -39,7 +42,21 @@ To run this example, you must launch IPython via ``ipython
 from fmralign.fetch_example_data import fetch_ibc_subjects_contrasts
 
 imgs, df, mask_img = fetch_ibc_subjects_contrasts(
-    ["sub-01", "sub-02", "sub-04", "sub-05", "sub-06", "sub-07"]
+    [
+        "sub-01",
+        "sub-02",
+        "sub-04",
+        "sub-05",
+        "sub-06",
+        "sub-07",
+        "sub-08",
+        "sub-09",
+        "sub-11",
+        "sub-12",
+        "sub-13",
+        "sub-14",
+        "sub-15",
+    ],
 )
 
 ###############################################################################
@@ -69,7 +86,7 @@ masker = NiftiMasker(mask_img=mask_img).fit()
 from nilearn.image import concat_imgs
 
 template_train = []
-for i in range(5):
+for i in range(6):
     template_train.append(concat_imgs(imgs[i]))
 target_train = df[df.subject == "sub-07"][df.acquisition == "ap"].path.values
 
@@ -82,6 +99,7 @@ target_train = concat_imgs(target_train)
 target_train_data = masker.transform(target_train)
 target_test = df[df.subject == "sub-07"][df.acquisition == "pa"].path.values
 
+
 ###############################################################################
 # Compute a baseline (average of subjects)
 # ----------------------------------------
@@ -92,7 +110,7 @@ target_test = df[df.subject == "sub-07"][df.acquisition == "pa"].path.values
 import numpy as np
 
 masked_imgs = [masker.transform(img) for img in template_train]
-average_img = np.mean(masked_imgs, axis=0)
+average_img = np.mean(masked_imgs[:-1], axis=0)
 average_subject = masker.inverse_transform(average_img)
 
 ###############################################################################
@@ -111,11 +129,6 @@ from nilearn.image import index_img
 from fmralign.alignment_methods import IndividualizedNeuralTuning
 from fmralign.hyperalignment.regions import compute_parcels, compute_searchlights
 
-
-model = IndividualizedNeuralTuning(
-    n_jobs=8, alignment_method="searchlight", n_components=30
-)
-
 ###############################################################################
 # Predict new data for left-out subject
 # -------------------------------------
@@ -129,42 +142,52 @@ model = IndividualizedNeuralTuning(
 train_index = range(53)
 test_index = range(53, 106)
 
-if False:
+train_data = np.array(masked_imgs)[:, train_index, :]
+test_data = np.array(masked_imgs)[:, train_index, :][:-1]
+
+if True:
     parcels = compute_parcels(
         niimg=template_train[0], mask=masker, n_parcels=1000, n_jobs=5
     )
-    model.fit(np.array(masked_imgs)[:, train_index, :], parcels=parcels, verbose=False)
+    model = IndividualizedNeuralTuning(
+        n_jobs=8, alignment_method="searchlight", n_components=None
+    )
+    model.fit(train_data, parcels=parcels, verbose=False)
     train_stimulus = np.copy(model.shared_response)
-    model.fit(np.array(masked_imgs)[:, test_index, :], parcels=parcels, verbose=False)
-    test_stimulus = np.copy(model.shared_response)
+    train_tuning = model.tuning_data[-1]
+    model_bis = IndividualizedNeuralTuning(
+        n_jobs=8, alignment_method="searchlight", n_components=None
+    )
+    model_bis.fit(test_data, parcels=parcels, verbose=False)
+    test_stimulus = np.copy(model_bis.shared_response)
 
 else:
     _, searchlights, dists = compute_searchlights(
         niimg=template_train[0], mask_img=masker.mask_img, n_jobs=5
     )
-    model.fit(
-        np.array(masked_imgs)[:, train_index, :],
+    model_bis.fit(
+        train_data,
         searchlights=searchlights,
         dists=dists,
         verbose=False,
     )
-    train_stimulus = np.copy(model.shared_response)
-    model.fit(
-        np.array(masked_imgs)[:, test_index, :],
+    train_stimulus = np.copy(model_bis.shared_response)
+    model_bis.fit(
+        test_data,
         searchlights=searchlights,
         dists=dists,
         verbose=False,
     )
-    test_stimulus = np.copy(model.shared_response)
+    test_stimulus = np.copy(model_bis.shared_response)
 
 
+# %%
 # We input the mapping image target_train in a list, we could have input more
 # than one subject for which we'd want to predict : [train_1, train_2 ...]
 
-tuning_target = np.linalg.pinv(train_stimulus[train_index, :]) @ target_train_data
+prediction_from_template = test_stimulus @ train_tuning
+prediction_from_template = masker.inverse_transform(prediction_from_template)
 
-prediction_from_template = test_stimulus @ tuning_target
-prediction_from_template = [masker.inverse_transform(prediction_from_template)]
 
 # As a baseline prediction, let's just take the average of activations across subjects.
 
@@ -178,21 +201,26 @@ prediction_from_average = index_img(average_subject, test_index)
 # measure the correlation between its profile of activation without and with
 # alignment, to see if alignment was able to predict a signal more alike the ground truth.
 #
-
+# %%
 from fmralign.metrics import score_voxelwise
 
 # Now we use this scoring function to compare the correlation of predictions
 # made from group average and from template with the real PA contrasts of sub-07
 
+
 average_score = masker.inverse_transform(
-    score_voxelwise(target_test, prediction_from_average, masker, loss="corr")
+    C_avg := score_voxelwise(target_test, prediction_from_average, masker, loss="corr")
 )
 
-# I choose abs value in reference to the work we did with the INT
 template_score = masker.inverse_transform(
-    score_voxelwise(target_test, prediction_from_template[0], masker, loss="corr")
+    C_temp := score_voxelwise(
+        target_test, prediction_from_template, masker, loss="corr"
+    )
 )
 
+print("============Mean correlation============")
+print(f"Baseline : {np.mean(C_avg)}")
+print(f"Template : {np.mean(C_temp)}")
 
 ###############################################################################
 # Plotting the measures
@@ -200,6 +228,7 @@ template_score = masker.inverse_transform(
 # Finally we plot both scores
 #
 
+# %%
 from nilearn import plotting
 
 baseline_display = plotting.plot_stat_map(

@@ -237,7 +237,7 @@ def thread_compute_correlation(X, Y, i, j):
 
 
 def multithread_compute_correlation(
-    X, Y, absolute=False, linear_assignment=True, n_jobs=40
+    X, Y, absolute=False, linear_assignment=True, n_jobs=1
 ):
     """
     Compute correlations between pairs of samples in X and Y using multiple threads.

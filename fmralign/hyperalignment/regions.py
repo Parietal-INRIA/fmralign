@@ -472,7 +472,7 @@ def template(
     X,
     regions,
     n_jobs=1,
-    template_kind="searchlight_pca",
+    template_kind="pca",
     verbose=False,
     weights=None,
 ):
@@ -496,7 +496,7 @@ def template(
                 X,
                 region=region,
                 kind=template_kind,
-                max_npc=None,
+                n_components=None,
                 common_topography=True,
             )
             for region in regions

@@ -26,7 +26,7 @@ class PiecewiseAlignment(BaseEstimator, TransformerMixin):
     def __init__(
         self,
         alignment_method="searchlight_ridge",
-        template_kind="searchlight_pca",
+        template_kind="pcav1",
         verbose=True,
         n_jobs=1,
     ):
