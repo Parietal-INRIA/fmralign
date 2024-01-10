@@ -75,7 +75,7 @@ def compute_similarity(X, Y, metric: str = "euclidean"):
     return sim
 
 
-def compute_pearson_corr(X, Y, linear_assignment: bool = True):
+def compute_pearson_corr(X, Y, linear_assignment: bool = False):
     """Compute Pearson correlation between X and Y.
     X and Y are two lists of matrices of the same shape.
     The returned matrix will be of shape 2N x 2N, where N is the number of matrices in X and Y.
@@ -88,7 +88,9 @@ def compute_pearson_corr(X, Y, linear_assignment: bool = True):
     corr_mat = np.zeros((n, n))
     for i in range(n):
         for j in range(n):
-            corr_i_j = pearson_corr_coeff(XY[i], XY[j])
+            corr_i_j = pearson_corr_coeff(
+                XY[i], XY[j], linear_assignment=linear_assignment
+            )
             corr_mat[i, j] = corr_i_j
 
     return corr_mat
@@ -151,7 +153,7 @@ def stimulus_correlation(X, Y, linear_assignment=True, absolute=True):
     """Compute pairwise Pearson correlation matrix between two stimulus matrices."""
     assert X.shape == Y.shape
     n = X.shape[0]
-    corr_mat = np.corrcoef(X, Y, dtype=np.float32)[:n, n:]
+    corr_mat = np.corrcoef(X, Y)[:n, n:]
 
     if absolute:
         corr_mat = np.abs(corr_mat)
@@ -161,7 +163,7 @@ def stimulus_correlation(X, Y, linear_assignment=True, absolute=True):
         corr_mat = corr_mat[row_ind, :]
         corr_mat = corr_mat[:, col_ind]
 
-    return corr_mat.astype(np.float16)
+    return corr_mat
 
 
 def matrix_MDS(X, Y, n_components=2, dissimilarity="euclidean"):
@@ -255,7 +257,6 @@ def multithread_compute_correlation(
             - corr_diff_sub_same_TR: Correlations between the same time points of different subjects.
     """
     from joblib import Parallel, delayed
-    from tqdm import tqdm
 
     def thread_compute_correlation(X, Y, i, j, absolute=False, linear_assignment=True):
         X_i, Y_i = X[i], Y[i]
@@ -284,9 +285,9 @@ def multithread_compute_correlation(
 
     assert X.shape == Y.shape
     n_s = X.shape[0]
-    corrdinates = list(combinations(range(n_s), 2)) + [(i, i) for i in range(n_s)]
+    coordinates = list(combinations(range(n_s), 2)) + [(i, i) for i in range(n_s)]
     results = Parallel(n_jobs=n_jobs)(
-        delayed(thread_compute_correlation)(X, Y, i, j) for (i, j) in tqdm(corrdinates)
+        delayed(thread_compute_correlation)(X, Y, i, j) for (i, j) in coordinates
     )
     results = list(zip(*results))
     corr_same_sub_diff_TR = results[2]

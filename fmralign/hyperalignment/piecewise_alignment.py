@@ -57,7 +57,7 @@ class PiecewiseAlignment(BaseEstimator, TransformerMixin):
         self.radius = None
         self.weights = None
 
-    def compute_linear_transformation(self, data, template, i: int = 0, save=True):
+    def compute_linear_transformation(self, data, template):
         """Compute the linear transformation for a given subject provided the global template.
 
         Parameters
@@ -75,8 +75,8 @@ class PiecewiseAlignment(BaseEstimator, TransformerMixin):
         """
 
         x_hat = piece_ridge(
-            X=data,
-            Y=template,
+            X=template,
+            Y=data,
             regions=self.regions,
             weights=self.weights,
             verbose=self.verbose,
@@ -90,7 +90,6 @@ class PiecewiseAlignment(BaseEstimator, TransformerMixin):
         dists=None,
         radius=None,
         weights=None,
-        id=None,
     ):
         """From given fmri data, compute the global template and the linear transformation.
         This provides denoised signal estimations using template alignment.
@@ -148,7 +147,7 @@ class PiecewiseAlignment(BaseEstimator, TransformerMixin):
         )
 
         self.Xhat = Parallel(n_jobs=self.n_jobs)(
-            delayed(self.compute_linear_transformation)(X[i], sl_template, i)
+            delayed(self.compute_linear_transformation)(X[i], sl_template)
             for i in range(self.n_s)
         )
         return np.array(self.Xhat)

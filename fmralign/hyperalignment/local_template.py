@@ -8,7 +8,6 @@ import numpy as np
 from scipy.stats import zscore
 from sklearn.decomposition import PCA
 from sklearn.utils.extmath import randomized_svd
-from tqdm import tqdm
 
 from .linalg import safe_svd
 from .linalg import procrustes
@@ -148,11 +147,7 @@ def compute_procrustes_template(
         X = X[:, :, region]
     common_space = np.copy(X[0])
     aligned_X = [X[0]]
-    if debug:
-        iter_X = tqdm(X[1:])
-        iter_X.set_description("Computing procrustes alignment (level 1)...")
-    else:
-        iter_X = X[1:]
+    iter_X = X[1:]
     for x in iter_X:
         T = procrustes(x, common_space, reflection=reflection, scaling=scaling)
         aligned_x = x.dot(T)
@@ -164,12 +159,7 @@ def compute_procrustes_template(
             common_space = np.nan_to_num(zscore(common_space, axis=0))
 
     aligned_X2 = []
-
-    if debug:
-        iter2 = tqdm(range(level2_iter))
-        iter2.set_description("Computing procrustes alignment (level 2)...")
-    else:
-        iter2 = range(level2_iter)
+    iter2 = range(level2_iter)
 
     for level2 in iter2:
         common_space = np.zeros_like(X[0])

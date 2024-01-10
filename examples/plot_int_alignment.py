@@ -112,29 +112,9 @@ from fmralign.alignment_methods import IndividualizedNeuralTuning
 from fmralign.hyperalignment.regions import compute_parcels, compute_searchlights
 
 
-train_index = range(53)
 model = IndividualizedNeuralTuning(
-    n_jobs=10, alignment_method="parcelation", n_components=20
+    n_jobs=8, alignment_method="searchlight", n_components=30
 )
-
-if True:  # Use Parcellation
-    parcels = compute_parcels(
-        niimg=template_train[0], mask=masker, n_parcels=200, n_jobs=5
-    )
-    model.fit(np.array(masked_imgs)[:, train_index, :], parcels=parcels, verbose=False)
-else:
-    _, searchlights, dists = compute_searchlights(
-        niimg=template_train[0], mask_img=masker.mask_img, n_jobs=5
-    )
-    model.fit(
-        np.array(masked_imgs)[:, train_index, :],
-        searchlights=searchlights,
-        dists=dists,
-        verbose=False,
-    )
-
-train_stimulus = np.copy(model.shared_response)
-
 
 ###############################################################################
 # Predict new data for left-out subject
@@ -145,12 +125,30 @@ train_stimulus = np.copy(model.shared_response)
 # For each train subject and for the template, the AP contrasts are sorted from
 # 0, to 53, and then the PA contrasts from 53 to 106.
 #
+
+train_index = range(53)
 test_index = range(53, 106)
-if True:
+
+if False:
+    parcels = compute_parcels(
+        niimg=template_train[0], mask=masker, n_parcels=1000, n_jobs=5
+    )
+    model.fit(np.array(masked_imgs)[:, train_index, :], parcels=parcels, verbose=False)
+    train_stimulus = np.copy(model.shared_response)
     model.fit(np.array(masked_imgs)[:, test_index, :], parcels=parcels, verbose=False)
     test_stimulus = np.copy(model.shared_response)
 
 else:
+    _, searchlights, dists = compute_searchlights(
+        niimg=template_train[0], mask_img=masker.mask_img, n_jobs=5
+    )
+    model.fit(
+        np.array(masked_imgs)[:, train_index, :],
+        searchlights=searchlights,
+        dists=dists,
+        verbose=False,
+    )
+    train_stimulus = np.copy(model.shared_response)
     model.fit(
         np.array(masked_imgs)[:, test_index, :],
         searchlights=searchlights,

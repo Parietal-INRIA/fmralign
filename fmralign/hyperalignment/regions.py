@@ -18,7 +18,6 @@ from scipy.spatial import distance_matrix
 from nilearn._utils.niimg_conversions import (
     safe_get_data,
 )
-from tqdm import tqdm
 from .linalg import procrustes
 from .linalg import ridge
 from .local_template import compute_template
@@ -377,8 +376,6 @@ def iter_hyperalignment(
 
     if weights is not None:
         zip_iter = zip(searchlights, weights)
-        if verbose:
-            zip_iter = tqdm(zip_iter, leave=False)
         for sl, w in zip_iter:
             x, y = X[:, sl], Y[:, sl]
             t = sl_func(x, y)
@@ -386,8 +383,6 @@ def iter_hyperalignment(
             del t
     else:
         searchlights_iter = searchlights
-        if verbose:
-            searchlights_iter = tqdm(searchlights_iter, leave=False)
         for sl in searchlights_iter:
             x, y = X[:, sl], Y[:, sl]
             t = sl_func(x, y)
@@ -495,12 +490,6 @@ def template(
         numpy.ndarray: The computed template of shape (n_features,).
 
     """
-
-    if verbose:
-        iterator = tqdm(regions, leave=False)
-        iterator.set_description("Computing local templates")
-    else:
-        iterator = regions
     with Parallel(n_jobs=n_jobs, batch_size=1, verbose=1) as parallel:
         local_templates = parallel(
             delayed(compute_template)(
@@ -510,7 +499,7 @@ def template(
                 max_npc=None,
                 common_topography=True,
             )
-            for region in iterator
+            for region in regions
         )
 
     template = np.zeros_like(X[0])
