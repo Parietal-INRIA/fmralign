@@ -376,8 +376,6 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
 
         """
 
-        # Alignment method is hyperalignment (too different from other methods)
-
         # Check if the input is a list, if list of lists, concatenate each subjects
         # data into one unique image.
         if not isinstance(imgs, (list, np.ndarray)) or len(imgs) < 2:
@@ -443,8 +441,6 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             Each Niimg has the same length as the list test_index
 
         """
-        if self.alignment_method == "hyperalignment":
-            return self.model.transform(imgs, verbose=self.verbose)
 
         if not isinstance(imgs, (list, np.ndarray)):
             raise ValueError(

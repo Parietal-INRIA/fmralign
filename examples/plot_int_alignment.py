@@ -49,13 +49,6 @@ imgs, df, mask_img = fetch_ibc_subjects_contrasts(
         "sub-05",
         "sub-06",
         "sub-07",
-        "sub-08",
-        "sub-09",
-        "sub-11",
-        "sub-12",
-        "sub-13",
-        "sub-14",
-        "sub-15",
     ],
 )
 
@@ -145,7 +138,7 @@ test_index = range(53, 106)
 train_data = np.array(masked_imgs)[:, train_index, :]
 test_data = np.array(masked_imgs)[:, train_index, :][:-1]
 
-if True:
+if False:
     parcels = compute_parcels(
         niimg=template_train[0], mask=masker, n_parcels=1000, n_jobs=5
     )
@@ -165,13 +158,20 @@ else:
     _, searchlights, dists = compute_searchlights(
         niimg=template_train[0], mask_img=masker.mask_img, n_jobs=5
     )
-    model_bis.fit(
+    model = IndividualizedNeuralTuning(
+        n_jobs=8, alignment_method="searchlight", n_components=None
+    )
+    model.fit(
         train_data,
         searchlights=searchlights,
         dists=dists,
         verbose=False,
     )
-    train_stimulus = np.copy(model_bis.shared_response)
+    train_stimulus = np.copy(model.shared_response)
+    train_tuning = model.tuning_data[-1]
+    model_bis = IndividualizedNeuralTuning(
+        n_jobs=8, alignment_method="searchlight", n_components=None
+    )
     model_bis.fit(
         test_data,
         searchlights=searchlights,
