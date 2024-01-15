@@ -56,27 +56,45 @@ SEARCHLIGHT = False
 
 if SEARCHLIGHT:
     searchlights, dists = generate_dummy_searchlights(
-        n_searchlights=12, n_v=n_v, radius=5
+        n_searchlights=n_v, n_v=n_v, radius=5
     )
+    int1 = INT(
+        n_components=latent_dim,
+        decomp_method=decomposition_method,
+        alignment_method="searchlight",
+    )
+    int2 = INT(
+        n_components=latent_dim,
+        decomp_method=decomposition_method,
+        alignment_method="searchlight",
+    )
+    int_first_part = int1.fit(
+        data_run_1, searchlights=searchlights, dists=dists, radius=5, verbose=False
+    )  # S is provided if we cheat and know the ground truth
+    int_second_part = int2.fit(
+        data_run_2, searchlights=searchlights, dists=dists, radius=5, verbose=False
+    )
+
+
 else:
     parcels = [range(n_v)]
+    int1 = INT(
+        n_components=latent_dim,
+        decomp_method=decomposition_method,
+        alignment_method="parcelation",
+    )
+    int2 = INT(
+        n_components=latent_dim,
+        decomp_method=decomposition_method,
+        alignment_method="parcelation",
+    )
+    int_first_part = int1.fit(
+        data_run_1, parcels=parcels, verbose=False
+    )  # S is provided if we cheat and know the ground truth
+    int_second_part = int2.fit(data_run_2, parcels=parcels, verbose=False)
 
 #############################################################################
 # Test INT on the two parts of the data (ie different runs of the experiment)
-int1 = INT(
-    n_components=latent_dim,
-    decomp_method=decomposition_method,
-    alignment_method="parcelation",
-)
-int2 = INT(
-    n_components=latent_dim,
-    decomp_method=decomposition_method,
-    alignment_method="parcelation",
-)
-int_first_part = int1.fit(
-    data_run_1, parcels=parcels, verbose=False
-)  # S is provided if we cheat and know the ground truth
-int_second_part = int2.fit(data_run_2, parcels=parcels, verbose=False)
 
 
 # save individual components
