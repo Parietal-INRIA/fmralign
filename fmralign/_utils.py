@@ -146,7 +146,7 @@ def _make_parcellation(
             )
             err.args += (errmsg,)
             raise err
-        labels = apply_mask_fmri(parcellation.labels_img_, masker.mask_img_).astype(int)
+        labels = apply_mask_fmri(parcellation.labels_img_, masker.mask_img).astype(int)
 
     if verbose > 0:
         unique_labels, counts = np.unique(labels, return_counts=True)

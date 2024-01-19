@@ -548,7 +548,9 @@ class IndividualizedNeuralTuning(Alignment):
             array-like: The estimated tuning weights.
 
         """
-        return np.linalg.pinv(shared_response).dot(target)
+        if shared_response.shape[1] < shared_response.shape[0]:
+            return (np.linalg.pinv(shared_response)).dot(target)
+        return np.linalg.inv(shared_response).dot(target)
 
     @staticmethod
     def _stimulus_estimator(full_signal, n_t, n_s, latent_dim=None):
@@ -568,7 +570,7 @@ class IndividualizedNeuralTuning(Alignment):
             U = svd_pca(full_signal)
             U = U[:, :latent_dim]
         else:
-            U, _, _ = safe_svd(full_signal)
+            U, _, _ = safe_svd(full_signal, remove_mean=False)
 
         stimulus = np.sqrt(n_s) * U
         stimulus = stimulus.astype(np.float32)

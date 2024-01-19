@@ -496,7 +496,7 @@ def template(
                 X,
                 region=region,
                 kind=template_kind,
-                n_components=None,
+                n_components=150,
                 common_topography=True,
             )
             for region in regions
