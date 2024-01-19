@@ -26,7 +26,7 @@ class PiecewiseAlignment(BaseEstimator, TransformerMixin):
     def __init__(
         self,
         alignment_method="searchlight_ridge",
-        template_kind="pcav1",
+        template_kind="pca",
         verbose=True,
         n_jobs=1,
     ):
@@ -132,11 +132,14 @@ class PiecewiseAlignment(BaseEstimator, TransformerMixin):
             print(f"[{self.FUNC}]Computing global template M ...")
 
         if dists is None or radius is None:
-            self.weights = None
-        else:
+            self.weights = weights
+        elif weights is None:
             self.weights = searchlight_weights(
                 searchlights=regions, dists=dists, radius=radius
             )
+        else:
+            self.weights = weights
+
         sl_template = template(
             X,
             regions=regions,
