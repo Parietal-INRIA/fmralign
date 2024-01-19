@@ -136,11 +136,11 @@ def fit_one_parcellation(
     verbose,
 ):
     """Create parcellation of n_pieces and align one piece i in group source
-    data piece_X_list, using SRM alignment instance.
+    data X_list, using SRM alignment instance.
 
     Parameters
     ----------
-    X_: Niimg-like object
+    X_list: Iterable of Niimg-like objects
         Source data
     srm : FastSRM instance
     masker: instance of NiftiMasker or MultiNiftiMasker
