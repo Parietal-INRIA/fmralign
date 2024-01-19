@@ -518,7 +518,6 @@ class IndividualizedNeuralTuning(Alignment):
             self.distances = None
             self.radius = None
 
-        self.path = None
         self.tuning_data = []
         self.denoised_signal = []
         self.decomp_method = decomp_method
@@ -592,7 +591,7 @@ class IndividualizedNeuralTuning(Alignment):
 
     def fit(
         self,
-        X_train,
+        X,
         searchlights=None,
         parcels=None,
         dists=None,
@@ -606,7 +605,7 @@ class IndividualizedNeuralTuning(Alignment):
         Parameters:
         --------
 
-        - X_train (array-like):
+        - X (array-like):
             The training data of shape (n_subjects, n_samples, n_voxels).
         - searchlights (array-like):
             The searchlight indices for each subject, of shape (n_s, n_searchlights).
@@ -630,15 +629,17 @@ class IndividualizedNeuralTuning(Alignment):
             The fitted model.
         """
 
-        X_train_ = np.array(X_train, copy=True, dtype=np.float32)
+        X_ = np.array(X, copy=True, dtype=np.float32)
 
-        self.n_s, self.n_t, self.n_v = X_train_.shape
+        self.n_s, self.n_t, self.n_v = X_.shape
 
         self.tuning_data = np.empty(self.n_s, dtype=np.float32)
         self.denoised_signal = np.empty(self.n_s, dtype=np.float32)
 
         if searchlights is None:
             self.regions = parcels
+            self.distances = None
+            self.radius = None
         else:
             self.regions = searchlights
             self.distances = dists
@@ -648,13 +649,11 @@ class IndividualizedNeuralTuning(Alignment):
             alignment_method=self.alignment_method, n_jobs=self.n_jobs, verbose=verbose
         )
         self.denoised_signal = denoiser.fit_transform(
-            X_train_,
+            X_,
             regions=self.regions,
-            dists=dists,
-            radius=radius,
+            dists=self.distances,
+            radius=self.radius,
         )
-        # Clear memory of the SearchlightAlignment object
-        denoiser = None
 
         # Stimulus matrix computation
         if self.decomp_method is None:
@@ -673,12 +672,12 @@ class IndividualizedNeuralTuning(Alignment):
 
         return self
 
-    def transform(self, X_test_, verbose=False):
+    def transform(self, X, verbose=False):
         """
         Transforms the input test data using the hyperalignment model.
 
         Args:
-            X_test_ (list of arrays):
+            X (list of arrays):
                 The input test data.
             verbose (bool, optional):
                 Whether to print verbose output. Defaults to False.
@@ -689,7 +688,7 @@ class IndividualizedNeuralTuning(Alignment):
             numpy.ndarray: The transformed test data.
         """
 
-        full_signal = np.concatenate(X_test_, axis=1, dtype=np.float32)
+        full_signal = np.concatenate(X, axis=1, dtype=np.float32)
 
         if verbose:
             print("Predict : Computing stimulus matrix...")

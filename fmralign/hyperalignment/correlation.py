@@ -258,9 +258,12 @@ def multithread_compute_correlation(
     """
     from joblib import Parallel, delayed
 
-    def thread_compute_correlation(X, Y, i, j, absolute=False, linear_assignment=True):
+    def thread_compute_correlation(X, Y, i, j):
         X_i, Y_i = X[i], Y[i]
-        corr = stimulus_correlation(X_i, Y_i, absolute=False)
+        corr = np.corrcoef(X_i, Y_i)[X.shape[1] :, : X.shape[1]]
+        row_ind, col_ind = linear_sum_assignment(corr, maximize=True)
+        corr = corr[row_ind, :]
+        corr = corr[:, col_ind]
         same_TR_corr = np.diag(corr)
         # Get all the values except the diagonal in a list
         diff_TR_corr = corr[np.where(~np.eye(corr.shape[0], dtype=bool))]
