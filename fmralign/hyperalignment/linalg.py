@@ -108,6 +108,14 @@ def ridge(X, Y, alpha):
     return betas
 
 
+def _ridge(X, Y, alpha):
+    from sklearn.linear_model import Ridge
+
+    ridge = Ridge(alpha=alpha, fit_intercept=False)
+    ridge.fit(X, Y)
+    return ridge.coef_.T
+
+
 def procrustes(X, Y, reflection=True, scaling=False):
     r"""
     The orthogonal Procrustes algorithm.
