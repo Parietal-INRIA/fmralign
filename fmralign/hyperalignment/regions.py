@@ -480,6 +480,7 @@ def piece_ridge(
 
     """
     sl_func = functools.partial(ridge, alpha=alpha)
+
     T = iter_hyperalignment(
         X,
         Y,
