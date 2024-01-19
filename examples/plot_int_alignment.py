@@ -136,20 +136,20 @@ train_index = range(53)
 test_index = range(53, 106)
 
 train_data = np.array(masked_imgs)[:, train_index, :]
-test_data = np.array(masked_imgs)[:, train_index, :][:-1]
+test_data = np.array(masked_imgs)[:, test_index, :][:-1]
 
-if False:
+if True:
     parcels = compute_parcels(
-        niimg=template_train[0], mask=masker, n_parcels=1000, n_jobs=5
+        niimg=template_train[0], mask=masker, n_parcels=100, n_jobs=5
     )
     model = IndividualizedNeuralTuning(
-        n_jobs=8, alignment_method="searchlight", n_components=None
+        n_jobs=8, alignment_method="parcellation", n_components=None
     )
     model.fit(train_data, parcels=parcels, verbose=False)
     train_stimulus = np.copy(model.shared_response)
-    train_tuning = model.tuning_data[-1]
+    train_tuning = np.linalg.pinv(train_stimulus) @ model.denoised_signal[-1]
     model_bis = IndividualizedNeuralTuning(
-        n_jobs=8, alignment_method="searchlight", n_components=None
+        n_jobs=8, alignment_method="parcellation", n_components=None
     )
     model_bis.fit(test_data, parcels=parcels, verbose=False)
     test_stimulus = np.copy(model_bis.shared_response)
@@ -185,7 +185,7 @@ else:
 # We input the mapping image target_train in a list, we could have input more
 # than one subject for which we'd want to predict : [train_1, train_2 ...]
 
-prediction_from_template = test_stimulus @ train_tuning
+prediction_from_template = -test_stimulus @ train_tuning
 prediction_from_template = masker.inverse_transform(prediction_from_template)
 
 
@@ -247,3 +247,5 @@ display.title("Hyperalignment-based prediction correlation wt ground truth")
 #
 
 plotting.show()
+
+# %%

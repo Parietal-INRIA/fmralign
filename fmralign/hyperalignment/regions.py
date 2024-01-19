@@ -355,41 +355,63 @@ def iter_hyperalignment(
     searchlights,
     sl_func,
     weights=None,
+    return_betas=False,
     verbose=False,
 ):
     """
-    Perform searchlight hyperalignment on the given data.
+    Tool function to iterate hyperalignment over pieces of data.
 
-    Args:
-        X (ndarray): The source data matrix of shape (n_samples, n_features).
-        Y (ndarray): The target data matrix of shape (n_samples, n_features).
-        searchlights (list): List of searchlight indices.
-        dists (ndarray): distances of vertices to the center of their searchlight, of shape (n_searchlights, n_vertices_sl)
-        radius (float): Radius of the searchlight.
-        sl_func (function): Function to compute the searchlight transformation.
-        weighted (bool, optional): Whether to use weighted searchlights. Defaults to True.
+    Parameters
+    ----------
+    X : array-like of shape (n_samples, n_features)
+        The source data matrix.
+    Y : array-like of shape (n_samples, n_features)
+        The target data matrix.
+    searchlights : array-like
+        The indices of the searchlight regions.
+    sl_func : function
+        The function to use for hyperalignment.
+    weights : array-like, optional
+        The weights to use for weighted hyperalignment. Defaults to None.
+    return_betas : bool, optional
+        Whether to return the coefficients of regression instead of the prediciton.
+        Defaults to False.
+    verbose : bool, optional
+        Whether to display progress. Defaults to False.
 
-    Returns:
-        ndarray: The transformed matrix T of shape (n_features, n_features).
+    Returns
+    -------
+    res : array-like
+        The transformed data matrix.
+
     """
-    Yhat = np.zeros_like(X, dtype=np.float32)
+    if return_betas:
+        T = np.zeros((X.shape[1], Y.shape[1]), dtype=np.float32)
+    else:
+        Yhat = np.zeros_like(X, dtype=np.float32)
 
     if weights is not None:
         zip_iter = zip(searchlights, weights)
         for sl, w in zip_iter:
             x, y = X[:, sl], Y[:, sl]
             t = sl_func(x, y)
+        if return_betas:
+            T[np.ix_(sl, sl)] += t * w[np.newaxis]
+        else:
             Yhat[:, sl] += x @ t * w[np.newaxis]
-            del t
+
     else:
         searchlights_iter = searchlights
         for sl in searchlights_iter:
             x, y = X[:, sl], Y[:, sl]
             t = sl_func(x, y)
-            Yhat[:, sl] += x @ t
-            del t
+            if return_betas:
+                T[np.ix_(sl, sl)] += t
+            else:
+                Yhat[:, sl] += x @ t
 
-    return Yhat
+    res = T if return_betas else Yhat
+    return res
 
 
 def piece_procrustes(
@@ -438,6 +460,7 @@ def piece_ridge(
     alpha=1e3,
     weights=None,
     verbose=False,
+    return_betas=False,
 ):
     """
     Perform searchlight ridge regression for hyperalignment.
@@ -464,6 +487,7 @@ def piece_ridge(
         sl_func=sl_func,
         weights=weights,
         verbose=verbose,
+        return_betas=return_betas,
     )
     return T
 
