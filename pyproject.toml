@@ -25,7 +25,8 @@ dependencies = [
     "scipy",
     "nibabel",
     "nilearn>=0.10.2",
-    "POT"
+    "POT",
+    "fastsrm"
 ]
 dynamic = ["version"]
 
