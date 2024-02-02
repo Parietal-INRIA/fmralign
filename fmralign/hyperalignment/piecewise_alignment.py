@@ -27,6 +27,7 @@ class PiecewiseAlignment(BaseEstimator, TransformerMixin):
         self,
         alignment_method="searchlight_ridge",
         template_kind="pca",
+        common_topography=True,
         verbose=True,
         n_jobs=1,
     ):
@@ -51,6 +52,7 @@ class PiecewiseAlignment(BaseEstimator, TransformerMixin):
         self.warp_alignment_method = alignment_method
         self.template_kind = template_kind
         self.verbose = verbose
+        self.common_topography = common_topography
         self.n_jobs = n_jobs
         self.regions = None
         self.distances = None
@@ -77,6 +79,7 @@ class PiecewiseAlignment(BaseEstimator, TransformerMixin):
         x_hat = piece_ridge(
             X=template,
             Y=data,
+            alpha=10,
             regions=self.regions,
             weights=self.weights,
             verbose=self.verbose,
@@ -146,6 +149,7 @@ class PiecewiseAlignment(BaseEstimator, TransformerMixin):
             n_jobs=self.n_jobs,
             template_kind=self.template_kind,
             verbose=self.verbose,
+            common_topography=self.common_topography,
             weights=self.weights,
         )
 

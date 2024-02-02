@@ -521,8 +521,8 @@ class IndividualizedNeuralTuning(Alignment):
         self.tuning_data = []
         self.denoised_signal = []
         self.decomp_method = decomp_method
-        self.tmpl_kind = template
-        self.latent_dim = n_components
+        self.template = template
+        self.n_components = n_components
         self.n_jobs = n_jobs
 
     #######################################################################################
@@ -565,11 +565,9 @@ class IndividualizedNeuralTuning(Alignment):
         Returns:
             stimulus (np.ndarray): The stimulus response of shape (n_t, latent_dim) or (n_t, n_t).
         """
+        U = svd_pca(full_signal)
         if latent_dim is not None and latent_dim < n_t:
-            U = svd_pca(full_signal)
             U = U[:, :latent_dim]
-        else:
-            U, _, _ = safe_svd(full_signal, remove_mean=False)
 
         stimulus = np.sqrt(n_s) * U
         stimulus = stimulus.astype(np.float32)
@@ -659,7 +657,7 @@ class IndividualizedNeuralTuning(Alignment):
         if self.decomp_method is None:
             full_signal = np.concatenate(self.denoised_signal, axis=1)
             self.shared_response = self._stimulus_estimator(
-                full_signal, self.n_t, self.n_s, self.latent_dim
+                full_signal, self.n_t, self.n_s, self.n_components
             )
             if tuning:
                 self.tuning_data = Parallel(n_jobs=self.n_jobs)(
@@ -695,7 +693,7 @@ class IndividualizedNeuralTuning(Alignment):
 
         if self.decomp_method is None:
             stimulus_ = self._stimulus_estimator(
-                full_signal, self.n_t, self.n_s, self.latent_dim
+                full_signal, self.n_t, self.n_s, self.n_components
             )
 
         if verbose:

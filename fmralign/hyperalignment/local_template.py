@@ -14,7 +14,7 @@ from .linalg import procrustes
 
 
 def PCA_decomposition(
-    X, n_components=None, flavor="sklearn", adjust_ns=False, demean=True
+    X, n_components=None, flavor="sklearn", adjust_ns=True, demean=True
 ):
     """Decompose concatenated data matrices using PCA/SVD.
 
@@ -106,12 +106,13 @@ def compute_PCA_template(X, sl=None, n_components=None, flavor="sklearn", demean
         The PCA template array of shape (n_samples, n_features, n_components).
     """
     if sl is not None:
-        X = X[:, :, sl]
+        X_ = X[:, :, sl]
     else:
-        X = X
-    n_components = min(X.shape[1], X.shape[2])
+        X_ = X
+    n = min(X_.shape[1], X_.shape[2])
+    n_components = min(n, n_components)
     XX, cc = PCA_decomposition(
-        X, n_components=n_components, flavor=flavor, adjust_ns=True, demean=demean
+        X_, n_components=n_components, flavor=flavor, adjust_ns=True, demean=demean
     )
     return XX.astype(np.float32)
 

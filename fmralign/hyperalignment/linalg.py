@@ -8,7 +8,8 @@ searchlight algorithm), and ``svd_pca`` performs PCA based on
 """
 
 import numpy as np
-from scipy.linalg import svd, LinAlgError
+from scipy.linalg import LinAlgError
+from scipy.linalg import svd
 
 __all__ = ["safe_svd", "svd_pca", "ridge"]
 
@@ -86,7 +87,7 @@ def svd_pca(X, remove_mean=True):
     return X_new
 
 
-def ridge(X, Y, alpha):
+def ridge(X, Y, alpha=10):
     """Solve ridge regression problem for matrix target using SVD.
     Parameters
     ----------
@@ -101,7 +102,7 @@ def ridge(X, Y, alpha):
     betas : ndarray of shape (n_features, n_targets)
         The solution to the ridge regression problem.
     """
-    U, s, Vt = safe_svd(X, remove_mean=False)
+    U, s, Vt = safe_svd(X, remove_mean=True)
     d = s / (alpha + s**2)
     d_UT_Y = d[:, np.newaxis] * (U.T @ Y)
     betas = Vt.T @ d_UT_Y

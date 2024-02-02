@@ -499,6 +499,7 @@ def template(
     n_jobs=1,
     template_kind="pca",
     verbose=False,
+    common_topography=True,
     weights=None,
 ):
     """
@@ -522,7 +523,7 @@ def template(
                 region=region,
                 kind=template_kind,
                 n_components=150,
-                common_topography=True,
+                common_topography=common_topography,
             )
             for region in regions
         )
