@@ -4,6 +4,7 @@ See the ```nilearn``` documentation for more details:
 - https://nilearn.github.io/modules/generated/nilearn.regions.Parcellations.html
 - https://nilearn.github.io/dev/modules/generated/nilearn.decoding.SearchLight.html
 """
+
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 from .regions import (
@@ -81,7 +82,6 @@ class PiecewiseAlignment(BaseEstimator, TransformerMixin):
             Y=data,
             alpha=10,
             regions=self.regions,
-            weights=self.weights,
             verbose=self.verbose,
         )
         return x_hat

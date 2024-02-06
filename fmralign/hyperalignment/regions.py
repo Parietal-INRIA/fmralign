@@ -354,7 +354,6 @@ def iter_hyperalignment(
     Y,
     searchlights,
     sl_func,
-    weights=None,
     return_betas=False,
     verbose=False,
 ):
@@ -390,25 +389,14 @@ def iter_hyperalignment(
     else:
         Yhat = np.zeros_like(X, dtype=np.float32)
 
-    if weights is not None:
-        zip_iter = zip(searchlights, weights)
-        for sl, w in zip_iter:
-            x, y = X[:, sl], Y[:, sl]
-            t = sl_func(x, y)
+    searchlights_iter = searchlights
+    for sl in searchlights_iter:
+        x, y = X[:, sl], Y[:, sl]
+        t = sl_func(x, y)
         if return_betas:
-            T[np.ix_(sl, sl)] += t * w[np.newaxis]
+            T[np.ix_(sl, sl)] += t
         else:
-            Yhat[:, sl] += x @ t * w[np.newaxis]
-
-    else:
-        searchlights_iter = searchlights
-        for sl in searchlights_iter:
-            x, y = X[:, sl], Y[:, sl]
-            t = sl_func(x, y)
-            if return_betas:
-                T[np.ix_(sl, sl)] += t
-            else:
-                Yhat[:, sl] += x @ t
+            Yhat[:, sl] += x @ t
 
     res = T if return_betas else Yhat
     return res
@@ -418,7 +406,6 @@ def piece_procrustes(
     X,
     Y,
     regions,
-    weights=None,
     T0=None,
     reflection=True,
     scaling=False,
@@ -447,7 +434,6 @@ def piece_procrustes(
         Y,
         regions,
         T0=T0,
-        weights=weights,
         sl_func=sl_func,
     )
     return T
@@ -486,7 +472,6 @@ def piece_ridge(
         Y,
         regions,
         sl_func=sl_func,
-        weights=weights,
         verbose=verbose,
         return_betas=return_betas,
     )

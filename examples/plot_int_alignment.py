@@ -134,11 +134,13 @@ from fmralign.hyperalignment.regions import compute_parcels, compute_searchlight
 
 train_index = range(53)
 test_index = range(53, 106)
+full_index = range(106)
 
 train_data = np.array(masked_imgs)[:, train_index, :]
-test_data = np.array(masked_imgs)[:, test_index, :][:-1]
+test_data = np.array(masked_imgs)[:, full_index, :]
+target_test_masked = np.array(masked_imgs)[:, test_index, :]
 
-if True:
+if False:
     parcels = compute_parcels(
         niimg=template_train[0], mask=masker, n_parcels=100, n_jobs=5
     )
@@ -156,7 +158,7 @@ if True:
 
 else:
     _, searchlights, dists = compute_searchlights(
-        niimg=template_train[0], mask_img=masker.mask_img, n_jobs=5
+        niimg=template_train[0], mask_img=masker.mask_img, radius=5, n_jobs=5
     )
     model = IndividualizedNeuralTuning(
         n_jobs=8, alignment_method="searchlight", n_components=None
@@ -167,8 +169,8 @@ else:
         dists=dists,
         verbose=False,
     )
-    train_stimulus = np.copy(model.shared_response)
-    train_tuning = model.tuning_data[-1]
+    train_target_denoised = model.denoised_signal[-1]
+
     model_bis = IndividualizedNeuralTuning(
         n_jobs=8, alignment_method="searchlight", n_components=None
     )
@@ -178,14 +180,17 @@ else:
         dists=dists,
         verbose=False,
     )
-    test_stimulus = np.copy(model_bis.shared_response)
+    train_tuning = (
+        np.linalg.pinv(model_bis.shared_response[train_index]) @ train_target_denoised
+    )
 
 
 # %%
 # We input the mapping image target_train in a list, we could have input more
 # than one subject for which we'd want to predict : [train_1, train_2 ...]
 
-prediction_from_template = -test_stimulus @ train_tuning
+stimulus_ = np.copy(model_bis.shared_response)
+prediction_from_template = stimulus_[test_index] @ train_tuning
 prediction_from_template = masker.inverse_transform(prediction_from_template)
 
 
@@ -238,7 +243,7 @@ baseline_display.title("Group average correlation wt ground truth")
 display = plotting.plot_stat_map(
     template_score, display_mode="z", cut_coords=[-15, -5], vmax=1
 )
-display.title("Hyperalignment-based prediction correlation wt ground truth")
+display.title("INT prediction correlation wt ground truth")
 
 ###############################################################################
 # We observe that creating a template and aligning a new subject to it yields
