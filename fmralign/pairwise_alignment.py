@@ -8,7 +8,7 @@ import nibabel as nib
 import numpy as np
 from joblib import Memory, Parallel, delayed
 from nilearn.image import concat_imgs, load_img
-from nilearn.maskers._masker_validation import _check_embedded_nifti_masker
+from nilearn._utils.masker_validation import check_embedded_masker
 from sklearn.base import BaseEstimator, TransformerMixin, clone
 from sklearn.model_selection import ShuffleSplit
 
@@ -313,7 +313,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         -------
         self
         """
-        self.masker_ = _check_embedded_nifti_masker(self)
+        self.masker_ = check_embedded_masker(self)
         self.masker_.n_jobs = self.n_jobs
 
         if self.masker_.mask_img is None:
@@ -330,7 +330,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
                     self.clustering, self.masker_.mask_img
                 )
                 self.mask = reduced_mask
-                self.masker_ = _check_embedded_nifti_masker(self)
+                self.masker_ = check_embedded_masker(self)
                 self.masker_.n_jobs = self.n_jobs
                 self.masker_.fit()
                 warnings.warn(
