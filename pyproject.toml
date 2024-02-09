@@ -24,7 +24,7 @@ dependencies = [
     "joblib",
     "scipy",
     "nibabel",
-    "nilearn>=0.10.2",
+    "nilearn>=0.10.3",
     "POT",
     "fastsrm"
 ]
