@@ -501,9 +501,8 @@ class IndividualizedNeuralTuning(Alignment):
         None
         """
 
-        self.n_s = None
-        self.n_t = None
-        self.n_v = None
+        self.n_subjects = None
+        self.n_time_points = None
         self.labels = None
         self.alphas = None
         self.alignment_method = alignment_method
@@ -521,7 +520,6 @@ class IndividualizedNeuralTuning(Alignment):
         self.tuning_data = []
         self.denoised_signal = []
         self.decomp_method = decomp_method
-        self.template = template
         self.n_components = n_components
         self.n_jobs = n_jobs
 
@@ -531,20 +529,17 @@ class IndividualizedNeuralTuning(Alignment):
     @staticmethod
     def _tuning_estimator(shared_response, target):
         """
-        Estimate the tuning weights for individualized neural tuning.
+        Estimate the tuning matrix for individualized neural tuning.
 
         Parameters:
         --------
-            - shared_response (array-like):
-                The shared response matrix.
-            - target (array-like):
-                The target matrix.
-            - latent_dim (int, optional):
-                The number of latent dimensions. Defaults to None.
+        - shared_response (array-like): The shared response matrix.
+        - target (array-like): The target matrix.
+        - latent_dim (int, optional): The number of latent dimensions (if PCA is used). Defaults to None.
 
         Returns:
         --------
-            array-like: The estimated tuning weights.
+        array-like: The estimated tuning matrix for the given target.
 
         """
         if shared_response.shape[1] < shared_response.shape[0]:
@@ -552,20 +547,22 @@ class IndividualizedNeuralTuning(Alignment):
         return np.linalg.inv(shared_response).dot(target)
 
     @staticmethod
-    def _stimulus_estimator(full_signal, n_t, n_s, latent_dim=None):
+    def _stimulus_estimator(full_signal, n_t, n_s, latent_dim=None, scaling=True):
         """
-        Estimates the stimulus response using the given parameters.
+        Estimates the stimulus matrix for the Individualized Neural Tuning model.
 
-        Args:
-            full_signal (np.ndarray): The full signal data.
-            n_t (int): The number of time points.
-            n_s (int): The number of stimuli.
-            latent_dim (int, optional): The number of latent dimensions. Defaults to None.
-
-        Returns:
-            stimulus (np.ndarray): The stimulus response of shape (n_t, latent_dim) or (n_t, n_t).
+        Parameters:
+        --------
+        - full_signal (numpy.ndarray): The full signal of shape (n_t, n_s).
+        - n_t (int): The number of time points.
+        - n_s (int): The number of subjects.
+        - latent_dim (int, optional): The number of latent dimensions to use. Defaults to None.
+        - scaling (bool, optional): Whether to scale the stimulus matrix sources. Defaults to True.
         """
-        U = svd_pca(full_signal)
+        if scaling:
+            U = svd_pca(full_signal)
+        else:
+            U, _, _ = safe_svd(full_signal)
         if latent_dim is not None and latent_dim < n_t:
             U = U[:, :latent_dim]
 
@@ -699,7 +696,10 @@ class IndividualizedNeuralTuning(Alignment):
         if verbose:
             print("Predict : stimulus matrix shape: ", stimulus_.shape)
 
-        reconstructed_signal = [
-            self._reconstruct_signal(stimulus_, T_est) for T_est in self.tuning_data
-        ]
+        reconstructed_signal = Parallel(n_jobs=self.n_jobs)(
+            delayed(
+                self._reconstruct_signal(stimulus_, T_est) for T_est in self.tuning_data
+            )
+        )
+
         return np.array(reconstructed_signal, dtype=np.float32)

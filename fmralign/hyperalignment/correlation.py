@@ -142,7 +142,7 @@ def tuning_correlation(X, Y):
     corr_mat = np.zeros((n, n))
     for i in range(n):
         for j in range(i, n):
-            corr_i_j = pearson_corr_coeff(X[i], Y[j])
+            corr_i_j = pearson_corr_coeff(X[i], Y[j], absolute=False)
             corr_mat[i, j] = corr_i_j
             corr_mat[j, i] = corr_i_j
 
@@ -260,14 +260,12 @@ def multithread_compute_correlation(
 
     def thread_compute_correlation(X, Y, i, j):
         X_i, Y_i = X[i], Y[i]
-        corr = np.corrcoef(X_i, Y_i)[X.shape[1] :, : X.shape[1]]
-        row_ind, col_ind = linear_sum_assignment(corr, maximize=True)
-        corr = corr[row_ind, :]
-        corr = corr[:, col_ind]
+        corr = stimulus_correlation(
+            X_i, Y_i, absolute=absolute, linear_assignment=linear_assignment
+        )
         same_TR_corr = np.diag(corr)
         # Get all the values except the diagonal in a list
         diff_TR_corr = corr[np.where(~np.eye(corr.shape[0], dtype=bool))]
-        diff_TR_corr = diff_TR_corr.flatten().astype(np.float16)
         if i == j:
             return (
                 np.array([]),
@@ -290,7 +288,13 @@ def multithread_compute_correlation(
     n_s = X.shape[0]
     coordinates = list(combinations(range(n_s), 2)) + [(i, i) for i in range(n_s)]
     results = Parallel(n_jobs=n_jobs)(
-        delayed(thread_compute_correlation)(X, Y, i, j) for (i, j) in coordinates
+        delayed(thread_compute_correlation)(
+            X,
+            Y,
+            i,
+            j,
+        )
+        for (i, j) in coordinates
     )
     results = list(zip(*results))
     corr_same_sub_diff_TR = results[2]
