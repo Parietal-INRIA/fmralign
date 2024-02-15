@@ -4,9 +4,9 @@ import warnings
 
 import nibabel as nib
 import numpy as np
-from nilearn._utils.niimg_conversions import _check_same_fov
+from nilearn._utils.niimg_conversions import check_same_fov
 from nilearn.image import index_img, new_img_like, smooth_img
-from nilearn.masking import _apply_mask_fmri, intersect_masks
+from nilearn.masking import apply_mask_fmri, intersect_masks
 from nilearn.regions.parcellations import Parcellations
 
 
@@ -113,8 +113,8 @@ def _make_parcellation(
     """
     # check if clustering is provided
     if isinstance(clustering, nib.nifti1.Nifti1Image) or os.path.isfile(clustering):
-        _check_same_fov(masker.mask_img_, clustering)
-        labels = _apply_mask_fmri(clustering, masker.mask_img_).astype(int)
+        check_same_fov(masker.mask_img_, clustering)
+        labels = apply_mask_fmri(clustering, masker.mask_img_).astype(int)
 
     # otherwise check it's needed, if not return 1 everywhere
     elif n_pieces == 1:
@@ -147,9 +147,7 @@ def _make_parcellation(
             err.args += (errmsg,)
             raise err
 
-        labels = _apply_mask_fmri(parcellation.labels_img_, masker.mask_img_).astype(
-            int
-        )
+        labels = apply_mask_fmri(parcellation.labels_img_, masker.mask_img_).astype(int)
 
 
     if verbose > 0:

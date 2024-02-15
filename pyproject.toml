@@ -23,8 +23,8 @@ dependencies = [
     "scikit-learn",
     "joblib",
     "scipy",
-    "nibabel"
-    "nilearn>=0.10.2",
+    "nibabel",
+    "nilearn>=0.10.3",
     "POT",
     "fastsrm"
 

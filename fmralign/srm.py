@@ -15,7 +15,7 @@ from joblib import delayed, Parallel
 from nilearn.image import concat_imgs, load_img
 from sklearn.model_selection import ShuffleSplit
 from sklearn.base import BaseEstimator, TransformerMixin
-from nilearn.maskers._masker_validation import _check_embedded_nifti_masker
+from nilearn._utils.masker_validation import check_embedded_masker
 
 from ._utils import _make_parcellation, _intersect_clustering_mask
 
@@ -313,7 +313,7 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
             if isinstance(imgs[0], (list, np.ndarray)):
                 imgs = [concat_imgs(img) for img in imgs]
 
-        self.masker_ = _check_embedded_nifti_masker(self)
+        self.masker_ = check_embedded_masker(self)
         self.masker_.n_jobs = self.n_jobs  # self.n_jobs
 
         # if masker_ has been provided a mask_img
@@ -331,7 +331,7 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
                     self.clustering, self.masker_.mask_img
                 )
                 self.mask = reduced_mask
-                self.masker_ = _check_embedded_nifti_masker(self)
+                self.masker_ = check_embedded_masker(self)
                 self.masker_.n_jobs = self.n_jobs
                 self.masker_.fit()
                 warnings.warn(

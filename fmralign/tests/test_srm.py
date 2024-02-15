@@ -9,7 +9,7 @@ from fmralign.srm import PiecewiseModel, Identity
 
 
 def to_niimgs(X, dim):
-    from nilearn.masking import _unmask_from_to_3d_array
+    from nilearn.masking import unmask_from_to_3d_array
     import nibabel
 
     p = np.prod(dim)
@@ -19,9 +19,7 @@ def to_niimgs(X, dim):
     mask[: X.shape[-1]] = 1
     assert mask.sum() == X.shape[1]
     mask = mask.reshape(dim)
-    X = np.rollaxis(
-        np.array([_unmask_from_to_3d_array(x, mask) for x in X]), 0, start=4
-    )
+    X = np.rollaxis(np.array([unmask_from_to_3d_array(x, mask) for x in X]), 0, start=4)
     affine = np.eye(4)
     return (
         nibabel.Nifti1Image(X, affine),
