@@ -142,7 +142,7 @@ def tuning_correlation(X, Y):
     corr_mat = np.zeros((n, n))
     for i in range(n):
         for j in range(i, n):
-            corr_i_j = pearson_corr_coeff(X[i], Y[j], absolute=False)
+            corr_i_j = pearson_corr_coeff(X[i], Y[j], absolute=True)
             corr_mat[i, j] = corr_i_j
             corr_mat[j, i] = corr_i_j
 

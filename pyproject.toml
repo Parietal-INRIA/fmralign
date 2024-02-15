@@ -23,11 +23,11 @@ dependencies = [
     "scikit-learn",
     "joblib",
     "scipy",
-    "nibabel"
+    "nibabel",
     "nilearn>=0.10.2",
     "POT",
     "fastsrm"
-
+]
 dynamic = ["version"]
 
 [project.optional-dependencies]

@@ -16,7 +16,7 @@ import warnings
 from sklearn import neighbors
 from scipy.spatial import distance_matrix
 from nilearn._utils.niimg_conversions import (
-    safe_get_data,
+    _safe_get_data as safe_get_data,
 )
 from .linalg import procrustes
 from .linalg import ridge

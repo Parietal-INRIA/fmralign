@@ -479,7 +479,6 @@ class IndividualizedNeuralTuning(Alignment):
 
     def __init__(
         self,
-        template="pca",
         decomp_method=None,
         n_components=None,
         alignment_method="searchlight",
@@ -490,7 +489,6 @@ class IndividualizedNeuralTuning(Alignment):
         Parameters:
         --------
 
-        - template (str): The type of template to use for alignment. Default is "pca".
         - decomp_method (str): The decomposition method to use. Default is None.
         - alignment_method (str): The alignment method to use. Can be either "searchlight" or "parcelation", Default is "searchlight".
         - n_components (int): The number of latent dimensions to use in the shared stimulus information matrix. Default is None.
@@ -575,11 +573,13 @@ class IndividualizedNeuralTuning(Alignment):
         """
         Reconstructs the signal using the shared response and individual tuning.
 
-        Args:
-            shared_response (numpy.ndarray): The shared response of shape (n_t, n_t) or (n_t, latent_dim).
-            individual_tuning (numpy.ndarray): The individual tuning of shape (latent_dim, n_v) or (n_t, n_v).
+        Parameters:
+        --------
+        - shared_response (numpy.ndarray): The shared response of shape (n_t, n_t) or (n_t, latent_dim).
+        - individual_tuning (numpy.ndarray): The individual tuning of shape (latent_dim, n_v) or (n_t, n_v).
 
         Returns:
+        --------
             numpy.ndarray: The reconstructed signal of shape (n_t, n_v) (same shape as the original signal)
         """
         return (shared_response @ individual_tuning).astype(np.float32)
@@ -651,19 +651,19 @@ class IndividualizedNeuralTuning(Alignment):
         )
 
         # Stimulus matrix computation
-        if self.decomp_method is None:
-            full_signal = np.concatenate(self.denoised_signal, axis=1)
-            self.shared_response = self._stimulus_estimator(
-                full_signal, self.n_t, self.n_s, self.n_components
-            )
-            if tuning:
-                self.tuning_data = Parallel(n_jobs=self.n_jobs)(
-                    delayed(self._tuning_estimator)(
-                        self.shared_response,
-                        self.denoised_signal[i],
-                    )
-                    for i in range(self.n_s)
+
+        full_signal = np.concatenate(self.denoised_signal, axis=1)
+        self.shared_response = self._stimulus_estimator(
+            full_signal, self.n_t, self.n_s, self.n_components
+        )
+        if tuning:
+            self.tuning_data = Parallel(n_jobs=self.n_jobs)(
+                delayed(self._tuning_estimator)(
+                    self.shared_response,
+                    self.denoised_signal[i],
                 )
+                for i in range(self.n_s)
+            )
 
         return self
 
@@ -671,16 +671,14 @@ class IndividualizedNeuralTuning(Alignment):
         """
         Transforms the input test data using the hyperalignment model.
 
-        Args:
-            X (list of arrays):
-                The input test data.
-            verbose (bool, optional):
-                Whether to print verbose output. Defaults to False.
-            id (int, optional):
-                Identifier for the transformation. Defaults to None.
+        Parameters:
+        --------
+        - X (array-like): The test data of shape (n_subjects, n_samples, n_voxels).
+        - verbose (bool, optional): Whether to print progress information. Defaults to False.
 
         Returns:
-            numpy.ndarray: The transformed test data.
+        --------
+        - array-like: The transformed data of shape (n_subjects, n_samples, n_voxels).
         """
 
         full_signal = np.concatenate(X, axis=1, dtype=np.float32)
@@ -688,18 +686,16 @@ class IndividualizedNeuralTuning(Alignment):
         if verbose:
             print("Predict : Computing stimulus matrix...")
 
-        if self.decomp_method is None:
-            stimulus_ = self._stimulus_estimator(
-                full_signal, self.n_t, self.n_s, self.n_components
-            )
+        stimulus_ = self._stimulus_estimator(
+            full_signal, self.n_t, self.n_s, self.n_components
+        )
 
         if verbose:
             print("Predict : stimulus matrix shape: ", stimulus_.shape)
 
         reconstructed_signal = Parallel(n_jobs=self.n_jobs)(
-            delayed(
-                self._reconstruct_signal(stimulus_, T_est) for T_est in self.tuning_data
-            )
+            delayed(self._reconstruct_signal)(stimulus_, T_est)
+            for T_est in self.tuning_data
         )
 
         return np.array(reconstructed_signal, dtype=np.float32)
