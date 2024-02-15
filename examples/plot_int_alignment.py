@@ -53,7 +53,7 @@ imgs, df, mask_img = fetch_ibc_subjects_contrasts(
 )
 
 ###############################################################################
-# Definine a masker
+# Define a masker
 # -----------------
 # We define a nilearn masker that will be used to handle relevant data.
 #   For more information, visit :
