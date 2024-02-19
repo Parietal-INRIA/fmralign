@@ -41,16 +41,8 @@ warnings.filterwarnings("ignore")
 
 from fmralign.fetch_example_data import fetch_ibc_subjects_contrasts
 
-imgs, df, mask_img = fetch_ibc_subjects_contrasts(
-    [
-        "sub-01",
-        "sub-02",
-        "sub-04",
-        "sub-05",
-        "sub-06",
-        "sub-07",
-    ],
-)
+sub_list = ["sub-01", "sub-02", "sub-04", "sub-05", "sub-06", "sub-07"]
+imgs, df, mask_img = fetch_ibc_subjects_contrasts(sub_list)
 
 ###############################################################################
 # Define a masker
