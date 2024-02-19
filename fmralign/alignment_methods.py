@@ -488,9 +488,9 @@ class IndividualizedNeuralTuning(Alignment):
     ):
         """
         Initialize the IndividualizedNeuralTuning object.
+
         Parameters:
         --------
-
         decomp_method : str
              The decomposition method to use. If None, "pca" will be used. Can be ["pca", "procrustes"] Default is None.
         alignment_method : str
