@@ -20,16 +20,16 @@ def generate_dummy_signal(
 
     Parameters
     ----------
-    n_s : int
+    n_subjects : int
         Number of subjects.
-    n_t : int
+    n_timepoints : int
         Number of timepoints.
-    n_v : int
+    n_voxels : int
         Number of voxels.
     S_std : float, default=1
         Standard deviation of latent variables.
     latent_dim: int, defult=None
-        Number of latent dimensions. Defualts to n_t
+        Number of latent dimensions. Defualts to n_timepoints
     T_mean : float
         Mean of weights.
     T_std : float
@@ -44,15 +44,15 @@ def generate_dummy_signal(
 
     Returns
     -------
-    imgs_train : ndarray of shape (n_s, n_t, n_v)
+    imgs_train : ndarray of shape (n_subjects, n_timepoints, n_voxels)
         Training data.
-    imgs_test : ndarray of shape (n_s, n_t, n_v)
+    imgs_test : ndarray of shape (n_subjects, n_timepoints, n_voxels)
         Testing data.
-    S_train : ndarray of shape (n_t, latent_dim)
+    S_train : ndarray of shape (n_timepoints, latent_dim)
         Training latent variables.
-    S_test : ndarray of shape (n_t, latent_dim)
+    S_test : ndarray of shape (n_timepoints, latent_dim)
         Testing latent variables.
-    Ts : ndarray of shape (n_s, latent_dim , n_v)
+    Ts : ndarray of shape (n_subjects, latent_dim , n_voxels)
         Tuning matrices.
     """
     if latent_dim is None:

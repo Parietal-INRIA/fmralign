@@ -1,3 +1,9 @@
+"""Toy experiment to test INT on the two parts of the data (ie different runs
+of the experiment) to acess the validity of tuning computation. This code as
+no vocation to be an explanatory example, it is only used to test the INT
+method. It is not intended to be used as a tutorial.
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 from fmralign.alignment_methods import IndividualizedNeuralTuning as INT
@@ -15,9 +21,9 @@ from fmralign.hyperalignment.correlation import (
 #############################################################################
 
 
-n_s = 10
-n_t = 200
-n_v = 500
+n_subjects = 10
+n_timepoints = 200
+n_voxels = 500
 S_std = 5
 T_std = 1
 SNR = 100
@@ -35,9 +41,9 @@ decomposition_method = "pca"  # if None, SVD is used
     stimulus_run_2,
     data_tuning,
 ) = generate_dummy_signal(
-    n_subjects=n_s,
-    n_timepoints=n_t,
-    n_voxels=n_v,
+    n_subjects=n_subjects,
+    n_timepoints=n_timepoints,
+    n_voxels=n_voxels,
     S_std=S_std,
     T_std=T_std,
     latent_dim=latent_dim,
@@ -49,7 +55,7 @@ SEARCHLIGHT = False
 
 if SEARCHLIGHT:
     searchlights, dists = generate_dummy_searchlights(
-        n_searchlights=n_v, n_v=n_v, radius=5
+        n_searchlights=n_voxels, n_v=n_voxels, radius=5
     )
     int1 = INT(
         n_components=latent_dim,
@@ -70,7 +76,7 @@ if SEARCHLIGHT:
 
 
 else:
-    parcels = [range(n_v)]
+    parcels = [range(n_voxels)]
     int1 = INT(
         n_components=latent_dim,
         decomp_method=decomposition_method,
@@ -116,7 +122,7 @@ ax[0, 0].set_xlabel("Subjects, Run 1")
 ax[0, 0].set_ylabel("Subjects, Run 2")
 fig.colorbar(ax[0, 0].imshow(correlation_tuning), ax=ax[0, 0])
 
-random_colors = np.random.rand(n_s, 3)
+random_colors = np.random.rand(n_subjects, 3)
 # MDS of predicted images
 corr_tunning = compute_pearson_corr(data_pred, data_run_2)
 data_pred_reduced, data_test_reduced = matrix_MDS(
@@ -190,7 +196,7 @@ fig.colorbar(ax[1, 2].imshow(corr_reconstruction), ax=ax[1, 2])
 plt.rc("font", size=10)
 # Define small font for titles
 fig.suptitle(
-    f"Correlation Run 1/2\n ns={n_s}, nt={n_t}, nv={n_v}, S_std={S_std}, T_std={T_std}, SNR={SNR}, latent space dim={latent_dim}"
+    f"Correlation Run 1/2\n ns={n_subjects}, nt={n_timepoints}, nv={n_voxels}, S_std={S_std}, T_std={T_std}, SNR={SNR}, latent space dim={latent_dim}"
 )
 plt.tight_layout()
 
