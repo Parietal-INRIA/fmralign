@@ -236,7 +236,8 @@ def compute_searchlights(
     return_dist_mat=False,
     n_jobs=1,
 ):
-    """Implement search_light analysis using an arbitrary type of classifier.
+    """
+    Compute searchlights for a given 4D image and mask.
 
     Parameters
     ----------
@@ -260,11 +261,6 @@ def compute_searchlights(
         Whether to return the distance matrix between voxels in the mask.
         Defaults to False.
 
-    groups : array-like of shape (n_samples,), optional
-        Labels of samples for each subject. If provided, the searchlights
-        will be computed within each group separately.
-        Defaults to None.
-
     verbose : int, optional
         Verbosity level (0 means no message).
         Defaults to 0.
@@ -278,10 +274,6 @@ def compute_searchlights(
     A_list : list of lists
         Contains the boolean indices for each sphere.
         shape: (number of seeds, number of voxels)
-
-    dist_matrix : 2D numpy.ndarray
-        Distance matrix between voxels in the mask.
-        shape: (number of voxels, number of voxels)
 
     dists : list of lists
         Contains the distance between each voxel and the seed.
@@ -332,6 +324,24 @@ def compute_searchlights(
 
 
 def searchlight_weights(searchlights, dists, radius):
+    """
+    Calculate the weights for each searchlight based on the distances from the center.
+
+    Parameters:
+    ----------
+    searchlights :list of arrays
+        List of searchlights, where each searchlight is represented as an array of voxel indices.
+    dists : array
+        Array of distances from the center for each searchlight.
+    radius : float
+        Radius of the searchlight.
+
+    Returns:
+    --------
+    weights : list
+        List of weights for each searchlight.
+
+    """
     nv = np.concatenate(searchlights).max() + 1
     weights_sum = np.zeros((nv,))
     for sl, d in zip(searchlights, dists):
@@ -354,7 +364,7 @@ def searchlight_weights(searchlights, dists, radius):
 def iter_hyperalignment(
     X,
     Y,
-    searchlights,
+    regions,
     sl_func,
     return_betas=False,
 ):
@@ -367,8 +377,8 @@ def iter_hyperalignment(
         The source data matrix.
     Y : array-like of shape (n_samples, n_features)
         The target data matrix.
-    searchlights : array-like
-        The indices of the searchlight regions.
+    regions : array-like
+        The indices of the regions.
     sl_func : function
         The function to use for hyperalignment.
     weights : array-like, optional
@@ -388,7 +398,7 @@ def iter_hyperalignment(
     else:
         Yhat = np.zeros_like(X, dtype=np.float32)
 
-    searchlights_iter = searchlights
+    searchlights_iter = regions
     for sl in searchlights_iter:
         x, y = X[:, sl], Y[:, sl]
         t = sl_func(x, y)
@@ -480,7 +490,6 @@ def piece_ridge(
         Y,
         regions,
         sl_func=sl_func,
-        verbose=verbose,
         return_betas=return_betas,
     )
     return T

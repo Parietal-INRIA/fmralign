@@ -129,13 +129,7 @@ print(f"We will cluster them in {n_pieces} regions")
 from fmralign.metrics import score_voxelwise
 from fmralign.pairwise_alignment import PairwiseAlignment
 
-methods = [
-    "identity",
-    "scaled_orthogonal",
-    "ridge_cv",
-    "optimal_transport",
-    "individualized_neural_tuning",
-]
+methods = ["identity", "scaled_orthogonal", "ridge_cv", "optimal_transport"]
 
 for method in methods:
     alignment_estimator = PairwiseAlignment(
