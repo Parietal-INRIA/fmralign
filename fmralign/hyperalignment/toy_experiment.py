@@ -22,7 +22,7 @@ S_std = 5
 T_std = 1
 SNR = 100
 latent_dim = 15  # if None, latent_dim = n_t
-decomposition_method = None  # if None, SVD is used
+decomposition_method = "pca"  # if None, SVD is used
 
 
 #############################################################################
@@ -74,12 +74,10 @@ else:
     int1 = INT(
         n_components=latent_dim,
         decomp_method=decomposition_method,
-        alignment_method="parcelation",
     )
     int2 = INT(
         n_components=latent_dim,
         decomp_method=decomposition_method,
-        alignment_method="parcelation",
     )
     int_first_part = int1.fit(
         data_run_1, parcels=parcels, verbose=False

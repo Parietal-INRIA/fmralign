@@ -547,7 +547,7 @@ class IndividualizedNeuralTuning(Alignment):
         array-like: The estimated tuning matrix for the given target.
 
         """
-        if shared_response.shape[1] < shared_response.shape[0]:
+        if shared_response.shape[1] != shared_response.shape[0]:
             return (np.linalg.pinv(shared_response)).dot(target)
         return np.linalg.inv(shared_response).dot(target)
 

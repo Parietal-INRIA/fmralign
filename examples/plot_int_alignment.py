@@ -112,6 +112,7 @@ average_subject = masker.inverse_transform(average_img)
 
 from nilearn.image import index_img
 from fmralign.alignment_methods import IndividualizedNeuralTuning
+from fmralign.hyperalignment.piecewise_alignment import PiecewiseAlignment
 from fmralign.hyperalignment.regions import compute_parcels
 
 ###############################################################################
@@ -126,36 +127,30 @@ from fmralign.hyperalignment.regions import compute_parcels
 
 train_index = range(53)
 test_index = range(53, 106)
-full_index = range(106)
 
-train_data = np.array(masked_imgs)[:, train_index, :]
-test_data = np.array(masked_imgs)[:, full_index, :]
+denoising_data = np.array(masked_imgs)[:, train_index, :]
+training_data = np.array(masked_imgs)[:-1]
 target_test_masked = np.array(masked_imgs)[:, test_index, :]
 
 
 parcels = compute_parcels(niimg=template_train[0], mask=masker, n_parcels=100, n_jobs=5)
+denoiser = PiecewiseAlignment(alignment_method="parcelation", n_jobs=5)
+denoised_signal = denoiser.fit_transform(X=denoising_data, regions=parcels)
 model = IndividualizedNeuralTuning(
-    n_jobs=8, alignment_method="parcelation", n_components=20
+    n_jobs=8, alignment_method="parcelation", n_components=None
 )
-model.fit(train_data, parcels=parcels, verbose=False)
-
-train_stimulus = np.copy(model.shared_response)
-
-train_tuning = model._tuning_estimator(
-    shared_response=train_stimulus, target=model.denoised_signal[-1]
+model.fit(training_data, parcels=parcels, verbose=False)
+stimulus_ = np.copy(model.shared_response)
+target_tuning = model._tuning_estimator(
+    shared_response=stimulus_[train_index], target=denoised_signal[-1]
 )
-model_bis = IndividualizedNeuralTuning(
-    n_jobs=8, alignment_method="parcelation", n_components=20
-)
-model_bis.fit(test_data, parcels=parcels, verbose=False)
-test_stimulus = np.copy(model_bis.shared_response)
 # %%
 # We input the mapping image target_train in a list, we could have input more
 # than one subject for which we'd want to predict : [train_1, train_2 ...]
 
-stimulus_ = np.copy(model_bis.shared_response)
+
 prediction_from_template = model._reconstruct_signal(
-    shared_response=stimulus_[test_index], individual_tuning=train_tuning
+    shared_response=stimulus_[test_index], individual_tuning=target_tuning
 )
 prediction_from_template = masker.inverse_transform(prediction_from_template)
 
