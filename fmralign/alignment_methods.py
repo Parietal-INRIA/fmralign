@@ -588,13 +588,13 @@ class IndividualizedNeuralTuning(Alignment):
         Parameters:
         --------
         shared_response : numpy.ndarray
-             The shared response of shape (n_t, n_t) or (n_t, latent_dim).
+             The shared response of shape (n_timeframes, n_timeframes) or (n_timeframes, latent_dim).
         individual_tuning : numpy.ndarray
-             The individual tuning of shape (latent_dim, n_v) or (n_t, n_v).
+             The individual tuning of shape (latent_dim, n_voxels) or (n_timeframes, n_voxels).
 
         Returns:
         --------
-        numpy.ndarray: The reconstructed signal of shape (n_t, n_v) (same shape as the original signal)
+        ndarray: The reconstructed signal of shape (n_timeframes, n_voxels) (same shape as the original signal)
         """
         return (shared_response @ individual_tuning).astype(np.float32)
 
@@ -628,8 +628,6 @@ class IndividualizedNeuralTuning(Alignment):
             Whether to compute the tuning weights. Defaults to True.
         verbose : bool(optional)
             Whether to print progress information. Defaults to True.
-        id : str(optional)
-            An identifier for caching purposes. Defaults to None.
 
         Returns:
         --------
@@ -706,8 +704,9 @@ class IndividualizedNeuralTuning(Alignment):
             print("Predict : Computing stimulus matrix...")
 
         stimulus_ = self._stimulus_estimator(
-            full_signal, self.n_time_points, self.n_subjects, self.n_components
+            full_signal, self.n_subjects, self.n_components
         )
+        print("Predict : stimulus matrix shape: ", stimulus_.shape)
 
         if verbose:
             print("Predict : stimulus matrix shape: ", stimulus_.shape)

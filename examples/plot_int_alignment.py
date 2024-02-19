@@ -73,13 +73,13 @@ from nilearn.image import concat_imgs
 template_train = []
 for i in range(6):
     template_train.append(concat_imgs(imgs[i]))
-target_train = df[df.subject == "sub-07"][df.acquisition == "ap"].path.values
+
 
 # For subject sub-07, we split it in two folds:
 #   - target train: sub-07 AP contrasts, used to learn alignment to template
 #   - target test: sub-07 PA contrasts, used as a ground truth to score predictions
 # We make a single 4D Niimg from our list of 3D filenames
-
+target_train = df[df.subject == "sub-07"][df.acquisition == "ap"].path.values
 target_train = concat_imgs(target_train)
 target_train_data = masker.transform(target_train)
 target_test = df[df.subject == "sub-07"][df.acquisition == "pa"].path.values
@@ -138,8 +138,12 @@ model = IndividualizedNeuralTuning(
     n_jobs=8, alignment_method="parcelation", n_components=20
 )
 model.fit(train_data, parcels=parcels, verbose=False)
+
 train_stimulus = np.copy(model.shared_response)
-train_tuning = np.linalg.pinv(train_stimulus) @ model.denoised_signal[-1]
+
+train_tuning = model._tuning_estimator(
+    shared_response=train_stimulus, target=model.denoised_signal[-1]
+)
 model_bis = IndividualizedNeuralTuning(
     n_jobs=8, alignment_method="parcelation", n_components=20
 )
@@ -150,7 +154,9 @@ test_stimulus = np.copy(model_bis.shared_response)
 # than one subject for which we'd want to predict : [train_1, train_2 ...]
 
 stimulus_ = np.copy(model_bis.shared_response)
-prediction_from_template = stimulus_[test_index] @ train_tuning
+prediction_from_template = model._reconstruct_signal(
+    shared_response=stimulus_[test_index], individual_tuning=train_tuning
+)
 prediction_from_template = masker.inverse_transform(prediction_from_template)
 
 

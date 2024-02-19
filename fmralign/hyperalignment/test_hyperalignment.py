@@ -6,8 +6,8 @@ import numpy as np
 def test_int_fit_predict():
     """Test if the outputs and arguments of the INT are the correct format"""
     # Create random data
-    X_train, X_test, S_true_first_part, S_true_second_part, Ts = generate_dummy_signal(
-        n_subjects=5,
+    X_train, X_test, S_true_first_part, S_true_second_part, _ = generate_dummy_signal(
+        n_subjects=7,
         n_timepoints=50,
         n_voxels=300,
         S_std=1,
@@ -80,7 +80,7 @@ def test_int_with_searchlight():
         seed=0,
     )
     searchlights, dists = generate_dummy_searchlights(
-        n_searchlights=10, n_v=300, radius=5, seed=0
+        n_searchlights=10, n_voxels=30, radius=5, seed=0
     )
     from fmralign.hyperalignment.correlation import (
         tuning_correlation,

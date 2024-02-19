@@ -13,18 +13,11 @@ from fmralign.alignment_methods import (
     POTAlignment,
     RidgeAlignment,
     ScaledOrthogonalAlignment,
-    IndividualizedNeuralTuning as INT,
     _voxelwise_signal_projection,
     optimal_permutation,
     scaled_procrustes,
 )
 from fmralign.tests.utils import zero_mean_coefficient_determination
-from fmralign.generate_data import (
-    generate_dummy_signal,
-    generate_dummy_searchlights,
-)
-
-from fmralign.hyperalignment.regions import create_parcels_from_labels
 
 
 def test_scaled_procrustes_algorithmic():
@@ -209,46 +202,3 @@ def test_ott_backend():
     algo.fit(X, Y)
     old_implem.fit(X, Y)
     assert_array_almost_equal(algo.R, old_implem.R, decimal=3)
-
-
-def test_searchlight_alignment_with_ridge():
-    n_voxels = 99
-    n_time_points = 149
-    n_searchlights = 92
-    n_subjects = 5
-
-    radius = 20
-    searchlights, dists = generate_dummy_searchlights(
-        n_searchlights=n_searchlights,
-        n_v=n_voxels,
-        radius=radius,
-        seed=0,
-    )
-
-    X_train, X_test, _, _, _ = generate_dummy_signal(
-        n_timepoints=n_time_points, n_voxels=n_voxels, n_subjects=n_subjects
-    )
-
-    model = INT(n_jobs=5)
-    model.fit(X_train, searchlights=searchlights, dists=dists, radius=radius)
-    X_pred = model.transform(X_test)
-    assert X_pred.shape == X_test.shape
-
-
-def test_parcel_alignment():
-    n_voxels = 99
-    n_time_points = 149
-    n_subjects = 5
-
-    n_parcels = 10
-    labels = np.arange(n_voxels) % n_parcels + 1
-    parcels = create_parcels_from_labels(labels)
-
-    X_train, X_test, _, _, _ = generate_dummy_signal(
-        n_timepoints=n_time_points, n_voxels=n_voxels, n_subjects=n_subjects
-    )
-
-    model = INT(n_jobs=5, alignment_method="parcel")
-    model.fit(X_train, parcels=parcels)
-    X_pred = model.transform(X_test)
-    assert X_pred.shape == X_test.shape

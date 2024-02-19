@@ -120,7 +120,7 @@ def generate_dummy_signal(
 
 def generate_dummy_searchlights(
     n_searchlights: int,
-    n_v: int,
+    n_voxels: int,
     radius: int,
     sl_size: int = 5,
     seed: int = 0,
@@ -131,7 +131,7 @@ def generate_dummy_searchlights(
     ----------
     n_searchlights : int
         Number of searchlights.
-    n_v : int
+    n_voxels : int
         Number of voxels.
     radius : int
         Radius of searchlights.
@@ -148,6 +148,6 @@ def generate_dummy_searchlights(
         Distances.
     """
     rng = np.random.RandomState(seed=seed)
-    searchlights = rng.randint(n_v, size=(n_searchlights, sl_size))
+    searchlights = rng.randint(n_voxels, size=(n_searchlights, sl_size))
     dists = rng.randint(radius, size=searchlights.shape)
     return searchlights, dists
