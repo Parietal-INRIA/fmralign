@@ -481,7 +481,7 @@ class IndividualizedNeuralTuning(Alignment):
 
     def __init__(
         self,
-        decomp_method=None,
+        decomp_method="pca",
         n_components=None,
         alignment_method="searchlight",
         n_jobs=1,
@@ -492,7 +492,7 @@ class IndividualizedNeuralTuning(Alignment):
         Parameters:
         --------
         decomp_method : str
-             The decomposition method to use. If None, "pca" will be used. Can be ["pca", "procrustes"] Default is None.
+             The decomposition method to use. Can be ["pca", "pcav1", "procrustes"] Default is "pca".
         alignment_method : str
              The alignment method to use. Can be either "searchlight" or "parcelation", Default is "searchlight".
         n_components : int
@@ -535,7 +535,8 @@ class IndividualizedNeuralTuning(Alignment):
         Parameters:
         --------
         shared_response : array-like
-             The shared response matrix.
+             The shared response matrix of shape (n_timepoints, k)
+             where k is the dimension of the sources latent space.
         target : array-like
              The target matrix.
         latent_dim : int, optional
@@ -551,31 +552,31 @@ class IndividualizedNeuralTuning(Alignment):
         return np.linalg.inv(shared_response).dot(target)
 
     @staticmethod
-    def _stimulus_estimator(full_signal, n_t, n_s, latent_dim=None, scaling=True):
+    def _stimulus_estimator(full_signal, n_subjects, latent_dim=None, scaling=True):
         """
         Estimates the stimulus matrix for the Individualized Neural Tuning model.
 
         Parameters:
         --------
         full_signal : numpy.ndarray
-             The full signal of shape (n_t, n_s).
-        n_t : int
-             The number of time points.
-        n_s : int
+             Concatenated signal for all subjects,
+             of shape (n_timepoints, n_subjects * n_voxels).
+        n_subjects : int
              The number of subjects.
         latent_dim : int, optional
              The number of latent dimensions to use. Defaults to None.
         scaling : bool, optional
              Whether to scale the stimulus matrix sources. Defaults to True.
         """
+        n_timepoints = full_signal.shape[0]
         if scaling:
             U = svd_pca(full_signal)
         else:
             U, _, _ = safe_svd(full_signal)
-        if latent_dim is not None and latent_dim < n_t:
+        if latent_dim is not None and latent_dim < n_timepoints:
             U = U[:, :latent_dim]
 
-        stimulus = np.sqrt(n_s) * U
+        stimulus = np.sqrt(n_subjects) * U
         stimulus = stimulus.astype(np.float32)
         return stimulus
 
@@ -639,10 +640,10 @@ class IndividualizedNeuralTuning(Alignment):
 
         X_ = np.array(X, copy=True, dtype=np.float32)
 
-        self.n_s, self.n_t, self.n_v = X_.shape
+        self.n_subjects, self.n_time_points, self.n_voxels = X_.shape
 
-        self.tuning_data = np.empty(self.n_s, dtype=np.float32)
-        self.denoised_signal = np.empty(self.n_s, dtype=np.float32)
+        self.tuning_data = np.empty(self.n_subjects, dtype=np.float32)
+        self.denoised_signal = np.empty(self.n_subjects, dtype=np.float32)
 
         if searchlights is None:
             self.regions = parcels
@@ -670,7 +671,7 @@ class IndividualizedNeuralTuning(Alignment):
 
         full_signal = np.concatenate(self.denoised_signal, axis=1)
         self.shared_response = self._stimulus_estimator(
-            full_signal, self.n_t, self.n_s, self.n_components
+            full_signal, self.n_subjects, self.n_components
         )
         if tuning:
             self.tuning_data = Parallel(n_jobs=self.n_jobs)(
@@ -678,7 +679,7 @@ class IndividualizedNeuralTuning(Alignment):
                     self.shared_response,
                     self.denoised_signal[i],
                 )
-                for i in range(self.n_s)
+                for i in range(self.n_subjects)
             )
 
         return self
@@ -690,13 +691,13 @@ class IndividualizedNeuralTuning(Alignment):
         Parameters:
         --------
         X : array-like
-            The test data of shape (n_subjects, n_samples, n_voxels).
+            The test data of shape (n_subjects, n_timepoints, n_voxels).
         verbose : bool(optional)
             Whether to print progress information. Defaults to False.
 
         Returns:
         --------
-        array-like: The transformed data of shape (n_subjects, n_samples, n_voxels).
+        array-like: The transformed data of shape (n_subjects, n_timepoints, n_voxels).
         """
 
         full_signal = np.concatenate(X, axis=1, dtype=np.float32)
@@ -705,7 +706,7 @@ class IndividualizedNeuralTuning(Alignment):
             print("Predict : Computing stimulus matrix...")
 
         stimulus_ = self._stimulus_estimator(
-            full_signal, self.n_t, self.n_s, self.n_components
+            full_signal, self.n_time_points, self.n_subjects, self.n_components
         )
 
         if verbose:

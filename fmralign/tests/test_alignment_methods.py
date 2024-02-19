@@ -5,12 +5,6 @@ from numpy.testing import assert_array_almost_equal
 from scipy.sparse import csc_matrix
 from scipy.linalg import orthogonal_procrustes
 
-# add directory to path
-import sys
-import os
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from fmralign.alignment_methods import (
     DiagonalAlignment,
     Hungarian,
@@ -232,7 +226,7 @@ def test_searchlight_alignment_with_ridge():
     )
 
     X_train, X_test, _, _, _ = generate_dummy_signal(
-        n_t=n_time_points, n_v=n_voxels, n_s=n_subjects
+        n_timepoints=n_time_points, n_voxels=n_voxels, n_subjects=n_subjects
     )
 
     model = INT(n_jobs=5)
@@ -251,7 +245,7 @@ def test_parcel_alignment():
     parcels = create_parcels_from_labels(labels)
 
     X_train, X_test, _, _, _ = generate_dummy_signal(
-        n_t=n_time_points, n_v=n_voxels, n_s=n_subjects
+        n_timepoints=n_time_points, n_voxels=n_voxels, n_subjects=n_subjects
     )
 
     model = INT(n_jobs=5, alignment_method="parcel")

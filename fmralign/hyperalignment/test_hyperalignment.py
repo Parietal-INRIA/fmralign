@@ -7,9 +7,9 @@ def test_int_fit_predict():
     """Test if the outputs and arguments of the INT are the correct format"""
     # Create random data
     X_train, X_test, S_true_first_part, S_true_second_part, Ts = generate_dummy_signal(
-        n_s=5,
-        n_t=50,
-        n_v=300,
+        n_subjects=5,
+        n_timepoints=50,
+        n_voxels=300,
         S_std=1,
         T_std=1,
         latent_dim=6,
@@ -61,17 +61,17 @@ def test_int_fit_predict():
     assert 3 * np.mean(corr2_out) < np.mean(np.diag(corr2))
     assert 3 * np.mean(corr3_out) < np.mean(np.diag(corr3))
     assert 3 * np.mean(corr4_out) < np.mean(np.diag(corr4))
-    assert int1.tuning_data[0].shape == (6, int1.n_v)
-    assert int2.tuning_data[0].shape == (6, int2.n_v)
-    assert int1.shared_response.shape == (int1.n_t, 6)
+    assert int1.tuning_data[0].shape == (6, int1.n_voxels)
+    assert int2.tuning_data[0].shape == (6, int2.n_voxels)
+    assert int1.shared_response.shape == (int1.n_time_points, 6)
     assert X_pred.shape == X_test.shape
 
 
 def test_int_with_searchlight():
     X_train, X_test, stimulus_train, stimulus_test, _ = generate_dummy_signal(
-        n_s=5,
-        n_t=50,
-        n_v=300,
+        n_subjects=5,
+        n_timepoints=50,
+        n_voxels=300,
         S_std=1,
         T_std=1,
         latent_dim=6,
@@ -118,7 +118,7 @@ def test_int_with_searchlight():
     assert 3 * np.mean(corr2_out) < np.mean(np.diag(corr2))
     assert 3 * np.mean(corr3_out) < np.mean(np.diag(corr3))
     assert 3 * np.mean(corr4_out) < np.mean(np.diag(corr4))
-    assert model1.tuning_data[0].shape == (6, model1.n_v)
-    assert model2.tuning_data[0].shape == (6, model2.n_v)
-    assert model1.shared_response.shape == (model1.n_t, 6)
+    assert model1.tuning_data[0].shape == (6, model1.n_voxels)
+    assert model2.tuning_data[0].shape == (6, model2.n_voxels)
+    assert model1.shared_response.shape == (model1.n_time_points, 6)
     assert X_pred.shape == X_test.shape

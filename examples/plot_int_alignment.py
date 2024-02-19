@@ -135,13 +135,13 @@ target_test_masked = np.array(masked_imgs)[:, test_index, :]
 
 parcels = compute_parcels(niimg=template_train[0], mask=masker, n_parcels=100, n_jobs=5)
 model = IndividualizedNeuralTuning(
-    n_jobs=8, alignment_method="parcellation", n_components=None
+    n_jobs=8, alignment_method="parcelation", n_components=20
 )
 model.fit(train_data, parcels=parcels, verbose=False)
 train_stimulus = np.copy(model.shared_response)
 train_tuning = np.linalg.pinv(train_stimulus) @ model.denoised_signal[-1]
 model_bis = IndividualizedNeuralTuning(
-    n_jobs=8, alignment_method="parcellation", n_components=None
+    n_jobs=8, alignment_method="parcelation", n_components=20
 )
 model_bis.fit(test_data, parcels=parcels, verbose=False)
 test_stimulus = np.copy(model_bis.shared_response)

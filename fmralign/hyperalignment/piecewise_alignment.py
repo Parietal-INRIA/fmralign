@@ -148,7 +148,6 @@ class PiecewiseAlignment(BaseEstimator, TransformerMixin):
             regions=regions,
             n_jobs=self.n_jobs,
             template_kind=self.template_kind,
-            verbose=self.verbose,
             common_topography=self.common_topography,
             weights=self.weights,
         )

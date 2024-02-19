@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Hyperalignment-base prediction using Feilong Ma's IndividualNeuralTuning Model.
+Hyperalignment-base prediction using Hugo Richard's FastSRM.
 See article : https://doi.org/10.1162/imag_a_00032
 
 ==========================

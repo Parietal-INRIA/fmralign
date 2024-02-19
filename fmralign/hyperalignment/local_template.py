@@ -1,8 +1,6 @@
 """ Local template computation functions. Those functions are part of the warp hyperalignment
-introducted by Feilong Ma et al. 2023. The functions are adapted from the original code and
-adapted for more general regionations approches.
+introducted by Feilong Ma et al. 2023.
 """
-
 
 import numpy as np
 from scipy.stats import zscore
@@ -20,7 +18,7 @@ def PCA_decomposition(
 
     Parameters
     ----------
-    X : ndarray of shape (ns, nt, nv)
+    X : ndarray of shape (n_subjects, n_timepoints, n_voxels)
         The input data array.
     n_components : int or None
         The number of components to keep. If None, all components are kept.
@@ -33,8 +31,8 @@ def PCA_decomposition(
 
     Returns
     -------
-    XX : ndarray of shape (nt, npc)
-    cc : ndarray of shape (npc, ns, nv)
+    XX : ndarray of shape (n_timepoints, n_components)
+    cc : ndarray of shape (n_components, n_subjects, n_voxels)
     """
     ns, nt, nv = X.shape
     X = X.transpose(1, 0, 2).reshape(nt, ns * nv).astype(np.float32)
@@ -88,21 +86,21 @@ def compute_PCA_template(X, sl=None, n_components=None, flavor="sklearn", demean
     Parameters:
     -----------
 
-    - X (ndarray):
-        The input data array of shape (n_samples, n_features, n_timepoints).
-    - sl (slice, optional):
-        The slice of timepoints to consider. Defaults to None.
-    - n_components (int, optional):
-        The maximum number of principal components to keep. Defaults to None.
-    - flavor (str, optional):
+    X : ndarray of shape (n_samples, n_features, n_timepoints)
+        The input data array.
+    sl : slice(optional)
+        The region indices for searchlight-based template computation. Defaults to None.
+    n_components : int(optional)
+        The maximum number of principal components to keep. If None, all components will be kept. Defaults to None.
+    flavor : str(optional)
         The flavor of PCA algorithm to use. Defaults to "sklearn".
-    - demean (bool, optional):
+    demean : bool(optional)
         Whether to demean the data before performing PCA. Defaults to False.
 
     Returns:
     --------
 
-    XX (ndarray):
+    XX : ndarray
         The PCA template array of shape (n_samples, n_features, n_components).
     """
     if sl is not None:
@@ -118,16 +116,39 @@ def compute_PCA_template(X, sl=None, n_components=None, flavor="sklearn", demean
 
 
 def compute_PCA_var1_template(
-    dss, sl=None, n_components=None, flavor="sklearn", demean=True
+    X, sl=None, n_components=None, flavor="sklearn", demean=True
 ):
+    """
+    Compute the PCA template from the input data.
+
+    Parameters:
+    -----------
+
+    X : ndarray of shape (n_samples, n_features, n_timepoints)
+        The input data array.
+    sl : slice(optional)
+        The region indices for searchlight-based template computation. Defaults to None.
+    n_components : int(optional)
+        The maximum number of principal components to keep. If None, all components will be kept. Defaults to None.
+    flavor : str(optional)
+        The flavor of PCA algorithm to use. Defaults to "sklearn".
+    demean : bool(optional)
+        Whether to demean the data before performing PCA. Defaults to False.
+
+    Returns:
+    --------
+
+    XX : ndarray
+        The PCA template array of shape (n_samples, n_features, n_components).
+    """
     if sl is not None:
-        dss = dss[:, :, sl]
+        X = X[:, :, sl]
     XX, cc = PCA_decomposition(
-        dss, n_components=n_components, flavor=flavor, adjust_ns=False, demean=demean
+        X, n_components=n_components, flavor=flavor, adjust_ns=False, demean=demean
     )
     w = np.sqrt(np.sum(cc**2, axis=2)).mean(axis=1)
     XX *= w[np.newaxis]
-    return XX
+    return XX.astype(np.float32)
 
 
 def compute_procrustes_template(
@@ -142,19 +163,27 @@ def compute_procrustes_template(
     """
     Compute the Procrustes template for a given set of data.
 
-    Args:
-        X (ndarray): The input data array of shape (n_samples, n_features, n_regions).
-        region (int or None, optional): The index of the region to consider. If None, all regions are considered. Defaults to None.
-        reflection (bool, optional): Whether to allow reflection in the Procrustes alignment. Defaults to True.
-        scaling (bool, optional): Whether to allow scaling in the Procrustes alignment. Defaults to False.
-        zscore_common (bool, optional): Whether to z-score the aligned data to have zero mean and unit variance. Defaults to True.
-        level2_iter (int, optional): The number of iterations for the level 2 alignment. Defaults to 1.
-        X2 (ndarray or None, optional): The second set of input data array of shape (n_samples, n_features, n_regions). Only used for level 2 alignment. Defaults to None.
-        debug (bool, optional): Whether to display progress bars during alignment. Defaults to False.
+    Parameters:
+    -----------
+    X : ndarray of shape (n_subjects, n_timepoints, n_voxels)
+        The input data array.
+    region : arraylike
+        The index of the region to consider. If None, all regions are considered. Defaults to None.
+    reflection : bool (optional)
+        Whether to allow reflection in the Procrustes alignment. Defaults to True.
+    scaling bool (optional)
+        Whether to allow scaling in the Procrustes alignment. Defaults to False.
+    zscore_common : bool(optional)
+        Whether to z-score the aligned data to have zero mean and unit variance. Defaults to True.
+    level2_iter : int(optional)
+        The number of iterations for the level 2 alignment. Defaults to 1.
+    X2 : ndarray(optional)
+        The second set of input data array of shape (n_samples, n_features, n_regions). Only used for level 2 alignment. Defaults to None.
 
     Returns:
-        ndarray: The computed Procrustes template.
-
+    --------
+    common_space: ndarray
+        The computed Procrustes template.
     """
     if region is not None:
         X = X[:, :, region]
@@ -216,21 +245,30 @@ def compute_template(
     """
     Compute a template from a set of datasets.
 
-    ----------
     Parameters:
+    -----------
 
-       - X (ndarray): The input datasets.
-       - region (ndarray or None): The region indices for searchlight or region-based template computation.
-       - sl (ndarray or None): The searchlight indices for searchlight-based template computation.
-       - region (int or None, optional): The index of the region to consider. If None, all regions are considered (or searchlights). Defaults to None.
-       - kind (str): The type of template computation algorithm to use. Can be "pca", "pcav1", "pcav2", or "cls".
-       - n_components (int or None): The maximum number of principal components to use for PCA-based template computation.
-       - common_topography (bool): Whether to enforce common topography across datasets.
-       - demean (bool): Whether to demean the datasets before template computation.
+    X : ndarray of shape (n_subjects, n_timepoints, n_voxels)
+        The input datasets.
+    region : ndarray or None
+        The region indices for searchlight or region-based template computation.
+    sl : ndarray or None
+        The searchlight indices for searchlight-based template computation.
+    region : int
+        The index of the region to consider.
+    kind : str
+        The type of template computation algorithm to use. Can be "pca", "pcav1", "pcav2", or "cls".
+    n_components : int(optional)
+        The maximum number of principal components to use for PCA-based template computation. Defaults to 150.
+    common_topography : bool(optional)
+        Whether to enforce common topography across datasets. Defaults to True.
+    demean : bool(optional)
+        Whether to demean the datasets before template computation. Defaults to True.
 
-    ----------
     Returns:
-        tmpl : The computed template on all parcels (or searchlights).
+    --------
+    tmpl : ndaray of shape (n_timepoints, n_voxels)
+        The computed template on all parcels (or searchlights).
     """
     mapping = {
         "pca": compute_PCA_template,

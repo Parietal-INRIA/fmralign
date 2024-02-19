@@ -5,9 +5,9 @@ from fastsrm.srm import projection
 
 
 def generate_dummy_signal(
-    n_s: int,
-    n_t: int,
-    n_v: int,
+    n_subjects: int,
+    n_timepoints: int,
+    n_voxels: int,
     S_std=1,
     latent_dim=None,
     T_mean=0,
@@ -56,30 +56,30 @@ def generate_dummy_signal(
         Tuning matrices.
     """
     if latent_dim is None:
-        latent_dim = n_t
+        latent_dim = n_timepoints
 
     rng = np.random.RandomState(seed=seed)
 
     if generative_method == "custom":
-        sigma = n_s * np.arange(1, latent_dim + 1)
+        sigma = n_subjects * np.arange(1, latent_dim + 1)
         # np.random.shuffle(sigma)
         # Generate common signal matrix
-        S_train = S_std * np.random.randn(n_t, latent_dim)
+        S_train = S_std * np.random.randn(n_timepoints, latent_dim)
         # Normalize each row to have unit norm
         S_train = S_train / np.linalg.norm(S_train, axis=0, keepdims=True)
         S_train = S_train @ np.diag(sigma)
-        S_test = S_std * np.random.randn(n_t, latent_dim)
+        S_test = S_std * np.random.randn(n_timepoints, latent_dim)
         S_test = S_test / np.linalg.norm(S_test, axis=0, keepdims=True)
         S_test = S_test @ np.diag(sigma)
 
     elif generative_method == "fastsrm":
         Sigma = rng.dirichlet(np.ones(latent_dim), 1).flatten()
-        S_train = np.sqrt(Sigma)[:, None] * rng.randn(n_t, latent_dim)
-        S_test = np.sqrt(Sigma)[:, None] * rng.randn(n_t, latent_dim)
+        S_train = np.sqrt(Sigma)[:, None] * rng.randn(n_timepoints, latent_dim)
+        S_test = np.sqrt(Sigma)[:, None] * rng.randn(n_timepoints, latent_dim)
 
     elif generative_method == "multiviewica":
-        S_train = np.random.laplace(size=(n_t, latent_dim))
-        S_test = np.random.laplace(size=(n_t, latent_dim))
+        S_train = np.random.laplace(size=(n_timepoints, latent_dim))
+        S_test = np.random.laplace(size=(n_timepoints, latent_dim))
 
     else:
         raise ValueError("Unknown generative method")
@@ -87,30 +87,30 @@ def generate_dummy_signal(
     # Generate indiivdual spatial components
     data_train, data_test = [], []
     Ts = []
-    for _ in range(n_s):
+    for _ in range(n_subjects):
         if generative_method == "custom" or generative_method == "multiviewica":
-            W = T_mean + T_std * np.random.randn(latent_dim, n_v)
+            W = T_mean + T_std * np.random.randn(latent_dim, n_voxels)
         else:
-            W = projection(rng.randn(latent_dim, n_v))
+            W = projection(rng.randn(latent_dim, n_voxels))
 
         Ts.append(W)
         X_train = S_train @ W
-        N = np.random.randn(n_t, n_v)
-        N = (
-            N
+        noise = np.random.randn(n_timepoints, n_voxels)
+        noise = (
+            noise
             * np.linalg.norm(X_train)
-            / (SNR * np.linalg.norm(N, axis=0, keepdims=True))
+            / (SNR * np.linalg.norm(noise, axis=0, keepdims=True))
         )
-        X_train += N
+        X_train += noise
         data_train.append(X_train)
         X_test = S_test @ W
-        N = np.random.randn(n_t, n_v)
-        N = (
-            N
+        noise = np.random.randn(n_timepoints, n_voxels)
+        noise = (
+            noise
             * np.linalg.norm(X_test)
-            / (SNR * np.linalg.norm(N, axis=0, keepdims=True))
+            / (SNR * np.linalg.norm(noise, axis=0, keepdims=True))
         )
-        X_test += N
+        X_test += noise
         data_test.append(X_test)
 
     data_train = np.array(data_train)

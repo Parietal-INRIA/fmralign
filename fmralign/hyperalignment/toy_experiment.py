@@ -1,6 +1,3 @@
-import os
-import sys
-
 import numpy as np
 import matplotlib.pyplot as plt
 from fmralign.alignment_methods import IndividualizedNeuralTuning as INT
@@ -16,10 +13,6 @@ from fmralign.hyperalignment.correlation import (
 #############################################################################
 # INT
 #############################################################################
-
-
-file_dir = os.path.dirname(__file__)
-sys.path.append(file_dir)
 
 
 n_s = 10
@@ -42,9 +35,9 @@ decomposition_method = None  # if None, SVD is used
     stimulus_run_2,
     data_tuning,
 ) = generate_dummy_signal(
-    n_s=n_s,
-    n_t=n_t,
-    n_v=n_v,
+    n_subjects=n_s,
+    n_timepoints=n_t,
+    n_voxels=n_v,
     S_std=S_std,
     T_std=T_std,
     latent_dim=latent_dim,

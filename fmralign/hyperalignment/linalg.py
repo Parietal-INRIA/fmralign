@@ -89,6 +89,7 @@ def svd_pca(X, remove_mean=True):
 
 def ridge(X, Y, alpha=10):
     """Solve ridge regression problem for matrix target using SVD.
+
     Parameters
     ----------
     X : ndarray
@@ -97,6 +98,7 @@ def ridge(X, Y, alpha=10):
         The target matrix.
     alpha : float
         The regularization parameter.
+
     Returns
     -------
     betas : ndarray of shape (n_features, n_targets)
@@ -109,32 +111,9 @@ def ridge(X, Y, alpha=10):
     return betas
 
 
-def _ridge(X, Y, alpha):
-    from sklearn.linear_model import Ridge
-
-    ridge = Ridge(alpha=alpha, fit_intercept=False)
-    ridge.fit(X, Y)
-    return ridge.coef_.T
-
-
 def procrustes(X, Y, reflection=True, scaling=False):
     r"""
     The orthogonal Procrustes algorithm.
-
-    The orthogonal Procrustes algorithm, also known as the classic
-    hyperalignment algorithm, is the first hyperalignment algorithm, which
-    was introduced in Haxby et al. (2011). It tries to align two
-    configurations in a high-dimensional space through an orthogonal
-    transformation. The transformation is an improper rotation, which is a
-    rotation with an optional reflection. Neither rotation nor reflection
-    changes the geometry of the configuration. Therefore, the geometry,
-    such as a representational dissimilarity matrix (RDM), remains the
-    same in the process.
-
-    Optionally, a global scaling can be added to the algorithm to further
-    improve alignment quality. That is, scaling the data with the same
-    factor for all directions. Different from rotation and reflection,
-    global scaling can change the geometry of the data.
 
     Parameters
     ----------
@@ -159,17 +138,6 @@ def procrustes(X, Y, reflection=True, scaling=False):
         Depending on the parameters ``reflection`` and ``scaling``, the
         transformation can be a pure rotation, an improper rotation, or a
         pure/improper rotation with global scaling.
-
-    Notes
-    -----
-    The algorithm tries to minimize the Frobenius norm of the difference
-    between transformed data ``X @ T`` and the target ``Y``:
-
-    .. math:: \underset{T}{\arg\min} \lVert XT - Y \rVert_F
-
-    The solution ``T`` differs depending on whether reflection and global
-    scaling are allowed. When it's a rotation (pure or improper), it's
-    often denoted as ``R``.
     """
 
     A = Y.T.dot(X).T

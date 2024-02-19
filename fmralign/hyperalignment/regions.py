@@ -32,14 +32,16 @@ from nibabel.nifti1 import Nifti1Image
 
 def create_parcels_from_labels(labels: np.ndarray):
     """
-    Create parcels from labels.
 
-    Args:
-        labels (np.ndarray): Array of labels.
+    Parameters:
+    ----------
+    labels : ndarray
+        Array of labels.
 
     Returns:
-        list: List of parcels, where each parcel is an array of indices.
-
+    -------
+    parcles : list
+        List of parcels, where each parcel is an array of indices.
     """
     n_labels = labels.max()
     parcels = []
@@ -355,7 +357,6 @@ def iter_hyperalignment(
     searchlights,
     sl_func,
     return_betas=False,
-    verbose=False,
 ):
     """
     Tool function to iterate hyperalignment over pieces of data.
@@ -375,8 +376,6 @@ def iter_hyperalignment(
     return_betas : bool, optional
         Whether to return the coefficients of regression instead of the prediciton.
         Defaults to False.
-    verbose : bool, optional
-        Whether to display progress. Defaults to False.
 
     Returns
     -------
@@ -411,21 +410,26 @@ def piece_procrustes(
     scaling=False,
 ):
     """
-    Applies searchlight hyperalignment using Procrustes alignment.
+    Computes a transformation matrix from a template and a target signal using Procrustes hyperalignment.
 
-    Args:
-        X (array-like): The source data matrix of shape (n_samples, n_features).
-        Y (array-like): The target data matrix of shape (n_samples, n_features).
-        searchlights (array-like): The indices of the searchlight regions.
-        dists (array-like): distances of vertices to the center of their searchlight, of shape (n_searchlights, n_vertices_sl)
-        radius (float): The radius of the searchlight region.
-        T0 (array-like, optional): The initial transformation matrix. Defaults to None.
-        reflection (bool, optional): Whether to allow reflection in the alignment. Defaults to True.
-        scaling (bool, optional): Whether to allow scaling in the alignment. Defaults to False.
-        weighted (bool, optional): Whether to use weighted Procrustes alignment. Defaults to True.
+    Parameters:
+    ----------
+    X : ndarray
+        The source data matrix of shape (n_samples, n_features).
+    Y : ndarray
+        The target data matrix of shape (n_samples, n_features).
+    regions : list of arrays
+        List of brain regions. Contains the indices of the voxels in each region (either parcels or searchlights).
+    T0 : array-like, optional
+        The initial transformation matrix. Defaults to None.
+    reflection : bool, optional
+        Whether to allow reflection. Defaults to True.
 
     Returns:
-        array-like: The transformation matrix T.
+    -------
+    T : array-like
+        The transformation matrix T.
+
 
     """
     sl_func = functools.partial(procrustes, reflection=reflection, scaling=scaling)
@@ -444,25 +448,29 @@ def piece_ridge(
     Y,
     regions,
     alpha=1e3,
-    weights=None,
     verbose=False,
     return_betas=False,
 ):
     """
     Perform searchlight ridge regression for hyperalignment.
 
-    Args:
-        X (array-like): The source data matrix of shape (n_samples, n_features).
-        Y (array-like): The target data matrix of shape (n_samples, n_features).
-        searchlights (array-like): The indices of the searchlight regions.
-        dists (array-like): distances of vertices to the center of their searchlight, of shape (n_searchlights, n_vertices_sl)
-        radius (float): The radius of the searchlight region.
-        T0 (array-like, optional): The initial transformation matrix. Defaults to None.
-        alpha (float, optional): The regularization parameter for ridge regression. Defaults to 1e3.
-        weighted (bool, optional): Whether to use weighted ridge regression. Defaults to True.
+    Parameters:
+    ----------
+    X : ndarray
+        The source data matrix of shape (n_samples, n_features).
+    Y : ndarray
+        The target data matrix of shape (n_samples, n_features).
+    regions : list of arrays
+        List of brain regions. Contains the indices of the voxels in each region (either parcels or searchlights).
+    alpha : float(optional)
+        The regularization parameter for Ridge regression. Defaults to 1e3.
+    return_betas : bool(optional)
+        Whether to return the coefficients of regression instead of the prediciton. Defaults to False.
 
     Returns:
-        array-like: The transformation matrix T.
+    -------
+    T : array-like
+        The transformation matrix T.
 
     """
     sl_func = functools.partial(ridge, alpha=alpha)
@@ -483,22 +491,29 @@ def template(
     regions,
     n_jobs=1,
     template_kind="pca",
-    verbose=False,
     common_topography=True,
     weights=None,
 ):
     """
     Compute a template by aggregating local templates within searchlights.
 
-    Args:
-        X (numpy.ndarray): The input data matrix of shape (n_subjects, n_samples, n_features).
-        regions (list): The indices of the searchlight/parcels regions.
-        n_jobs (int, optional): The number of parallel jobs to run. Defaults to -1.
-        template_kind (str, optional): The kind of template to compute. Defaults to "pca".
-        verbose (bool, optional): Whether to display progress. Defaults to False.
+    Parameters:
+    ----------
+
+    X : ndarray
+        The input data matrix of shape (n_subjects, n_samples, n_features).
+    regions : list of ndarrays
+        List of regions composed of indices of voxels.
+    n_jobs : int(optional)
+        The number of parallel jobs to run. Defaults to 1.
+    template_kind : str(optional)
+        The kind of template to compute. Defaults to "pca".
+
 
     Returns:
-        numpy.ndarray: The computed template of shape (n_features,).
+    -------
+    template : ndarray of shape (n_timepoints, n_voxels)
+        The computed template.
 
     """
     with Parallel(n_jobs=n_jobs, batch_size=1, verbose=1) as parallel:
