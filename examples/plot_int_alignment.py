@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Hyperalignment-base prediction using the IndividualNeuralTuning Model.
+Co-smoothing Prediction using the IndividualNeuralTuning Model.
 See article : https://doi.org/10.1162/imag_a_00032
 
 ==========================
