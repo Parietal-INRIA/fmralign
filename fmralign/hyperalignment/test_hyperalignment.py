@@ -9,7 +9,8 @@ from fmralign.hyperalignment.correlation import (
 
 
 def test_int_fit_predict():
-    """Test if the outputs and arguments of the INT are the correct format"""
+    """Test if the outputs and arguments of the INT are the correct format,
+    and if decomposition is working"""
     # Create random data
     X_train, X_test, S_true_first_part, S_true_second_part, _ = generate_dummy_signal(
         n_subjects=7,
@@ -69,6 +70,8 @@ def test_int_fit_predict():
 
 
 def test_int_with_searchlight():
+    """Test if the outputs and arguments of the INT are the correct format and
+    if the decomposition is working, with searchlight input"""
     X_train, X_test, stimulus_train, stimulus_test, _ = generate_dummy_signal(
         n_subjects=5,
         n_timepoints=50,
