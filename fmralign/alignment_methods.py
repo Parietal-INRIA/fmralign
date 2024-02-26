@@ -367,7 +367,7 @@ class POTAlignment(Alignment):
         """
 
         Parameters
-        --------------
+        ----------
         X: (n_samples, n_features) nd array
             source data
         Y: (n_samples, n_features) nd array
@@ -440,7 +440,7 @@ class OptimalTransportAlignment(Alignment):
         """
 
         Parameters
-        --------------
+        ----------
         X: (n_samples, n_features) nd array
             source data
         Y: (n_samples, n_features) nd array
@@ -492,7 +492,7 @@ class IndividualizedNeuralTuning(Alignment):
         Initialize the IndividualizedNeuralTuning object.
 
         Parameters:
-        --------
+        ----------
         decomp_method : str
              The decomposition method to use.
              Can be ["pca", "pcav1", "procrustes"]
@@ -541,7 +541,7 @@ class IndividualizedNeuralTuning(Alignment):
         Estimate the tuning matrix for individualized neural tuning.
 
         Parameters:
-        --------
+        ----------
         shared_response : array-like
              The shared response matrix of shape (n_timepoints, k)
              where k is the dimension of the sources latent space.
@@ -565,7 +565,7 @@ class IndividualizedNeuralTuning(Alignment):
         Estimates the stimulus matrix for the Individualized Neural Tuning model.
 
         Parameters:
-        --------
+        -----------
         full_signal : numpy.ndarray
              Concatenated signal for all subjects,
              of shape (n_timepoints, n_subjects * n_voxels).
@@ -623,7 +623,7 @@ class IndividualizedNeuralTuning(Alignment):
         Fits the IndividualizedNeuralTuning model to the training data.
 
         Parameters:
-        --------
+        -----------
 
         X : array-like
             The training data of shape (n_subjects, n_samples, n_voxels).
@@ -702,7 +702,7 @@ class IndividualizedNeuralTuning(Alignment):
         Transforms the input test data using the hyperalignment model.
 
         Parameters:
-        --------
+        ----------
         X : array-like
             The test data of shape (n_subjects, n_timepoints, n_voxels).
         verbose : bool(optional)
