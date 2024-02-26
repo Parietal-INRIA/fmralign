@@ -6,6 +6,7 @@ import numpy as np
 import scipy
 from joblib import Parallel, delayed
 from scipy import linalg
+import ot
 from scipy.optimize import linear_sum_assignment
 from scipy.sparse import diags
 from scipy.spatial.distance import cdist
@@ -372,7 +373,6 @@ class POTAlignment(Alignment):
         Y: (n_samples, n_features) nd array
             target data
         """
-        import ot
 
         n = len(X.T)
         if n > 5000:
@@ -474,8 +474,10 @@ class OptimalTransportAlignment(Alignment):
 class IndividualizedNeuralTuning(Alignment):
     """
     Method of alignment based on the Individualized Neural Tuning model.
-    It works on 4D fMRI data, and is based on the assumption that the neural response to a stimulus is shared across subjects.
-    It uses searchlight/parcelation alignment to denoise the data, and then computes the stimulus response matrix.
+    It works on 4D fMRI data, and is based on the assumption that the neural
+    response to a stimulus is shared across subjects. It uses searchlight/
+    parcelation alignment to denoise the data, and then computes the stimulus
+    response matrix.
     See article : https://doi.org/10.1162/imag_a_00032
     """
 
@@ -492,11 +494,17 @@ class IndividualizedNeuralTuning(Alignment):
         Parameters:
         --------
         decomp_method : str
-             The decomposition method to use. Can be ["pca", "pcav1", "procrustes"] Default is "pca".
+             The decomposition method to use.
+             Can be ["pca", "pcav1", "procrustes"]
+             Default is "pca".
         alignment_method : str
-             The alignment method to use. Can be either "searchlight" or "parcelation", Default is "searchlight".
+             The alignment method to use.
+             Can be either "searchlight" or "parcelation",
+             Default is "searchlight".
         n_components : int
-             The number of latent dimensions to use in the shared stimulus information matrix. Default is None.
+             The number of latent dimensions to use in the shared stimulus
+             information
+             matrix. Default is None.
         n_jobs : int
              The number of parallel jobs to run. Default is -1.
 
@@ -524,7 +532,7 @@ class IndividualizedNeuralTuning(Alignment):
         self.n_components = n_components
         self.n_jobs = n_jobs
 
-    #######################################################################################
+    ################################################################
     # Computing decomposition
 
     @staticmethod
@@ -588,13 +596,16 @@ class IndividualizedNeuralTuning(Alignment):
         Parameters:
         --------
         shared_response : numpy.ndarray
-             The shared response of shape (n_timeframes, n_timeframes) or (n_timeframes, latent_dim).
+             The shared response of shape (n_timeframes, n_timeframes) or
+             (n_timeframes, latent_dim).
         individual_tuning : numpy.ndarray
-             The individual tuning of shape (latent_dim, n_voxels) or (n_timeframes, n_voxels).
+             The individual tuning of shape (latent_dim, n_voxels) or
+             (n_timeframes, n_voxels).
 
         Returns:
         --------
-        ndarray: The reconstructed signal of shape (n_timeframes, n_voxels) (same shape as the original signal)
+        ndarray: The reconstructed signal of shape (n_timeframes, n_voxels)
+        (same shape as the original signal)
         """
         return (shared_response @ individual_tuning).astype(np.float32)
 
@@ -617,13 +628,17 @@ class IndividualizedNeuralTuning(Alignment):
         X : array-like
             The training data of shape (n_subjects, n_samples, n_voxels).
         searchlights : array-like
-            The searchlight indices for each subject, of shape (n_s, n_searchlights).
+            The searchlight indices for each subject,
+            of shape (n_s, n_searchlights).
         parcels : array-like
-            The parcel indices for each subject, of shape (n_s, n_parcels) (if not using searchlights)
+            The parcel indices for each subject,
+            of shape (n_s, n_parcels) (if not using searchlights)
         dists : array-like
-            The distances of vertices to the center of their searchlight, of shape (n_searchlights, n_vertices_sl)
+            The distances of vertices to the center of their searchlight,
+            of shape (n_searchlights, n_vertices_sl)
         radius : int(optional)
-            The radius of the searchlight sphere, in milimeters. Defaults to 20.
+            The radius of the searchlight sphere, in milimeters.
+            Defaults to 20.
         tuning :bool(optional)
             Whether to compute the tuning weights. Defaults to True.
         verbose : bool(optional)
