@@ -22,7 +22,7 @@ def PCA_decomposition(
     n_components : int or None
         The number of components to keep. If None, all components are kept.
     flavor : {'sklearn', 'svd'}
-        Wethter to use sklearn or the custom SVD implementation.
+        Whether to use sklearn or the custom SVD implementation.
     adjust_ns : bool
         Whether to adjust the variance of the output so that it doesn't increase with the number of subjects.
     demean : bool
