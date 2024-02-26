@@ -161,14 +161,17 @@ def matrix_MDS(X, Y, n_components=2, dissimilarity="euclidean"):
     n_components : int
         The number of dimensions in the output space (default is 2).
     dissimilarity : str or array-like
-        The dissimilarity measure to use. If it is a string other than "precomputed",
-        the dissimilarity is computed using the Euclidean distance between flattened data points.
-        If it is "precomputed", the dissimilarity is assumed to be a precomputed dissimilarity matrix.
+        The dissimilarity measure to use.
+        If it is a string other than "precomputed", the dissimilarity is
+        computed using the Euclidean distance between flattened data points.
+        If it is "precomputed", the dissimilarity is assumed to be a
+        precomputed dissimilarity matrix.
 
     Returns:
     -------
-    tuple: A tuple containing two arrays. The first array represents the transformed data points from matrix X,
-            and the second array represents the transformed data points from matrix Y.
+    tuple: A tuple containing two arrays. The first array represents
+        the transformed data points from matrix X, and the second array
+        represents the transformed data points from matrix Y.
     """
     assert len(X) == len(Y)
 
@@ -184,50 +187,6 @@ def matrix_MDS(X, Y, n_components=2, dissimilarity="euclidean"):
         transformed = mds.fit_transform(dissimilarity)
 
     return np.array(transformed[: len(X)]), np.array(transformed[len(X) :])
-
-
-def thread_compute_correlation(X, Y, i, j):
-    """
-    Compute the correlation between two time series X_i and Y_i.
-
-    Parameters:
-    ----------
-    X : ndarray
-        ndrray of shape (n_samples, n_features) representing the first time series.
-    Y : ndarray
-        ndrray of shape (n_samples, n_features) representing the second time series.
-    i : int
-        Index of the first time series.
-    j : int
-        Index of the second time series.
-
-    Returns:
-    -------
-    ndarray
-        Correlations between different time points if i != j, otherwise an empty array.
-    ndarray
-        Correlations between the same time points if i != j, otherwise an empty array.
-    ndarray
-        Correlations between different time points if i == j, otherwise an empty array.
-    ndarray
-        Correlations between the same time points if i == j, otherwise an empty array.
-    """
-    X_i, Y_i = X[i], Y[i]
-    corr = stimulus_correlation(X_i, Y_i, absolute=False)
-    same_TR_corr = np.diag(corr)
-    # Get all the values except the diagonal in a list
-    diff_TR_corr = corr[np.where(~np.eye(corr.shape[0], dtype=bool))]
-    diff_TR_corr = diff_TR_corr.flatten()
-    if i == j:
-        return (
-            np.array([]),
-            np.array([]),
-            [x for x in diff_TR_corr],
-            [x for x in same_TR_corr],
-        )
-
-    else:
-        return diff_TR_corr, same_TR_corr, np.array([]), np.array([])
 
 
 def multithread_compute_correlation(
@@ -255,10 +214,14 @@ def multithread_compute_correlation(
 
     tuple
         A tuple containing four arrays
-        - corr_same_sub_diff_TR: Correlations between different time points of the same subject.
-        - corr_same_sub_same_TR: Correlations between the same time points of the same subject.
-        - corr_diff_sub_diff_TR: Correlations between different time points of different subjects.
-        - corr_diff_sub_same_TR: Correlations between the same time points of different subjects.
+        - corr_same_sub_diff_TR: Correlations between different time points
+        of the same subject.
+        - corr_same_sub_same_TR: Correlations between the same time points
+        of the same subject.
+        - corr_diff_sub_diff_TR: Correlations between different time points
+        of different subjects.
+        - corr_diff_sub_same_TR: Correlations between the same time points
+        of different subjects.
     """
     from joblib import Parallel, delayed
 
