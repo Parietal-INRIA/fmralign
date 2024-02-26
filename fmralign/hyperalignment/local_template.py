@@ -3,7 +3,6 @@ introducted by Feilong Ma et al. 2023.
 """
 
 import numpy as np
-from scipy.stats import zscore
 from sklearn.decomposition import PCA
 from sklearn.utils.extmath import randomized_svd
 
@@ -151,89 +150,6 @@ def compute_PCA_var1_template(
     return XX.astype(np.float32)
 
 
-def compute_procrustes_template(
-    X,
-    region=None,
-    reflection=True,
-    scaling=False,
-    zscore_common=True,
-    level2_iter=1,
-    X2=None,
-):
-    """
-    Compute the Procrustes template for a given set of data.
-
-    Parameters:
-    -----------
-    X : ndarray of shape (n_subjects, n_timepoints, n_voxels)
-        The input data array.
-    region : arraylike
-        The index of the region to consider. If None, all regions are considered. Defaults to None.
-    reflection : bool (optional)
-        Whether to allow reflection in the Procrustes alignment. Defaults to True.
-    scaling bool (optional)
-        Whether to allow scaling in the Procrustes alignment. Defaults to False.
-    zscore_common : bool(optional)
-        Whether to z-score the aligned data to have zero mean and unit variance. Defaults to True.
-    level2_iter : int(optional)
-        The number of iterations for the level 2 alignment. Defaults to 1.
-    X2 : ndarray(optional)
-        The second set of input data array of shape (n_samples, n_features, n_regions). Only used for level 2 alignment. Defaults to None.
-
-    Returns:
-    --------
-    common_space: ndarray
-        The computed Procrustes template.
-    """
-    if region is not None:
-        X = X[:, :, region]
-    common_space = np.copy(X[0])
-    aligned_X = [X[0]]
-    iter_X = X[1:]
-    for x in iter_X:
-        T = procrustes(x, common_space, reflection=reflection, scaling=scaling)
-        aligned_x = x.dot(T)
-        if zscore_common:
-            aligned_x = np.nan_to_num(zscore(aligned_x, axis=0))
-        aligned_X.append(aligned_x)
-        common_space = (common_space + aligned_x) * 0.5
-        if zscore_common:
-            common_space = np.nan_to_num(zscore(common_space, axis=0))
-
-    aligned_X2 = []
-    iter2 = range(level2_iter)
-
-    for level2 in iter2:
-        common_space = np.zeros_like(X[0])
-        for x in aligned_X:
-            common_space += x
-        for i, x in enumerate(X):
-            reference = (common_space - aligned_X[i]) / float(len(X) - 1)
-            if zscore_common:
-                reference = np.nan_to_num(zscore(reference, axis=0))
-            T = procrustes(x, reference, reflection=reflection, scaling=scaling)
-            if level2 == level2_iter - 1 and X2 is not None:
-                aligned_X2.append(X2[i].dot(T))
-            aligned_X[i] = x.dot(T)
-
-    common_space = np.sum(aligned_X, axis=0)
-    if zscore_common:
-        common_space = np.nan_to_num(zscore(common_space, axis=0))
-    else:
-        common_space /= float(len(X))
-    if X2 is not None:
-        common_space2 = np.zeros_like(X2[0])
-        for x in aligned_X2:
-            common_space2 += x
-        if zscore_common:
-            common_space2 = np.nan_to_num(zscore(common_space2, axis=0))
-        else:
-            common_space2 /= float(len(X))
-        return common_space, common_space2
-
-    return common_space
-
-
 def compute_template(
     X,
     region,
@@ -273,18 +189,8 @@ def compute_template(
     mapping = {
         "pca": compute_PCA_template,
         "pcav1": compute_PCA_var1_template,
-        "procrustes": compute_procrustes_template,
     }
-
-    if kind == "procrustes":
-        tmpl = compute_procrustes_template(
-            X=X,
-            region=region,
-            reflection=True,
-            scaling=False,
-            zscore_common=True,
-        )
-    elif kind in mapping:
+    if kind in mapping:
         tmpl = mapping[kind](X, sl=region, n_components=n_components, demean=demean)
     else:
         raise ValueError("Unknown template kind")

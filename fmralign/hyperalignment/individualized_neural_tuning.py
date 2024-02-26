@@ -5,7 +5,7 @@ from nibabel import Nifti1Image
 import numpy as np
 
 
-class IndividualizedNeuralTuning(BaseINT):
+class HA_INT(BaseINT):
     """
     Wrapper for the IndividualTuningModel class to be used in fmralign with Niimg objects.
     Preprocessing and searchlight/parcellation alignment are done without any user input.
