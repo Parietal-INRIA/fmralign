@@ -31,7 +31,9 @@ def PCA_decomposition(
     Returns
     -------
     XX : ndarray of shape (n_timepoints, n_components)
+        The decomposed data array with reduced dimensionality.
     cc : ndarray of shape (n_components, n_subjects, n_voxels)
+        Column-wise principal components (from Vt)
     """
     ns, nt, nv = X.shape
     X = X.transpose(1, 0, 2).reshape(nt, ns * nv).astype(np.float32)

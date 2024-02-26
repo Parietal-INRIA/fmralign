@@ -149,10 +149,10 @@ target_tuning = model._tuning_estimator(
 # than one subject for which we'd want to predict : [train_1, train_2 ...]
 
 
-prediction_from_template = model._reconstruct_signal(
+pred = model._reconstruct_signal(
     shared_response=stimulus_[test_index], individual_tuning=target_tuning
 )
-prediction_from_template = masker.inverse_transform(prediction_from_template)
+prediction_from_template = masker.inverse_transform(pred)
 
 
 # As a baseline prediction, let's just take the average of activations across subjects.

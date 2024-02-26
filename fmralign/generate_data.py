@@ -121,7 +121,7 @@ def generate_dummy_signal(
 def generate_dummy_searchlights(
     n_searchlights: int,
     n_voxels: int,
-    radius: int,
+    radius: float,
     sl_size: int = 5,
     seed: int = 0,
 ):
@@ -133,7 +133,7 @@ def generate_dummy_searchlights(
         Number of searchlights.
     n_voxels : int
         Number of voxels.
-    radius : int
+    radius : float,
         Radius of searchlights.
     sl_size : int, default=5
         Size of each searchlight (easier for dummy signal generation).
