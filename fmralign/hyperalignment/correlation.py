@@ -149,7 +149,7 @@ def stimulus_correlation(X, Y, linear_assignment=True, absolute=True):
 
 def matrix_MDS(X, Y, n_components=2, dissimilarity="euclidean"):
     """
-    Perform multidimensional scaling (MDS) on the given data matrices X and Y.
+    Perform multidimensional scaling (MDS) on the rows of X and Y.
 
     Parameters:
     ----------
