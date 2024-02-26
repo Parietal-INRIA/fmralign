@@ -2,6 +2,11 @@ from fmralign.alignment_methods import IndividualizedNeuralTuning as INT
 from fmralign.generate_data import generate_dummy_signal, generate_dummy_searchlights
 import numpy as np
 
+from fmralign.hyperalignment.correlation import (
+    tuning_correlation,
+    stimulus_correlation,
+)
+
 
 def test_int_fit_predict():
     """Test if the outputs and arguments of the INT are the correct format"""
@@ -16,10 +21,6 @@ def test_int_fit_predict():
         SNR=100,
         generative_method="custom",
         seed=0,
-    )
-    from fmralign.hyperalignment.correlation import (
-        tuning_correlation,
-        stimulus_correlation,
     )
 
     # Testing without searchlights
@@ -50,8 +51,6 @@ def test_int_fit_predict():
     corr3 = stimulus_correlation(S_estimated_second_part.T, S_true_second_part.T)
     corr4 = tuning_correlation(X_pred, X_test)
 
-    # Check that predicted components have the same shape as original data
-
     # Check that the correlation between the two parts of the data is high
     corr1_out = corr1 - np.diag(corr1)
     corr2_out = corr2 - np.diag(corr2)
@@ -61,6 +60,8 @@ def test_int_fit_predict():
     assert 3 * np.mean(corr2_out) < np.mean(np.diag(corr2))
     assert 3 * np.mean(corr3_out) < np.mean(np.diag(corr3))
     assert 3 * np.mean(corr4_out) < np.mean(np.diag(corr4))
+
+    # Check that predicted components have the same shape as original data
     assert int1.tuning_data[0].shape == (6, int1.n_voxels)
     assert int2.tuning_data[0].shape == (6, int2.n_voxels)
     assert int1.shared_response.shape == (int1.n_time_points, 6)
@@ -81,10 +82,6 @@ def test_int_with_searchlight():
     )
     searchlights, dists = generate_dummy_searchlights(
         n_searchlights=10, n_voxels=30, radius=5, seed=0
-    )
-    from fmralign.hyperalignment.correlation import (
-        tuning_correlation,
-        stimulus_correlation,
     )
 
     # Test INT on the two parts of the data (ie different runs of the experiment)
@@ -107,8 +104,6 @@ def test_int_with_searchlight():
     corr3 = stimulus_correlation(stimulus_run_2.T, stimulus_test.T)
     corr4 = tuning_correlation(X_pred, X_test)
 
-    # Check that predicted components have the same shape as original data
-
     # Check that the correlation between the two parts of the data is high
     corr1_out = corr1 - np.diag(corr1)
     corr2_out = corr2 - np.diag(corr2)
@@ -118,6 +113,8 @@ def test_int_with_searchlight():
     assert 3 * np.mean(corr2_out) < np.mean(np.diag(corr2))
     assert 3 * np.mean(corr3_out) < np.mean(np.diag(corr3))
     assert 3 * np.mean(corr4_out) < np.mean(np.diag(corr4))
+
+    # Check that predicted components have the same shape as original data
     assert model1.tuning_data[0].shape == (6, model1.n_voxels)
     assert model2.tuning_data[0].shape == (6, model2.n_voxels)
     assert model1.shared_response.shape == (model1.n_time_points, 6)
