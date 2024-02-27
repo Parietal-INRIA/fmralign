@@ -10,7 +10,8 @@ from fmralign.hyperalignment.correlation import (
 
 def test_int_fit_predict():
     """Test if the outputs and arguments of the INT are the correct format,
-    and if decomposition is working"""
+    and if decomposition is working. Without proper searchlight input
+    (ie all voxels are used)"""
     # Create random data
     X_train, X_test, S_true_first_part, S_true_second_part, _ = generate_dummy_signal(
         n_subjects=7,
