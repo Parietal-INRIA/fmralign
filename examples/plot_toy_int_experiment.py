@@ -78,19 +78,22 @@ parcels = [range(n_voxels)]
 #############################################################################
 # Create two independant instances of the model
 # ---------------------------------------------
-# We create two instances of the INT model to align the two runs of the experiment.
-# We then extract the tuning matrices and the shared from the two runs to compare them.
+# We create two instances of the INT model to align the two runs of
+# the experiment, then extract the tuning matrices and the shared from the two
+# runs to compare them.
 
 int1 = INT(
     n_components=latent_dim,
+    parcels=parcels,
     decomp_method=decomposition_method,
 )
 int2 = INT(
     n_components=latent_dim,
+    parcels=parcels,
     decomp_method=decomposition_method,
 )
-int1.fit(data_run_1, parcels=parcels, verbose=False)
-int2.fit(data_run_2, parcels=parcels, verbose=False)
+int1.fit(data_run_1, verbose=False)
+int2.fit(data_run_2, verbose=False)
 
 # save individual components
 tuning_pred_run_1 = int1.tuning_data
