@@ -134,15 +134,19 @@ target_test_masked = np.array(masked_imgs)[:, test_index, :]
 
 
 parcels = compute_parcels(niimg=template_train[0], mask=masker, n_parcels=100, n_jobs=5)
-denoiser = PiecewiseAlignment(alignment_method="parcelation", n_jobs=5)
+denoiser = PiecewiseAlignment(n_jobs=5)
 denoised_signal = denoiser.fit_transform(X=denoising_data, regions=parcels)
+target_denoised_data = denoised_signal[-1]
 model = IndividualizedNeuralTuning(
-    n_jobs=8, alignment_method="parcelation", n_components=None
+    parcels=parcels,
 )
-model.fit(training_data, parcels=parcels, verbose=False)
+model.fit(training_data, verbose=False)
 stimulus_ = np.copy(model.shared_response)
+
+# From the denoised data and the stimulus, we can now extract the tuning
+# matrix from sub-07 AP contrasts, and use it to predict the PA contrasts.
 target_tuning = model._tuning_estimator(
-    shared_response=stimulus_[train_index], target=denoised_signal[-1]
+    shared_response=stimulus_[train_index], target=target_denoised_data
 )
 # %%
 # We input the mapping image target_train in a list, we could have input more

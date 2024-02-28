@@ -26,7 +26,6 @@ class PiecewiseAlignment(BaseEstimator, TransformerMixin):
 
     def __init__(
         self,
-        alignment_method="searchlight_ridge",
         template_kind="pca",
         common_topography=True,
         verbose=True,
@@ -50,7 +49,6 @@ class PiecewiseAlignment(BaseEstimator, TransformerMixin):
         self.n_s = None
         self.n_t = None
         self.n_v = None
-        self.warp_alignment_method = alignment_method
         self.template_kind = template_kind
         self.verbose = verbose
         self.common_topography = common_topography

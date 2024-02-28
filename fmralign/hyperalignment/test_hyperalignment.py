@@ -30,12 +30,10 @@ def test_int_fit_predict():
     dists = [np.ones((300,))]
 
     # Test INT on the two parts of the data (ie different runs of the experiment)
-    int1 = INT(n_components=6)
-    int2 = INT(n_components=6)
-    int1.fit(
-        X_train, searchlights=searchlights, dists=dists
-    )  # S is provided if we cheat and know the ground truth
-    int2.fit(X_test, searchlights=searchlights, dists=dists)
+    int1 = INT(n_components=6, searchlights=searchlights, dists=dists)
+    int2 = INT(n_components=6, searchlights=searchlights, dists=dists)
+    int1.fit(X_train)
+    int2.fit(X_test)
 
     X_pred = int1.transform(X_test)
     # save individual components
@@ -89,10 +87,10 @@ def test_int_with_searchlight():
     )
 
     # Test INT on the two parts of the data (ie different runs of the experiment)
-    model1 = INT(n_components=6)
-    model2 = INT(n_components=6)
-    model1.fit(X_train, searchlights=searchlights, dists=dists, radius=5)
-    model2.fit(X_test, searchlights=searchlights, dists=dists, radius=5)
+    model1 = INT(n_components=6, searchlights=searchlights, dists=dists, radius=5)
+    model2 = INT(n_components=6, searchlights=searchlights, dists=dists, radius=5)
+    model1.fit(X_train)
+    model2.fit(X_test)
     X_pred = model1.transform(X_test)
 
     tuning_data_run_1 = model1.tuning_data

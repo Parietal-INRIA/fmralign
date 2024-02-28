@@ -485,7 +485,11 @@ class IndividualizedNeuralTuning(Alignment):
         self,
         decomp_method="pca",
         n_components=None,
-        alignment_method="searchlight",
+        searchlights=None,
+        parcels=None,
+        dists=None,
+        radius=20,
+        tuning=True,
         n_jobs=1,
     ):
         """
@@ -497,10 +501,20 @@ class IndividualizedNeuralTuning(Alignment):
              The decomposition method to use.
              Can be ["pca", "pcav1", "procrustes"]
              Default is "pca".
-        alignment_method : str
-             The alignment method to use.
-             Can be either "searchlight" or "parcelation",
-             Default is "searchlight".
+        searchlights : array-like
+            The searchlight indices for each subject,
+            of shape (n_s, n_searchlights).
+        parcels : array-like
+            The parcel indices for each subject,
+            of shape (n_s, n_parcels) (if not using searchlights)
+        dists : array-like
+            The distances of vertices to the center of their searchlight,
+            of shape (n_searchlights, n_vertices_sl)
+        radius : int(optional)
+            The radius of the searchlight sphere, in milimeters.
+            Defaults to 20.
+        tuning : bool(optional)
+            Whether to compute the tuning weights. Defaults to True.
         n_components : int
              The number of latent dimensions to use in the shared stimulus
              information
@@ -517,14 +531,23 @@ class IndividualizedNeuralTuning(Alignment):
         self.n_time_points = None
         self.labels = None
         self.alphas = None
-        self.alignment_method = alignment_method
-        if alignment_method == "parcelation":
-            self.parcels = None
 
-        elif alignment_method == "searchlight":
-            self.searchlights = None
-            self.distances = None
-            self.radius = None
+        if searchlights is None and parcels is None:
+            raise ValueError("searchlights or parcels must be provided")
+
+        if searchlights is not None and parcels is not None:
+            raise ValueError(
+                "searchlights and parcels cannot be provided at the same time"
+            )
+
+        if searchlights is not None:
+            self.regions = searchlights
+        else:
+            self.regions = parcels
+
+        self.dists = dists
+        self.radius = radius
+        self.tuning = tuning
 
         self.tuning_data = []
         self.denoised_signal = []
@@ -566,7 +589,7 @@ class IndividualizedNeuralTuning(Alignment):
 
         Parameters:
         -----------
-        full_signal : numpy.ndarray
+        full_signal : ndarray
              Concatenated signal for all subjects,
              of shape (n_timepoints, n_subjects * n_voxels).
         n_subjects : int
@@ -575,6 +598,11 @@ class IndividualizedNeuralTuning(Alignment):
              The number of latent dimensions to use. Defaults to None.
         scaling : bool, optional
              Whether to scale the stimulus matrix sources. Defaults to True.
+
+        Returns:
+        --------
+        stimulus : ndarray
+            The stimulus matrix of shape (n_timepoints, n_subjects * n_voxels)
         """
         n_timepoints = full_signal.shape[0]
         if scaling:
@@ -591,32 +619,28 @@ class IndividualizedNeuralTuning(Alignment):
     @staticmethod
     def _reconstruct_signal(shared_response, individual_tuning):
         """
-        Reconstructs the signal using the shared response and individual tuning.
+        Reconstructs the signal using the stimulus as shared
+        response and individual tuning.
 
         Parameters:
         --------
-        shared_response : numpy.ndarray
+        shared_response : ndarray
              The shared response of shape (n_timeframes, n_timeframes) or
              (n_timeframes, latent_dim).
-        individual_tuning : numpy.ndarray
+        individual_tuning : ndarray
              The individual tuning of shape (latent_dim, n_voxels) or
              (n_timeframes, n_voxels).
 
         Returns:
         --------
-        ndarray: The reconstructed signal of shape (n_timeframes, n_voxels)
-        (same shape as the original signal)
+        ndarray:
+            The reconstructed signal of shape (n_timeframes, n_voxels).
         """
         return (shared_response @ individual_tuning).astype(np.float32)
 
     def fit(
         self,
         X,
-        searchlights=None,
-        parcels=None,
-        dists=None,
-        radius=20,
-        tuning=True,
         verbose=True,
     ):
         """
@@ -624,23 +648,8 @@ class IndividualizedNeuralTuning(Alignment):
 
         Parameters:
         -----------
-
         X : array-like
             The training data of shape (n_subjects, n_samples, n_voxels).
-        searchlights : array-like
-            The searchlight indices for each subject,
-            of shape (n_s, n_searchlights).
-        parcels : array-like
-            The parcel indices for each subject,
-            of shape (n_s, n_parcels) (if not using searchlights)
-        dists : array-like
-            The distances of vertices to the center of their searchlight,
-            of shape (n_searchlights, n_vertices_sl)
-        radius : int(optional)
-            The radius of the searchlight sphere, in milimeters.
-            Defaults to 20.
-        tuning :bool(optional)
-            Whether to compute the tuning weights. Defaults to True.
         verbose : bool(optional)
             Whether to print progress information. Defaults to True.
 
@@ -658,17 +667,7 @@ class IndividualizedNeuralTuning(Alignment):
         self.tuning_data = np.empty(self.n_subjects, dtype=np.float32)
         self.denoised_signal = np.empty(self.n_subjects, dtype=np.float32)
 
-        if searchlights is None:
-            self.regions = parcels
-            self.distances = None
-            self.radius = None
-        else:
-            self.regions = searchlights
-            self.distances = dists
-            self.radius = radius
-
         denoiser = PiecewiseAlignment(
-            alignment_method=self.alignment_method,
             template_kind=self.decomp_method,
             n_jobs=self.n_jobs,
             verbose=verbose,
@@ -676,17 +675,16 @@ class IndividualizedNeuralTuning(Alignment):
         self.denoised_signal = denoiser.fit_transform(
             X_,
             regions=self.regions,
-            dists=self.distances,
+            dists=self.dists,
             radius=self.radius,
         )
 
         # Stimulus matrix computation
-
         full_signal = np.concatenate(self.denoised_signal, axis=1)
         self.shared_response = self._stimulus_estimator(
             full_signal, self.n_subjects, self.n_components
         )
-        if tuning:
+        if self.tuning:
             self.tuning_data = Parallel(n_jobs=self.n_jobs)(
                 delayed(self._tuning_estimator)(
                     self.shared_response,
@@ -710,7 +708,8 @@ class IndividualizedNeuralTuning(Alignment):
 
         Returns:
         --------
-        array-like: The transformed data of shape (n_subjects, n_timepoints, n_voxels).
+        ndarray :
+            The transformed data of shape (n_subjects, n_timepoints, n_voxels).
         """
 
         full_signal = np.concatenate(X, axis=1, dtype=np.float32)
