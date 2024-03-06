@@ -199,7 +199,7 @@ from nilearn import plotting
 baseline_display = plotting.plot_stat_map(
     average_score, display_mode="z", vmax=1, cut_coords=[-15, -5]
 )
-baseline_display.title("Group average correlation wt ground truth")
+baseline_display.title("Group average correlation wrt ground truth")
 display = plotting.plot_stat_map(
     template_score, display_mode="z", cut_coords=[-15, -5], vmax=1
 )
