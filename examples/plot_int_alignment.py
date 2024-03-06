@@ -49,7 +49,7 @@ imgs, df, mask_img = fetch_ibc_subjects_contrasts(sub_list)
 # -----------------
 # We define a nilearn masker that will be used to handle relevant data.
 #   For more information, visit :
-#   'http://nilearn.github.io/manipulating_images/masker_objects.html'
+#   'https://nilearn.github.io/stable/manipulating_images/masker_objects.html'
 #
 
 from nilearn.maskers import NiftiMasker
