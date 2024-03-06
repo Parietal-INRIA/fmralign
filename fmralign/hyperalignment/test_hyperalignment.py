@@ -1,5 +1,8 @@
 from fmralign.alignment_methods import IndividualizedNeuralTuning as INT
-from fmralign.generate_data import generate_dummy_signal, generate_dummy_searchlights
+from fmralign.fetch_example_data import (
+    generate_dummy_signal,
+    generate_dummy_searchlights,
+)
 import numpy as np
 
 from fmralign.hyperalignment.correlation import (

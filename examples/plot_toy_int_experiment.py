@@ -24,7 +24,7 @@ To run this example, you must launch IPython via ``ipython
 import numpy as np
 import matplotlib.pyplot as plt
 from fmralign.alignment_methods import IndividualizedNeuralTuning as INT
-from fmralign.generate_data import generate_dummy_signal
+from fmralign.fetch_example_data import generate_dummy_signal
 from fmralign.hyperalignment.correlation import (
     tuning_correlation,
     stimulus_correlation,
