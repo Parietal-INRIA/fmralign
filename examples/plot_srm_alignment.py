@@ -7,7 +7,7 @@ See article : https://doi.org/10.1162/imag_a_00032
 ==========================
 
 In this tutorial, we show how to better predict new contrasts for a target
-subject using many source subjects corresponding contrasts. For this purpose,
+subject using corresponding contrasts from multiple source subjects. For this purpose,
 we create a template to which we align the target subject, using shared information.
 We then predict new images for the target and compare them to a baseline.
 
