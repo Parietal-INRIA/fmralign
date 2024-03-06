@@ -1,8 +1,8 @@
 """Piecewise alignment model. This model decomposes the data into regions (pieces).
 Those can either be searchlights or parcels (computed with standard parcellation algorithms).
 See the ```nilearn``` documentation for more details:
-- https://nilearn.github.io/modules/generated/nilearn.regions.Parcellations.html
-- https://nilearn.github.io/dev/modules/generated/nilearn.decoding.SearchLight.html
+- https://nilearn.github.io/stable/modules/generated/nilearn.regions.Parcellations.html
+- https://nilearn.github.io/stable/modules/generated/nilearn.decoding.SearchLight.html
 """
 
 import numpy as np
