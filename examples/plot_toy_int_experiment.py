@@ -8,7 +8,7 @@ See article : https://doi.org/10.1162/imag_a_00032
 
 This is a toy experiment to test Individual Tuning Model (INT) on two parts of the
 data (or different runs) to assess the validity of tuning computation. This code has
-no vocation to be an explanatory example, but rather a test to check the validity of
+no intention to be an explanatory example, but rather a test to check the validity of
 the INT model.
 
 
