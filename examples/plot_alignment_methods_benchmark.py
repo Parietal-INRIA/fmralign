@@ -147,7 +147,11 @@ for method in methods:
     aligned_score = roi_masker.inverse_transform(method_error)
     title = f"Correlation of prediction after {method} alignment"
     display = plotting.plot_stat_map(
-        aligned_score, display_mode="z", cut_coords=[-15, -5], vmax=1, title=title
+        aligned_score,
+        display_mode="z",
+        cut_coords=[-15, -5],
+        vmax=1,
+        title=title,
     )
 
 ###############################################################################

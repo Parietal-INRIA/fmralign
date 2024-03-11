@@ -31,7 +31,9 @@ def test_make_parcellation():
 
         # check that not inputing n_pieces yields problems
         with pytest.raises(Exception):
-            assert _make_parcellation(img, indexes, clustering_method, 0, masker)
+            assert _make_parcellation(
+                img, indexes, clustering_method, 0, masker
+            )
 
     clustering = nibabel.Nifti1Image(
         np.hstack([np.ones((7, 3, 8)), 2 * np.ones((7, 3, 8))]), np.eye(4)

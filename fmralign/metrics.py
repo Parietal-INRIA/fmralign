@@ -4,7 +4,9 @@ from scipy.stats import pearsonr
 from sklearn.metrics import r2_score
 
 
-def score_voxelwise(ground_truth, prediction, masker, loss, multioutput="raw_values"):
+def score_voxelwise(
+    ground_truth, prediction, masker, loss, multioutput="raw_values"
+):
     """
     Calculate loss function for predicted, ground truth arrays.
     Supported scores are R2, correlation, and normalized
@@ -51,7 +53,9 @@ def score_voxelwise(ground_truth, prediction, masker, loss, multioutput="raw_val
     if loss == "R2":
         score = r2_score(X_gt, X_pred, multioutput=multioutput)
     elif loss == "n_reconstruction_err":
-        score = normalized_reconstruction_error(X_gt, X_pred, multioutput=multioutput)
+        score = normalized_reconstruction_error(
+            X_gt, X_pred, multioutput=multioutput
+        )
     elif loss == "corr":
         score = np.array(
             [
@@ -124,7 +128,9 @@ def normalized_reconstruction_error(
 
     # Calculate reconstruction error
     output_scores = np.ones([y_true.shape[-1]])
-    output_scores[valid_score] = 1 - (numerator[valid_score] / denominator[valid_score])
+    output_scores[valid_score] = 1 - (
+        numerator[valid_score] / denominator[valid_score]
+    )
     if multioutput == "raw_values":
         # return scores individually
         return output_scores

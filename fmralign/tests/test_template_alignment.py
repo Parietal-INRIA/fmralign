@@ -4,8 +4,14 @@ from nilearn.image import concat_imgs, index_img, math_img
 from nilearn.maskers import NiftiMasker
 from numpy.testing import assert_array_almost_equal
 
-from fmralign.template_alignment import TemplateAlignment, _rescaled_euclidean_mean
-from fmralign.tests.utils import random_niimg, zero_mean_coefficient_determination
+from fmralign.template_alignment import (
+    TemplateAlignment,
+    _rescaled_euclidean_mean,
+)
+from fmralign.tests.utils import (
+    random_niimg,
+    zero_mean_coefficient_determination,
+)
 
 
 def test_template_identity():
@@ -24,7 +30,9 @@ def test_template_identity():
 
     # test euclidian mean function
     euclidian_template = _rescaled_euclidean_mean(subs, masker)
-    assert_array_almost_equal(ref_template.get_fdata(), euclidian_template.get_fdata())
+    assert_array_almost_equal(
+        ref_template.get_fdata(), euclidian_template.get_fdata()
+    )
 
     # test different fit() accept list of list of 3D Niimgs as input.
     algo = TemplateAlignment(alignment_method="identity", mask=masker)
@@ -37,7 +45,12 @@ def test_template_identity():
         {"alignment_method": "identity", "mask": masker},
         {"alignment_method": "identity", "mask": masker, "n_jobs": 2},
         {"alignment_method": "identity", "n_pieces": 3, "mask": masker},
-        {"alignment_method": "identity", "n_pieces": 3, "n_bags": 2, "mask": masker},
+        {
+            "alignment_method": "identity",
+            "n_pieces": 3,
+            "n_bags": 2,
+            "mask": masker,
+        },
     ]
 
     for args in args_list:
@@ -45,9 +58,13 @@ def test_template_identity():
         # Learning a template which is
         algo.fit(subs)
         # test template
-        assert_array_almost_equal(ref_template.get_fdata(), algo.template.get_fdata())
+        assert_array_almost_equal(
+            ref_template.get_fdata(), algo.template.get_fdata()
+        )
         predicted_imgs = algo.transform(
-            [index_img(sub_1, range(8))], train_index=range(8), test_index=range(8, 10)
+            [index_img(sub_1, range(8))],
+            train_index=range(8),
+            test_index=range(8, 10),
         )
         ground_truth = index_img(ref_template, range(8, 10))
         assert_array_almost_equal(
@@ -65,7 +82,9 @@ def test_template_identity():
     for train_ind, test_ind in zip(train_inds, test_inds):
         with pytest.raises(Exception):
             assert algo.transform(
-                [index_img(sub_1, range(2))], train_index=train_ind, test_index=test_ind
+                [index_img(sub_1, range(2))],
+                train_index=train_ind,
+                test_index=test_ind,
             )
 
     # test wrong images input in fit() and transform method
@@ -116,4 +135,6 @@ def test_template_closer_to_target():
             avg_data, template_data
         )
         assert template_mean_distance >= mean_distance_1
-        assert template_mean_distance >= mean_distance_2 - 1.0e-3  # for robustness
+        assert (
+            template_mean_distance >= mean_distance_2 - 1.0e-3
+        )  # for robustness

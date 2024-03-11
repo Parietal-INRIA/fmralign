@@ -91,7 +91,11 @@ def test_scaled_procrustes_on_simple_exact_cases():
 
     """3D Rotation"""
     R = np.array(
-        [[1.0, 0.0, 0.0], [0.0, np.cos(1), -np.sin(1)], [0.0, np.sin(1), np.cos(1)]]
+        [
+            [1.0, 0.0, 0.0],
+            [0.0, np.cos(1), -np.sin(1)],
+            [0.0, np.sin(1), np.cos(1)],
+        ]
     )
     X = np.random.rand(3, 4)
     X = X - X.mean(axis=1, keepdims=True)

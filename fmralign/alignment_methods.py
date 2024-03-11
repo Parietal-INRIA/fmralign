@@ -2,17 +2,21 @@
 """Module implementing alignment estimators on ndarrays."""
 import warnings
 
-import ot
 import numpy as np
 import scipy
 from joblib import Parallel, delayed
 from scipy import linalg
+import ot
 from scipy.optimize import linear_sum_assignment
 from scipy.sparse import diags
 from scipy.spatial.distance import cdist
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.linear_model import RidgeCV
 from sklearn.metrics.pairwise import pairwise_distances
+
+# Fast implementation for parallelized computing
+from fmralign.hyperalignment.linalg import safe_svd, svd_pca
+from fmralign.hyperalignment.piecewise_alignment import PiecewiseAlignment
 
 
 def scaled_procrustes(X, Y, scaling=False, primal=None):
@@ -363,7 +367,7 @@ class POTAlignment(Alignment):
         """
 
         Parameters
-        --------------
+        ----------
         X: (n_samples, n_features) nd array
             source data
         Y: (n_samples, n_features) nd array
@@ -436,7 +440,7 @@ class OptimalTransportAlignment(Alignment):
         """
 
         Parameters
-        --------------
+        ----------
         X: (n_samples, n_features) nd array
             source data
         Y: (n_samples, n_features) nd array
@@ -465,3 +469,265 @@ class OptimalTransportAlignment(Alignment):
     def transform(self, X):
         """Transform X using optimal coupling computed during fit."""
         return X.dot(self.R)
+
+
+class IndividualizedNeuralTuning(Alignment):
+    """
+    Method of alignment based on the Individualized Neural Tuning model.
+    It works on 4D fMRI data, and is based on the assumption that the neural
+    response to a stimulus is shared across subjects. It uses searchlight/
+    parcelation alignment to denoise the data, and then computes the stimulus
+    response matrix.
+    See article : https://doi.org/10.1162/imag_a_00032
+    """
+
+    def __init__(
+        self,
+        decomp_method="pca",
+        n_components=None,
+        searchlights=None,
+        parcels=None,
+        dists=None,
+        radius=20,
+        tuning=True,
+        n_jobs=1,
+    ):
+        """
+        Initialize the IndividualizedNeuralTuning object.
+
+        Parameters:
+        ----------
+        decomp_method : str
+             The decomposition method to use.
+             Can be ["pca", "pcav1", "procrustes"]
+             Default is "pca".
+        searchlights : array-like
+            The searchlight indices for each subject,
+            of shape (n_s, n_searchlights).
+        parcels : array-like
+            The parcel indices for each subject,
+            of shape (n_s, n_parcels) (if not using searchlights)
+        dists : array-like
+            The distances of vertices to the center of their searchlight,
+            of shape (n_searchlights, n_vertices_sl)
+        radius : int(optional)
+            The radius of the searchlight sphere, in milimeters.
+            Defaults to 20.
+        tuning : bool(optional)
+            Whether to compute the tuning weights. Defaults to True.
+        n_components : int
+             The number of latent dimensions to use in the shared stimulus
+             information
+             matrix. Default is None.
+        n_jobs : int
+             The number of parallel jobs to run. Default is -1.
+
+        Returns:
+        --------
+        None
+        """
+
+        self.n_subjects = None
+        self.n_time_points = None
+        self.labels = None
+        self.alphas = None
+
+        if searchlights is None and parcels is None:
+            raise ValueError("searchlights or parcels must be provided")
+
+        if searchlights is not None and parcels is not None:
+            raise ValueError(
+                "searchlights and parcels cannot be provided at the same time"
+            )
+
+        if searchlights is not None:
+            self.regions = searchlights
+        else:
+            self.regions = parcels
+
+        self.dists = dists
+        self.radius = radius
+        self.tuning = tuning
+
+        self.tuning_data = []
+        self.denoised_signal = []
+        self.decomp_method = decomp_method
+        self.n_components = n_components
+        self.n_jobs = n_jobs
+
+    ################################################################
+    # Computing decomposition
+
+    @staticmethod
+    def _tuning_estimator(shared_response, target):
+        """
+        Estimate the tuning matrix for individualized neural tuning.
+
+        Parameters:
+        ----------
+        shared_response : array-like
+             The shared response matrix of shape (n_timepoints, k)
+             where k is the dimension of the sources latent space.
+        target : array-like
+             The target matrix.
+        latent_dim : int, optional
+             The number of latent dimensions (if PCA is used). Defaults to None.
+
+        Returns:
+        --------
+        array-like: The estimated tuning matrix for the given target.
+
+        """
+        if shared_response.shape[1] != shared_response.shape[0]:
+            return (np.linalg.pinv(shared_response)).dot(target)
+        return np.linalg.inv(shared_response).dot(target)
+
+    @staticmethod
+    def _stimulus_estimator(full_signal, n_subjects, latent_dim=None, scaling=True):
+        """
+        Estimates the stimulus matrix for the Individualized Neural Tuning model.
+
+        Parameters:
+        -----------
+        full_signal : ndarray
+             Concatenated signal for all subjects,
+             of shape (n_timepoints, n_subjects * n_voxels).
+        n_subjects : int
+             The number of subjects.
+        latent_dim : int, optional
+             The number of latent dimensions to use. Defaults to None.
+        scaling : bool, optional
+             Whether to scale the stimulus matrix sources. Defaults to True.
+
+        Returns:
+        --------
+        stimulus : ndarray
+            The stimulus matrix of shape (n_timepoints, n_subjects * n_voxels)
+        """
+        n_timepoints = full_signal.shape[0]
+        if scaling:
+            U = svd_pca(full_signal)
+        else:
+            U, _, _ = safe_svd(full_signal)
+        if latent_dim is not None and latent_dim < n_timepoints:
+            U = U[:, :latent_dim]
+
+        stimulus = np.sqrt(n_subjects) * U
+        stimulus = stimulus.astype(np.float32)
+        return stimulus
+
+    @staticmethod
+    def _reconstruct_signal(shared_response, individual_tuning):
+        """
+        Reconstructs the signal using the stimulus as shared
+        response and individual tuning.
+
+        Parameters:
+        --------
+        shared_response : ndarray
+             The shared response of shape (n_timeframes, n_timeframes) or
+             (n_timeframes, latent_dim).
+        individual_tuning : ndarray
+             The individual tuning of shape (latent_dim, n_voxels) or
+             (n_timeframes, n_voxels).
+
+        Returns:
+        --------
+        ndarray:
+            The reconstructed signal of shape (n_timeframes, n_voxels).
+        """
+        return (shared_response @ individual_tuning).astype(np.float32)
+
+    def fit(
+        self,
+        X,
+        verbose=True,
+    ):
+        """
+        Fits the IndividualizedNeuralTuning model to the training data.
+
+        Parameters:
+        -----------
+        X : array-like
+            The training data of shape (n_subjects, n_samples, n_voxels).
+        verbose : bool(optional)
+            Whether to print progress information. Defaults to True.
+
+        Returns:
+        --------
+
+        self : Instance of IndividualizedNeuralTuning)
+            The fitted model.
+        """
+
+        X_ = np.array(X, copy=True, dtype=np.float32)
+
+        self.n_subjects, self.n_time_points, self.n_voxels = X_.shape
+
+        self.tuning_data = np.empty(self.n_subjects, dtype=np.float32)
+        self.denoised_signal = np.empty(self.n_subjects, dtype=np.float32)
+
+        denoiser = PiecewiseAlignment(
+            template_kind=self.decomp_method,
+            n_jobs=self.n_jobs,
+            verbose=verbose,
+        )
+        self.denoised_signal = denoiser.fit_transform(
+            X_,
+            regions=self.regions,
+            dists=self.dists,
+            radius=self.radius,
+        )
+
+        # Stimulus matrix computation
+        full_signal = np.concatenate(self.denoised_signal, axis=1)
+        self.shared_response = self._stimulus_estimator(
+            full_signal, self.n_subjects, self.n_components
+        )
+        if self.tuning:
+            self.tuning_data = Parallel(n_jobs=self.n_jobs)(
+                delayed(self._tuning_estimator)(
+                    self.shared_response,
+                    self.denoised_signal[i],
+                )
+                for i in range(self.n_subjects)
+            )
+
+        return self
+
+    def transform(self, X, verbose=False):
+        """
+        Transforms the input test data using the hyperalignment model.
+
+        Parameters:
+        ----------
+        X : array-like
+            The test data of shape (n_subjects, n_timepoints, n_voxels).
+        verbose : bool(optional)
+            Whether to print progress information. Defaults to False.
+
+        Returns:
+        --------
+        ndarray :
+            The transformed data of shape (n_subjects, n_timepoints, n_voxels).
+        """
+
+        full_signal = np.concatenate(X, axis=1, dtype=np.float32)
+
+        if verbose:
+            print("Predict : Computing stimulus matrix...")
+
+        stimulus_ = self._stimulus_estimator(
+            full_signal, self.n_subjects, self.n_components
+        )
+        print("Predict : stimulus matrix shape: ", stimulus_.shape)
+
+        if verbose:
+            print("Predict : stimulus matrix shape: ", stimulus_.shape)
+
+        reconstructed_signal = Parallel(n_jobs=self.n_jobs)(
+            delayed(self._reconstruct_signal)(stimulus_, T_est)
+            for T_est in self.tuning_data
+        )
+
+        return np.array(reconstructed_signal, dtype=np.float32)

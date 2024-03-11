@@ -11,7 +11,6 @@ from joblib import Memory, Parallel, delayed
 from nilearn.image import concat_imgs, index_img, load_img
 from nilearn._utils.masker_validation import check_embedded_masker
 from sklearn.base import BaseEstimator, TransformerMixin
-
 from fmralign.pairwise_alignment import PairwiseAlignment
 
 
@@ -265,7 +264,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         alignment_method: string
             Algorithm used to perform alignment between X_i and Y_i :
             * either 'identity', 'scaled_orthogonal', 'optimal_transport',
-            'ridge_cv', 'permutation', 'diagonal'
+            'ridge_cv', 'permutation', 'diagonal',
             * or an instance of one of alignment classes (imported from
             functional_alignment.alignment_methods)
         n_pieces: int, optional (default = 1)
@@ -376,6 +375,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             Length : n_samples
 
         """
+
         # Check if the input is a list, if list of lists, concatenate each subjects
         # data into one unique image.
         if not isinstance(imgs, (list, np.ndarray)) or len(imgs) < 2:
@@ -441,6 +441,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             Each Niimg has the same length as the list test_index
 
         """
+
         if not isinstance(imgs, (list, np.ndarray)):
             raise ValueError(
                 "The method TemplateAlignment.transform() need a list input. "
