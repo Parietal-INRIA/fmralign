@@ -4,12 +4,14 @@ import numpy as np
 from numpy.testing import assert_array_almost_equal
 from scipy.sparse import csc_matrix
 from scipy.linalg import orthogonal_procrustes
+from nilearn import maskers, masking
 
 from fmralign.alignment_methods import (
     DiagonalAlignment,
     Hungarian,
     Identity,
     OptimalTransportAlignment,
+    FugwAlignment,
     POTAlignment,
     RidgeAlignment,
     ScaledOrthogonalAlignment,
@@ -79,14 +81,18 @@ def test_scaled_procrustes_on_simple_exact_cases():
     assert_array_almost_equal(R_test.T, R)
 
     """Scaled Matrix"""
-    X = np.array([[1.0, 2.0, 3.0, 4.0], [5.0, 3.0, 4.0, 6.0], [7.0, 8.0, -5.0, -2.0]])
+    X = np.array(
+        [[1.0, 2.0, 3.0, 4.0], [5.0, 3.0, 4.0, 6.0], [7.0, 8.0, -5.0, -2.0]]
+    )
 
     X = X - X.mean(axis=1, keepdims=True)
 
     Y = 2 * X
     Y = Y - Y.mean(axis=1, keepdims=True)
 
-    assert_array_almost_equal(scaled_procrustes(X.T, Y.T, scaling=True)[0], np.eye(3))
+    assert_array_almost_equal(
+        scaled_procrustes(X.T, Y.T, scaling=True)[0], np.eye(3)
+    )
     assert_array_almost_equal(scaled_procrustes(X.T, Y.T, scaling=True)[1], 2)
 
     """3D Rotation"""
@@ -106,7 +112,8 @@ def test_scaled_procrustes_on_simple_exact_cases():
         R.dot(np.array([0.0, 1.0, 0.0])), np.array([0.0, np.cos(1), np.sin(1)])
     )
     assert_array_almost_equal(
-        R.dot(np.array([0.0, 0.0, 1.0])), np.array([0.0, -np.sin(1), np.cos(1)])
+        R.dot(np.array([0.0, 0.0, 1.0])),
+        np.array([0.0, -np.sin(1), np.cos(1)]),
     )
     assert_array_almost_equal(R, R_test.T)
 
@@ -189,6 +196,20 @@ def test_all_classes_R_and_pred_shape_and_better_than_identity():
             assert algo_score >= identity_baseline_score
 
 
+def test_fugw_alignment():
+    # Create a random 3D mask
+    segmentation = np.ones((5, 5, 5))
+    n_features = 3
+    n_samples = int(segmentation.sum())
+    X = np.random.randn(n_samples, n_features)
+    Y = np.random.randn(n_samples, n_features)
+
+    fugw_alignment = FugwAlignment()
+    fugw_alignment.fit(X, Y, segmentation, method="dense")
+    assert fugw_alignment.transform(X).shape == X.shape
+    assert fugw_alignment.transform(X).shape == Y.shape
+
+
 # %%
 def test_ott_backend():
     n_samples, n_features = 100, 20
@@ -198,7 +219,9 @@ def test_ott_backend():
     algo = OptimalTransportAlignment(
         reg=epsilon, metric="euclidean", tol=1e-5, max_iter=10000
     )
-    old_implem = POTAlignment(reg=epsilon, metric="euclidean", tol=1e-5, max_iter=10000)
+    old_implem = POTAlignment(
+        reg=epsilon, metric="euclidean", tol=1e-5, max_iter=10000
+    )
     algo.fit(X, Y)
     old_implem.fit(X, Y)
     assert_array_almost_equal(algo.R, old_implem.R, decimal=3)
