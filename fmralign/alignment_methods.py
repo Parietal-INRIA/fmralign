@@ -828,7 +828,7 @@ class FugwAlignment:
         X,
         Y,
         segmentation,
-        method="coarse_to_fine",
+        method="coarse-to-fine",
         n_samples=10,
         n_landmarks=100,
         device="auto",
@@ -905,7 +905,7 @@ class FugwAlignment:
 
             self.mapping = mapping
 
-        elif method == "coarse_to_fine":
+        elif method == "coarse-to-fine":
             # Subsample vertices as uniformly as possible on the surface
             sampled_geometry = self._sample_geometry(
                 segmentation, geometry_embedding, n_samples
