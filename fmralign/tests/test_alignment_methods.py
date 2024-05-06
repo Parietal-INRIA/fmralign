@@ -195,11 +195,10 @@ def test_all_classes_R_and_pred_shape_and_better_than_identity():
             algo_score = zero_mean_coefficient_determination(Y, X_pred)
             assert algo_score >= identity_baseline_score
 
-@pytest.mark.parametrize(
-    "method", ["dense", "coarse-to-fine"]
-)
+
+@pytest.mark.parametrize("method", ["dense", "coarse-to-fine"])
 def test_fugw_alignment(method):
-    # Create a random 3D mask
+    # Create a fake segmentation
     segmentation = np.ones((5, 5, 5))
     n_features = 3
     n_samples = int(segmentation.sum())
@@ -210,9 +209,8 @@ def test_fugw_alignment(method):
     fugw_alignment.fit(X, Y, segmentation, method=method)
     assert fugw_alignment.transform(X).shape == X.shape
     assert fugw_alignment.transform(X).shape == Y.shape
-    
 
-# %%
+
 def test_ott_backend():
     n_samples, n_features = 100, 20
     epsilon = 0.1
