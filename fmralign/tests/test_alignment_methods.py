@@ -5,7 +5,6 @@ import pytest
 from numpy.testing import assert_array_almost_equal
 from scipy.sparse import csc_matrix
 from scipy.linalg import orthogonal_procrustes
-from nilearn import maskers, masking
 
 from fmralign.alignment_methods import (
     DiagonalAlignment,
