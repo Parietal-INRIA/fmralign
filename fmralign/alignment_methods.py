@@ -14,7 +14,6 @@ from scipy.spatial.distance import cdist
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.linear_model import RidgeCV
 from sklearn.metrics.pairwise import pairwise_distances
-from nilearn import masking
 
 # Fast implementation for parallelized computing
 from fmralign.hyperalignment.linalg import safe_svd, svd_pca
