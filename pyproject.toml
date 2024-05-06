@@ -26,7 +26,8 @@ dependencies = [
     "nibabel",
     "nilearn>=0.10.3",
     "POT",
-    "fastsrm"
+    "fastsrm",
+    "fugw>=0.1.1"
 ]
 dynamic = ["version"]
 
