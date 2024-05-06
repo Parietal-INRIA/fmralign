@@ -27,7 +27,8 @@ dependencies = [
     "nilearn>=0.10.3",
     "POT",
     "fastsrm",
-    "fugw>=0.1.1"
+    "fugw>=0.1.1",
+    "torch",
 ]
 dynamic = ["version"]
 
