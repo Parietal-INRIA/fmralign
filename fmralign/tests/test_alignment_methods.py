@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+import pytest
 from numpy.testing import assert_array_almost_equal
 from scipy.sparse import csc_matrix
 from scipy.linalg import orthogonal_procrustes
@@ -195,8 +196,10 @@ def test_all_classes_R_and_pred_shape_and_better_than_identity():
             algo_score = zero_mean_coefficient_determination(Y, X_pred)
             assert algo_score >= identity_baseline_score
 
-
-def test_fugw_alignment():
+@pytest.mark.parametrize(
+    "method", ["dense", "coarse-to-fine"]
+)
+def test_fugw_alignment(method):
     # Create a random 3D mask
     segmentation = np.ones((5, 5, 5))
     n_features = 3
@@ -205,10 +208,10 @@ def test_fugw_alignment():
     Y = np.random.randn(n_samples, n_features)
 
     fugw_alignment = FugwAlignment()
-    fugw_alignment.fit(X, Y, segmentation, method="dense")
+    fugw_alignment.fit(X, Y, segmentation, method=method)
     assert fugw_alignment.transform(X).shape == X.shape
     assert fugw_alignment.transform(X).shape == Y.shape
-
+    
 
 # %%
 def test_ott_backend():
