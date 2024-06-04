@@ -202,8 +202,8 @@ def test_fugw_alignment(method):
     segmentation = np.ones((5, 5, 5))
     n_features = 3
     n_samples = int(segmentation.sum())
-    X = np.random.randn(n_samples, n_features)
-    Y = np.random.randn(n_samples, n_features)
+    X = np.random.randn(n_samples, n_features).T
+    Y = np.random.randn(n_samples, n_features).T
 
     fugw_alignment = FugwAlignment()
     fugw_alignment.fit(X, Y, segmentation, method=method)
