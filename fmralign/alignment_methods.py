@@ -838,9 +838,9 @@ class FugwAlignment:
 
         Parameters
         ----------
-        X : ndarray
+        X : ndarray of shape (n_samples, n_features)
             Source features
-        Y : ndarray
+        Y : ndarray of shape (n_samples, n_features)
             Target features
         segmentation : ndarray,
             Segmentation of the mask
@@ -861,6 +861,7 @@ class FugwAlignment:
         self : FugwAlignment
             Fitted FUGW alignment
         """
+        # Set the device on which to perform the computation
         if device == "auto":
             device = torch.device(
                 "cuda:0" if torch.cuda.is_available() else "cpu"
@@ -876,8 +877,8 @@ class FugwAlignment:
         if verbose:
             print("Geometry embedding computed")
 
-        source_features_normalized = self._normalize(X)
-        target_features_normalized = self._normalize(Y)
+        source_features_normalized = self._normalize(X.T)
+        target_features_normalized = self._normalize(Y.T)
 
         if verbose:
             print("Features computed")
