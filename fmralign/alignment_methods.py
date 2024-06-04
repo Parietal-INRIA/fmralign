@@ -831,7 +831,7 @@ class FugwAlignment:
         n_samples=10,
         n_landmarks=100,
         device="auto",
-        verbose=True,
+        verbose=False,
         **kwargs,
     ):
         """Fit FUGW alignment
@@ -960,7 +960,7 @@ class FugwAlignment:
 
         Parameters
         ----------
-        X : ndarray
+        X : ndarray of shape (n_samples, n_features)
             Source features
         device : torch.device, optional, by default "auto"
             Device on which to perform the computation.
@@ -990,6 +990,6 @@ class FugwAlignment:
         # If id_reg is True, interpolate the resulting
         # mapping with the identity matrix
         transformed_features = self.mapping.transform(
-            X.T, id_reg=id_reg, device=device
+            X, id_reg=id_reg, device=device
         )
-        return transformed_features.T
+        return transformed_features
