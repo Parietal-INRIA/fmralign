@@ -199,7 +199,7 @@ def test_all_classes_R_and_pred_shape_and_better_than_identity():
 @pytest.mark.parametrize("method", ["dense", "coarse-to-fine"])
 def test_fugw_alignment(method):
     # Create a fake segmentation
-    segmentation = np.ones((5, 5, 5))
+    segmentation = np.ones((10, 10, 10))
     n_features = 3
     n_samples = int(segmentation.sum())
     X = np.random.randn(n_samples, n_features).T
