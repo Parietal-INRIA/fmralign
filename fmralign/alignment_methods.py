@@ -752,7 +752,6 @@ class FugwAlignment:
         rho_fine=1.0,
         eps_coarse=1.0,
         eps_fine=1.0,
-        radius=5,
         anisotropy=(3, 3, 3),
         reg_mode="independent",
         divergence="kl",
@@ -761,16 +760,12 @@ class FugwAlignment:
 
         Parameters
         ----------
-        n_samples : int, optional
-            Number of samples from the embedding, by default 300.
         alpha_coarse : float, optional, by default 0.5.
         rho_coarse : float, optional, by default 1.
         eps_coarse : float, optional, by default 1.
         alpha_fine : float, optional, by default 0.5.
         rho_fine : float, optional, by default 1.
         eps_fine : float, optional, by default 1e-6.
-        radius : int, optional
-            Radius around the sampled points in mm, by default 5.
         anisotropy : tuple, optional.
             Anisotropy of the fmri mask, by default (3, 3, 3)
         reg_mode : str, optional
@@ -784,7 +779,6 @@ class FugwAlignment:
         self.alpha_fine = alpha_fine
         self.rho_fine = rho_fine
         self.eps_fine = eps_fine
-        self.radius = radius
         self.anisotropy = anisotropy
         self.reg_mode = reg_mode
         self.divergence = divergence
@@ -828,8 +822,9 @@ class FugwAlignment:
         Y,
         segmentation,
         method="coarse-to-fine",
-        n_samples=10,
-        n_landmarks=100,
+        n_landmarks=1000,
+        n_samples=100,
+        radius=5,
         device="auto",
         verbose=False,
         **kwargs,
@@ -846,10 +841,13 @@ class FugwAlignment:
             Segmentation of the mask
         method : str, optional
             Method used to compute FUGW alignments, by default "coarse_to_fine".
-        n_samples : int, optional
-            Number of samples from the embedding, by default 300.
         n_landmarks : int, optional
             Number of landmarks used in the embedding, by default 1000.
+        n_samples : int, optional
+            Number of samples points passed to 
+            sklearn.cluster.AgglomerativeClustering, by default 100.
+        radius : int, optional
+            Radius around the sampled points in mm, by default 5.
         device : torch.device, optional, by default "auto"
             Device on which to perform the computation.
         verbose : bool, optional, by default True
@@ -938,8 +936,8 @@ class FugwAlignment:
                 source_sample=sampled_geometry,
                 target_sample=sampled_geometry,
                 coarse_mapping=coarse_mapping,
-                source_selection_radius=(self.radius / max_distance),
-                target_selection_radius=(self.radius / max_distance),
+                source_selection_radius=(radius / max_distance),
+                target_selection_radius=(radius / max_distance),
                 fine_mapping=fine_mapping,
                 device=device,
                 verbose=verbose,
@@ -953,8 +951,8 @@ class FugwAlignment:
     def transform(
         self,
         X,
-        device="auto",
         id_reg=0.0,
+        device="auto",
     ):
         """Project features using the fitted FUGW alignment
 
@@ -962,14 +960,14 @@ class FugwAlignment:
         ----------
         X : ndarray of shape (n_samples, n_features)
             Source features
-        device : torch.device, optional, by default "auto"
-            Device on which to perform the computation.
         id_reg: float, in the [0, 1] interval, defaults to 0
             If source/target share the same geometry,
             interpolate the transport plan with the identity
             using the provided coefficient.
             A value of 1 (resp. 0) will rely solely on the identity
             (resp. the transport plan).
+        device : torch.device, optional, by default "auto"
+            Device on which to perform the computation.
 
         Returns
         -------
