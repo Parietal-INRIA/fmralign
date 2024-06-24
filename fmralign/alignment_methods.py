@@ -844,7 +844,7 @@ class FugwAlignment:
         n_landmarks : int, optional
             Number of landmarks used in the embedding, by default 1000.
         n_samples : int, optional
-            Number of samples points passed to 
+            Number of samples points passed to
             sklearn.cluster.AgglomerativeClustering, by default 100.
         radius : int, optional
             Radius around the sampled points in mm, by default 5.
