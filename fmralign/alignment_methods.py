@@ -784,7 +784,7 @@ class FugwAlignment:
         divergence : str, optional
             Divergence used in the FUGW alignment, by default "kl".
         method : str, optional
-            Method used to compute FUGW alignments, by default "coarse_to_fine".
+            Method used to compute FUGW alignments, by default "coarse-to-fine".
         n_landmarks : int, optional
             Number of landmarks used in the embedding, by default 1000.
         n_samples : int, optional
