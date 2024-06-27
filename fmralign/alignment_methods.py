@@ -746,6 +746,7 @@ class FugwAlignment:
 
     def __init__(
         self,
+        segmentation,
         alpha_coarse=0.5,
         alpha_fine=0.5,
         rho_coarse=1.0,
@@ -755,11 +756,21 @@ class FugwAlignment:
         anisotropy=(3, 3, 3),
         reg_mode="independent",
         divergence="kl",
+        method="coarse-to-fine",
+        n_landmarks=1000,
+        n_samples=100,
+        radius=5,
+        id_reg=0.0,
+        device="auto",
+        verbose=False,
+        **kwargs,
     ) -> None:
         """Initialize FUGW alignment
 
         Parameters
         ----------
+        segmentation : ndarray,
+            Segmentation of the mask
         alpha_coarse : float, optional, by default 0.5.
         rho_coarse : float, optional, by default 1.
         eps_coarse : float, optional, by default 1.
@@ -772,7 +783,28 @@ class FugwAlignment:
             Regularization mode, by default "independent"
         divergence : str, optional
             Divergence used in the FUGW alignment, by default "kl".
+        method : str, optional
+            Method used to compute FUGW alignments, by default "coarse_to_fine".
+        n_landmarks : int, optional
+            Number of landmarks used in the embedding, by default 1000.
+        n_samples : int, optional
+            Number of samples points passed to
+            sklearn.cluster.AgglomerativeClustering, by default 100.
+        radius : int, optional
+            Radius around the sampled points in mm, by default 5.
+        id_reg: float, in the [0, 1] interval, defaults to 0
+            If source/target share the same geometry,
+            interpolate the transport plan with the identity
+            using the provided coefficient.
+            A value of 1 (resp. 0) will rely solely on the identity
+            (resp. the transport plan).
+        device : torch.device, optional, by default "auto"
+            Device on which to perform the computation.
+        verbose : bool, optional, by default True
+        **kwargs : dict
+            Additional parameters passed to the FUGW mapping.fit method.
         """
+        self.segmentation = segmentation
         self.alpha_coarse = alpha_coarse
         self.rho_coarse = rho_coarse
         self.eps_coarse = eps_coarse
@@ -782,18 +814,45 @@ class FugwAlignment:
         self.anisotropy = anisotropy
         self.reg_mode = reg_mode
         self.divergence = divergence
+        self.method = method
+        self.n_landmarks = n_landmarks
+        self.n_samples = n_samples
+        self.radius = radius
+        self.id_reg = id_reg
+        self.verbose = verbose
+        self.kwargs = kwargs
+        
+        self.device = self._get_device(device)
+        if self.verbose:
+            print("Computing geometry embedding...")
+        self.geometry_embedding, self.geometry_embedding_normalized, self.max_distance = (
+            self._prepare_geometry_embedding(
+                self.segmentation, self.n_landmarks, self.anisotropy, self.verbose,
+            )
+        )
+        if self.verbose:
+            print("Geometry embedding computed")
+        
+    def _get_device(self, device):
+        """Set the device on which to perform the computation"""
+        if device == "auto":
+            device = torch.device(
+                "cuda:0" if torch.cuda.is_available() else "cpu"
+            )
+            
+        return device
 
     def _normalize(self, X):
         """Normalize the input data"""
         return (X / np.linalg.norm(X, axis=1).reshape(-1, 1)).T
 
-    def _prepare_geometry_embedding(self, segmentation, n_landmarks, verbose):
+    def _prepare_geometry_embedding(self, segmentation, n_landmarks, anisotropy, verbose):
         """Compute the normalized geometry embedding"""
         geometry_embedding = lmds.compute_lmds_volume(
             segmentation,
             k=12,
             n_landmarks=n_landmarks,
-            anisotropy=self.anisotropy,
+            anisotropy=anisotropy,
             verbose=verbose,
         ).nan_to_num()
 
@@ -820,14 +879,6 @@ class FugwAlignment:
         self,
         X,
         Y,
-        segmentation,
-        method="coarse-to-fine",
-        n_landmarks=1000,
-        n_samples=100,
-        radius=5,
-        device="auto",
-        verbose=False,
-        **kwargs,
     ):
         """Fit FUGW alignment
 
@@ -837,51 +888,18 @@ class FugwAlignment:
             Source features
         Y : ndarray of shape (n_samples, n_features)
             Target features
-        segmentation : ndarray,
-            Segmentation of the mask
-        method : str, optional
-            Method used to compute FUGW alignments, by default "coarse_to_fine".
-        n_landmarks : int, optional
-            Number of landmarks used in the embedding, by default 1000.
-        n_samples : int, optional
-            Number of samples points passed to
-            sklearn.cluster.AgglomerativeClustering, by default 100.
-        radius : int, optional
-            Radius around the sampled points in mm, by default 5.
-        device : torch.device, optional, by default "auto"
-            Device on which to perform the computation.
-        verbose : bool, optional, by default True
-        **kwargs : dict
-            Additional parameters passed to the FUGW mapping.fit method.
 
         Returns
         -------
         self : FugwAlignment
             Fitted FUGW alignment
         """
-        # Set the device on which to perform the computation
-        if device == "auto":
-            device = torch.device(
-                "cuda:0" if torch.cuda.is_available() else "cpu"
-            )
-
-        # Compute the embedding of the source and target data
-        geometry_embedding, geometry_embedding_normalized, max_distance = (
-            self._prepare_geometry_embedding(
-                segmentation, n_landmarks, verbose
-            )
-        )
-
-        if verbose:
-            print("Geometry embedding computed")
-
         source_features_normalized = self._normalize(X.T)
         target_features_normalized = self._normalize(Y.T)
-
-        if verbose:
-            print("Features computed")
-
-        if method == "dense":
+        if self.verbose:
+            print("Features normalized")
+            
+        if self.method == "dense":
             mapping = FUGW(
                 alpha=self.alpha_coarse,
                 rho=self.rho_coarse,
@@ -893,23 +911,23 @@ class FugwAlignment:
             mapping.fit(
                 source_features=source_features_normalized,
                 target_features=target_features_normalized,
-                source_geometry=geometry_embedding_normalized
-                @ geometry_embedding_normalized.T,
-                target_geometry=geometry_embedding_normalized
-                @ geometry_embedding_normalized.T,
-                verbose=verbose,
-                **kwargs,
+                source_geometry=self.geometry_embedding_normalized
+                @ self.geometry_embedding_normalized.T,
+                target_geometry=self.geometry_embedding_normalized
+                @ self.geometry_embedding_normalized.T,
+                verbose=self.verbose,
+                **self.kwargs,
             )
 
             self.mapping = mapping
 
-        elif method == "coarse-to-fine":
+        elif self.method == "coarse-to-fine":
             # Subsample vertices as uniformly as possible on the surface
             sampled_geometry = self._sample_geometry(
-                segmentation, geometry_embedding, n_samples
+                self.segmentation, self.geometry_embedding, self.n_samples
             )
 
-            if verbose:
+            if self.verbose:
                 print("Samples computed")
 
             coarse_mapping = FUGW(
@@ -931,17 +949,17 @@ class FugwAlignment:
             coarse_to_fine.fit(
                 source_features=source_features_normalized,
                 target_features=target_features_normalized,
-                source_geometry_embeddings=geometry_embedding_normalized,
-                target_geometry_embeddings=geometry_embedding_normalized,
+                source_geometry_embeddings=self.geometry_embedding_normalized,
+                target_geometry_embeddings=self.geometry_embedding_normalized,
                 source_sample=sampled_geometry,
                 target_sample=sampled_geometry,
                 coarse_mapping=coarse_mapping,
-                source_selection_radius=(radius / max_distance),
-                target_selection_radius=(radius / max_distance),
+                source_selection_radius=(self.radius / self.max_distance),
+                target_selection_radius=(self.radius / self.max_distance),
                 fine_mapping=fine_mapping,
-                device=device,
-                verbose=verbose,
-                **kwargs,
+                device=self.device,
+                verbose=self.verbose,
+                **self.kwargs,
             )
 
             self.mapping = fine_mapping
@@ -951,8 +969,6 @@ class FugwAlignment:
     def transform(
         self,
         X,
-        id_reg=0.0,
-        device="auto",
     ):
         """Project features using the fitted FUGW alignment
 
@@ -960,14 +976,6 @@ class FugwAlignment:
         ----------
         X : ndarray of shape (n_samples, n_features)
             Source features
-        id_reg: float, in the [0, 1] interval, defaults to 0
-            If source/target share the same geometry,
-            interpolate the transport plan with the identity
-            using the provided coefficient.
-            A value of 1 (resp. 0) will rely solely on the identity
-            (resp. the transport plan).
-        device : torch.device, optional, by default "auto"
-            Device on which to perform the computation.
 
         Returns
         -------
@@ -980,14 +988,9 @@ class FugwAlignment:
                 "FUGW alignment must be fitted before transforming data"
             )
 
-        if device == "auto":
-            device = torch.device(
-                "cuda:0" if torch.cuda.is_available() else "cpu"
-            )
-
         # If id_reg is True, interpolate the resulting
         # mapping with the identity matrix
         transformed_features = self.mapping.transform(
-            X, id_reg=id_reg, device=device
+            X, id_reg=self.id_reg, device=self.device
         )
         return transformed_features
