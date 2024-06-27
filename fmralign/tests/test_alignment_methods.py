@@ -205,8 +205,8 @@ def test_fugw_alignment(method):
     X = np.random.randn(n_samples, n_features).T
     Y = np.random.randn(n_samples, n_features).T
 
-    fugw_alignment = FugwAlignment()
-    fugw_alignment.fit(X, Y, segmentation, method=method)
+    fugw_alignment = FugwAlignment(segmentation, method=method)
+    fugw_alignment.fit(X, Y)
     assert fugw_alignment.transform(X).shape == X.shape
     assert fugw_alignment.transform(X).shape == Y.shape
 
