@@ -821,32 +821,38 @@ class FugwAlignment:
         self.id_reg = id_reg
         self.verbose = verbose
         self.kwargs = kwargs
-        
+
         self.device = self._get_device(device)
         if self.verbose:
             print("Computing geometry embedding...")
-        self.geometry_embedding, self.geometry_embedding_normalized, self.max_distance = (
-            self._prepare_geometry_embedding(
-                self.segmentation, self.n_landmarks, self.anisotropy, self.verbose,
-            )
+        (
+            self.geometry_embedding,
+            self.geometry_embedding_normalized,
+            self.max_distance,
+        ) = self._prepare_geometry_embedding(
+            self.segmentation,
+            self.n_landmarks,
+            self.anisotropy,
+            self.verbose,
         )
         if self.verbose:
             print("Geometry embedding computed")
-        
+
     def _get_device(self, device):
         """Set the device on which to perform the computation"""
         if device == "auto":
             device = torch.device(
                 "cuda:0" if torch.cuda.is_available() else "cpu"
             )
-            
         return device
 
     def _normalize(self, X):
         """Normalize the input data"""
         return (X / np.linalg.norm(X, axis=1).reshape(-1, 1)).T
 
-    def _prepare_geometry_embedding(self, segmentation, n_landmarks, anisotropy, verbose):
+    def _prepare_geometry_embedding(
+        self, segmentation, n_landmarks, anisotropy, verbose
+    ):
         """Compute the normalized geometry embedding"""
         geometry_embedding = lmds.compute_lmds_volume(
             segmentation,
@@ -898,7 +904,7 @@ class FugwAlignment:
         target_features_normalized = self._normalize(Y.T)
         if self.verbose:
             print("Features normalized")
-            
+
         if self.method == "dense":
             mapping = FUGW(
                 alpha=self.alpha_coarse,
