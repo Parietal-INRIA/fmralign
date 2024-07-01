@@ -848,7 +848,7 @@ class FugwAlignment:
 
     def _normalize(self, X):
         """Normalize the input data"""
-        return (X / np.linalg.norm(X, axis=1).reshape(-1, 1)).T
+        return np.nan_to_num((X / np.linalg.norm(X, axis=1).reshape(-1, 1)).T)
 
     def _prepare_geometry_embedding(
         self, segmentation, n_landmarks, anisotropy, verbose
