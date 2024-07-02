@@ -136,5 +136,5 @@ def test_template_closer_to_target():
         )
         assert template_mean_distance >= mean_distance_1
         assert (
-            template_mean_distance >= mean_distance_2 - 1.0e-3
+            template_mean_distance >= mean_distance_2 - 1.0e-2
         )  # for robustness

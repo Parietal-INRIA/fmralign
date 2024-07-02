@@ -17,7 +17,7 @@ classifiers = [
   "Programming Language :: Python :: 3",
 ]
 dependencies = [
-    "numpy",
+    "numpy<2",
     "pandas",
     "matplotlib",
     "scikit-learn",
@@ -26,7 +26,9 @@ dependencies = [
     "nibabel",
     "nilearn>=0.10.3",
     "POT",
-    "fastsrm"
+    "fastsrm",
+    "fugw>=0.1.1",
+    "torch",
 ]
 dynamic = ["version"]
 
