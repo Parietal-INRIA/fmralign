@@ -89,7 +89,7 @@ jobs:
 
     # Deploy the documentation to GitHub Pages.
     deploy_docs:
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/master'
         needs: build_docs
         runs-on: ubuntu-latest
         steps:
