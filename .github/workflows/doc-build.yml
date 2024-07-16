@@ -12,7 +12,7 @@ jobs:
   # Steps to build the documentation.
     build_docs:
     # This prevents this workflow from running on a fork.
-        if: github.repository == 'parietal-INRIA/fakerepo'
+        if: github.repository == 'parietal-INRIA/fmralign'
         runs-on: ubuntu-latest
         timeout-minutes: 360
         defaults:
@@ -84,13 +84,13 @@ jobs:
         -   name: Upload documentation
             uses: actions/upload-artifact@v4
             with:
-                name: doc
+                name: DocHTML
                 path: doc/_build/html
 
     # Deploy the documentation to GitHub Pages.
     deploy_docs:
         if: github.repository == 'parietal-INRIA/fmralign'
-        # needs: build_docs
+        needs: build_docs
         runs-on: ubuntu-latest
         steps:
         -   uses: actions/checkout@v3
@@ -98,6 +98,7 @@ jobs:
         -   name: Download artifacts
             uses: actions/download-artifact@v4
             with:
+                name: DocHTML
                 path: doc/_build/html/
 
         -   name: Commit to documentation branch
