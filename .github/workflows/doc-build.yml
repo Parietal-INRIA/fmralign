@@ -90,7 +90,7 @@ jobs:
     # Deploy the documentation to GitHub Pages.
     deploy_docs:
         if: github.repository == 'parietal-INRIA/fmralign'
-        needs: build_docs
+        # needs: build_docs
         runs-on: ubuntu-latest
         steps:
         -   uses: actions/checkout@v3
