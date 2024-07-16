@@ -8,6 +8,11 @@ on:
     pull_request:
         branches:
         -   '*'
+
+permissions:
+  contents: write
+  pages: write
+
 jobs:
   # Steps to build the documentation.
     build_docs:
@@ -86,3 +91,34 @@ jobs:
             with:
                 name: DocHTML
                 path: doc/_build/html
+                
+    # Deploy the documentation to GitHub Pages.
+    deploy_docs:
+        if: github.repository == 'parietal-INRIA/fmralign'
+        needs: build_docs
+        runs-on: ubuntu-latest
+        steps:
+        -   uses: actions/checkout@v3
+
+        -   name: Download artifacts
+            uses: actions/download-artifact@v4
+            with:
+                name: DocHTML
+                path: doc/_build/html/
+
+        -   name: Commit to documentation branch
+            run: |
+                git clone --depth 1 https://github.com/${{ github.repository }}.git --branch gh-pages --single-branch gh-pages
+                cp -r doc/_build/html/* gh-pages/
+                cd gh-pages
+                touch .nojekyll
+                git config --local user.email "fmralign@github.com"
+                git config --local user.name "fmralign GitHub Action"
+                git add .
+                git commit -m "Update documentation" -a || true
+            
+        -   name: Push changes
+            uses: ad-m/github-push-action@v0.6.0
+            with:
+                branch: gh-pages
+                github_token: ${{ secrets.GITHUB_TOKEN }}
