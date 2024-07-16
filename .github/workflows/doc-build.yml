@@ -8,6 +8,16 @@ on:
     pull_request:
         branches:
         -   '*'
+
+# Bump up GITHUB_TOKEN permissions to allow pushing to gh-pages.
+permissions:
+    pull-requests: write
+    issues: write
+    repository-projects: write
+    contents: write
+    pages: write
+    id-token: write    
+        
 jobs:
   # Steps to build the documentation.
     build_docs:
