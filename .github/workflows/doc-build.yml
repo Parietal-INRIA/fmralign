@@ -12,7 +12,7 @@ jobs:
   # Steps to build the documentation.
     build_docs:
     # This prevents this workflow from running on a fork.
-        if: github.repository == 'parietal-INRIA/fmralign'
+        if: github.repository == 'parietal-INRIA/fakerepo'
         runs-on: ubuntu-latest
         timeout-minutes: 360
         defaults:
