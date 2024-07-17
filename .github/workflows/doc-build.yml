@@ -105,6 +105,7 @@ jobs:
             with:
                 name: DocHTML
                 path: doc/_build/html/
+                fetch-depth: 0
 
         -   name: Commit to documentation branch
             run: |
