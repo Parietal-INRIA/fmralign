@@ -1,0 +1,761 @@
+
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title> &#8212; fMRI alignment</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nature.css?v=f256d4a3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=62940405"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../_static/favicon.ico"/>
+    <link rel="search" title="Search" href="../../search.html" />
+<meta content="True" name="HandheldFriendly">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<meta name="keywords" content="neuroimaging, python, neuroscience, statistics">
+
+
+
+<script type="text/javascript">
+function updateTopMenuPosition(height, width) {
+    if($(window).scrollTop() > height && $(window).outerWidth() > 1024) {
+        //begin to scroll
+        $('.related-wrapper').css("z-index", 1000)
+        $('.related-wrapper').css("position", "sticky")
+        $('.related-wrapper').css("top", 0)
+        $('.related-wrapper').css("width", width)
+    } else {
+        //lock it back into place
+        $('.related-wrapper').css("position", "relative")
+        $('.related-wrapper').css("top", 0)
+    }
+}
+
+$(function() {
+    var banner_height = $('#logo-banner').outerHeight()
+    var banner_width = $('#logo-banner').outerWidth()
+    var width = $('.related-wrapper').css("height", $('.related').outerHeight())
+
+    updateTopMenuPosition(banner_height, width)
+
+    $(window).scroll(function(event) {
+        updateTopMenuPosition(banner_height, width)
+    });
+
+    $(window).resize(function(event) {
+        var banner_width = $('#logo-banner').outerWidth()
+        var menu_height = $('.related').outerHeight()
+        $('.related').css("width", banner_width)
+        $('.related-wrapper').css("height", menu_height)
+        updateTopMenuPosition(banner_height, width)
+    })
+});
+</script>
+<script type="text/javascript">
+function updateSideBarPosition(top, offset, sections) {
+    var pos = $(window).scrollTop()
+    // Lock the table of content to a fixed position once we scroll enough
+    var topShift = 2 * offset
+    if(pos > top + topShift + 1) {
+        // begin to scroll with sticky menu bar
+        var topShift = -topShift + 1
+        if ($(window).outerWidth() < 1024) {
+            // compensate top menu that disappears
+            topShift -= offset + 1
+        }
+        $('.sphinxsidebarwrapper').css("position", "fixed")
+        $('.sphinxsidebarwrapper').css("top", topShift)
+    }
+    else {
+        //lock it back into place
+        $('.sphinxsidebarwrapper').css("position", "relative")
+        $('.sphinxsidebarwrapper').css("top",0)
+    }
+
+    // Highlight the current section
+    i = 0
+    current_section = 0
+    $('a.internal').removeClass('active')
+    for(i in sections) {
+        if(sections[i] > pos) {
+            break
+        };
+        if($('a.internal[href$="' + i + '"]').is(':visible')){
+            current_section = i
+        };
+    }
+    $('a.internal[href$="' + current_section + '"]').addClass('active')
+    $('a.internal[href$="' + current_section + '"]').parent().addClass('active')
+}
+
+$(function () {
+    // Lock the table of content to a fixed position once we scroll enough
+    var top = 105 + $('.sphinxsidebarwrapper').offset().top - parseFloat($('.sphinxsidebarwrapper').css('margin-top').replace(/auto/, 0)),
+        sections = {},
+        i        = 0,
+	url	 = document.URL.replace(/#.*$/, ""),
+	current_section = 0;
+
+    // Grab positions of our sections
+    $('.headerlink').each(function(){
+        sections[this.href.replace(url, '')] = $(this).offset().top - 50;
+    });
+
+    $(window).scroll(function(event) {
+	var pos   = $(window).scrollTop();
+	// Lock the table of content to a fixed position once we scroll enough
+	if(pos > top){
+	    //begin to scroll
+	    $('.sphinxsidebarwrapper').css("position", "fixed");
+	    $('.sphinxsidebarwrapper').css("top", -105);
+	}
+	else{
+	    //lock it back into place
+	    $('.sphinxsidebarwrapper').css("position", "relative");
+	    $('.sphinxsidebarwrapper').css("top",0);
+	}
+
+	// Highlight the current section
+	$('a.internal').removeClass('active');
+        for(i in sections){
+            if(sections[i] > pos){
+		break;
+            };
+	    if($('a.internal[href$="' + i + '"]').is(':visible')){
+		current_section = i;
+	    };
+        }
+	$('a.internal[href$="' + current_section + '"]').addClass('active');
+    });
+
+});
+</script>
+
+
+<script type="text/javascript">
+
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-41920728-1']);
+        _gaq.push(['_trackPageview']);
+
+        (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+
+  </head><body>
+<div id="logo-banner">
+  <!-- A tag cloud to make it easy for people to find what they are
+                         looking for -->
+
+  <div class="banner">
+    <h1>fmralign:</h1>
+    <h2>Functional MRI alignment in Python</h2>
+  </div>
+  <div class="search_form">
+    <div id="cse" style="width: 100%;"></div>
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+      google.load('search', '1', {language : 'en'});
+      google.setOnLoadCallback(function() {
+      var customSearchControl = new google.search.CustomSearchControl('014136483057745874622:r-npolb1uki');
+      customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+      var options = new google.search.DrawOptions();
+      options.setAutoComplete(true);
+      customSearchControl.draw('cse', options);
+      }, true);
+    </script>
+  </div>
+</div>
+
+
+
+<div class=related-wrapper>
+    
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a></li>
+<li><a href="../../index.html">Home</a> |&nbsp;</li>
+<li><a href="../../user_guide.html">User Guide</a> |&nbsp;</li>
+<li><a href="../../auto_examples/index.html">Examples</a> |&nbsp;</li>
+<li><a href="../../modules/reference.html">Reference</a> |&nbsp;</li>
+<li id="navbar-about"><a href="../../authors.html">About</a>|&nbsp;</li>
+
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""></a></li> 
+      </ul>
+    </div>
+</div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for fmralign.template_alignment</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module for functional template inference.</span>
+<span class="sd">Uses functional alignment on Niimgs and predicts new subjects&#39; unseen images.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># Author: T. Bazeille, B. Thirion</span>
+<span class="c1"># License: simplified BSD</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Memory</span><span class="p">,</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+<span class="kn">from</span> <span class="nn">nilearn.image</span> <span class="kn">import</span> <span class="n">concat_imgs</span><span class="p">,</span> <span class="n">index_img</span><span class="p">,</span> <span class="n">load_img</span>
+<span class="kn">from</span> <span class="nn">nilearn._utils.masker_validation</span> <span class="kn">import</span> <span class="n">check_embedded_masker</span>
+<span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span>
+<span class="kn">from</span> <span class="nn">fmralign.pairwise_alignment</span> <span class="kn">import</span> <span class="n">PairwiseAlignment</span>
+
+
+<span class="k">def</span> <span class="nf">_rescaled_euclidean_mean</span><span class="p">(</span><span class="n">imgs</span><span class="p">,</span> <span class="n">masker</span><span class="p">,</span> <span class="n">scale_average</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Make the Euclidian average of images.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    imgs: list of Niimgs</span>
+<span class="sd">        Each img is 3D by default, but can also be 4D.</span>
+<span class="sd">    masker: instance of NiftiMasker or MultiNiftiMasker</span>
+<span class="sd">        Masker to be used on the data.</span>
+<span class="sd">    scale_average: boolean</span>
+<span class="sd">        If true, the returned average is scaled to have the average norm of imgs</span>
+<span class="sd">        If false, it will usually have a smaller norm than initial average</span>
+<span class="sd">        because noise will cancel across images</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    average_img: Niimg</span>
+<span class="sd">        Average of imgs, with same shape as one img</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">masked_imgs</span> <span class="o">=</span> <span class="p">[</span><span class="n">masker</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">img</span><span class="p">)</span> <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">imgs</span><span class="p">]</span>
+    <span class="n">average_img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">masked_imgs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">scale_average</span><span class="p">:</span>
+        <span class="n">X_norm</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">masked_imgs</span><span class="p">:</span>
+            <span class="n">X_norm</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+        <span class="n">X_norm</span> <span class="o">/=</span> <span class="nb">len</span><span class="p">(</span><span class="n">masked_imgs</span><span class="p">)</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="n">X_norm</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">average_img</span><span class="p">)</span>
+    <span class="n">average_img</span> <span class="o">*=</span> <span class="n">scale</span>
+
+    <span class="k">return</span> <span class="n">masker</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">average_img</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_align_images_to_template</span><span class="p">(</span>
+    <span class="n">imgs</span><span class="p">,</span>
+    <span class="n">template</span><span class="p">,</span>
+    <span class="n">alignment_method</span><span class="p">,</span>
+    <span class="n">n_pieces</span><span class="p">,</span>
+    <span class="n">clustering</span><span class="p">,</span>
+    <span class="n">n_bags</span><span class="p">,</span>
+    <span class="n">masker</span><span class="p">,</span>
+    <span class="n">memory</span><span class="p">,</span>
+    <span class="n">memory_level</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convenience function.</span>
+<span class="sd">    For a list of images, return the list of estimators (PairwiseAlignment instances)</span>
+<span class="sd">    aligning each of them to a common target, the template.</span>
+<span class="sd">    All arguments are used in PairwiseAlignment.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">aligned_imgs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">imgs</span><span class="p">:</span>
+        <span class="n">piecewise_estimator</span> <span class="o">=</span> <span class="n">PairwiseAlignment</span><span class="p">(</span>
+            <span class="n">n_pieces</span><span class="o">=</span><span class="n">n_pieces</span><span class="p">,</span>
+            <span class="n">alignment_method</span><span class="o">=</span><span class="n">alignment_method</span><span class="p">,</span>
+            <span class="n">clustering</span><span class="o">=</span><span class="n">clustering</span><span class="p">,</span>
+            <span class="n">n_bags</span><span class="o">=</span><span class="n">n_bags</span><span class="p">,</span>
+            <span class="n">mask</span><span class="o">=</span><span class="n">masker</span><span class="p">,</span>
+            <span class="n">memory</span><span class="o">=</span><span class="n">memory</span><span class="p">,</span>
+            <span class="n">memory_level</span><span class="o">=</span><span class="n">memory_level</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">piecewise_estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">template</span><span class="p">)</span>
+        <span class="n">aligned_imgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">piecewise_estimator</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">img</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">aligned_imgs</span>
+
+
+<span class="k">def</span> <span class="nf">_create_template</span><span class="p">(</span>
+    <span class="n">imgs</span><span class="p">,</span>
+    <span class="n">n_iter</span><span class="p">,</span>
+    <span class="n">scale_template</span><span class="p">,</span>
+    <span class="n">alignment_method</span><span class="p">,</span>
+    <span class="n">n_pieces</span><span class="p">,</span>
+    <span class="n">clustering</span><span class="p">,</span>
+    <span class="n">n_bags</span><span class="p">,</span>
+    <span class="n">masker</span><span class="p">,</span>
+    <span class="n">memory</span><span class="p">,</span>
+    <span class="n">memory_level</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create template through alternate minimization.</span>
+<span class="sd">    Compute iteratively :</span>
+<span class="sd">    * T minimizing sum(||R_i X_i-T||) which is the mean of aligned images (RX_i)</span>
+<span class="sd">    * align initial images to new template T</span>
+<span class="sd">        (find transform R_i minimizing ||R_i X_i-T|| for each img X_i)</span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    imgs: List of Niimg-like objects</span>
+<span class="sd">       See http://nilearn.github.io/manipulating_images/input_output.html</span>
+<span class="sd">       source data. Every img must have the same length (n_sample)</span>
+<span class="sd">    scale_template: boolean</span>
+<span class="sd">        If true, template is rescaled after each inference so that it keeps</span>
+<span class="sd">        the same norm as the average of training images.</span>
+<span class="sd">    n_iter: int</span>
+<span class="sd">       Number of iterations in the alternate minimization. Each image is</span>
+<span class="sd">       aligned n_iter times to the evolving template. If n_iter = 0,</span>
+<span class="sd">       the template is simply the mean of the input images.</span>
+<span class="sd">    All other arguments are the same are passed to PairwiseAlignment</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    template: list of 3D Niimgs of length (n_sample)</span>
+<span class="sd">        Models the barycenter of input imgs</span>
+<span class="sd">    template_history: list of list of 3D Niimgs</span>
+<span class="sd">        List of the intermediate templates computed at the end of each iteration</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">aligned_imgs</span> <span class="o">=</span> <span class="n">imgs</span>
+    <span class="n">template_history</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="nb">iter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_iter</span><span class="p">):</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">_rescaled_euclidean_mean</span><span class="p">(</span><span class="n">aligned_imgs</span><span class="p">,</span> <span class="n">masker</span><span class="p">,</span> <span class="n">scale_template</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="nb">iter</span> <span class="o">&lt;</span> <span class="n">n_iter</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">template_history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+        <span class="n">aligned_imgs</span> <span class="o">=</span> <span class="n">_align_images_to_template</span><span class="p">(</span>
+            <span class="n">imgs</span><span class="p">,</span>
+            <span class="n">template</span><span class="p">,</span>
+            <span class="n">alignment_method</span><span class="p">,</span>
+            <span class="n">n_pieces</span><span class="p">,</span>
+            <span class="n">clustering</span><span class="p">,</span>
+            <span class="n">n_bags</span><span class="p">,</span>
+            <span class="n">masker</span><span class="p">,</span>
+            <span class="n">memory</span><span class="p">,</span>
+            <span class="n">memory_level</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">template</span><span class="p">,</span> <span class="n">template_history</span>
+
+
+<span class="k">def</span> <span class="nf">_map_template_to_image</span><span class="p">(</span>
+    <span class="n">imgs</span><span class="p">,</span>
+    <span class="n">train_index</span><span class="p">,</span>
+    <span class="n">template</span><span class="p">,</span>
+    <span class="n">alignment_method</span><span class="p">,</span>
+    <span class="n">n_pieces</span><span class="p">,</span>
+    <span class="n">clustering</span><span class="p">,</span>
+    <span class="n">n_bags</span><span class="p">,</span>
+    <span class="n">masker</span><span class="p">,</span>
+    <span class="n">memory</span><span class="p">,</span>
+    <span class="n">memory_level</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Learn alignment operator from the template toward new images.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    imgs: list of 3D Niimgs</span>
+<span class="sd">        Target images to learn mapping from the template to a new subject</span>
+<span class="sd">    train_index: list of int</span>
+<span class="sd">        Matching index between imgs and the corresponding template images to use</span>
+<span class="sd">        to learn alignment. len(train_index) must be equal to len(imgs)</span>
+<span class="sd">    template: list of 3D Niimgs</span>
+<span class="sd">        Learnt in a first step now used as source image</span>
+<span class="sd">    All other arguments are the same are passed to PairwiseAlignment</span>
+
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    mapping: instance of PairwiseAlignment class</span>
+<span class="sd">        Alignment estimator fitted to align the template with the input images</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">mapping_image</span> <span class="o">=</span> <span class="n">index_img</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">train_index</span><span class="p">)</span>
+    <span class="n">mapping</span> <span class="o">=</span> <span class="n">PairwiseAlignment</span><span class="p">(</span>
+        <span class="n">n_pieces</span><span class="o">=</span><span class="n">n_pieces</span><span class="p">,</span>
+        <span class="n">alignment_method</span><span class="o">=</span><span class="n">alignment_method</span><span class="p">,</span>
+        <span class="n">clustering</span><span class="o">=</span><span class="n">clustering</span><span class="p">,</span>
+        <span class="n">n_bags</span><span class="o">=</span><span class="n">n_bags</span><span class="p">,</span>
+        <span class="n">mask</span><span class="o">=</span><span class="n">masker</span><span class="p">,</span>
+        <span class="n">memory</span><span class="o">=</span><span class="n">memory</span><span class="p">,</span>
+        <span class="n">memory_level</span><span class="o">=</span><span class="n">memory_level</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">mapping</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">mapping_image</span><span class="p">,</span> <span class="n">imgs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mapping</span>
+
+
+<span class="k">def</span> <span class="nf">_predict_from_template_and_mapping</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">test_index</span><span class="p">,</span> <span class="n">mapping</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    From a template and an alignment estimator, predict new contrasts.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    template: list of 3D Niimgs</span>
+<span class="sd">        Learnt in a first step now used to predict some new data</span>
+<span class="sd">    test_index:</span>
+<span class="sd">        Index of the images not used to learn the alignment mapping and so</span>
+<span class="sd">        predictable without overfitting</span>
+<span class="sd">    mapping: instance of PairwiseAlignment class</span>
+<span class="sd">        Alignment estimator that must have been fitted already</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    transformed_image: list of Niimgs</span>
+<span class="sd">        Prediction corresponding to each template image with index in test_index</span>
+<span class="sd">        once realigned to the new subjects</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">image_to_transform</span> <span class="o">=</span> <span class="n">index_img</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">test_index</span><span class="p">)</span>
+    <span class="n">transformed_image</span> <span class="o">=</span> <span class="n">mapping</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">image_to_transform</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">transformed_image</span>
+
+
+<div class="viewcode-block" id="TemplateAlignment">
+<a class="viewcode-back" href="../../modules/generated/fmralign.template_alignment.TemplateAlignment.html#fmralign.template_alignment.TemplateAlignment">[docs]</a>
+<span class="k">class</span> <span class="nc">TemplateAlignment</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decompose the source images into regions and summarize subjects information</span>
+<span class="sd">    in a template, then use pairwise alignment to predict</span>
+<span class="sd">    new contrast for target subject.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TemplateAlignment.__init__">
+<a class="viewcode-back" href="../../modules/generated/fmralign.template_alignment.TemplateAlignment.html#fmralign.template_alignment.TemplateAlignment.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">alignment_method</span><span class="o">=</span><span class="s2">&quot;identity&quot;</span><span class="p">,</span>
+        <span class="n">n_pieces</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">clustering</span><span class="o">=</span><span class="s2">&quot;kmeans&quot;</span><span class="p">,</span>
+        <span class="n">scale_template</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">n_iter</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">save_template</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">n_bags</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">smoothing_fwhm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">standardize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">detrend</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">target_affine</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">target_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">low_pass</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">high_pass</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">t_r</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">memory</span><span class="o">=</span><span class="n">Memory</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="kc">None</span><span class="p">),</span>
+        <span class="n">memory_level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        alignment_method: string</span>
+<span class="sd">            Algorithm used to perform alignment between X_i and Y_i :</span>
+<span class="sd">            * either &#39;identity&#39;, &#39;scaled_orthogonal&#39;, &#39;optimal_transport&#39;,</span>
+<span class="sd">            &#39;ridge_cv&#39;, &#39;permutation&#39;, &#39;diagonal&#39;,</span>
+<span class="sd">            * or an instance of one of alignment classes (imported from</span>
+<span class="sd">            functional_alignment.alignment_methods)</span>
+<span class="sd">        n_pieces: int, optional (default = 1)</span>
+<span class="sd">            Number of regions in which the data is parcellated for alignment.</span>
+<span class="sd">            If 1 the alignment is done on full scale data.</span>
+<span class="sd">            If &gt; 1, the voxels are clustered and alignment is performed on each</span>
+<span class="sd">            cluster applied to X and Y.</span>
+<span class="sd">        clustering : string or 3D Niimg optional (default : kmeans)</span>
+<span class="sd">            &#39;kmeans&#39;, &#39;ward&#39;, &#39;rena&#39;, &#39;hierarchical_kmeans&#39; method used for</span>
+<span class="sd">            clustering of voxels based on functional signal,</span>
+<span class="sd">            passed to nilearn.regions.parcellations</span>
+<span class="sd">            If 3D Niimg, image used as predefined clustering,</span>
+<span class="sd">            n_bags and n_pieces are then ignored.</span>
+<span class="sd">        scale_template: boolean, default False</span>
+<span class="sd">            rescale template after each inference so that it keeps</span>
+<span class="sd">            the same norm as the average of training images.</span>
+<span class="sd">        n_iter: int</span>
+<span class="sd">           number of iteration in the alternate minimization. Each img is</span>
+<span class="sd">           aligned n_iter times to the evolving template. If n_iter = 0,</span>
+<span class="sd">           the template is simply the mean of the input images.</span>
+<span class="sd">        save_template: None or string(optional)</span>
+<span class="sd">            If not None, path to which the template will be saved.</span>
+<span class="sd">        n_bags: int, optional (default = 1)</span>
+<span class="sd">            If 1 : one estimator is fitted.</span>
+<span class="sd">            If &gt;1 number of bagged parcellations and estimators used.</span>
+<span class="sd">        mask: Niimg-like object, instance of NiftiMasker or</span>
+<span class="sd">                                MultiNiftiMasker, optional (default = None)</span>
+<span class="sd">            Mask to be used on data. If an instance of masker is passed, then its</span>
+<span class="sd">            mask will be used. If no mask is given, it will be computed</span>
+<span class="sd">            automatically by a MultiNiftiMasker with default parameters.</span>
+<span class="sd">        smoothing_fwhm: float, optional (default = None)</span>
+<span class="sd">            If smoothing_fwhm is not None, it gives the size in millimeters</span>
+<span class="sd">            of the spatial smoothing to apply to the signal.</span>
+<span class="sd">        standardize: boolean, optional (default = None)</span>
+<span class="sd">            If standardize is True, the time-series are centered and normed:</span>
+<span class="sd">            their variance is put to 1 in the time dimension.</span>
+<span class="sd">        detrend: boolean, optional (default = None)</span>
+<span class="sd">            This parameter is passed to nilearn.signal.clean.</span>
+<span class="sd">            Please see the related documentation for details</span>
+<span class="sd">        target_affine: 3x3 or 4x4 matrix, optional (default = None)</span>
+<span class="sd">            This parameter is passed to nilearn.image.resample_img.</span>
+<span class="sd">            Please see the related documentation for details.</span>
+<span class="sd">        target_shape: 3-tuple of integers, optional (default = None)</span>
+<span class="sd">            This parameter is passed to nilearn.image.resample_img.</span>
+<span class="sd">            Please see the related documentation for details.</span>
+<span class="sd">        low_pass: None or float, optional (default = None)</span>
+<span class="sd">            This parameter is passed to nilearn.signal.clean.</span>
+<span class="sd">            Please see the related documentation for details.</span>
+<span class="sd">        high_pass: None or float, optional (default = None)</span>
+<span class="sd">            This parameter is passed to nilearn.signal.clean.</span>
+<span class="sd">            Please see the related documentation for details.</span>
+<span class="sd">        t_r: float, optional (default = None)</span>
+<span class="sd">            This parameter is passed to nilearn.signal.clean.</span>
+<span class="sd">            Please see the related documentation for details.</span>
+<span class="sd">        memory: instance of joblib.Memory or string (default = None)</span>
+<span class="sd">            Used to cache the masking process and results of algorithms.</span>
+<span class="sd">            By default, no caching is done. If a string is given, it is the</span>
+<span class="sd">            path to the caching directory.</span>
+<span class="sd">        memory_level: integer, optional (default = None)</span>
+<span class="sd">            Rough estimator of the amount of memory used by caching.</span>
+<span class="sd">            Higher value means more memory for caching.</span>
+<span class="sd">        n_jobs: integer, optional (default = 1)</span>
+<span class="sd">            The number of CPUs to use to do the computation. -1 means</span>
+<span class="sd">            &#39;all CPUs&#39;, -2 &#39;all CPUs but one&#39;, and so on.</span>
+<span class="sd">        verbose: integer, optional (default = 0)</span>
+<span class="sd">            Indicate the level of verbosity. By default, nothing is printed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">template_history</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alignment_method</span> <span class="o">=</span> <span class="n">alignment_method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_pieces</span> <span class="o">=</span> <span class="n">n_pieces</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clustering</span> <span class="o">=</span> <span class="n">clustering</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_iter</span> <span class="o">=</span> <span class="n">n_iter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale_template</span> <span class="o">=</span> <span class="n">scale_template</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_template</span> <span class="o">=</span> <span class="n">save_template</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_bags</span> <span class="o">=</span> <span class="n">n_bags</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">smoothing_fwhm</span> <span class="o">=</span> <span class="n">smoothing_fwhm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">standardize</span> <span class="o">=</span> <span class="n">standardize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">detrend</span> <span class="o">=</span> <span class="n">detrend</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_affine</span> <span class="o">=</span> <span class="n">target_affine</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_shape</span> <span class="o">=</span> <span class="n">target_shape</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">low_pass</span> <span class="o">=</span> <span class="n">low_pass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">high_pass</span> <span class="o">=</span> <span class="n">high_pass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_r</span> <span class="o">=</span> <span class="n">t_r</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">memory</span> <span class="o">=</span> <span class="n">memory</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">memory_level</span> <span class="o">=</span> <span class="n">memory_level</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">=</span> <span class="n">n_jobs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span></div>
+
+
+<div class="viewcode-block" id="TemplateAlignment.fit">
+<a class="viewcode-back" href="../../modules/generated/fmralign.template_alignment.TemplateAlignment.html#fmralign.template_alignment.TemplateAlignment.fit">[docs]</a>
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">imgs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Learn a template from source images, using alignment.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        imgs: List of 4D Niimg-like or List of lists of 3D Niimg-like</span>
+<span class="sd">            Source subjects data. Each element of the parent list is one subject</span>
+<span class="sd">            data, and all must have the same length (n_samples).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self</span>
+
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        self.template: 4D Niimg object</span>
+<span class="sd">            Length : n_samples</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Check if the input is a list, if list of lists, concatenate each subjects</span>
+        <span class="c1"># data into one unique image.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">imgs</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">))</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">imgs</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;The method TemplateAlignment.fit() need a list input. &quot;</span>
+                <span class="s2">&quot;Each element of the list (Niimg-like or list of Niimgs) &quot;</span>
+                <span class="s2">&quot;is the data for one subject.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">imgs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+                <span class="n">imgs</span> <span class="o">=</span> <span class="p">[</span><span class="n">concat_imgs</span><span class="p">(</span><span class="n">img</span><span class="p">)</span> <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">imgs</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">masker_</span> <span class="o">=</span> <span class="n">check_embedded_masker</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">masker_</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span>  <span class="c1"># self.n_jobs</span>
+
+        <span class="c1"># if masker_ has been provided a mask_img</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">masker_</span><span class="o">.</span><span class="n">mask_img</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">masker_</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">imgs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">masker_</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_history</span> <span class="o">=</span> <span class="n">_create_template</span><span class="p">(</span>
+            <span class="n">imgs</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_iter</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scale_template</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">alignment_method</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_pieces</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_bags</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">masker_</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">memory</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">memory_level</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_template</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">save_template</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TemplateAlignment.transform">
+<a class="viewcode-back" href="../../modules/generated/fmralign.template_alignment.TemplateAlignment.html#fmralign.template_alignment.TemplateAlignment.transform">[docs]</a>
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">imgs</span><span class="p">,</span> <span class="n">train_index</span><span class="p">,</span> <span class="n">test_index</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Learn alignment between new subject and template calculated during fit,</span>
+<span class="sd">        then predict other conditions for this new subject.</span>
+<span class="sd">        Alignment is learnt between imgs and conditions in the template indexed by train_index.</span>
+<span class="sd">        Prediction correspond to conditions in the template index by test_index.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        imgs: List of 3D Niimg-like objects</span>
+<span class="sd">            Target subjects known data.</span>
+<span class="sd">            Every img must have length (number of sample) train_index.</span>
+<span class="sd">        train_index: list of ints</span>
+<span class="sd">            Indexes of the 3D samples used to map each img to the template.</span>
+<span class="sd">            Every index should be smaller than the number of images in the template.</span>
+<span class="sd">        test_index: list of ints</span>
+<span class="sd">            Indexes of the 3D samples to predict from the template and the mapping.</span>
+<span class="sd">            Every index should be smaller than the number of images in the template.</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        predicted_imgs: List of 3D Niimg-like objects</span>
+<span class="sd">            Target subjects predicted data.</span>
+<span class="sd">            Each Niimg has the same length as the list test_index</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">imgs</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;The method TemplateAlignment.transform() need a list input. &quot;</span>
+                <span class="s2">&quot;Each element of the list (Niimg-like or list of Niimgs) &quot;</span>
+                <span class="s2">&quot;is the data used to align one new subject with images &quot;</span>
+                <span class="s2">&quot;indexed by train_index.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">imgs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">imgs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span>
+                <span class="n">train_index</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Each element of imgs (Niimg-like or list of Niimgs) &quot;</span>
+                    <span class="s2">&quot;should have the same length as the length of train_index.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">load_img</span><span class="p">(</span><span class="n">imgs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_index</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Each element of imgs (Niimg-like or list of Niimgs) &quot;</span>
+                    <span class="s2">&quot;should have the same length as the length of train_index.&quot;</span>
+                <span class="p">)</span>
+
+        <span class="n">template_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+            <span class="nb">all</span><span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">template_length</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">test_index</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">template_length</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">train_index</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Template has </span><span class="si">{</span><span class="n">template_length</span><span class="si">}</span><span class="s2"> images but you provided a &quot;</span>
+                <span class="s2">&quot;greater index in train_index or test_index.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">fitted_mappings</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="s2">&quot;threads&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)(</span>
+            <span class="n">delayed</span><span class="p">(</span><span class="n">_map_template_to_image</span><span class="p">)(</span>
+                <span class="n">img</span><span class="p">,</span>
+                <span class="n">train_index</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">alignment_method</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">n_pieces</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">n_bags</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">masker_</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">memory</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">memory_level</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">imgs</span>
+        <span class="p">)</span>
+
+        <span class="n">predicted_imgs</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="s2">&quot;threads&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)(</span>
+            <span class="n">delayed</span><span class="p">(</span><span class="n">_predict_from_template_and_mapping</span><span class="p">)(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">,</span> <span class="n">test_index</span><span class="p">,</span> <span class="n">mapping</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">mapping</span> <span class="ow">in</span> <span class="n">fitted_mappings</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">predicted_imgs</span></div>
+
+
+    <span class="c1"># Make inherited function harmless</span>
+<div class="viewcode-block" id="TemplateAlignment.fit_transform">
+<a class="viewcode-back" href="../../modules/generated/fmralign.template_alignment.TemplateAlignment.html#fmralign.template_alignment.TemplateAlignment.fit_transform">[docs]</a>
+    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parent method not applicable here. Will raise AttributeError if called.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+            <span class="s2">&quot;type object &#39;PairwiseAlignment&#39; has no attribute &#39;fit_transform&#39;&quot;</span>
+        <span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+
+
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+            &copy; fmralign developers 2018-2023.
+          Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 7.4.7.
+    </div>
+  </body>
+</html>

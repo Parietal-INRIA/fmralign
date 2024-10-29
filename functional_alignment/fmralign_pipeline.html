@@ -1,0 +1,490 @@
+
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title> &#8212; fMRI alignment</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/nature.css?v=f256d4a3" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=62940405"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="3. Reference documentation: all fmralign functions" href="../modules/reference.html" />
+    <link rel="prev" title="2.1. An introduction to functional alignment" href="introduction.html" />
+<meta content="True" name="HandheldFriendly">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<meta name="keywords" content="neuroimaging, python, neuroscience, statistics">
+
+
+
+<script type="text/javascript">
+function updateTopMenuPosition(height, width) {
+    if($(window).scrollTop() > height && $(window).outerWidth() > 1024) {
+        //begin to scroll
+        $('.related-wrapper').css("z-index", 1000)
+        $('.related-wrapper').css("position", "sticky")
+        $('.related-wrapper').css("top", 0)
+        $('.related-wrapper').css("width", width)
+    } else {
+        //lock it back into place
+        $('.related-wrapper').css("position", "relative")
+        $('.related-wrapper').css("top", 0)
+    }
+}
+
+$(function() {
+    var banner_height = $('#logo-banner').outerHeight()
+    var banner_width = $('#logo-banner').outerWidth()
+    var width = $('.related-wrapper').css("height", $('.related').outerHeight())
+
+    updateTopMenuPosition(banner_height, width)
+
+    $(window).scroll(function(event) {
+        updateTopMenuPosition(banner_height, width)
+    });
+
+    $(window).resize(function(event) {
+        var banner_width = $('#logo-banner').outerWidth()
+        var menu_height = $('.related').outerHeight()
+        $('.related').css("width", banner_width)
+        $('.related-wrapper').css("height", menu_height)
+        updateTopMenuPosition(banner_height, width)
+    })
+});
+</script>
+<script type="text/javascript">
+function updateSideBarPosition(top, offset, sections) {
+    var pos = $(window).scrollTop()
+    // Lock the table of content to a fixed position once we scroll enough
+    var topShift = 2 * offset
+    if(pos > top + topShift + 1) {
+        // begin to scroll with sticky menu bar
+        var topShift = -topShift + 1
+        if ($(window).outerWidth() < 1024) {
+            // compensate top menu that disappears
+            topShift -= offset + 1
+        }
+        $('.sphinxsidebarwrapper').css("position", "fixed")
+        $('.sphinxsidebarwrapper').css("top", topShift)
+    }
+    else {
+        //lock it back into place
+        $('.sphinxsidebarwrapper').css("position", "relative")
+        $('.sphinxsidebarwrapper').css("top",0)
+    }
+
+    // Highlight the current section
+    i = 0
+    current_section = 0
+    $('a.internal').removeClass('active')
+    for(i in sections) {
+        if(sections[i] > pos) {
+            break
+        };
+        if($('a.internal[href$="' + i + '"]').is(':visible')){
+            current_section = i
+        };
+    }
+    $('a.internal[href$="' + current_section + '"]').addClass('active')
+    $('a.internal[href$="' + current_section + '"]').parent().addClass('active')
+}
+
+$(function () {
+    // Lock the table of content to a fixed position once we scroll enough
+    var top = 105 + $('.sphinxsidebarwrapper').offset().top - parseFloat($('.sphinxsidebarwrapper').css('margin-top').replace(/auto/, 0)),
+        sections = {},
+        i        = 0,
+	url	 = document.URL.replace(/#.*$/, ""),
+	current_section = 0;
+
+    // Grab positions of our sections
+    $('.headerlink').each(function(){
+        sections[this.href.replace(url, '')] = $(this).offset().top - 50;
+    });
+
+    $(window).scroll(function(event) {
+	var pos   = $(window).scrollTop();
+	// Lock the table of content to a fixed position once we scroll enough
+	if(pos > top){
+	    //begin to scroll
+	    $('.sphinxsidebarwrapper').css("position", "fixed");
+	    $('.sphinxsidebarwrapper').css("top", -105);
+	}
+	else{
+	    //lock it back into place
+	    $('.sphinxsidebarwrapper').css("position", "relative");
+	    $('.sphinxsidebarwrapper').css("top",0);
+	}
+
+	// Highlight the current section
+	$('a.internal').removeClass('active');
+        for(i in sections){
+            if(sections[i] > pos){
+		break;
+            };
+	    if($('a.internal[href$="' + i + '"]').is(':visible')){
+		current_section = i;
+	    };
+        }
+	$('a.internal[href$="' + current_section + '"]').addClass('active');
+    });
+
+});
+</script>
+
+
+<script type="text/javascript">
+
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-41920728-1']);
+        _gaq.push(['_trackPageview']);
+
+        (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+
+  </head><body>
+<div id="logo-banner">
+  <!-- A tag cloud to make it easy for people to find what they are
+                         looking for -->
+
+  <div class="banner">
+    <h1>fmralign:</h1>
+    <h2>Functional MRI alignment in Python</h2>
+  </div>
+  <div class="search_form">
+    <div id="cse" style="width: 100%;"></div>
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+      google.load('search', '1', {language : 'en'});
+      google.setOnLoadCallback(function() {
+      var customSearchControl = new google.search.CustomSearchControl('014136483057745874622:r-npolb1uki');
+      customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+      var options = new google.search.DrawOptions();
+      options.setAutoComplete(true);
+      customSearchControl.draw('cse', options);
+      }, true);
+    </script>
+  </div>
+</div>
+
+
+
+<div class=related-wrapper>
+    
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a></li>
+        <li class="right" >
+          <a href="../modules/reference.html" title="3. Reference documentation: all fmralign functions"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="introduction.html" title="2.1. An introduction to functional alignment"
+             accesskey="P">previous</a> |</li>
+<li><a href="../index.html">Home</a> |&nbsp;</li>
+<li><a href="../user_guide.html">User Guide</a> |&nbsp;</li>
+<li><a href="../auto_examples/index.html">Examples</a> |&nbsp;</li>
+<li><a href="../modules/reference.html">Reference</a> |&nbsp;</li>
+<li id="navbar-about"><a href="../authors.html">About</a>|&nbsp;</li>
+
+          <li class="nav-item nav-item-1"><a href="../user_guide.html" >User guide: table of contents</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="index.html" accesskey="U"><span class="section-number">2. </span>Functional alignment: handling functional variability</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""></a></li> 
+      </ul>
+    </div>
+</div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="functional-alignment-pipeline">
+<h1><span class="section-number">2.2. </span>Functional alignment pipeline<a class="headerlink" href="#functional-alignment-pipeline" title="Link to this heading">¶</a></h1>
+<p>As seen in the <a class="reference internal" href="introduction.html#introduction"><span class="std std-ref">previous section</span></a>,
+functional alignment searches for a transform between images of two or several subjects in order to match voxels which have similar profile of activation.
+This section explains how this transform is found in fmralign to make the process easy, efficient and scalable.</p>
+<p>We compare various methods of alignment on a pairwise alignment problem for <a class="reference external" href="https://project.inria.fr/IBC/">Individual Brain Charting</a> subjects.
+For each subject, we have a lot of functional informations in the form of several task-based contrast per subject.
+We will just work here on a ROI.</p>
+<nav class="contents local" id="contents">
+<p class="topic-title"><strong>Contents</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#local-functional-alignment" id="id2">Local functional alignment</a></p></li>
+<li><p><a class="reference internal" href="#alignment-methods-on-a-region" id="id3">Alignment methods on a region</a></p></li>
+<li><p><a class="reference internal" href="#comparing-those-methods-on-a-region-of-interest" id="id4">Comparing those methods on a region of interest</a></p></li>
+</ul>
+</nav>
+<section id="local-functional-alignment">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink"><span class="section-number">2.2.1. </span>Local functional alignment</a><a class="headerlink" href="#local-functional-alignment" title="Link to this heading">¶</a></h2>
+<figure class="align-right">
+<a class="reference internal image-reference" href="../_images/alignment_pipeline.png"><img alt="../_images/alignment_pipeline.png" src="../_images/alignment_pipeline.png" style="width: 215.0px; height: 272.0px;" />
+</a>
+</figure>
+<p>Aligning images of various size is not always easy because when we search a
+transformation for <cite>n</cite> voxels yields at least a complexity of <span class="math notranslate nohighlight">\(n^2\)</span>. Moreover,
+finding just one transformation for similarity of functional signal in the whole
+brain could create unrealistic correspondances, for example inter-hemispheric.</p>
+<p>To avoid these issues, we keep alignment local, i.e. on local and functionally meaningful regions.
+Thus, in a first step cluster the voxels in the image into <cite>n_pieces</cite> sub-regions, based on functional information.
+Then we find local alignment on each parcel and we recompose the global matrix from these.</p>
+<p>With this technique, it is possible to find quickly sensible alignment even for full-brain images in 2mm resolution. The
+parcellation chosen can obviously have an impact. We recommend ‘ward’ to have spatially compact and reproducible clusters.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Optimal transport <a class="reference external" href="../_images/profiling_methods.png">shows poor convergence</a> for ROIs greater than 1000 voxels.
+We therefore recommend working with smaller regions when using this method.</p>
+</div>
+</section>
+<section id="alignment-methods-on-a-region">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink"><span class="section-number">2.2.2. </span>Alignment methods on a region</a><a class="headerlink" href="#alignment-methods-on-a-region" title="Link to this heading">¶</a></h2>
+<aside class="topic">
+<p class="topic-title"><strong>Full code example on 2D simulated data</strong></p>
+<p>All the figures in this section were generated from a dedicated example:
+<a class="reference internal" href="../auto_examples/plot_alignment_simulated_2D_data.html#sphx-glr-auto-examples-plot-alignment-simulated-2d-data-py"><span class="std std-ref">Alignment on simulated 2D data.</span></a>.</p>
+</aside>
+<p>As we mentionned several times, we search for a transformation, let’s call it <cite>R</cite>,
+between the source subject data <cite>X</cite> and the target data <cite>Y</cite>. <cite>X</cite> and <cite>Y</cite> are arrays of
+dimensions <cite>(n_voxels, n_samples)</cite> where each image is a sample.
+So we can see each signal as a distribution where each voxel as a point
+in a multidimensional functional space (each dimension is a sample).</p>
+<p>We show below a 2D example, with 2 distributions: <cite>X</cite> in green, <cite>Y</cite> in red. Both have 20 voxels (points) characterized by 2 samples (images). And the alignment we search for is the matching of both distibutions, optimally in some sense.</p>
+<figure class="align-left">
+<img alt="../_images/sphx_glr_plot_alignment_simulated_2D_data_001.png" src="../_images/sphx_glr_plot_alignment_simulated_2D_data_001.png" />
+</figure>
+<section id="orthogonal-alignment-procrustes">
+<h3><span class="section-number">2.2.2.1. </span>Orthogonal alignment (Procrustes)<a class="headerlink" href="#orthogonal-alignment-procrustes" title="Link to this heading">¶</a></h3>
+<p>The first idea proposed in Haxby, 2011 was to compute an orthogonal mixing
+matrix <cite>R</cite> and a scaling <cite>sc</cite> such that Frobenius norm <span class="math notranslate nohighlight">\(||sc RX - Y||^2\)</span> is minimized.</p>
+<figure class="align-left">
+<img alt="../_images/sphx_glr_plot_alignment_simulated_2D_data_003.png" src="../_images/sphx_glr_plot_alignment_simulated_2D_data_003.png" />
+</figure>
+<figure class="align-left">
+<img alt="../_images/sphx_glr_plot_alignment_simulated_2D_data_004.png" src="../_images/sphx_glr_plot_alignment_simulated_2D_data_004.png" />
+</figure>
+</section>
+<section id="ridge-alignment">
+<h3><span class="section-number">2.2.2.2. </span>Ridge alignment<a class="headerlink" href="#ridge-alignment" title="Link to this heading">¶</a></h3>
+<p>Another simple idea to regularize the transform <cite>R</cite> searched for is to penalize its L2 norm. This is a ridge regression, which means we search <cite>R</cite> such that Frobenius  norm <span class="math notranslate nohighlight">\(|| XR - Y ||^2 + alpha * ||R||^2\)</span> is minimized with cross-validation.</p>
+<figure class="align-left">
+<img alt="../_images/sphx_glr_plot_alignment_simulated_2D_data_005.png" src="../_images/sphx_glr_plot_alignment_simulated_2D_data_005.png" />
+</figure>
+<figure class="align-left">
+<img alt="../_images/sphx_glr_plot_alignment_simulated_2D_data_006.png" src="../_images/sphx_glr_plot_alignment_simulated_2D_data_006.png" />
+</figure>
+</section>
+<section id="optimal-transport-alignment">
+<h3><span class="section-number">2.2.2.3. </span>Optimal Transport alignment<a class="headerlink" href="#optimal-transport-alignment" title="Link to this heading">¶</a></h3>
+<p>Finally this package comes with a new method that build on the Wasserstein distance which is well-suited for this problem. This is the framework of Optimal Transport that search to transport all signal from <cite>X</cite> to <cite>Y</cite>
+while minimizign the overall cost of this transport. <cite>R</cite> is here the optimal coupling between <cite>X</cite> and <cite>Y</cite> with entropic regularization.</p>
+<figure class="align-left">
+<img alt="../_images/sphx_glr_plot_alignment_simulated_2D_data_007.png" src="../_images/sphx_glr_plot_alignment_simulated_2D_data_007.png" />
+</figure>
+<figure class="align-left">
+<img alt="../_images/sphx_glr_plot_alignment_simulated_2D_data_008.png" src="../_images/sphx_glr_plot_alignment_simulated_2D_data_008.png" />
+</figure>
+</section>
+</section>
+<section id="comparing-those-methods-on-a-region-of-interest">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink"><span class="section-number">2.2.3. </span>Comparing those methods on a region of interest</a><a class="headerlink" href="#comparing-those-methods-on-a-region-of-interest" title="Link to this heading">¶</a></h2>
+<aside class="topic">
+<p class="topic-title"><strong>Full code example</strong></p>
+<p>The full code example of this section is :
+<a class="reference internal" href="../auto_examples/plot_alignment_methods_benchmark.html#sphx-glr-auto-examples-plot-alignment-methods-benchmark-py"><span class="std std-ref">Alignment methods benchmark (pairwise ROI case).</span></a>.</p>
+</aside>
+<p>Now let’s compare the performance of these various methods on our simple example:
+the prediction of left-out data for a new subject from another subjects data.</p>
+<section id="loading-the-data">
+<h3><span class="section-number">2.2.3.1. </span>Loading the data<a class="headerlink" href="#loading-the-data" title="Link to this heading">¶</a></h3>
+<p>We begin with the retrieval of images from two <a class="reference external" href="https://project.inria.fr/IBC/">Individual Brain Charting</a> subjects :</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">fmralign.fetch_example_data</span> <span class="kn">import</span> <span class="n">fetch_ibc_subjects_contrasts</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">files</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="n">fetch_ibc_subjects_contrasts</span><span class="p">([</span><span class="s1">&#39;sub-01&#39;</span><span class="p">,</span> <span class="s1">&#39;sub-02&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Here <cite>files</cite> is the list of paths for each subject and <cite>df</cite> is a pandas Dataframe
+with metadata about each of them.</p>
+</section>
+<section id="extract-a-mask-for-the-visual-cortex-from-yeo-atlas">
+<h3><span class="section-number">2.2.3.2. </span>Extract a mask for the visual cortex from Yeo Atlas<a class="headerlink" href="#extract-a-mask-for-the-visual-cortex-from-yeo-atlas" title="Link to this heading">¶</a></h3>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nilearn</span> <span class="kn">import</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">plotting</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nilearn.image</span> <span class="kn">import</span> <span class="n">resample_to_img</span><span class="p">,</span> <span class="n">load_img</span><span class="p">,</span> <span class="n">new_img_like</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">atlas_yeo_2011</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">fetch_atlas_yeo_2011</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">atlas</span> <span class="o">=</span> <span class="n">load_img</span><span class="p">(</span><span class="n">atlas_yeo_2011</span><span class="o">.</span><span class="n">thick_7</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Select visual cortex, create a mask and resample it to the right resolution</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mask_visual</span> <span class="o">=</span> <span class="n">new_img_like</span><span class="p">(</span><span class="n">atlas</span><span class="p">,</span> <span class="n">atlas</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">resampled_mask_visual</span> <span class="o">=</span> <span class="n">resample_to_img</span><span class="p">(</span>
+<span class="go">    mask_visual, mask, interpolation=&quot;nearest&quot;)</span>
+</pre></div>
+</div>
+<p>Plot the mask we  use</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">plotting</span><span class="o">.</span><span class="n">plot_roi</span><span class="p">(</span><span class="n">resampled_mask_visual</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Visual regions mask extracted from atlas&#39;</span><span class="p">,</span>
+<span class="go">         cut_coords=(8, -80, 9), colorbar=True, cmap=&#39;Paired&#39;)</span>
+</pre></div>
+</div>
+<figure class="align-left">
+<a class="reference internal image-reference" href="../_images/sphx_glr_plot_alignment_methods_benchmark_001.png"><img alt="../_images/sphx_glr_plot_alignment_methods_benchmark_001.png" src="../_images/sphx_glr_plot_alignment_methods_benchmark_001.png" style="width: 219.0px; height: 105.0px;" />
+</a>
+</figure>
+</section>
+<section id="define-a-masker">
+<h3><span class="section-number">2.2.3.3. </span>Define a masker<a class="headerlink" href="#define-a-masker" title="Link to this heading">¶</a></h3>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nilearn.maskers</span> <span class="kn">import</span> <span class="n">NiftiMasker</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">roi_masker</span> <span class="o">=</span> <span class="n">NiftiMasker</span><span class="p">(</span><span class="n">mask_img</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="prepare-the-data">
+<h3><span class="section-number">2.2.3.4. </span>Prepare the data<a class="headerlink" href="#prepare-the-data" title="Link to this heading">¶</a></h3>
+<p>For each subject, for each task and conditions, our dataset contains two
+independent acquisitions, similar except for one acquisition parameter, the
+encoding phase used that was either Antero-Posterior (AP) or Postero-Anterior (PA).
+Although this induces small differences in the final data, we will take
+advantage of these “duplicates” to create a training and a testing set that
+contains roughly the same signals but acquired independently.</p>
+<dl class="simple">
+<dt>The training fold, used to learn alignment from source subject toward target:</dt><dd><ul class="simple">
+<li><p>source train: AP contrasts for subject ‘sub-01’</p></li>
+<li><p>target train: AP contrasts for subject ‘sub-02’</p></li>
+</ul>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">source_train</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">subject</span> <span class="o">==</span> <span class="s1">&#39;sub-01&#39;</span><span class="p">][</span><span class="n">df</span><span class="o">.</span><span class="n">acquisition</span> <span class="o">==</span> <span class="s1">&#39;ap&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">values</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">target_train</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">subject</span> <span class="o">==</span> <span class="s1">&#39;sub-02&#39;</span><span class="p">][</span><span class="n">df</span><span class="o">.</span><span class="n">acquisition</span> <span class="o">==</span> <span class="s1">&#39;ap&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">values</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>The testing fold:</dt><dd><ul class="simple">
+<li><p>source test: PA contrasts for subject ‘sub-01’, used to predict
+the corresponding contrasts of subject ‘sub-02’</p></li>
+<li><p>target test: PA contrasts for subject ‘sub-02’, used as a ground truth
+to score our predictions</p></li>
+</ul>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">source_test</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">subject</span> <span class="o">==</span> <span class="s1">&#39;sub-01&#39;</span><span class="p">][</span><span class="n">df</span><span class="o">.</span><span class="n">acquisition</span> <span class="o">==</span> <span class="s1">&#39;pa&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">values</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">target_test</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">subject</span> <span class="o">==</span> <span class="s1">&#39;sub-02&#39;</span><span class="p">][</span><span class="n">df</span><span class="o">.</span><span class="n">acquisition</span> <span class="o">==</span> <span class="s1">&#39;pa&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">values</span>
+</pre></div>
+</div>
+</section>
+<section id="define-the-estimators-fit-them-and-do-a-prediction">
+<h3><span class="section-number">2.2.3.5. </span>Define the estimators, fit them and do a prediction<a class="headerlink" href="#define-the-estimators-fit-them-and-do-a-prediction" title="Link to this heading">¶</a></h3>
+<p>To proceed with alignment we use the class PairwiseAlignment with the masker we created before.</p>
+<p>First we choose a suitable number of regions such that each regions is approximately 200 voxels wide.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">n_voxels</span> <span class="o">=</span> <span class="n">roi_masker</span><span class="o">.</span><span class="n">mask_img_</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n_pieces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">n_voxels</span> <span class="o">/</span> <span class="mi">200</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then for each method we define the estimator, fit it, and predict new image. We then plot
+the correlation of this prediction with the real signal. We also include identity (no alignment) as a baseline.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">fmralign.pairwise_alignment</span> <span class="kn">import</span> <span class="n">PairwiseAlignment</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">fmralign._utils</span> <span class="kn">import</span> <span class="n">voxelwise_correlation</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">methods</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;identity&#39;</span><span class="p">,</span><span class="s1">&#39;scaled_orthogonal&#39;</span><span class="p">,</span> <span class="s1">&#39;ridge_cv&#39;</span><span class="p">,</span> <span class="s1">&#39;optimal_transport&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">methods</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>  <span class="n">alignment_estimator</span> <span class="o">=</span> <span class="n">PairwiseAlignment</span><span class="p">(</span><span class="n">alignment_method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">n_pieces</span><span class="o">=</span><span class="n">n_pieces</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">roi_masker</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>  <span class="n">alignment_estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">source_train</span><span class="p">,</span> <span class="n">target_train</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>  <span class="n">target_pred</span> <span class="o">=</span> <span class="n">alignment_estimator</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">source_test</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>  <span class="n">aligned_score</span> <span class="o">=</span> <span class="n">voxelwise_correlation</span><span class="p">(</span><span class="n">target_test</span><span class="p">,</span> <span class="n">target_pred</span><span class="p">,</span> <span class="n">roi_masker</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>  <span class="n">display</span> <span class="o">=</span> <span class="n">plotting</span><span class="o">.</span><span class="n">plot_stat_map</span><span class="p">(</span><span class="n">aligned_score</span><span class="p">,</span> <span class="n">display_mode</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">cut_coords</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">15</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">],</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Correlation of prediction after </span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2"> alignment&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/sphx_glr_plot_alignment_methods_benchmark_002.png" src="../_images/sphx_glr_plot_alignment_methods_benchmark_002.png" />
+<img alt="../_images/sphx_glr_plot_alignment_methods_benchmark_003.png" src="../_images/sphx_glr_plot_alignment_methods_benchmark_003.png" />
+<img alt="../_images/sphx_glr_plot_alignment_methods_benchmark_004.png" src="../_images/sphx_glr_plot_alignment_methods_benchmark_004.png" />
+<img alt="../_images/sphx_glr_plot_alignment_methods_benchmark_005.png" src="../_images/sphx_glr_plot_alignment_methods_benchmark_005.png" />
+<p>We can observe that all alignment methods perform better than identity (no alignment).
+Ridge is the best performing method, followed by Optimal Transport. If you use
+Ridge though, be careful about the smooth predictions it yields.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+
+
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">2.2. Functional alignment pipeline</a><ul>
+<li><a class="reference internal" href="#local-functional-alignment">2.2.1. Local functional alignment</a></li>
+<li><a class="reference internal" href="#alignment-methods-on-a-region">2.2.2. Alignment methods on a region</a><ul>
+<li><a class="reference internal" href="#orthogonal-alignment-procrustes">2.2.2.1. Orthogonal alignment (Procrustes)</a></li>
+<li><a class="reference internal" href="#ridge-alignment">2.2.2.2. Ridge alignment</a></li>
+<li><a class="reference internal" href="#optimal-transport-alignment">2.2.2.3. Optimal Transport alignment</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#comparing-those-methods-on-a-region-of-interest">2.2.3. Comparing those methods on a region of interest</a><ul>
+<li><a class="reference internal" href="#loading-the-data">2.2.3.1. Loading the data</a></li>
+<li><a class="reference internal" href="#extract-a-mask-for-the-visual-cortex-from-yeo-atlas">2.2.3.2. Extract a mask for the visual cortex from Yeo Atlas</a></li>
+<li><a class="reference internal" href="#define-a-masker">2.2.3.3. Define a masker</a></li>
+<li><a class="reference internal" href="#prepare-the-data">2.2.3.4. Prepare the data</a></li>
+<li><a class="reference internal" href="#define-the-estimators-fit-them-and-do-a-prediction">2.2.3.5. Define the estimators, fit them and do a prediction</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="introduction.html"
+                          title="previous chapter"><span class="section-number">2.1. </span>An introduction to functional alignment</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="../modules/reference.html"
+                          title="next chapter"><span class="section-number">3. </span>Reference documentation: all fmralign functions</a></p>
+  </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+            &copy; fmralign developers 2018-2023.
+          Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 7.4.7.
+        <span style="padding-left: 5ex;">
+          <a href="../_sources/functional_alignment/fmralign_pipeline.rst.txt"
+        	 rel="nofollow">Show this page source</a>
+        </span>
+    </div>
+  </body>
+</html>

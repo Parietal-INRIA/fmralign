@@ -1,0 +1,1304 @@
+
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title> &#8212; fMRI alignment</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nature.css?v=f256d4a3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=62940405"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../_static/favicon.ico"/>
+    <link rel="search" title="Search" href="../../search.html" />
+<meta content="True" name="HandheldFriendly">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<meta name="keywords" content="neuroimaging, python, neuroscience, statistics">
+
+
+
+<script type="text/javascript">
+function updateTopMenuPosition(height, width) {
+    if($(window).scrollTop() > height && $(window).outerWidth() > 1024) {
+        //begin to scroll
+        $('.related-wrapper').css("z-index", 1000)
+        $('.related-wrapper').css("position", "sticky")
+        $('.related-wrapper').css("top", 0)
+        $('.related-wrapper').css("width", width)
+    } else {
+        //lock it back into place
+        $('.related-wrapper').css("position", "relative")
+        $('.related-wrapper').css("top", 0)
+    }
+}
+
+$(function() {
+    var banner_height = $('#logo-banner').outerHeight()
+    var banner_width = $('#logo-banner').outerWidth()
+    var width = $('.related-wrapper').css("height", $('.related').outerHeight())
+
+    updateTopMenuPosition(banner_height, width)
+
+    $(window).scroll(function(event) {
+        updateTopMenuPosition(banner_height, width)
+    });
+
+    $(window).resize(function(event) {
+        var banner_width = $('#logo-banner').outerWidth()
+        var menu_height = $('.related').outerHeight()
+        $('.related').css("width", banner_width)
+        $('.related-wrapper').css("height", menu_height)
+        updateTopMenuPosition(banner_height, width)
+    })
+});
+</script>
+<script type="text/javascript">
+function updateSideBarPosition(top, offset, sections) {
+    var pos = $(window).scrollTop()
+    // Lock the table of content to a fixed position once we scroll enough
+    var topShift = 2 * offset
+    if(pos > top + topShift + 1) {
+        // begin to scroll with sticky menu bar
+        var topShift = -topShift + 1
+        if ($(window).outerWidth() < 1024) {
+            // compensate top menu that disappears
+            topShift -= offset + 1
+        }
+        $('.sphinxsidebarwrapper').css("position", "fixed")
+        $('.sphinxsidebarwrapper').css("top", topShift)
+    }
+    else {
+        //lock it back into place
+        $('.sphinxsidebarwrapper').css("position", "relative")
+        $('.sphinxsidebarwrapper').css("top",0)
+    }
+
+    // Highlight the current section
+    i = 0
+    current_section = 0
+    $('a.internal').removeClass('active')
+    for(i in sections) {
+        if(sections[i] > pos) {
+            break
+        };
+        if($('a.internal[href$="' + i + '"]').is(':visible')){
+            current_section = i
+        };
+    }
+    $('a.internal[href$="' + current_section + '"]').addClass('active')
+    $('a.internal[href$="' + current_section + '"]').parent().addClass('active')
+}
+
+$(function () {
+    // Lock the table of content to a fixed position once we scroll enough
+    var top = 105 + $('.sphinxsidebarwrapper').offset().top - parseFloat($('.sphinxsidebarwrapper').css('margin-top').replace(/auto/, 0)),
+        sections = {},
+        i        = 0,
+	url	 = document.URL.replace(/#.*$/, ""),
+	current_section = 0;
+
+    // Grab positions of our sections
+    $('.headerlink').each(function(){
+        sections[this.href.replace(url, '')] = $(this).offset().top - 50;
+    });
+
+    $(window).scroll(function(event) {
+	var pos   = $(window).scrollTop();
+	// Lock the table of content to a fixed position once we scroll enough
+	if(pos > top){
+	    //begin to scroll
+	    $('.sphinxsidebarwrapper').css("position", "fixed");
+	    $('.sphinxsidebarwrapper').css("top", -105);
+	}
+	else{
+	    //lock it back into place
+	    $('.sphinxsidebarwrapper').css("position", "relative");
+	    $('.sphinxsidebarwrapper').css("top",0);
+	}
+
+	// Highlight the current section
+	$('a.internal').removeClass('active');
+        for(i in sections){
+            if(sections[i] > pos){
+		break;
+            };
+	    if($('a.internal[href$="' + i + '"]').is(':visible')){
+		current_section = i;
+	    };
+        }
+	$('a.internal[href$="' + current_section + '"]').addClass('active');
+    });
+
+});
+</script>
+
+
+<script type="text/javascript">
+
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-41920728-1']);
+        _gaq.push(['_trackPageview']);
+
+        (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+
+  </head><body>
+<div id="logo-banner">
+  <!-- A tag cloud to make it easy for people to find what they are
+                         looking for -->
+
+  <div class="banner">
+    <h1>fmralign:</h1>
+    <h2>Functional MRI alignment in Python</h2>
+  </div>
+  <div class="search_form">
+    <div id="cse" style="width: 100%;"></div>
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+      google.load('search', '1', {language : 'en'});
+      google.setOnLoadCallback(function() {
+      var customSearchControl = new google.search.CustomSearchControl('014136483057745874622:r-npolb1uki');
+      customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+      var options = new google.search.DrawOptions();
+      options.setAutoComplete(true);
+      customSearchControl.draw('cse', options);
+      }, true);
+    </script>
+  </div>
+</div>
+
+
+
+<div class=related-wrapper>
+    
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a></li>
+<li><a href="../../index.html">Home</a> |&nbsp;</li>
+<li><a href="../../user_guide.html">User Guide</a> |&nbsp;</li>
+<li><a href="../../auto_examples/index.html">Examples</a> |&nbsp;</li>
+<li><a href="../../modules/reference.html">Reference</a> |&nbsp;</li>
+<li id="navbar-about"><a href="../../authors.html">About</a>|&nbsp;</li>
+
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""></a></li> 
+      </ul>
+    </div>
+</div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for fmralign.alignment_methods</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Module implementing alignment estimators on ndarrays.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+<span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">linalg</span>
+<span class="kn">import</span> <span class="nn">ot</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">linear_sum_assignment</span>
+<span class="kn">from</span> <span class="nn">scipy.sparse</span> <span class="kn">import</span> <span class="n">diags</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial.distance</span> <span class="kn">import</span> <span class="n">cdist</span>
+<span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">RidgeCV</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics.pairwise</span> <span class="kn">import</span> <span class="n">pairwise_distances</span>
+
+<span class="c1"># Fast implementation for parallelized computing</span>
+<span class="kn">from</span> <span class="nn">fmralign.hyperalignment.linalg</span> <span class="kn">import</span> <span class="n">safe_svd</span><span class="p">,</span> <span class="n">svd_pca</span>
+<span class="kn">from</span> <span class="nn">fmralign.hyperalignment.piecewise_alignment</span> <span class="kn">import</span> <span class="n">PiecewiseAlignment</span>
+
+<span class="kn">from</span> <span class="nn">fugw.mappings</span> <span class="kn">import</span> <span class="n">FUGW</span><span class="p">,</span> <span class="n">FUGWSparse</span>
+<span class="kn">from</span> <span class="nn">fugw.scripts</span> <span class="kn">import</span> <span class="n">coarse_to_fine</span><span class="p">,</span> <span class="n">lmds</span>
+
+
+<span class="k">def</span> <span class="nf">scaled_procrustes</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">primal</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute a mixing matrix R and a scaling sc such that Frobenius norm</span>
+<span class="sd">    ||sc RX - Y||^2 is minimized and R is an orthogonal matrix</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    X: (n_samples, n_features) nd array</span>
+<span class="sd">        source data</span>
+<span class="sd">    Y: (n_samples, n_features) nd array</span>
+<span class="sd">        target data</span>
+<span class="sd">    scaling: bool</span>
+<span class="sd">        If scaling is true, computes a floating scaling parameter sc such that:</span>
+<span class="sd">        ||sc * RX - Y||^2 is minimized and</span>
+<span class="sd">        - R is an orthogonal matrix</span>
+<span class="sd">        - sc is a scalar</span>
+<span class="sd">        If scaling is false sc is set to 1</span>
+<span class="sd">    primal: bool or None, optional,</span>
+<span class="sd">         Whether the SVD is done on the YX^T (primal) or Y^TX (dual)</span>
+<span class="sd">         if None primal is used iff n_features &lt;= n_timeframes</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ----------</span>
+<span class="sd">    R: (n_features, n_features) nd array</span>
+<span class="sd">        transformation matrix</span>
+<span class="sd">    sc: int</span>
+<span class="sd">        scaling parameter</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">primal</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">primal</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">primal</span><span class="p">:</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="n">Y</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">A</span> <span class="o">+=</span> <span class="o">+</span><span class="mf">1.0e-18</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">U</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">full_matrices</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">U</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># &quot;dual&quot; mode</span>
+        <span class="n">Uy</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="n">Vy</span> <span class="o">=</span> <span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">full_matrices</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">Ux</span><span class="p">,</span> <span class="n">sx</span><span class="p">,</span> <span class="n">Vx</span> <span class="o">=</span> <span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">full_matrices</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">sy</span><span class="p">)</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Uy</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Ux</span><span class="p">)</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">sx</span><span class="p">))</span>
+        <span class="n">U</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">Vy</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">U</span><span class="p">)</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">V</span><span class="p">)</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Vx</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">scaling</span><span class="p">:</span>
+        <span class="n">sc</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sc</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">R</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">sc</span>
+
+
+<span class="k">def</span> <span class="nf">optimal_permutation</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the optmal permutation matrix of X toward Y.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    X: (n_samples, n_features) nd array</span>
+<span class="sd">        source data</span>
+<span class="sd">    Y: (n_samples, n_features) nd array</span>
+<span class="sd">        target data</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ----------</span>
+<span class="sd">    permutation : (n_features, n_features) nd array</span>
+<span class="sd">        transformation matrix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dist</span> <span class="o">=</span> <span class="n">pairwise_distances</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">Y</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="n">linear_sum_assignment</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">u</span><span class="p">)))</span>
+    <span class="n">permutation</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="p">(</span><span class="n">u</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">u</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]))</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="k">return</span> <span class="n">permutation</span>
+
+
+<span class="k">def</span> <span class="nf">_projection</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute scalar d minimizing ||dx-y||.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x: (n_features) nd array</span>
+<span class="sd">        source vector</span>
+<span class="sd">    y: (n_features) nd array</span>
+<span class="sd">        target vector</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    d: int</span>
+<span class="sd">        scaling factor</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+
+<span class="k">def</span> <span class="nf">_voxelwise_signal_projection</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">parallel_backend</span><span class="o">=</span><span class="s2">&quot;threading&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute D, list of scalar d_i minimizing :</span>
+<span class="sd">    ||d_i * x_i - y_i|| for every x_i, y_i in X, Y</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    X: (n_samples, n_features) nd array</span>
+<span class="sd">        source data</span>
+<span class="sd">    Y: (n_samples, n_features) nd array</span>
+<span class="sd">        target data</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    D: list of ints</span>
+<span class="sd">        List of optimal scaling factors</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">parallel_backend</span><span class="p">)(</span>
+        <span class="n">delayed</span><span class="p">(</span><span class="n">_projection</span><span class="p">)(</span><span class="n">voxel_source</span><span class="p">,</span> <span class="n">voxel_target</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">voxel_source</span><span class="p">,</span> <span class="n">voxel_target</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+    <span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">Alignment</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="Identity">
+<a class="viewcode-back" href="../../modules/generated/fmralign.alignment_methods.Identity.html#fmralign.alignment_methods.Identity">[docs]</a>
+<span class="k">class</span> <span class="nc">Identity</span><span class="p">(</span><span class="n">Alignment</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute no alignment, used as baseline for benchmarks : RX = X.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Identity.transform">
+<a class="viewcode-back" href="../../modules/generated/fmralign.alignment_methods.Identity.html#fmralign.alignment_methods.Identity.transform">[docs]</a>
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns X&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">X</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="DiagonalAlignment">
+<a class="viewcode-back" href="../../modules/generated/fmralign.alignment_methods.DiagonalAlignment.html#fmralign.alignment_methods.DiagonalAlignment">[docs]</a>
+<span class="k">class</span> <span class="nc">DiagonalAlignment</span><span class="p">(</span><span class="n">Alignment</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the voxelwise projection factor between X and Y.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n_jobs: integer, optional (default = 1)</span>
+<span class="sd">        The number of CPUs to use to do the computation. -1 means</span>
+<span class="sd">        &#39;all CPUs&#39;, -2 &#39;all CPUs but one&#39;, and so on.</span>
+<span class="sd">    parallel_backend: str, ParallelBackendBase instance, None (default: &#39;threading&#39;)</span>
+<span class="sd">        Specify the parallelization backend implementation. For more</span>
+<span class="sd">        informations see joblib.Parallel documentation</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    -----------</span>
+<span class="sd">    R : scipy.sparse.diags</span>
+<span class="sd">        Scaling matrix containing the optimal shrinking factor for every voxel</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="DiagonalAlignment.__init__">
+<a class="viewcode-back" href="../../modules/generated/fmralign.alignment_methods.DiagonalAlignment.html#fmralign.alignment_methods.DiagonalAlignment.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">parallel_backend</span><span class="o">=</span><span class="s2">&quot;threading&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">=</span> <span class="n">n_jobs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parallel_backend</span> <span class="o">=</span> <span class="n">parallel_backend</span></div>
+
+
+<div class="viewcode-block" id="DiagonalAlignment.fit">
+<a class="viewcode-back" href="../../modules/generated/fmralign.alignment_methods.DiagonalAlignment.html#fmralign.alignment_methods.DiagonalAlignment.fit">[docs]</a>
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        --------------</span>
+<span class="sd">        X: (n_samples, n_features) nd array</span>
+<span class="sd">            source data</span>
+<span class="sd">        Y: (n_samples, n_features) nd array</span>
+<span class="sd">            target data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">shrinkage_coefficients</span> <span class="o">=</span> <span class="n">_voxelwise_signal_projection</span><span class="p">(</span>
+            <span class="n">X</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">Y</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel_backend</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="n">diags</span><span class="p">(</span><span class="n">shrinkage_coefficients</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="DiagonalAlignment.transform">
+<a class="viewcode-back" href="../../modules/generated/fmralign.alignment_methods.DiagonalAlignment.html#fmralign.alignment_methods.DiagonalAlignment.transform">[docs]</a>
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform X using optimal coupling computed during fit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ScaledOrthogonalAlignment">
+<a class="viewcode-back" href="../../modules/generated/fmralign.alignment_methods.ScaledOrthogonalAlignment.html#fmralign.alignment_methods.ScaledOrthogonalAlignment">[docs]</a>
+<span class="k">class</span> <span class="nc">ScaledOrthogonalAlignment</span><span class="p">(</span><span class="n">Alignment</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute a orthogonal mixing matrix R and a scaling sc.</span>
+<span class="sd">    These are calculated such that Frobenius norm ||sc RX - Y||^2 is minimized.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    scaling : boolean, optional</span>
+<span class="sd">        Determines whether a scaling parameter is applied to improve transform.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    -----------</span>
+<span class="sd">    R : ndarray (n_features, n_features)</span>
+<span class="sd">        Optimal orthogonal transform</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ScaledOrthogonalAlignment.__init__">
+<a class="viewcode-back" href="../../modules/generated/fmralign.alignment_methods.ScaledOrthogonalAlignment.html#fmralign.alignment_methods.ScaledOrthogonalAlignment.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaling</span> <span class="o">=</span> <span class="n">scaling</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="ScaledOrthogonalAlignment.fit">
+<a class="viewcode-back" href="../../modules/generated/fmralign.alignment_methods.ScaledOrthogonalAlignment.html#fmralign.alignment_methods.ScaledOrthogonalAlignment.fit">[docs]</a>
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fit orthogonal R s.t. ||sc XR - Y||^2</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        -----------</span>
+<span class="sd">        X: (n_samples, n_features) nd array</span>
+<span class="sd">            source data</span>
+<span class="sd">        Y: (n_samples, n_features) nd array</span>
+<span class="sd">            target data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">R</span><span class="p">,</span> <span class="n">sc</span> <span class="o">=</span> <span class="n">scaled_procrustes</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scaling</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="n">sc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="n">sc</span> <span class="o">*</span> <span class="n">R</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="ScaledOrthogonalAlignment.transform">
+<a class="viewcode-back" href="../../modules/generated/fmralign.alignment_methods.ScaledOrthogonalAlignment.html#fmralign.alignment_methods.ScaledOrthogonalAlignment.transform">[docs]</a>
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform X using optimal transform computed during fit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">X</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="RidgeAlignment">
+<a class="viewcode-back" href="../../modules/generated/fmralign.alignment_methods.RidgeAlignment.html#fmralign.alignment_methods.RidgeAlignment">[docs]</a>
+<span class="k">class</span> <span class="nc">RidgeAlignment</span><span class="p">(</span><span class="n">Alignment</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute a scikit-estimator R using a mixing matrix M s.t Frobenius</span>
+<span class="sd">    norm || XM - Y ||^2 + alpha * ||M||^2 is minimized with cross-validation</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    R : scikit-estimator from sklearn.linear_model.RidgeCV</span>
+<span class="sd">        with methods fit, predict</span>
+<span class="sd">    alpha : numpy array of shape [n_alphas]</span>
+<span class="sd">        Array of alpha values to try. Regularization strength;</span>
+<span class="sd">        must be a positive float. Regularization improves the conditioning</span>
+<span class="sd">        of the problem and reduces the variance of the estimates.</span>
+<span class="sd">        Larger values specify stronger regularization. Alpha corresponds to</span>
+<span class="sd">        ``C^-1`` in other models such as LogisticRegression or LinearSVC.</span>
+<span class="sd">    cv : int, cross-validation generator or an iterable, optional</span>
+<span class="sd">        Determines the cross-validation splitting strategy.</span>
+<span class="sd">        Possible inputs for cv are:</span>
+<span class="sd">        -None, to use the efficient Leave-One-Out cross-validation</span>
+<span class="sd">        - integer, to specify the number of folds.</span>
+<span class="sd">        - An object to be used as a cross-validation generator.</span>
+<span class="sd">        - An iterable yielding train/test splits.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="RidgeAlignment.__init__">
+<a class="viewcode-back" href="../../modules/generated/fmralign.alignment_methods.RidgeAlignment.html#fmralign.alignment_methods.RidgeAlignment.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alphas</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">],</span> <span class="n">cv</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alphas</span> <span class="o">=</span> <span class="p">[</span><span class="n">alpha</span> <span class="k">for</span> <span class="n">alpha</span> <span class="ow">in</span> <span class="n">alphas</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cv</span> <span class="o">=</span> <span class="n">cv</span></div>
+
+
+<div class="viewcode-block" id="RidgeAlignment.fit">
+<a class="viewcode-back" href="../../modules/generated/fmralign.alignment_methods.RidgeAlignment.html#fmralign.alignment_methods.RidgeAlignment.fit">[docs]</a>
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fit R s.t. || XR - Y ||^2 + alpha ||R||^2 is minimized with cv</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        -----------</span>
+<span class="sd">        X: (n_samples, n_features) nd array</span>
+<span class="sd">            source data</span>
+<span class="sd">        Y: (n_samples, n_features) nd array</span>
+<span class="sd">            target data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="n">RidgeCV</span><span class="p">(</span>
+            <span class="n">alphas</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">alphas</span><span class="p">,</span>
+            <span class="n">fit_intercept</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">scoring</span><span class="o">=</span><span class="s2">&quot;r2&quot;</span><span class="p">,</span>
+            <span class="n">cv</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cv</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="RidgeAlignment.transform">
+<a class="viewcode-back" href="../../modules/generated/fmralign.alignment_methods.RidgeAlignment.html#fmralign.alignment_methods.RidgeAlignment.transform">[docs]</a>
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform X using optimal transform computed during fit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Hungarian">
+<a class="viewcode-back" href="../../modules/generated/fmralign.alignment_methods.Hungarian.html#fmralign.alignment_methods.Hungarian">[docs]</a>
+<span class="k">class</span> <span class="nc">Hungarian</span><span class="p">(</span><span class="n">Alignment</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the optimal permutation matrix of X toward Y</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    R : scipy.sparse.csr_matrix</span>
+<span class="sd">        Mixing matrix containing the optimal permutation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Hungarian.fit">
+<a class="viewcode-back" href="../../modules/generated/fmralign.alignment_methods.Hungarian.html#fmralign.alignment_methods.Hungarian.fit">[docs]</a>
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        -----------</span>
+<span class="sd">        X: (n_samples, n_features) nd array</span>
+<span class="sd">            source data</span>
+<span class="sd">        Y: (n_samples, n_features) nd array</span>
+<span class="sd">            target data&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="n">optimal_permutation</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="Hungarian.transform">
+<a class="viewcode-back" href="../../modules/generated/fmralign.alignment_methods.Hungarian.html#fmralign.alignment_methods.Hungarian.transform">[docs]</a>
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform X using optimal permutation computed during fit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">X</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">toarray</span><span class="p">())</span></div>
+</div>
+
+
+
+<span class="k">class</span> <span class="nc">POTAlignment</span><span class="p">(</span><span class="n">Alignment</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the optimal coupling between X and Y with entropic regularization,</span>
+<span class="sd">    using the pure Python POT (https://pythonot.github.io/) package.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    solver : str (optional)</span>
+<span class="sd">        solver from POT called to find optimal coupling &#39;sinkhorn&#39;,</span>
+<span class="sd">        &#39;greenkhorn&#39;, &#39;sinkhorn_stabilized&#39;,&#39;sinkhorn_epsilon_scaling&#39;, &#39;exact&#39;</span>
+<span class="sd">        see POT/ot/bregman on Github for source code of solvers</span>
+<span class="sd">    metric : str (optional)</span>
+<span class="sd">        metric used to create transport cost matrix,</span>
+<span class="sd">        see full list in scipy.spatial.distance.cdist doc</span>
+<span class="sd">    reg : int (optional)</span>
+<span class="sd">        level of entropic regularization</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    R : scipy.sparse.csr_matrix</span>
+<span class="sd">        Mixing matrix containing the optimal permutation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">solver</span><span class="o">=</span><span class="s2">&quot;sinkhorn_epsilon_scaling&quot;</span><span class="p">,</span>
+        <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;euclidean&quot;</span><span class="p">,</span>
+        <span class="n">reg</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+        <span class="n">tol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solver</span> <span class="o">=</span> <span class="n">solver</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="o">=</span> <span class="n">metric</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">reg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_iter</span> <span class="o">=</span> <span class="n">max_iter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tol</span> <span class="o">=</span> <span class="n">tol</span>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X: (n_samples, n_features) nd array</span>
+<span class="sd">            source data</span>
+<span class="sd">        Y: (n_samples, n_features) nd array</span>
+<span class="sd">            target data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">5000</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;One parcel is </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2"> voxels. As optimal transport on this region &quot;</span>
+                <span class="s2">&quot;would take too much time, no alignment was performed on it. &quot;</span>
+                <span class="s2">&quot;Decrease parcel size to have intended behavior of alignment.&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">n</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">n</span>
+
+            <span class="n">M</span> <span class="o">=</span> <span class="n">cdist</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">Y</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span> <span class="o">==</span> <span class="s2">&quot;exact&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="n">ot</span><span class="o">.</span><span class="n">lp</span><span class="o">.</span><span class="n">emd</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">M</span><span class="p">)</span> <span class="o">*</span> <span class="n">n</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">ot</span><span class="o">.</span><span class="n">sinkhorn</span><span class="p">(</span>
+                        <span class="n">a</span><span class="p">,</span>
+                        <span class="n">b</span><span class="p">,</span>
+                        <span class="n">M</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">reg</span><span class="p">,</span>
+                        <span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="p">,</span>
+                        <span class="n">numItermax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_iter</span><span class="p">,</span>
+                        <span class="n">stopThr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="o">*</span> <span class="n">n</span>
+                <span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform X using optimal coupling computed during fit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">X</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="OptimalTransportAlignment">
+<a class="viewcode-back" href="../../modules/generated/fmralign.alignment_methods.OptimalTransportAlignment.html#fmralign.alignment_methods.OptimalTransportAlignment">[docs]</a>
+<span class="k">class</span> <span class="nc">OptimalTransportAlignment</span><span class="p">(</span><span class="n">Alignment</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the optimal coupling between X and Y with entropic regularization</span>
+<span class="sd">    using a OTT-JAX as a backend for acceleration.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    metric : str(optional)</span>
+<span class="sd">        metric used to create transport cost matrix,</span>
+<span class="sd">        see full list in scipy.spatial.distance.cdist doc</span>
+<span class="sd">    reg : int (optional)</span>
+<span class="sd">        level of entropic regularization</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    R : jaxlib.xla_extension.Array</span>
+<span class="sd">        Mixing matrix containing the optimal permutation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="OptimalTransportAlignment.__init__">
+<a class="viewcode-back" href="../../modules/generated/fmralign.alignment_methods.OptimalTransportAlignment.html#fmralign.alignment_methods.OptimalTransportAlignment.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;euclidean&quot;</span><span class="p">,</span> <span class="n">reg</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="o">=</span> <span class="n">metric</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">reg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tol</span> <span class="o">=</span> <span class="n">tol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_iter</span> <span class="o">=</span> <span class="n">max_iter</span></div>
+
+
+<div class="viewcode-block" id="OptimalTransportAlignment.fit">
+<a class="viewcode-back" href="../../modules/generated/fmralign.alignment_methods.OptimalTransportAlignment.html#fmralign.alignment_methods.OptimalTransportAlignment.fit">[docs]</a>
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X: (n_samples, n_features) nd array</span>
+<span class="sd">            source data</span>
+<span class="sd">        Y: (n_samples, n_features) nd array</span>
+<span class="sd">            target data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">jax</span>
+        <span class="kn">from</span> <span class="nn">ott.geometry</span> <span class="kn">import</span> <span class="n">costs</span><span class="p">,</span> <span class="n">geometry</span>
+        <span class="kn">from</span> <span class="nn">ott.problems.linear</span> <span class="kn">import</span> <span class="n">linear_problem</span>
+        <span class="kn">from</span> <span class="nn">ott.solvers.linear</span> <span class="kn">import</span> <span class="n">sinkhorn</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;euclidean&quot;</span><span class="p">:</span>
+            <span class="n">cost_matrix</span> <span class="o">=</span> <span class="n">costs</span><span class="o">.</span><span class="n">Euclidean</span><span class="p">()</span><span class="o">.</span><span class="n">all_pairs</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">Y</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cost_matrix</span> <span class="o">=</span> <span class="n">cdist</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">Y</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">)</span>
+
+        <span class="n">geom</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">Geometry</span><span class="p">(</span><span class="n">cost_matrix</span><span class="o">=</span><span class="n">cost_matrix</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reg</span><span class="p">)</span>
+        <span class="n">problem</span> <span class="o">=</span> <span class="n">linear_problem</span><span class="o">.</span><span class="n">LinearProblem</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
+        <span class="n">solver</span> <span class="o">=</span> <span class="n">sinkhorn</span><span class="o">.</span><span class="n">Sinkhorn</span><span class="p">(</span>
+            <span class="n">geom</span><span class="p">,</span> <span class="n">max_iterations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_iter</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tol</span>
+        <span class="p">)</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">solver</span><span class="p">)(</span><span class="n">problem</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">matrix</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="OptimalTransportAlignment.transform">
+<a class="viewcode-back" href="../../modules/generated/fmralign.alignment_methods.OptimalTransportAlignment.html#fmralign.alignment_methods.OptimalTransportAlignment.transform">[docs]</a>
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform X using optimal coupling computed during fit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">X</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="k">class</span> <span class="nc">IndividualizedNeuralTuning</span><span class="p">(</span><span class="n">Alignment</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Method of alignment based on the Individualized Neural Tuning model.</span>
+<span class="sd">    It works on 4D fMRI data, and is based on the assumption that the neural</span>
+<span class="sd">    response to a stimulus is shared across subjects. It uses searchlight/</span>
+<span class="sd">    parcelation alignment to denoise the data, and then computes the stimulus</span>
+<span class="sd">    response matrix.</span>
+<span class="sd">    See article : https://doi.org/10.1162/imag_a_00032</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">decomp_method</span><span class="o">=</span><span class="s2">&quot;pca&quot;</span><span class="p">,</span>
+        <span class="n">n_components</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">searchlights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">parcels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dists</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">radius</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+        <span class="n">tuning</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the IndividualizedNeuralTuning object.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        ----------</span>
+<span class="sd">        decomp_method : str</span>
+<span class="sd">             The decomposition method to use.</span>
+<span class="sd">             Can be [&quot;pca&quot;, &quot;pcav1&quot;, &quot;procrustes&quot;]</span>
+<span class="sd">             Default is &quot;pca&quot;.</span>
+<span class="sd">        searchlights : array-like</span>
+<span class="sd">            The searchlight indices for each subject,</span>
+<span class="sd">            of shape (n_s, n_searchlights).</span>
+<span class="sd">        parcels : array-like</span>
+<span class="sd">            The parcel indices for each subject,</span>
+<span class="sd">            of shape (n_s, n_parcels) (if not using searchlights)</span>
+<span class="sd">        dists : array-like</span>
+<span class="sd">            The distances of vertices to the center of their searchlight,</span>
+<span class="sd">            of shape (n_searchlights, n_vertices_sl)</span>
+<span class="sd">        radius : int(optional)</span>
+<span class="sd">            The radius of the searchlight sphere, in milimeters.</span>
+<span class="sd">            Defaults to 20.</span>
+<span class="sd">        tuning : bool(optional)</span>
+<span class="sd">            Whether to compute the tuning weights. Defaults to True.</span>
+<span class="sd">        n_components : int</span>
+<span class="sd">             The number of latent dimensions to use in the shared stimulus</span>
+<span class="sd">             information</span>
+<span class="sd">             matrix. Default is None.</span>
+<span class="sd">        n_jobs : int</span>
+<span class="sd">             The number of parallel jobs to run. Default is -1.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        --------</span>
+<span class="sd">        None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_subjects</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_time_points</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alphas</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">searchlights</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">parcels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;searchlights or parcels must be provided&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">searchlights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">parcels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;searchlights and parcels cannot be provided at the same time&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">searchlights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">regions</span> <span class="o">=</span> <span class="n">searchlights</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">regions</span> <span class="o">=</span> <span class="n">parcels</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dists</span> <span class="o">=</span> <span class="n">dists</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="n">radius</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tuning</span> <span class="o">=</span> <span class="n">tuning</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">tuning_data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">denoised_signal</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decomp_method</span> <span class="o">=</span> <span class="n">decomp_method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_components</span> <span class="o">=</span> <span class="n">n_components</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">=</span> <span class="n">n_jobs</span>
+
+    <span class="c1">################################################################</span>
+    <span class="c1"># Computing decomposition</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_tuning_estimator</span><span class="p">(</span><span class="n">shared_response</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Estimate the tuning matrix for individualized neural tuning.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        ----------</span>
+<span class="sd">        shared_response : array-like</span>
+<span class="sd">             The shared response matrix of shape (n_timepoints, k)</span>
+<span class="sd">             where k is the dimension of the sources latent space.</span>
+<span class="sd">        target : array-like</span>
+<span class="sd">             The target matrix.</span>
+<span class="sd">        latent_dim : int, optional</span>
+<span class="sd">             The number of latent dimensions (if PCA is used). Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        --------</span>
+<span class="sd">        array-like: The estimated tuning matrix for the given target.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">shared_response</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">shared_response</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">(</span><span class="n">shared_response</span><span class="p">))</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">shared_response</span><span class="p">)</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_stimulus_estimator</span><span class="p">(</span>
+        <span class="n">full_signal</span><span class="p">,</span> <span class="n">n_subjects</span><span class="p">,</span> <span class="n">latent_dim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Estimates the stimulus matrix for the Individualized Neural Tuning model.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        full_signal : ndarray</span>
+<span class="sd">             Concatenated signal for all subjects,</span>
+<span class="sd">             of shape (n_timepoints, n_subjects * n_voxels).</span>
+<span class="sd">        n_subjects : int</span>
+<span class="sd">             The number of subjects.</span>
+<span class="sd">        latent_dim : int, optional</span>
+<span class="sd">             The number of latent dimensions to use. Defaults to None.</span>
+<span class="sd">        scaling : bool, optional</span>
+<span class="sd">             Whether to scale the stimulus matrix sources. Defaults to True.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        --------</span>
+<span class="sd">        stimulus : ndarray</span>
+<span class="sd">            The stimulus matrix of shape (n_timepoints, n_subjects * n_voxels)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n_timepoints</span> <span class="o">=</span> <span class="n">full_signal</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">scaling</span><span class="p">:</span>
+            <span class="n">U</span> <span class="o">=</span> <span class="n">svd_pca</span><span class="p">(</span><span class="n">full_signal</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">U</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">safe_svd</span><span class="p">(</span><span class="n">full_signal</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">latent_dim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">latent_dim</span> <span class="o">&lt;</span> <span class="n">n_timepoints</span><span class="p">:</span>
+            <span class="n">U</span> <span class="o">=</span> <span class="n">U</span><span class="p">[:,</span> <span class="p">:</span><span class="n">latent_dim</span><span class="p">]</span>
+
+        <span class="n">stimulus</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n_subjects</span><span class="p">)</span> <span class="o">*</span> <span class="n">U</span>
+        <span class="n">stimulus</span> <span class="o">=</span> <span class="n">stimulus</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">stimulus</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_reconstruct_signal</span><span class="p">(</span><span class="n">shared_response</span><span class="p">,</span> <span class="n">individual_tuning</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reconstructs the signal using the stimulus as shared</span>
+<span class="sd">        response and individual tuning.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        --------</span>
+<span class="sd">        shared_response : ndarray</span>
+<span class="sd">             The shared response of shape (n_timeframes, n_timeframes) or</span>
+<span class="sd">             (n_timeframes, latent_dim).</span>
+<span class="sd">        individual_tuning : ndarray</span>
+<span class="sd">             The individual tuning of shape (latent_dim, n_voxels) or</span>
+<span class="sd">             (n_timeframes, n_voxels).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        --------</span>
+<span class="sd">        ndarray:</span>
+<span class="sd">            The reconstructed signal of shape (n_timeframes, n_voxels).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">shared_response</span> <span class="o">@</span> <span class="n">individual_tuning</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fits the IndividualizedNeuralTuning model to the training data.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        X : array-like</span>
+<span class="sd">            The training data of shape (n_subjects, n_samples, n_voxels).</span>
+<span class="sd">        verbose : bool(optional)</span>
+<span class="sd">            Whether to print progress information. Defaults to True.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        --------</span>
+
+<span class="sd">        self : Instance of IndividualizedNeuralTuning)</span>
+<span class="sd">            The fitted model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">X_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_subjects</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_time_points</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_voxels</span> <span class="o">=</span> <span class="n">X_</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">tuning_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_subjects</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">denoised_signal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_subjects</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="n">denoiser</span> <span class="o">=</span> <span class="n">PiecewiseAlignment</span><span class="p">(</span>
+            <span class="n">template_kind</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decomp_method</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">denoised_signal</span> <span class="o">=</span> <span class="n">denoiser</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span>
+            <span class="n">X_</span><span class="p">,</span>
+            <span class="n">regions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regions</span><span class="p">,</span>
+            <span class="n">dists</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dists</span><span class="p">,</span>
+            <span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Stimulus matrix computation</span>
+        <span class="n">full_signal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">denoised_signal</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shared_response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stimulus_estimator</span><span class="p">(</span>
+            <span class="n">full_signal</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_subjects</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_components</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tuning</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tuning_data</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">)(</span>
+                <span class="n">delayed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tuning_estimator</span><span class="p">)(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">shared_response</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">denoised_signal</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_subjects</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Transforms the input test data using the hyperalignment model.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : array-like</span>
+<span class="sd">            The test data of shape (n_subjects, n_timepoints, n_voxels).</span>
+<span class="sd">        verbose : bool(optional)</span>
+<span class="sd">            Whether to print progress information. Defaults to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        --------</span>
+<span class="sd">        ndarray :</span>
+<span class="sd">            The transformed data of shape (n_subjects, n_timepoints, n_voxels).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">full_signal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Predict : Computing stimulus matrix...&quot;</span><span class="p">)</span>
+
+        <span class="n">stimulus_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stimulus_estimator</span><span class="p">(</span>
+            <span class="n">full_signal</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_subjects</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_components</span>
+        <span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Predict : stimulus matrix shape: &quot;</span><span class="p">,</span> <span class="n">stimulus_</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Predict : stimulus matrix shape: &quot;</span><span class="p">,</span> <span class="n">stimulus_</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="n">reconstructed_signal</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">)(</span>
+            <span class="n">delayed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_reconstruct_signal</span><span class="p">)(</span><span class="n">stimulus_</span><span class="p">,</span> <span class="n">T_est</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">T_est</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tuning_data</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">reconstructed_signal</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">FugwAlignment</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wrapper for FUGW alignment&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">segmentation</span><span class="p">,</span>
+        <span class="n">alpha_coarse</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">alpha_fine</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">rho_coarse</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">rho_fine</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">eps_coarse</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">eps_fine</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">anisotropy</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="n">reg_mode</span><span class="o">=</span><span class="s2">&quot;independent&quot;</span><span class="p">,</span>
+        <span class="n">divergence</span><span class="o">=</span><span class="s2">&quot;kl&quot;</span><span class="p">,</span>
+        <span class="n">method</span><span class="o">=</span><span class="s2">&quot;coarse-to-fine&quot;</span><span class="p">,</span>
+        <span class="n">n_landmarks</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+        <span class="n">n_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">radius</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+        <span class="n">id_reg</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">device</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize FUGW alignment</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        segmentation : ndarray,</span>
+<span class="sd">            Segmentation of the mask</span>
+<span class="sd">        alpha_coarse : float, optional, by default 0.5.</span>
+<span class="sd">        rho_coarse : float, optional, by default 1.</span>
+<span class="sd">        eps_coarse : float, optional, by default 1.</span>
+<span class="sd">        alpha_fine : float, optional, by default 0.5.</span>
+<span class="sd">        rho_fine : float, optional, by default 1.</span>
+<span class="sd">        eps_fine : float, optional, by default 1e-6.</span>
+<span class="sd">        anisotropy : tuple, optional.</span>
+<span class="sd">            Anisotropy of the fmri mask, by default (3, 3, 3)</span>
+<span class="sd">        reg_mode : str, optional</span>
+<span class="sd">            Regularization mode, by default &quot;independent&quot;</span>
+<span class="sd">        divergence : str, optional</span>
+<span class="sd">            Divergence used in the FUGW alignment, by default &quot;kl&quot;.</span>
+<span class="sd">        method : str, optional</span>
+<span class="sd">            Method used to compute FUGW alignments, by default &quot;coarse-to-fine&quot;.</span>
+<span class="sd">        n_landmarks : int, optional</span>
+<span class="sd">            Number of landmarks used in the embedding, by default 1000.</span>
+<span class="sd">        n_samples : int, optional</span>
+<span class="sd">            Number of samples points passed to</span>
+<span class="sd">            sklearn.cluster.AgglomerativeClustering, by default 100.</span>
+<span class="sd">        radius : int, optional</span>
+<span class="sd">            Radius around the sampled points in mm, by default 5.</span>
+<span class="sd">        id_reg: float, in the [0, 1] interval, defaults to 0</span>
+<span class="sd">            If source/target share the same geometry,</span>
+<span class="sd">            interpolate the transport plan with the identity</span>
+<span class="sd">            using the provided coefficient.</span>
+<span class="sd">            A value of 1 (resp. 0) will rely solely on the identity</span>
+<span class="sd">            (resp. the transport plan).</span>
+<span class="sd">        device : torch.device, optional, by default &quot;auto&quot;</span>
+<span class="sd">            Device on which to perform the computation.</span>
+<span class="sd">        verbose : bool, optional, by default True</span>
+<span class="sd">        **kwargs : dict</span>
+<span class="sd">            Additional parameters passed to the FUGW mapping.fit method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">segmentation</span> <span class="o">=</span> <span class="n">segmentation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha_coarse</span> <span class="o">=</span> <span class="n">alpha_coarse</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rho_coarse</span> <span class="o">=</span> <span class="n">rho_coarse</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eps_coarse</span> <span class="o">=</span> <span class="n">eps_coarse</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha_fine</span> <span class="o">=</span> <span class="n">alpha_fine</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rho_fine</span> <span class="o">=</span> <span class="n">rho_fine</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eps_fine</span> <span class="o">=</span> <span class="n">eps_fine</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">anisotropy</span> <span class="o">=</span> <span class="n">anisotropy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reg_mode</span> <span class="o">=</span> <span class="n">reg_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">divergence</span> <span class="o">=</span> <span class="n">divergence</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_landmarks</span> <span class="o">=</span> <span class="n">n_landmarks</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">=</span> <span class="n">n_samples</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="n">radius</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id_reg</span> <span class="o">=</span> <span class="n">id_reg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Computing geometry embedding...&quot;</span><span class="p">)</span>
+        <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">geometry_embedding</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">geometry_embedding_normalized</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_distance</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_geometry_embedding</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">segmentation</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_landmarks</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">anisotropy</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Geometry embedding computed&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the device on which to perform the computation&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">device</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+            <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span>
+                <span class="s2">&quot;cuda:0&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">device</span>
+
+    <span class="k">def</span> <span class="nf">_normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Normalize the input data&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">((</span><span class="n">X</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_prepare_geometry_embedding</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">segmentation</span><span class="p">,</span> <span class="n">n_landmarks</span><span class="p">,</span> <span class="n">anisotropy</span><span class="p">,</span> <span class="n">verbose</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the normalized geometry embedding&quot;&quot;&quot;</span>
+        <span class="n">geometry_embedding</span> <span class="o">=</span> <span class="n">lmds</span><span class="o">.</span><span class="n">compute_lmds_volume</span><span class="p">(</span>
+            <span class="n">segmentation</span><span class="p">,</span>
+            <span class="n">k</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+            <span class="n">n_landmarks</span><span class="o">=</span><span class="n">n_landmarks</span><span class="p">,</span>
+            <span class="n">anisotropy</span><span class="o">=</span><span class="n">anisotropy</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">()</span>
+
+        <span class="p">(</span>
+            <span class="n">geometry_embedding_normalized</span><span class="p">,</span>
+            <span class="n">max_distance</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="n">coarse_to_fine</span><span class="o">.</span><span class="n">random_normalizing</span><span class="p">(</span><span class="n">geometry_embedding</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">geometry_embedding</span><span class="p">,</span>
+            <span class="n">geometry_embedding_normalized</span><span class="p">,</span>
+            <span class="n">max_distance</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_sample_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">segmentation</span><span class="p">,</span> <span class="n">geometry_embedding</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sample the geometry of the mask&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">coarse_to_fine</span><span class="o">.</span><span class="n">sample_volume_uniformly</span><span class="p">(</span>
+            <span class="n">segmentation</span><span class="p">,</span>
+            <span class="n">embeddings</span><span class="o">=</span><span class="n">geometry_embedding</span><span class="p">,</span>
+            <span class="n">n_samples</span><span class="o">=</span><span class="n">n_samples</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">,</span>
+        <span class="n">Y</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit FUGW alignment</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : ndarray of shape (n_samples, n_features)</span>
+<span class="sd">            Source features</span>
+<span class="sd">        Y : ndarray of shape (n_samples, n_features)</span>
+<span class="sd">            Target features</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self : FugwAlignment</span>
+<span class="sd">            Fitted FUGW alignment</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">source_features_normalized</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">target_features_normalized</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize</span><span class="p">(</span><span class="n">Y</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Features normalized&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;dense&quot;</span><span class="p">:</span>
+            <span class="n">mapping</span> <span class="o">=</span> <span class="n">FUGW</span><span class="p">(</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha_coarse</span><span class="p">,</span>
+                <span class="n">rho</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rho_coarse</span><span class="p">,</span>
+                <span class="n">eps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">eps_coarse</span><span class="p">,</span>
+                <span class="n">reg_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reg_mode</span><span class="p">,</span>
+                <span class="n">divergence</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">divergence</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">mapping</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+                <span class="n">source_features</span><span class="o">=</span><span class="n">source_features_normalized</span><span class="p">,</span>
+                <span class="n">target_features</span><span class="o">=</span><span class="n">target_features_normalized</span><span class="p">,</span>
+                <span class="n">source_geometry</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry_embedding_normalized</span>
+                <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry_embedding_normalized</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
+                <span class="n">target_geometry</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry_embedding_normalized</span>
+                <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry_embedding_normalized</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
+                <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">mapping</span> <span class="o">=</span> <span class="n">mapping</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;coarse-to-fine&quot;</span><span class="p">:</span>
+            <span class="c1"># Subsample vertices as uniformly as possible on the surface</span>
+            <span class="n">sampled_geometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_geometry</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">segmentation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry_embedding</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Samples computed&quot;</span><span class="p">)</span>
+
+            <span class="n">coarse_mapping</span> <span class="o">=</span> <span class="n">FUGW</span><span class="p">(</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha_coarse</span><span class="p">,</span>
+                <span class="n">rho</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rho_coarse</span><span class="p">,</span>
+                <span class="n">eps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">eps_coarse</span><span class="p">,</span>
+                <span class="n">reg_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reg_mode</span><span class="p">,</span>
+                <span class="n">divergence</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">divergence</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">fine_mapping</span> <span class="o">=</span> <span class="n">FUGWSparse</span><span class="p">(</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha_fine</span><span class="p">,</span>
+                <span class="n">rho</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rho_fine</span><span class="p">,</span>
+                <span class="n">eps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">eps_fine</span><span class="p">,</span>
+                <span class="n">reg_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reg_mode</span><span class="p">,</span>
+                <span class="n">divergence</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">divergence</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">coarse_to_fine</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+                <span class="n">source_features</span><span class="o">=</span><span class="n">source_features_normalized</span><span class="p">,</span>
+                <span class="n">target_features</span><span class="o">=</span><span class="n">target_features_normalized</span><span class="p">,</span>
+                <span class="n">source_geometry_embeddings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry_embedding_normalized</span><span class="p">,</span>
+                <span class="n">target_geometry_embeddings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry_embedding_normalized</span><span class="p">,</span>
+                <span class="n">source_sample</span><span class="o">=</span><span class="n">sampled_geometry</span><span class="p">,</span>
+                <span class="n">target_sample</span><span class="o">=</span><span class="n">sampled_geometry</span><span class="p">,</span>
+                <span class="n">coarse_mapping</span><span class="o">=</span><span class="n">coarse_mapping</span><span class="p">,</span>
+                <span class="n">source_selection_radius</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_distance</span><span class="p">),</span>
+                <span class="n">target_selection_radius</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_distance</span><span class="p">),</span>
+                <span class="n">fine_mapping</span><span class="o">=</span><span class="n">fine_mapping</span><span class="p">,</span>
+                <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
+                <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">mapping</span> <span class="o">=</span> <span class="n">fine_mapping</span>
+
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Project features using the fitted FUGW alignment</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : ndarray of shape (n_samples, n_features)</span>
+<span class="sd">            Source features</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ndarray</span>
+<span class="sd">            Projected features</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapping</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;FUGW alignment must be fitted before transforming data&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># If id_reg is True, interpolate the resulting</span>
+        <span class="c1"># mapping with the identity matrix</span>
+        <span class="n">transformed_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapping</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">id_reg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">id_reg</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">transformed_features</span>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+
+
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+            &copy; fmralign developers 2018-2023.
+          Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 7.4.7.
+    </div>
+  </body>
+</html>

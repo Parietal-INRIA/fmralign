@@ -1,0 +1,561 @@
+
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title> &#8212; fMRI alignment</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/nature.css?v=f256d4a3" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=62940405"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="icon" href="_static/favicon.ico"/>
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="1. Introduction: fmralign in a nutshell" href="overview.html" />
+    <link rel="prev" title="People" href="authors.html" />
+<meta content="True" name="HandheldFriendly">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<meta name="keywords" content="neuroimaging, python, neuroscience, statistics">
+
+
+
+<script type="text/javascript">
+function updateTopMenuPosition(height, width) {
+    if($(window).scrollTop() > height && $(window).outerWidth() > 1024) {
+        //begin to scroll
+        $('.related-wrapper').css("z-index", 1000)
+        $('.related-wrapper').css("position", "sticky")
+        $('.related-wrapper').css("top", 0)
+        $('.related-wrapper').css("width", width)
+    } else {
+        //lock it back into place
+        $('.related-wrapper').css("position", "relative")
+        $('.related-wrapper').css("top", 0)
+    }
+}
+
+$(function() {
+    var banner_height = $('#logo-banner').outerHeight()
+    var banner_width = $('#logo-banner').outerWidth()
+    var width = $('.related-wrapper').css("height", $('.related').outerHeight())
+
+    updateTopMenuPosition(banner_height, width)
+
+    $(window).scroll(function(event) {
+        updateTopMenuPosition(banner_height, width)
+    });
+
+    $(window).resize(function(event) {
+        var banner_width = $('#logo-banner').outerWidth()
+        var menu_height = $('.related').outerHeight()
+        $('.related').css("width", banner_width)
+        $('.related-wrapper').css("height", menu_height)
+        updateTopMenuPosition(banner_height, width)
+    })
+});
+</script>
+<script type="text/javascript">
+function updateSideBarPosition(top, offset, sections) {
+    var pos = $(window).scrollTop()
+    // Lock the table of content to a fixed position once we scroll enough
+    var topShift = 2 * offset
+    if(pos > top + topShift + 1) {
+        // begin to scroll with sticky menu bar
+        var topShift = -topShift + 1
+        if ($(window).outerWidth() < 1024) {
+            // compensate top menu that disappears
+            topShift -= offset + 1
+        }
+        $('.sphinxsidebarwrapper').css("position", "fixed")
+        $('.sphinxsidebarwrapper').css("top", topShift)
+    }
+    else {
+        //lock it back into place
+        $('.sphinxsidebarwrapper').css("position", "relative")
+        $('.sphinxsidebarwrapper').css("top",0)
+    }
+
+    // Highlight the current section
+    i = 0
+    current_section = 0
+    $('a.internal').removeClass('active')
+    for(i in sections) {
+        if(sections[i] > pos) {
+            break
+        };
+        if($('a.internal[href$="' + i + '"]').is(':visible')){
+            current_section = i
+        };
+    }
+    $('a.internal[href$="' + current_section + '"]').addClass('active')
+    $('a.internal[href$="' + current_section + '"]').parent().addClass('active')
+}
+
+$(function () {
+    // Lock the table of content to a fixed position once we scroll enough
+    var top = 105 + $('.sphinxsidebarwrapper').offset().top - parseFloat($('.sphinxsidebarwrapper').css('margin-top').replace(/auto/, 0)),
+        sections = {},
+        i        = 0,
+	url	 = document.URL.replace(/#.*$/, ""),
+	current_section = 0;
+
+    // Grab positions of our sections
+    $('.headerlink').each(function(){
+        sections[this.href.replace(url, '')] = $(this).offset().top - 50;
+    });
+
+    $(window).scroll(function(event) {
+	var pos   = $(window).scrollTop();
+	// Lock the table of content to a fixed position once we scroll enough
+	if(pos > top){
+	    //begin to scroll
+	    $('.sphinxsidebarwrapper').css("position", "fixed");
+	    $('.sphinxsidebarwrapper').css("top", -105);
+	}
+	else{
+	    //lock it back into place
+	    $('.sphinxsidebarwrapper').css("position", "relative");
+	    $('.sphinxsidebarwrapper').css("top",0);
+	}
+
+	// Highlight the current section
+	$('a.internal').removeClass('active');
+        for(i in sections){
+            if(sections[i] > pos){
+		break;
+            };
+	    if($('a.internal[href$="' + i + '"]').is(':visible')){
+		current_section = i;
+	    };
+        }
+	$('a.internal[href$="' + current_section + '"]').addClass('active');
+    });
+
+});
+</script>
+
+
+<script type="text/javascript">
+
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-41920728-1']);
+        _gaq.push(['_trackPageview']);
+
+        (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+
+  </head><body>
+<div id="logo-banner">
+  <!-- A tag cloud to make it easy for people to find what they are
+                         looking for -->
+
+  <div class="banner">
+    <h1>fmralign:</h1>
+    <h2>Functional MRI alignment in Python</h2>
+  </div>
+  <div class="search_form">
+    <div id="cse" style="width: 100%;"></div>
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+      google.load('search', '1', {language : 'en'});
+      google.setOnLoadCallback(function() {
+      var customSearchControl = new google.search.CustomSearchControl('014136483057745874622:r-npolb1uki');
+      customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+      var options = new google.search.DrawOptions();
+      options.setAutoComplete(true);
+      customSearchControl.draw('cse', options);
+      }, true);
+    </script>
+  </div>
+</div>
+
+
+
+<div class=related-wrapper>
+    
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a></li>
+        <li class="right" >
+          <a href="overview.html" title="1. Introduction: fmralign in a nutshell"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="authors.html" title="People"
+             accesskey="P">previous</a> |</li>
+<li><a href="index.html">Home</a> |&nbsp;</li>
+<li><a href="#">User Guide</a> |&nbsp;</li>
+<li><a href="auto_examples/index.html">Examples</a> |&nbsp;</li>
+<li><a href="modules/reference.html">Reference</a> |&nbsp;</li>
+<li id="navbar-about"><a href="authors.html">About</a>|&nbsp;</li>
+
+        <li class="nav-item nav-item-this"><a href=""></a></li> 
+      </ul>
+    </div>
+</div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="user-guide-table-of-contents">
+<span id="user-guide"></span><h1>User guide: table of contents<a class="headerlink" href="#user-guide-table-of-contents" title="Link to this heading">¶</a></h1>
+<style type="text/css">
+  div.bodywrapper blockquote {
+      margin: 0 ;
+  }
+
+  div.toctree-wrapper ul {
+      margin-top: 0 ;
+      margin-bottom: 0 ;
+      padding-left: 10px ;
+  }
+
+  li.toctree-l1 {
+      padding: 0 0 0.5em 0 ;
+      list-style-type: none;
+      font-size: 150% ;
+      font-weight: bold;
+      }
+
+  li.toctree-l1 ul {
+      padding-left: 40px ;
+  }
+
+  li.toctree-l2 {
+      font-size: 75% ;
+      list-style-type: square;
+      font-weight: normal;
+      }
+
+  li.toctree-l3 {
+      font-size: 85% ;
+      list-style-type: circle;
+      font-weight: normal;
+      }
+
+</style> <SCRIPT>
+ //Function to make the index toctree collapsible
+ $(function () {
+     $('.toctree-l2')
+         .click(function(event){
+             if (event.target.tagName.toLowerCase() != "a") {
+                 if ($(this).children('ul').length > 0) {
+                      $(this).attr('data-content',
+                          (!$(this).children('ul').is(':hidden')) ? '\u25ba' : '\u25bc');
+                     $(this).children('ul').toggle();
+                 }
+                 return true; //Makes links clickable
+             }
+         })
+         .mousedown(function(event){ return false; }) //Firefox highlighting fix
+         .children('ul').hide();
+     // Initialize the values
+     $('li.toctree-l2:not(:has(ul))').attr('data-content', '-');
+     $('li.toctree-l2:has(ul)').attr('data-content', '\u25ba');
+     $('li.toctree-l2:has(ul)').css('cursor', 'pointer');
+
+     $('.toctree-l2').hover(
+         function () {
+             if ($(this).children('ul').length > 0) {
+                 $(this).css('background-color', '#D0D0D0').children('ul').css('background-color', '#F0F0F0');
+                 $(this).attr('data-content',
+                     (!$(this).children('ul').is(':hidden')) ? '\u25bc' : '\u25ba');
+             }
+             else {
+                 $(this).css('background-color', '#F9F9F9');
+             }
+         },
+         function () {
+             $(this).css('background-color', 'white').children('ul').css('background-color', 'white');
+             if ($(this).children('ul').length > 0) {
+                 $(this).attr('data-content',
+                     (!$(this).children('ul').is(':hidden')) ? '\u25bc' : '\u25ba');
+             }
+         }
+     );
+ });
+
+ </SCRIPT>
+
+<style type="text/css">
+  div.bodywrapper blockquote {
+      margin: 0 ;
+  }
+
+  div.toctree-wrapper ul {
+      margin: 0 ;
+      padding-left: 0px ;
+  }
+
+  li, ul {
+      transition-duration: 0.2s;
+  }
+
+  li.toctree-l1 {
+      padding: 5px 0 0;
+      list-style-type: none;
+      font-size: 150% ;
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      font-weight: normal;
+      color: #20435c;
+      margin-left: 0;
+      margin-bottom: 1.2em;
+      font-weight: bold;
+      }
+
+  li.toctree-l1 a {
+      padding: 0 0 0 10px ;
+      color: #314F64 ;
+  }
+
+  li.toctree-l2 {
+      padding: 0.25em 0 0.25em 0 ;
+      list-style-type: none;
+      background-color: #FFFFFF;
+      font-size: 85% ;
+      font-weight: normal;
+  }
+
+  li.toctree-l2 ul {
+      padding-left: 40px ;
+  }
+
+
+  li.toctree-l2:before {
+      content: attr(data-content) ;
+      font-size: 85% ;
+      color: #777 ;
+      display: inline-block;
+      width: 10px;
+  }
+
+  li.toctree-l3 {
+      font-size: 88% ;
+      list-style-type: square;
+      font-weight: normal;
+  }
+
+  li.toctree-l4 {
+      font-size: 93% ;
+      list-style-type: circle;
+      font-weight: normal;
+  }
+
+  div.topic li.toctree-l1 {
+      font-size: 100% ;
+      font-weight: bold;
+      background-color: transparent;
+      margin-bottom: 0;
+      margin-left: 1.5em;
+      display:inline;
+  }
+
+  div.topic p {
+      font-size: 90% ;
+      margin: 0.4ex;
+  }
+
+  div.topic p.topic-title {
+      display:inline;
+      font-size: 100% ;
+      margin-bottom: 0;
+  }
+
+  div.sidebar {
+      width: 25ex ;
+  }
+
+</style><div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">1. Introduction: fmralign in a nutshell</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#functional-alignment-handling-functional-variability">1.1. Functional alignment: handling functional variability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#installing-fmralign">1.2. Installing fmralign</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="functional_alignment/index.html">2. Functional alignment: handling functional variability</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="functional_alignment/introduction.html">2.1. An introduction to functional alignment</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functional_alignment/introduction.html#inter-subject-variability-in-fmri">2.1.1. Inter subject variability in fMRI</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="functional_alignment/introduction.html#loading-and-preparing-the-data">2.1.1.1. Loading and preparing the data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="functional_alignment/introduction.html#measure-correlation-between-subjects-images">2.1.1.2. Measure correlation between subjects images</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="functional_alignment/introduction.html#functional-alignment">2.1.2. Functional alignment</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="functional_alignment/introduction.html#learning-the-transformation-and-predicting-new-data">2.1.2.1. Learning the transformation and predicting new data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="functional_alignment/introduction.html#measuring-similarity-after-alignment">2.1.2.2. Measuring similarity after alignment</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="functional_alignment/fmralign_pipeline.html">2.2. Functional alignment pipeline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functional_alignment/fmralign_pipeline.html#local-functional-alignment">2.2.1. Local functional alignment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="functional_alignment/fmralign_pipeline.html#alignment-methods-on-a-region">2.2.2. Alignment methods on a region</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="functional_alignment/fmralign_pipeline.html#orthogonal-alignment-procrustes">2.2.2.1. Orthogonal alignment (Procrustes)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="functional_alignment/fmralign_pipeline.html#ridge-alignment">2.2.2.2. Ridge alignment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="functional_alignment/fmralign_pipeline.html#optimal-transport-alignment">2.2.2.3. Optimal Transport alignment</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="functional_alignment/fmralign_pipeline.html#comparing-those-methods-on-a-region-of-interest">2.2.3. Comparing those methods on a region of interest</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="functional_alignment/fmralign_pipeline.html#loading-the-data">2.2.3.1. Loading the data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="functional_alignment/fmralign_pipeline.html#extract-a-mask-for-the-visual-cortex-from-yeo-atlas">2.2.3.2. Extract a mask for the visual cortex from Yeo Atlas</a></li>
+<li class="toctree-l4"><a class="reference internal" href="functional_alignment/fmralign_pipeline.html#define-a-masker">2.2.3.3. Define a masker</a></li>
+<li class="toctree-l4"><a class="reference internal" href="functional_alignment/fmralign_pipeline.html#prepare-the-data">2.2.3.4. Prepare the data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="functional_alignment/fmralign_pipeline.html#define-the-estimators-fit-them-and-do-a-prediction">2.2.3.5. Define the estimators, fit them and do a prediction</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules/reference.html">3. Reference documentation: all fmralign functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="modules/reference.html#module-fmralign.pairwise_alignment">3.1. <code class="xref py py-mod docutils literal notranslate"><span class="pre">fmralign.pairwise_alignment</span></code>: Pairwise Alignment</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="modules/generated/fmralign.pairwise_alignment.PairwiseAlignment.html">3.1.1. fmralign.pairwise_alignment.PairwiseAlignment</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="modules/generated/fmralign.pairwise_alignment.PairwiseAlignment.html#fmralign.pairwise_alignment.PairwiseAlignment"><code class="docutils literal notranslate"><span class="pre">PairwiseAlignment</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="modules/generated/fmralign.pairwise_alignment.PairwiseAlignment.html#fmralign.pairwise_alignment.PairwiseAlignment.__init__"><code class="docutils literal notranslate"><span class="pre">PairwiseAlignment.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="modules/generated/fmralign.pairwise_alignment.PairwiseAlignment.html#fmralign.pairwise_alignment.PairwiseAlignment.fit"><code class="docutils literal notranslate"><span class="pre">PairwiseAlignment.fit()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="modules/generated/fmralign.pairwise_alignment.PairwiseAlignment.html#fmralign.pairwise_alignment.PairwiseAlignment.fit_transform"><code class="docutils literal notranslate"><span class="pre">PairwiseAlignment.fit_transform()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="modules/generated/fmralign.pairwise_alignment.PairwiseAlignment.html#fmralign.pairwise_alignment.PairwiseAlignment.transform"><code class="docutils literal notranslate"><span class="pre">PairwiseAlignment.transform()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="modules/reference.html#module-fmralign.template_alignment">3.2. <code class="xref py py-mod docutils literal notranslate"><span class="pre">fmralign.template_alignment</span></code>: Template Alignment</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="modules/generated/fmralign.template_alignment.TemplateAlignment.html">3.2.1. fmralign.template_alignment.TemplateAlignment</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="modules/generated/fmralign.template_alignment.TemplateAlignment.html#fmralign.template_alignment.TemplateAlignment"><code class="docutils literal notranslate"><span class="pre">TemplateAlignment</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="modules/generated/fmralign.template_alignment.TemplateAlignment.html#fmralign.template_alignment.TemplateAlignment.__init__"><code class="docutils literal notranslate"><span class="pre">TemplateAlignment.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="modules/generated/fmralign.template_alignment.TemplateAlignment.html#fmralign.template_alignment.TemplateAlignment.fit"><code class="docutils literal notranslate"><span class="pre">TemplateAlignment.fit()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="modules/generated/fmralign.template_alignment.TemplateAlignment.html#fmralign.template_alignment.TemplateAlignment.fit_transform"><code class="docutils literal notranslate"><span class="pre">TemplateAlignment.fit_transform()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="modules/generated/fmralign.template_alignment.TemplateAlignment.html#fmralign.template_alignment.TemplateAlignment.set_fit_request"><code class="docutils literal notranslate"><span class="pre">TemplateAlignment.set_fit_request()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="modules/generated/fmralign.template_alignment.TemplateAlignment.html#fmralign.template_alignment.TemplateAlignment.set_transform_request"><code class="docutils literal notranslate"><span class="pre">TemplateAlignment.set_transform_request()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="modules/generated/fmralign.template_alignment.TemplateAlignment.html#fmralign.template_alignment.TemplateAlignment.transform"><code class="docutils literal notranslate"><span class="pre">TemplateAlignment.transform()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="modules/reference.html#module-fmralign.alignment_methods">3.3. <code class="xref py py-mod docutils literal notranslate"><span class="pre">fmralign.alignment_methods</span></code>: Alignment Methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.Identity.html">3.3.1. fmralign.alignment_methods.Identity</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.Identity.html#fmralign.alignment_methods.Identity"><code class="docutils literal notranslate"><span class="pre">Identity</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.Identity.html#fmralign.alignment_methods.Identity.__init__"><code class="docutils literal notranslate"><span class="pre">Identity.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.Identity.html#fmralign.alignment_methods.Identity.transform"><code class="docutils literal notranslate"><span class="pre">Identity.transform()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.DiagonalAlignment.html">3.3.2. fmralign.alignment_methods.DiagonalAlignment</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.DiagonalAlignment.html#fmralign.alignment_methods.DiagonalAlignment"><code class="docutils literal notranslate"><span class="pre">DiagonalAlignment</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.DiagonalAlignment.html#fmralign.alignment_methods.DiagonalAlignment.__init__"><code class="docutils literal notranslate"><span class="pre">DiagonalAlignment.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.DiagonalAlignment.html#fmralign.alignment_methods.DiagonalAlignment.fit"><code class="docutils literal notranslate"><span class="pre">DiagonalAlignment.fit()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.DiagonalAlignment.html#fmralign.alignment_methods.DiagonalAlignment.transform"><code class="docutils literal notranslate"><span class="pre">DiagonalAlignment.transform()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.ScaledOrthogonalAlignment.html">3.3.3. fmralign.alignment_methods.ScaledOrthogonalAlignment</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.ScaledOrthogonalAlignment.html#fmralign.alignment_methods.ScaledOrthogonalAlignment"><code class="docutils literal notranslate"><span class="pre">ScaledOrthogonalAlignment</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.ScaledOrthogonalAlignment.html#fmralign.alignment_methods.ScaledOrthogonalAlignment.__init__"><code class="docutils literal notranslate"><span class="pre">ScaledOrthogonalAlignment.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.ScaledOrthogonalAlignment.html#fmralign.alignment_methods.ScaledOrthogonalAlignment.fit"><code class="docutils literal notranslate"><span class="pre">ScaledOrthogonalAlignment.fit()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.ScaledOrthogonalAlignment.html#fmralign.alignment_methods.ScaledOrthogonalAlignment.transform"><code class="docutils literal notranslate"><span class="pre">ScaledOrthogonalAlignment.transform()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.RidgeAlignment.html">3.3.4. fmralign.alignment_methods.RidgeAlignment</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.RidgeAlignment.html#fmralign.alignment_methods.RidgeAlignment"><code class="docutils literal notranslate"><span class="pre">RidgeAlignment</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.RidgeAlignment.html#fmralign.alignment_methods.RidgeAlignment.__init__"><code class="docutils literal notranslate"><span class="pre">RidgeAlignment.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.RidgeAlignment.html#fmralign.alignment_methods.RidgeAlignment.fit"><code class="docutils literal notranslate"><span class="pre">RidgeAlignment.fit()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.RidgeAlignment.html#fmralign.alignment_methods.RidgeAlignment.transform"><code class="docutils literal notranslate"><span class="pre">RidgeAlignment.transform()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.Hungarian.html">3.3.5. fmralign.alignment_methods.Hungarian</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.Hungarian.html#fmralign.alignment_methods.Hungarian"><code class="docutils literal notranslate"><span class="pre">Hungarian</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.Hungarian.html#fmralign.alignment_methods.Hungarian.__init__"><code class="docutils literal notranslate"><span class="pre">Hungarian.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.Hungarian.html#fmralign.alignment_methods.Hungarian.fit"><code class="docutils literal notranslate"><span class="pre">Hungarian.fit()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.Hungarian.html#fmralign.alignment_methods.Hungarian.transform"><code class="docutils literal notranslate"><span class="pre">Hungarian.transform()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.OptimalTransportAlignment.html">3.3.6. fmralign.alignment_methods.OptimalTransportAlignment</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.OptimalTransportAlignment.html#fmralign.alignment_methods.OptimalTransportAlignment"><code class="docutils literal notranslate"><span class="pre">OptimalTransportAlignment</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.OptimalTransportAlignment.html#fmralign.alignment_methods.OptimalTransportAlignment.__init__"><code class="docutils literal notranslate"><span class="pre">OptimalTransportAlignment.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.OptimalTransportAlignment.html#fmralign.alignment_methods.OptimalTransportAlignment.fit"><code class="docutils literal notranslate"><span class="pre">OptimalTransportAlignment.fit()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="modules/generated/fmralign.alignment_methods.OptimalTransportAlignment.html#fmralign.alignment_methods.OptimalTransportAlignment.transform"><code class="docutils literal notranslate"><span class="pre">OptimalTransportAlignment.transform()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+
+
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="authors.html"
+                          title="previous chapter">People</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="overview.html"
+                          title="next chapter"><span class="section-number">1. </span>Introduction: fmralign in a nutshell</a></p>
+  </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+            &copy; fmralign developers 2018-2023.
+          Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 7.4.7.
+        <span style="padding-left: 5ex;">
+          <a href="_sources/user_guide.rst.txt"
+        	 rel="nofollow">Show this page source</a>
+        </span>
+    </div>
+  </body>
+</html>
