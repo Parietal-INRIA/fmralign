@@ -108,7 +108,7 @@ First, we fetch and plot the complete atlas
  .. code-block:: none
 
 
-    <nilearn.plotting.displays._slicers.OrthoSlicer object at 0x7fad01d17a90>
+    <nilearn.plotting.displays._slicers.OrthoSlicer object at 0x7f05ed613890>
 
 
 
@@ -382,7 +382,7 @@ it yields.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 24.651 seconds)
+   **Total running time of the script:** (1 minutes 29.438 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_alignment_methods_benchmark.py:

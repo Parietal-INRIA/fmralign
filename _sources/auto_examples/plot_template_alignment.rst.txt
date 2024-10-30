@@ -70,16 +70,16 @@ mask is a binary image used to extract grey matter regions.
  .. code-block:: none
 
     Downloading data from https://osf.io/qn5b6/download ...
-    Downloaded 8396800 of 21197218 bytes (39.6%,    1.5s remaining) ...done. (3 seconds, 0 min)
+    Downloaded 10059776 of 21197218 bytes (47.5%,    1.1s remaining) ...done. (3 seconds, 0 min)
     Extracting data from /home/runner/nilearn_data/ibc/cd396fed594eb866baecd48b70ddf7e7/download..... done.
     Downloading data from https://osf.io/u74a3/download ...
-    Downloaded 9207808 of 21185350 bytes (43.5%,    1.3s remaining) ...done. (3 seconds, 0 min)
+     ...done. (2 seconds, 0 min)
     Extracting data from /home/runner/nilearn_data/ibc/fc5556cc3678df4f4ab566414382180a/download..... done.
     Downloading data from https://osf.io/83bje/download ...
-    Downloaded 16834560 of 21188335 bytes (79.5%,    0.3s remaining) ...done. (2 seconds, 0 min)
+    Downloaded 16834560 of 21188335 bytes (79.5%,    0.3s remaining) ...done. (3 seconds, 0 min)
     Extracting data from /home/runner/nilearn_data/ibc/1beaa1b5a1734a1afbf1c844e1f7a60e/download..... done.
     Downloading data from https://osf.io/43j69/download ...
-     ...done. (2 seconds, 0 min)
+    Downloaded 16965632 of 21187400 bytes (80.1%,    0.2s remaining) ...done. (3 seconds, 0 min)
     Extracting data from /home/runner/nilearn_data/ibc/75e62c44985852e000c2b2865badf72d/download..... done.
 
 
@@ -444,7 +444,7 @@ the average activations of subjects.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (21 minutes 56.821 seconds)
+   **Total running time of the script:** (21 minutes 55.530 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_template_alignment.py:
