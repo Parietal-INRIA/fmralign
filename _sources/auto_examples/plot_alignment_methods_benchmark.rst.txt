@@ -108,7 +108,7 @@ First, we fetch and plot the complete atlas
  .. code-block:: none
 
 
-    <nilearn.plotting.displays._slicers.OrthoSlicer object at 0x7f664d2f3760>
+    <nilearn.plotting.displays._slicers.OrthoSlicer object at 0x7fad01d17a90>
 
 
 
@@ -311,49 +311,49 @@ its correlation with the real signal.
 
  .. code-block:: none
 
-    /usr/share/miniconda3/envs/testenv/lib/python3.9/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+    /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
     Parameter mask_strategy :
         Masker parameter background - overriding estimator parameter epi
     Parameter smoothing_fwhm :
         Masker parameter None - overriding estimator parameter 4.0
 
       warnings.warn(warn_str)
-    /usr/share/miniconda3/envs/testenv/lib/python3.9/site-packages/fmralign/metrics.py:62: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
+    /home/runner/work/fmralign/fmralign/fmralign/metrics.py:62: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
       pearsonr(X_gt[:, vox], X_pred[:, vox])[
-    /usr/share/miniconda3/envs/testenv/lib/python3.9/site-packages/nilearn/plotting/img_plotting.py:1317: UserWarning: Non-finite values detected. These values will be replaced with zeros.
+    /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1317: UserWarning: Non-finite values detected. These values will be replaced with zeros.
       safe_get_data(stat_map_img, ensure_finite=True),
-    /usr/share/miniconda3/envs/testenv/lib/python3.9/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+    /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
     Parameter mask_strategy :
         Masker parameter background - overriding estimator parameter epi
     Parameter smoothing_fwhm :
         Masker parameter None - overriding estimator parameter 4.0
 
       warnings.warn(warn_str)
-    /usr/share/miniconda3/envs/testenv/lib/python3.9/site-packages/fmralign/metrics.py:62: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
+    /home/runner/work/fmralign/fmralign/fmralign/metrics.py:62: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
       pearsonr(X_gt[:, vox], X_pred[:, vox])[
-    /usr/share/miniconda3/envs/testenv/lib/python3.9/site-packages/nilearn/plotting/img_plotting.py:1317: UserWarning: Non-finite values detected. These values will be replaced with zeros.
+    /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1317: UserWarning: Non-finite values detected. These values will be replaced with zeros.
       safe_get_data(stat_map_img, ensure_finite=True),
-    /usr/share/miniconda3/envs/testenv/lib/python3.9/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+    /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
     Parameter mask_strategy :
         Masker parameter background - overriding estimator parameter epi
     Parameter smoothing_fwhm :
         Masker parameter None - overriding estimator parameter 4.0
 
       warnings.warn(warn_str)
-    /usr/share/miniconda3/envs/testenv/lib/python3.9/site-packages/fmralign/metrics.py:62: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
+    /home/runner/work/fmralign/fmralign/fmralign/metrics.py:62: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
       pearsonr(X_gt[:, vox], X_pred[:, vox])[
-    /usr/share/miniconda3/envs/testenv/lib/python3.9/site-packages/nilearn/plotting/img_plotting.py:1317: UserWarning: Non-finite values detected. These values will be replaced with zeros.
+    /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1317: UserWarning: Non-finite values detected. These values will be replaced with zeros.
       safe_get_data(stat_map_img, ensure_finite=True),
-    /usr/share/miniconda3/envs/testenv/lib/python3.9/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+    /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
     Parameter mask_strategy :
         Masker parameter background - overriding estimator parameter epi
     Parameter smoothing_fwhm :
         Masker parameter None - overriding estimator parameter 4.0
 
       warnings.warn(warn_str)
-    /usr/share/miniconda3/envs/testenv/lib/python3.9/site-packages/fmralign/metrics.py:62: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
+    /home/runner/work/fmralign/fmralign/fmralign/metrics.py:62: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
       pearsonr(X_gt[:, vox], X_pred[:, vox])[
-    /usr/share/miniconda3/envs/testenv/lib/python3.9/site-packages/nilearn/plotting/img_plotting.py:1317: UserWarning: Non-finite values detected. These values will be replaced with zeros.
+    /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1317: UserWarning: Non-finite values detected. These values will be replaced with zeros.
       safe_get_data(stat_map_img, ensure_finite=True),
 
 
@@ -382,7 +382,7 @@ it yields.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 21.064 seconds)
+   **Total running time of the script:** (1 minutes 24.651 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_alignment_methods_benchmark.py:
