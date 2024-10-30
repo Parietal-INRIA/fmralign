@@ -49,6 +49,7 @@ jobs:
           path: doc/_build/html
 
   deploy:
+    # Avoid running this job on a fork
     if: github.repository == 'parietal-INRIA/fmralign'
     needs: build
     runs-on: ubuntu-latest
