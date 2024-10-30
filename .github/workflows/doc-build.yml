@@ -1,125 +1,68 @@
----
-# Workflow to build the documentation.
-name: Build documentation
+name: Build and Deploy Sphinx Docs
+
 on:
-    push:
-        branches:
-        -   main
-    pull_request:
-        branches:
-        -   '*'
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - '*'
 
 permissions:
   contents: write
   pages: write
 
 jobs:
-  # Steps to build the documentation.
-    build_docs:
-    # This prevents this workflow from running on a fork.
-        if: github.repository == 'parietal-INRIA/fmralign'
-        runs-on: ubuntu-latest
-        timeout-minutes: 360
-        defaults:
-            run:
-                shell: bash -el {0}
-        steps:
-        -   name: Source caching
-            uses: actions/cache@v3
-            with:
-                path: .git
-                key: source-cache-${{ runner.os }}-${{ github.run_id }}
-                restore-keys: |
-                    source-cache-${{ runner.os }}
-        -   name: Checkout fmralign
-            uses: actions/checkout@v3
-            with:
-          # If pull request, checkout HEAD commit with all commit history
-                ref: ${{ github.event.pull_request.head.sha }}
-                fetch-depth: 0
-        -   name: Complete checkout
-            run: |
-                set -x
-                if ! git remote -v | grep upstream; then
-                  git remote add upstream https://github.com/parietal-INRIA/fmralign.git
-                fi
-                git fetch upstream
-        -   name: Merge with upstream
-            run: |
-                set -x
-                echo $(git log -1 --pretty=%B) | tee gitlog.txt
-                echo "gitlog.txt = $(cat gitlog.txt)"
-                echo $GITHUB_REF_NAME | tee merge.txt
-                if [ "$GITHUB_REF_NAME" != "main" ]; then
-                    echo "Merging $(cat merge.txt)";
-                    git pull --ff-only upstream "refs/pull/$(cat merge.txt)";
-                fi
-      # Set up environment
-        -   name: Install apt packages
-            run: |
-                sudo -E apt-get -yq update
-                sudo -E apt-get -yq --no-install-suggests --no-install-recommends install \
-                    dvipng texlive-latex-base texlive-latex-extra
-        -   name: Setup conda
-            uses: conda-incubator/setup-miniconda@v2
-            with:
-                auto-activate-base: true
-                activate-environment: ''
-                miniconda-version: latest
-                channels: conda-forge
-        -   name: Install packages in conda env
-            run: |
-                conda init bash
-                echo "conda version = $(conda --version)"
-                conda create -n testenv
-                conda install -n testenv -yq python=3.9
-                source activate testenv
-                python -m pip install --user --upgrade --progress-bar off pip
-                # See pyproject.toml for dependency group options
-                python -m pip install .[jax,test,doc]
+  build:
+    runs-on: ubuntu-latest
 
-      # Run the doc build. 
-        -   name: Build docs
-            run: |
-                source activate testenv
-                echo "Conda active env = $CONDA_DEFAULT_ENV";
-                cd doc;
-                set -o pipefail;
-                make html | tee log.txt;
-        -   name: Upload documentation
-            uses: actions/upload-artifact@v4
-            with:
-                name: DocHTML
-                path: doc/_build/html
-                
-    # Deploy the documentation to GitHub Pages.
-    deploy_docs:
-        if: github.repository == 'parietal-INRIA/fmralign'
-        needs: build_docs
-        runs-on: ubuntu-latest
-        steps:
-        -   uses: actions/checkout@v3
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-        -   name: Download artifacts
-            uses: actions/download-artifact@v4
-            with:
-                name: DocHTML
-                path: doc/_build/html/
-                fetch-depth: 0
+      # Step 2: Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
 
-        -   name: Commit to documentation branch
-            run: |
-                git clone --depth 1 https://github.com/${{ github.repository }}.git --branch gh-pages --single-branch gh-pages
-                cp -r doc/_build/html/* gh-pages/
-                cd gh-pages
-                touch .nojekyll
-                git config --local user.email "fmralign@github.com"
-                git config --local user.name "fmralign GitHub Action"
-                git add .
-                git commit -m "Update documentation" -a || true
-            
-        -   name: Push changes
-            uses: ad-m/github-push-action@v0.6.0
-            with:
-                branch: gh-pages
-                github_token: ${{ secrets.GITHUB_TOKEN }}
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -e ".[doc]"
+
+      # Step 4: Build Sphinx documentation
+      - name: Build Sphinx documentation
+        working-directory: doc
+        run: |
+          python -m sphinx -b html . _build/html
+
+      # Step 5: Upload Sphinx docs as an artifact
+      - name: Upload Sphinx docs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sphinx-docs
+          path: doc/_build/html
+
+  deploy:
+    if: github.repository == 'parietal-INRIA/fmralign'
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 6: Download Sphinx docs artifact
+      - name: Download Sphinx docs artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: sphinx-docs
+          path: doc/_build/html/
+      # Step 7: Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: doc/_build/html
