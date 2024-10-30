@@ -46,7 +46,7 @@ jobs:
 
   deploy:
     # Avoid running this job on a fork
-    if: github.repository == 'parietal-INRIA/fmralign'
+    if: github.repository == 'parietal-INRIA/fmralign' && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
 
