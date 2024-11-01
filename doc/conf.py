@@ -262,7 +262,7 @@ intersphinx_mapping = {
 extlinks = {
     "sklearn": ("https://scikit-learn.org/stable/%s", None),
     "inria": ("https://team.inria.fr/%s", None),
-    "nilearn-gh": ("https://github.com/nilearn/nilearn/%s", None),
+    "nilearn": ("https://nilearn.github.io/stable/%s", None),
     "nipy": ("https://nipy.org/%s", None),
 }
 

@@ -143,6 +143,7 @@ Featured examples
    :caption: Development
 
    authors.rst
+   whats_new.rst
    GitHub Repository <https://github.com/parietal-INRIA/fmralign>
 
 

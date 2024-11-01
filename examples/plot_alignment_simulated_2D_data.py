@@ -29,6 +29,7 @@ in a terminal, or use ``jupyter-notebook``.
 #   * tick_params which are a set of plotting parameters
 #   * _plot2D_samples_mat to plot 2D alignment matrix as matching between distributions.
 #   * _plot_distributions_and_alignment to plot both the distributions and the matchings
+#
 # Now you can skip this part.
 
 import math
@@ -231,5 +232,3 @@ _plot_distributions_and_alignment(
     X, Y, R=ot_alignment.R, title="Optimal Transport", thr=0.1
 )
 _plot_mixing_matrix(R=ot_alignment.R, title="Optimal Transport coupling")
-
-# sphinx_gallery_thumbnail_number = 7

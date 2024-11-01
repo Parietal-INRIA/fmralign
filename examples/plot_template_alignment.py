@@ -175,4 +175,3 @@ display.title("Template-based prediction correlation wt ground truth")
 # We observe that creating a template and aligning a new subject to it yields
 # a prediction that is better correlated with the ground truth than just using
 # the average activations of subjects.
-#

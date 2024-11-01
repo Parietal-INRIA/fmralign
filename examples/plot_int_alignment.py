@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 
 """
-Co-smoothing Prediction using the IndividualNeuralTuning Model.
-See article : https://doi.org/10.1162/imag_a_00032
-
-==========================
+Co-smoothing prediction using the Individual Neural Tuning Model
+================================================================
 
 In this tutorial, we show how to better predict new contrasts for a target
 subject using many source subjects corresponding contrasts. For this purpose,
@@ -18,7 +16,7 @@ functional data in a clean fashion.
 To run this example, you must launch IPython via ``ipython
 --matplotlib`` in a terminal, or use ``jupyter-notebook``.
 """
-# %%
+
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -41,7 +39,7 @@ imgs, df, mask_img = fetch_ibc_subjects_contrasts(sub_list)
 
 ###############################################################################
 # Define a masker
-# -----------------
+# ---------------
 # We define a nilearn masker that will be used to handle relevant data.
 #   For more information, visit :
 #   'https://nilearn.github.io/stable/manipulating_images/masker_objects.html'
@@ -143,7 +141,7 @@ stimulus_ = np.copy(model.shared_response)
 target_tuning = model._tuning_estimator(
     shared_response=stimulus_[train_index], target=target_denoised_data
 )
-# %%
+
 # We input the mapping image target_train in a list, we could have input more
 # than one subject for which we'd want to predict : [train_1, train_2 ...]
 
@@ -166,7 +164,7 @@ prediction_from_average = index_img(average_subject, test_index)
 # measure the correlation between its profile of activation without and with
 # alignment, to see if alignment was able to predict a signal more alike the ground truth.
 #
-# %%
+
 from fmralign.metrics import score_voxelwise
 
 # Now we use this scoring function to compare the correlation of predictions
@@ -188,7 +186,6 @@ template_score = masker.inverse_transform(
 # Finally we plot both scores
 #
 
-# %%
 from nilearn import plotting
 
 baseline_display = plotting.plot_stat_map(
@@ -207,5 +204,3 @@ display.title("INT prediction correlation wt ground truth")
 #
 
 plotting.show()
-
-# %%

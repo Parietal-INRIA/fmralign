@@ -133,3 +133,4 @@ display.title("Prediction correlation wt ground truth")
 ###############################################################################
 # We can see on the plot that after alignment the prediction made for one
 # subject data, informed by another subject are greatly improved.
+#
