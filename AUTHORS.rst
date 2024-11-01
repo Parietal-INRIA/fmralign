@@ -10,8 +10,8 @@ This work is made available by a community of people, including:
 * `Elizabeth DuPre <https://github.com/emdupre>`_
 * `Hugo Richard <https://github.com/hugorichard>`_
 * `Kshitij Chawla <https://github.com/kchawla-pi>`_
-* `Thomas Bazeille <https://github.com/thomasbazeille>`_
 * `Pierre-Louis Barbarant <https://github.com/pbarbarant>`_
+* `Thomas Bazeille <https://github.com/thomasbazeille>`_
 
 
 Funding

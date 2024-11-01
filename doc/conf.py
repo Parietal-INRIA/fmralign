@@ -263,7 +263,6 @@ extlinks = {
     "sklearn": ("https://scikit-learn.org/stable/%s", None),
     "inria": ("https://team.inria.fr/%s", None),
     "nilearn-gh": ("https://github.com/nilearn/nilearn/%s", None),
-    "neurostars": ("https://neurostars.org/tag/nilearn/%s", None),
     "nipy": ("https://nipy.org/%s", None),
 }
 
