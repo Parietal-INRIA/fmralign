@@ -13,11 +13,6 @@ data in a clean fashion.
 
 To run this example, you must launch IPython via ``ipython
 --matplotlib`` in a terminal, or use ``jupyter-notebook``.
-
-.. contents:: **Contents**
-    :local:
-    :depth: 1
-
 """
 ###############################################################################
 # Retrieve the data
@@ -138,3 +133,4 @@ display.title("Prediction correlation wt ground truth")
 ###############################################################################
 # We can see on the plot that after alignment the prediction made for one
 # subject data, informed by another subject are greatly improved.
+#

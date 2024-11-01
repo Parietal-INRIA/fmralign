@@ -47,6 +47,7 @@ doc = [
   "sphinx-gallery",
   "sphinxcontrib-bibtex",
   "sphinxext-opengraph",
+  "furo"
 ]
 # For running unit and docstring tests
 test = [

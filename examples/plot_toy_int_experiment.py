@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 
 """
-Co-smoothing Prediction using the IndividualNeuralTuning Model.
-See article : https://doi.org/10.1162/imag_a_00032
-
-==========================
+Individual Neural Tuning Model on simulated data
+================================================
 
 This is a toy experiment to test Individual Tuning Model (INT) on two parts of the
 data (or different runs) to assess the validity of tuning computation. This code has
@@ -14,13 +12,8 @@ the INT model.
 
 To run this example, you must launch IPython via ``ipython
 --matplotlib`` in a terminal, or use ``jupyter-notebook``.
-
-.. contents:: **Contents**
-    :local:
-    :depth: 1
-
 """
-# %%
+
 import numpy as np
 import matplotlib.pyplot as plt
 from fmralign.alignment_methods import IndividualizedNeuralTuning as INT
@@ -32,7 +25,6 @@ from fmralign.hyperalignment.correlation import (
     matrix_MDS,
 )
 
-# %%
 ###############################################################################
 # Generate the data
 # -----------------
@@ -74,7 +66,6 @@ decomposition_method = "pca"  # if None, SVD is used
 
 parcels = [range(n_voxels)]
 
-# %%
 #############################################################################
 # Create two independant instances of the model
 # ---------------------------------------------
@@ -106,7 +97,6 @@ stimulus_pred_run_2 = int2.shared_response
 
 data_pred = int1.transform(data_run_2)
 
-# %%
 ###############################################################################
 # Plotting validation metrics
 # ---------------------------
@@ -211,5 +201,4 @@ fig.suptitle(
 )
 
 plt.tight_layout()
-# %%
 plt.show()

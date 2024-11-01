@@ -60,8 +60,17 @@ coverage.xml
 # Sphinx documentation
 doc/_build/
 doc/auto_examples/
-source/_build/
-source/auto_examples/
+doc/.nojekyll
+doc/building_blocks/generated/
+doc/generated/
+doc/modules/generated/
+doc/modules/generated_reports/*.html
+doc/modules/description
+doc/sg_execution_times.rst
+log.txt
+build.txt
+pattern.txt
+
 
 # Jupyter Notebook
 .ipynb_checkpoints

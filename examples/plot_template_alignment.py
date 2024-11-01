@@ -15,11 +15,6 @@ functional data in a clean fashion.
 
 To run this example, you must launch IPython via ``ipython
 --matplotlib`` in a terminal, or use ``jupyter-notebook``.
-
-.. contents:: **Contents**
-    :local:
-    :depth: 1
-
 """
 
 ###############################################################################
@@ -180,4 +175,3 @@ display.title("Template-based prediction correlation wt ground truth")
 # We observe that creating a template and aligning a new subject to it yields
 # a prediction that is better correlated with the ground truth than just using
 # the average activations of subjects.
-#

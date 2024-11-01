@@ -279,6 +279,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
             'all CPUs', -2 'all CPUs but one', and so on.
         verbose: integer, optional (default = 0)
             Indicate the level of verbosity. By default, nothing is printed.
+
         """
         self.n_pieces = n_pieces
         self.alignment_method = alignment_method
