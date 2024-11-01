@@ -1,14 +1,12 @@
 
 .. _user_guide:
 
-User guide: table of contents
-=============================
+==========
+User guide
+==========
 
-.. include:: includes/big_toc_css.rst
-
-.. nice layout in the toc
-
-.. include:: tune_toc.rst
+Table of contents
+=================
 
 .. toctree::
    :numbered:

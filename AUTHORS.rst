@@ -19,7 +19,7 @@ Funding
 
 This project has received funding from the European Union's Horizon
 2020 Research and Innovation Programme under Grant Agreement No. 785907
-(HBP SGA2) and `Digiteo <https://digiteo.fr>`_.
+(HBP SGA2) and `Digiteo <https://fr.wikipedia.org/wiki/Digiteo>`_.
 
 .. _citing:
 
