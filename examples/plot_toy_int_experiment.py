@@ -14,11 +14,6 @@ the INT model.
 
 To run this example, you must launch IPython via ``ipython
 --matplotlib`` in a terminal, or use ``jupyter-notebook``.
-
-.. contents:: **Contents**
-    :local:
-    :depth: 1
-
 """
 # %%
 import numpy as np
