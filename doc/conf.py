@@ -57,7 +57,7 @@ extensions = [
     "sphinx_design",
     "gh_substitutions",
     "myst_parser",
-    "numpydoc",   
+    "numpydoc",
 ]
 
 
