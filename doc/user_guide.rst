@@ -10,6 +10,7 @@ Table of contents
 
 .. toctree::
    :numbered:
+   :maxdepth: 3
 
    overview.rst
    functional_alignment/index.rst
