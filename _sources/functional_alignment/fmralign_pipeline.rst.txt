@@ -12,9 +12,6 @@ We compare various methods of alignment on a pairwise alignment problem for `Ind
 For each subject, we have a lot of functional informations in the form of several task-based contrast per subject.
 We will just work here on a ROI.
 
-.. contents:: **Contents**
-    :local:
-    :depth: 1
 
 Local functional alignment
 ==========================

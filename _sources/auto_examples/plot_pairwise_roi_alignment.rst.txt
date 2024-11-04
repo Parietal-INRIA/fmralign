@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_auto_examples_plot_pairwise_roi_alignment.py>`
-        to download the full example code.
+        to download the full example code. or to run this example in your browser via Binder
 
 .. rst-class:: sphx-glr-example-title
 
@@ -33,11 +33,7 @@ data in a clean fashion.
 To run this example, you must launch IPython via ``ipython
 --matplotlib`` in a terminal, or use ``jupyter-notebook``.
 
-.. contents:: **Contents**
-    :local:
-    :depth: 1
-
-.. GENERATED FROM PYTHON SOURCE LINES 25-35
+.. GENERATED FROM PYTHON SOURCE LINES 20-30
 
 Retrieve the data
 ------------------
@@ -50,7 +46,7 @@ df is a dataframe with metadata about each of them.
 mask is an appropriate nifti image to select the data.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 35-40
+.. GENERATED FROM PYTHON SOURCE LINES 30-35
 
 .. code-block:: Python
 
@@ -66,14 +62,14 @@ mask is an appropriate nifti image to select the data.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 41-45
+.. GENERATED FROM PYTHON SOURCE LINES 36-40
 
 Extract a mask for the visual cortex from Yeo Atlas
 ---------------------------------------------------
 First, we fetch and plot the complete atlas
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 45-68
+.. GENERATED FROM PYTHON SOURCE LINES 40-63
 
 .. code-block:: Python
 
@@ -120,11 +116,11 @@ First, we fetch and plot the complete atlas
      ...done. (0 seconds, 0 min)
     Extracting data from /home/runner/nilearn_data/yeo_2011/d7a5390bfb7686fb41fa64cc2ba058d0/Yeo_JNeurophysiol11_MNI152.zip..... done.
 
-    <nilearn.plotting.displays._slicers.OrthoSlicer object at 0x7f0600a8ef10>
+    <nilearn.plotting.displays._slicers.OrthoSlicer object at 0x7f62acaa0f10>
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 69-75
+.. GENERATED FROM PYTHON SOURCE LINES 64-70
 
 Definine a masker
 -----------------
@@ -133,7 +129,7 @@ For more information, visit :
 'http://nilearn.github.io/manipulating_images/masker_objects.html'
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 75-80
+.. GENERATED FROM PYTHON SOURCE LINES 70-75
 
 .. code-block:: Python
 
@@ -149,7 +145,7 @@ For more information, visit :
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 81-87
+.. GENERATED FROM PYTHON SOURCE LINES 76-82
 
 Prepare the data
 ----------------
@@ -158,7 +154,7 @@ two independent sessions with a different phase encoding:
 Antero-posterior(AP) or Postero-anterior(PA).
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 87-105
+.. GENERATED FROM PYTHON SOURCE LINES 82-100
 
 .. code-block:: Python
 
@@ -188,19 +184,19 @@ Antero-posterior(AP) or Postero-anterior(PA).
 
  .. code-block:: none
 
-    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_roi_alignment.py:93: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_roi_alignment.py:88: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
       source_train = df[df.subject == "sub-01"][df.acquisition == "ap"].path.values
-    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_roi_alignment.py:94: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_roi_alignment.py:89: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
       target_train = df[df.subject == "sub-02"][df.acquisition == "ap"].path.values
-    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_roi_alignment.py:102: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_roi_alignment.py:97: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
       source_test = df[df.subject == "sub-01"][df.acquisition == "pa"].path.values
-    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_roi_alignment.py:103: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_roi_alignment.py:98: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
       target_test = df[df.subject == "sub-02"][df.acquisition == "pa"].path.values
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 106-116
+.. GENERATED FROM PYTHON SOURCE LINES 101-111
 
 Define the estimator, fit it and predict
 ----------------------------------------
@@ -213,7 +209,7 @@ n_pieces to 1. We learn alignment estimator on train data and use it to
 predict target test data.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 116-125
+.. GENERATED FROM PYTHON SOURCE LINES 111-120
 
 .. code-block:: Python
 
@@ -242,7 +238,7 @@ predict target test data.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 126-134
+.. GENERATED FROM PYTHON SOURCE LINES 121-129
 
 Score the baseline and the prediction
 -------------------------------------
@@ -253,7 +249,7 @@ and with alignment, to see if alignment was able to predict a signal more
 alike the ground truth.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 134-147
+.. GENERATED FROM PYTHON SOURCE LINES 129-142
 
 .. code-block:: Python
 
@@ -284,14 +280,14 @@ alike the ground truth.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 148-152
+.. GENERATED FROM PYTHON SOURCE LINES 143-147
 
 Plotting the measures
 ---------------------
 Finally we plot both scores.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 152-164
+.. GENERATED FROM PYTHON SOURCE LINES 147-159
 
 .. code-block:: Python
 
@@ -338,7 +334,7 @@ Finally we plot both scores.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 165-167
+.. GENERATED FROM PYTHON SOURCE LINES 160-162
 
 We can see on the plot that after alignment, the prediction made for one
 subject data, informed by another subject are greatly improved.
@@ -346,7 +342,7 @@ subject data, informed by another subject are greatly improved.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 21.990 seconds)
+   **Total running time of the script:** (0 minutes 23.132 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_pairwise_roi_alignment.py:
@@ -354,6 +350,13 @@ subject data, informed by another subject are greatly improved.
 .. only:: html
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
+
+    .. container:: binder-badge
+
+      .. image:: images/binder_badge_logo.svg
+        :target: https://mybinder.org/v2/gh/nilearn/nilearn/main?urlpath=lab/tree/notebooks/auto_examples/plot_pairwise_roi_alignment.ipynb
+        :alt: Launch binder
+        :width: 150 px
 
     .. container:: sphx-glr-download sphx-glr-download-jupyter
 

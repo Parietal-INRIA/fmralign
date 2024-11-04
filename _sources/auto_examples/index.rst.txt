@@ -1,8 +1,15 @@
 :orphan:
 
-==================================================
-Functional alignment with fmralign : some examples
-==================================================
+########
+Examples
+########
+
+.. warning::
+
+    If you want to run the examples, make sure you execute them in a directory
+    where you have write permissions, or you copy the examples into such a
+    directory. If you install fmralign manually, make sure you have followed
+    the instructions.
 
 
 
@@ -82,7 +89,7 @@ Functional alignment with fmralign : some examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="==========================">
+    <div class="sphx-glr-thumbcontainer" tooltip="In this tutorial, we show how to better predict new contrasts for a target subject using many source subjects corresponding contrasts. For this purpose, we create a template to which we align the target subject, using shared information. We then predict new images for the target and compare them to a baseline.">
 
 .. only:: html
 
@@ -93,13 +100,13 @@ Functional alignment with fmralign : some examples
 
 .. raw:: html
 
-      <div class="sphx-glr-thumbnail-title">Co-smoothing Prediction using the IndividualNeuralTuning Model.</div>
+      <div class="sphx-glr-thumbnail-title">Co-smoothing prediction using the Individual Neural Tuning Model</div>
     </div>
 
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="==========================">
+    <div class="sphx-glr-thumbcontainer" tooltip="This is a toy experiment to test Individual Tuning Model (INT) on two parts of the data (or different runs) to assess the validity of tuning computation. This code has no intention to be an explanatory example, but rather a test to check the validity of the INT model.">
 
 .. only:: html
 
@@ -110,7 +117,7 @@ Functional alignment with fmralign : some examples
 
 .. raw:: html
 
-      <div class="sphx-glr-thumbnail-title">Co-smoothing Prediction using the IndividualNeuralTuning Model.</div>
+      <div class="sphx-glr-thumbnail-title">Individual Neural Tuning Model on simulated data</div>
     </div>
 
 

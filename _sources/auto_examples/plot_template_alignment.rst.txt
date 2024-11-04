@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_auto_examples_plot_template_alignment.py>`
-        to download the full example code.
+        to download the full example code. or to run this example in your browser via Binder
 
 .. rst-class:: sphx-glr-example-title
 
@@ -33,11 +33,7 @@ functional data in a clean fashion.
 To run this example, you must launch IPython via ``ipython
 --matplotlib`` in a terminal, or use ``jupyter-notebook``.
 
-.. contents:: **Contents**
-    :local:
-    :depth: 1
-
-.. GENERATED FROM PYTHON SOURCE LINES 26-36
+.. GENERATED FROM PYTHON SOURCE LINES 21-31
 
 Retrieve the data
 -----------------
@@ -50,7 +46,7 @@ df is a dataframe with metadata about each of them.
 mask is a binary image used to extract grey matter regions.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 36-43
+.. GENERATED FROM PYTHON SOURCE LINES 31-38
 
 .. code-block:: Python
 
@@ -70,22 +66,22 @@ mask is a binary image used to extract grey matter regions.
  .. code-block:: none
 
     Downloading data from https://osf.io/qn5b6/download ...
-    Downloaded 10059776 of 21197218 bytes (47.5%,    1.1s remaining) ...done. (3 seconds, 0 min)
+    Downloaded 8347648 of 21197218 bytes (39.4%,    1.5s remaining)    Downloaded 15925248 of 21197218 bytes (75.1%,    0.7s remaining) ...done. (6 seconds, 0 min)
     Extracting data from /home/runner/nilearn_data/ibc/cd396fed594eb866baecd48b70ddf7e7/download..... done.
     Downloading data from https://osf.io/u74a3/download ...
-     ...done. (2 seconds, 0 min)
+    Downloaded 8675328 of 21185350 bytes (40.9%,    1.4s remaining)    Downloaded 16785408 of 21185350 bytes (79.2%,    0.5s remaining) ...done. (4 seconds, 0 min)
     Extracting data from /home/runner/nilearn_data/ibc/fc5556cc3678df4f4ab566414382180a/download..... done.
     Downloading data from https://osf.io/83bje/download ...
-    Downloaded 16834560 of 21188335 bytes (79.5%,    0.3s remaining) ...done. (3 seconds, 0 min)
+    Downloaded 16867328 of 21188335 bytes (79.6%,    0.3s remaining) ...done. (4 seconds, 0 min)
     Extracting data from /home/runner/nilearn_data/ibc/1beaa1b5a1734a1afbf1c844e1f7a60e/download..... done.
     Downloading data from https://osf.io/43j69/download ...
-    Downloaded 16965632 of 21187400 bytes (80.1%,    0.2s remaining) ...done. (3 seconds, 0 min)
+    Downloaded 16875520 of 21187400 bytes (79.6%,    0.3s remaining) ...done. (3 seconds, 0 min)
     Extracting data from /home/runner/nilearn_data/ibc/75e62c44985852e000c2b2865badf72d/download..... done.
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 44-50
+.. GENERATED FROM PYTHON SOURCE LINES 39-45
 
 Definine a masker
 -----------------
@@ -94,7 +90,7 @@ We define a nilearn masker that will be used to handle relevant data.
   'http://nilearn.github.io/manipulating_images/masker_objects.html'
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 50-55
+.. GENERATED FROM PYTHON SOURCE LINES 45-50
 
 .. code-block:: Python
 
@@ -110,7 +106,7 @@ We define a nilearn masker that will be used to handle relevant data.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 56-62
+.. GENERATED FROM PYTHON SOURCE LINES 51-57
 
 Prepare the data
 ----------------
@@ -119,7 +115,7 @@ two independent sessions with a different phase encoding:
 Antero-posterior(AP) or Postero-anterior(PA).
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 62-82
+.. GENERATED FROM PYTHON SOURCE LINES 57-77
 
 .. code-block:: Python
 
@@ -151,15 +147,15 @@ Antero-posterior(AP) or Postero-anterior(PA).
 
  .. code-block:: none
 
-    /home/runner/work/fmralign/fmralign/examples/plot_template_alignment.py:72: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+    /home/runner/work/fmralign/fmralign/examples/plot_template_alignment.py:67: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
       target_train = df[df.subject == "sub-07"][df.acquisition == "ap"].path.values
-    /home/runner/work/fmralign/fmralign/examples/plot_template_alignment.py:80: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+    /home/runner/work/fmralign/fmralign/examples/plot_template_alignment.py:75: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
       target_test = df[df.subject == "sub-07"][df.acquisition == "pa"].path.values
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 83-88
+.. GENERATED FROM PYTHON SOURCE LINES 78-83
 
 Compute a baseline (average of subjects)
 ----------------------------------------
@@ -167,7 +163,7 @@ We create an image with as many contrasts as any subject representing for
 each contrast the average of all train subjects maps.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 88-95
+.. GENERATED FROM PYTHON SOURCE LINES 83-90
 
 .. code-block:: Python
 
@@ -185,7 +181,7 @@ each contrast the average of all train subjects maps.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 96-106
+.. GENERATED FROM PYTHON SOURCE LINES 91-101
 
 Create a template from the training subjects.
 ---------------------------------------------
@@ -198,7 +194,7 @@ We define an estimator using the class TemplateAlignment:
     new template space.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 106-116
+.. GENERATED FROM PYTHON SOURCE LINES 101-111
 
 .. code-block:: Python
 
@@ -299,7 +295,7 @@ We define an estimator using the class TemplateAlignment:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 117-125
+.. GENERATED FROM PYTHON SOURCE LINES 112-120
 
 Predict new data for left-out subject
 -------------------------------------
@@ -310,7 +306,7 @@ For each train subject and for the template, the AP contrasts are sorted from
 0, to 53, and then the PA contrasts from 53 to 106.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 125-140
+.. GENERATED FROM PYTHON SOURCE LINES 120-135
 
 .. code-block:: Python
 
@@ -352,7 +348,7 @@ For each train subject and for the template, the AP contrasts are sorted from
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 141-148
+.. GENERATED FROM PYTHON SOURCE LINES 136-143
 
 Score the baseline and the prediction
 -------------------------------------
@@ -362,7 +358,7 @@ measure the correlation between its profile of activation without and with
 alignment, to see if alignment was able to predict a signal more alike the ground truth.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 148-162
+.. GENERATED FROM PYTHON SOURCE LINES 143-157
 
 .. code-block:: Python
 
@@ -387,14 +383,14 @@ alignment, to see if alignment was able to predict a signal more alike the groun
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 163-167
+.. GENERATED FROM PYTHON SOURCE LINES 158-162
 
 Plotting the measures
 ---------------------
 Finally we plot both scores
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 167-179
+.. GENERATED FROM PYTHON SOURCE LINES 162-174
 
 .. code-block:: Python
 
@@ -434,17 +430,16 @@ Finally we plot both scores
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 180-184
+.. GENERATED FROM PYTHON SOURCE LINES 175-178
 
 We observe that creating a template and aligning a new subject to it yields
 a prediction that is better correlated with the ground truth than just using
 the average activations of subjects.
 
 
-
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (21 minutes 55.530 seconds)
+   **Total running time of the script:** (22 minutes 28.019 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_template_alignment.py:
@@ -452,6 +447,13 @@ the average activations of subjects.
 .. only:: html
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
+
+    .. container:: binder-badge
+
+      .. image:: images/binder_badge_logo.svg
+        :target: https://mybinder.org/v2/gh/nilearn/nilearn/main?urlpath=lab/tree/notebooks/auto_examples/plot_template_alignment.ipynb
+        :alt: Launch binder
+        :width: 150 px
 
     .. container:: sphx-glr-download sphx-glr-download-jupyter
 

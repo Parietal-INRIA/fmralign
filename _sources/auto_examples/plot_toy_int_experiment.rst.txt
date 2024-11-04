@@ -11,17 +11,15 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_auto_examples_plot_toy_int_experiment.py>`
-        to download the full example code.
+        to download the full example code. or to run this example in your browser via Binder
 
 .. rst-class:: sphx-glr-example-title
 
 .. _sphx_glr_auto_examples_plot_toy_int_experiment.py:
 
 
-Co-smoothing Prediction using the IndividualNeuralTuning Model.
-See article : https://doi.org/10.1162/imag_a_00032
-
-==========================
+Individual Neural Tuning Model on simulated data
+================================================
 
 This is a toy experiment to test Individual Tuning Model (INT) on two parts of the
 data (or different runs) to assess the validity of tuning computation. This code has
@@ -32,13 +30,10 @@ the INT model.
 To run this example, you must launch IPython via ``ipython
 --matplotlib`` in a terminal, or use ``jupyter-notebook``.
 
-.. contents:: **Contents**
-    :local:
-    :depth: 1
-
-.. GENERATED FROM PYTHON SOURCE LINES 24-35
+.. GENERATED FROM PYTHON SOURCE LINES 16-28
 
 .. code-block:: Python
+
 
     import numpy as np
     import matplotlib.pyplot as plt
@@ -58,21 +53,20 @@ To run this example, you must launch IPython via ``ipython
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 36-47
+.. GENERATED FROM PYTHON SOURCE LINES 29-39
 
-##############################################################################
- Generate the data
- -----------------
- In this example we use toy data to test the INT model. We generate two runs of
- the experiment, and we use the INT model to align the two runs. We then compare
- the tuning matrices and the shared response to assess the validity of the INT model.
- We also compare the reconstructed images to the ground truth to assess the validity
- of the INT model.
- The toy generation function allows us to get the ground truth stimulus and tuning
- matrices that were used to generate the data, and we can also control the level of
- noise in the data.
+Generate the data
+-----------------
+In this example we use toy data to test the INT model. We generate two runs of
+the experiment, and we use the INT model to align the two runs. We then compare
+the tuning matrices and the shared response to assess the validity of the INT model.
+We also compare the reconstructed images to the ground truth to assess the validity
+of the INT model.
+The toy generation function allows us to get the ground truth stimulus and tuning
+matrices that were used to generate the data, and we can also control the level of
+noise in the data.
 
-.. GENERATED FROM PYTHON SOURCE LINES 47-77
+.. GENERATED FROM PYTHON SOURCE LINES 39-69
 
 .. code-block:: Python
 
@@ -113,16 +107,15 @@ To run this example, you must launch IPython via ``ipython
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 78-84
+.. GENERATED FROM PYTHON SOURCE LINES 70-75
 
-############################################################################
- Create two independant instances of the model
- ---------------------------------------------
- We create two instances of the INT model to align the two runs of
- the experiment, then extract the tuning matrices and the shared from the two
- runs to compare them.
+Create two independant instances of the model
+---------------------------------------------
+We create two instances of the INT model to align the two runs of
+the experiment, then extract the tuning matrices and the shared from the two
+runs to compare them.
 
-.. GENERATED FROM PYTHON SOURCE LINES 84-109
+.. GENERATED FROM PYTHON SOURCE LINES 75-100
 
 .. code-block:: Python
 
@@ -164,20 +157,19 @@ To run this example, you must launch IPython via ``ipython
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 110-120
+.. GENERATED FROM PYTHON SOURCE LINES 101-110
 
-##############################################################################
- Plotting validation metrics
- ---------------------------
- We compare the tuning matrices and the shared response to assess the validity
- of the INT model. To achieve that, we use Pearson correlation between true and
- estimated stimulus, as well as between true and estimated tuning matrices.
- For tuning matrices, this is dones by first computing the correlation between
- every pair of tuning matrices from the two runs of the experiment, and then
- averaging the correlation across the diagonal (ie the correlation between
- the same timepoint of the two runs).
+Plotting validation metrics
+---------------------------
+We compare the tuning matrices and the shared response to assess the validity
+of the INT model. To achieve that, we use Pearson correlation between true and
+estimated stimulus, as well as between true and estimated tuning matrices.
+For tuning matrices, this is dones by first computing the correlation between
+every pair of tuning matrices from the two runs of the experiment, and then
+averaging the correlation across the diagonal (ie the correlation between
+the same timepoint of the two runs).
 
-.. GENERATED FROM PYTHON SOURCE LINES 120-214
+.. GENERATED FROM PYTHON SOURCE LINES 110-205
 
 .. code-block:: Python
 
@@ -275,6 +267,7 @@ To run this example, you must launch IPython via ``ipython
     )
 
     plt.tight_layout()
+    plt.show()
 
 
 
@@ -287,22 +280,10 @@ To run this example, you must launch IPython via ``ipython
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 215-216
-
-.. code-block:: Python
-
-    plt.show()
-
-
-
-
-
-
-
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 5.075 seconds)
+   **Total running time of the script:** (0 minutes 5.689 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_toy_int_experiment.py:
@@ -310,6 +291,13 @@ To run this example, you must launch IPython via ``ipython
 .. only:: html
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
+
+    .. container:: binder-badge
+
+      .. image:: images/binder_badge_logo.svg
+        :target: https://mybinder.org/v2/gh/nilearn/nilearn/main?urlpath=lab/tree/notebooks/auto_examples/plot_toy_int_experiment.ipynb
+        :alt: Launch binder
+        :width: 150 px
 
     .. container:: sphx-glr-download sphx-glr-download-jupyter
 

@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_auto_examples_plot_alignment_simulated_2D_data.py>`
-        to download the full example code.
+        to download the full example code. or to run this example in your browser via Binder
 
 .. rst-class:: sphx-glr-example-title
 
@@ -35,11 +35,7 @@ some sense.
 To run this example, you must launch IPython via ``ipython --matplotlib``
 in a terminal, or use ``jupyter-notebook``.
 
-.. contents:: **Contents**
-    :local:
-    :depth: 1
-
-.. GENERATED FROM PYTHON SOURCE LINES 28-37
+.. GENERATED FROM PYTHON SOURCE LINES 24-34
 
 Defining utility functions
 --------------------------
@@ -49,9 +45,10 @@ In this example we will do a lot of plotting so we first define :
   * tick_params which are a set of plotting parameters
   * _plot2D_samples_mat to plot 2D alignment matrix as matching between distributions.
   * _plot_distributions_and_alignment to plot both the distributions and the matchings
+
 Now you can skip this part.
 
-.. GENERATED FROM PYTHON SOURCE LINES 37-127
+.. GENERATED FROM PYTHON SOURCE LINES 34-124
 
 .. code-block:: Python
 
@@ -152,7 +149,7 @@ Now you can skip this part.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 128-134
+.. GENERATED FROM PYTHON SOURCE LINES 125-131
 
 Create a sample distribution
 ----------------------------
@@ -161,7 +158,7 @@ a S shape. Here the dimension of our distributions will `(n_points, 2)`
 since we want to be able to plot each voxel in a point. In real cases
 however we have tens or hundreds of observations that characterize each point.
 
-.. GENERATED FROM PYTHON SOURCE LINES 134-168
+.. GENERATED FROM PYTHON SOURCE LINES 131-165
 
 .. code-block:: Python
 
@@ -223,7 +220,7 @@ however we have tens or hundreds of observations that characterize each point.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 169-175
+.. GENERATED FROM PYTHON SOURCE LINES 166-172
 
 Alignment : finding the right transform
 ---------------------------------------
@@ -232,7 +229,7 @@ idea of alignment is to find a transform, let's call it `R`, between the
 source `X` and the target `Y` that will handle that. Now we will showcase
 on our simple 2D example different kind of transformation we can look for.
 
-.. GENERATED FROM PYTHON SOURCE LINES 175-182
+.. GENERATED FROM PYTHON SOURCE LINES 172-179
 
 .. code-block:: Python
 
@@ -250,7 +247,7 @@ on our simple 2D example different kind of transformation we can look for.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 183-188
+.. GENERATED FROM PYTHON SOURCE LINES 180-185
 
 Orthogonal alignment
 --------------------
@@ -258,7 +255,7 @@ The first idea proposed in Haxby, 2011 was to compute an orthogonal mixing
 matrix `R` and a scaling `sc` such that Frobenius norm: math:
 ` | |sc RX - Y | | ^ 2` is minimized.
 
-.. GENERATED FROM PYTHON SOURCE LINES 188-202
+.. GENERATED FROM PYTHON SOURCE LINES 185-199
 
 .. code-block:: Python
 
@@ -300,7 +297,7 @@ matrix `R` and a scaling `sc` such that Frobenius norm: math:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 203-209
+.. GENERATED FROM PYTHON SOURCE LINES 200-206
 
 Ridge alignment
 ---------------
@@ -309,7 +306,7 @@ penalize its L2 norm. This is a ridge regression, which means we search `R`
 such that Frobenius  norm :math:`|| XR - Y ||^2 + alpha * ||R||^2`
 is minimized with cross-validation.
 
-.. GENERATED FROM PYTHON SOURCE LINES 209-221
+.. GENERATED FROM PYTHON SOURCE LINES 206-218
 
 .. code-block:: Python
 
@@ -349,7 +346,7 @@ is minimized with cross-validation.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 222-231
+.. GENERATED FROM PYTHON SOURCE LINES 219-228
 
 Optimal Transport alignment
 ---------------------------
@@ -361,7 +358,7 @@ optimal coupling between `X` and `Y` with entropic regularization.
 This way of finding a transform uses more geometrical information from the
 distributions.
 
-.. GENERATED FROM PYTHON SOURCE LINES 231-240
+.. GENERATED FROM PYTHON SOURCE LINES 228-235
 
 .. code-block:: Python
 
@@ -372,8 +369,6 @@ distributions.
         X, Y, R=ot_alignment.R, title="Optimal Transport", thr=0.1
     )
     _plot_mixing_matrix(R=ot_alignment.R, title="Optimal Transport coupling")
-
-    # sphinx_gallery_thumbnail_number = 7
 
 
 
@@ -401,7 +396,7 @@ distributions.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.688 seconds)
+   **Total running time of the script:** (0 minutes 1.498 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_alignment_simulated_2D_data.py:
@@ -409,6 +404,13 @@ distributions.
 .. only:: html
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
+
+    .. container:: binder-badge
+
+      .. image:: images/binder_badge_logo.svg
+        :target: https://mybinder.org/v2/gh/nilearn/nilearn/main?urlpath=lab/tree/notebooks/auto_examples/plot_alignment_simulated_2D_data.ipynb
+        :alt: Launch binder
+        :width: 150 px
 
     .. container:: sphx-glr-download sphx-glr-download-jupyter
 

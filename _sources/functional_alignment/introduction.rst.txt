@@ -16,12 +16,8 @@ In this documentation we use a subset of `Individual Brain Charting dataset <htt
 .. topic:: **Full code example**
 
    The documentation here just gives the big idea. A full code example can be found on
-   :ref:`sphx_glr_auto_examples_plot_pairwise_alignment.py`. If you want to work on a
-   Region Of Interest see :ref:`sphx_glr_auto_examples_plot_pairwise_roi_alignment.py`.
-
-.. contents:: **Contents**
-    :local:
-    :depth: 1
+   :ref:`sphx_glr_auto_examples_plot_pairwise_alignment.py` If you want to work on a
+   Region Of Interest see :ref:`sphx_glr_auto_examples_plot_pairwise_roi_alignment.py`
 
 
 Inter subject variability in fMRI

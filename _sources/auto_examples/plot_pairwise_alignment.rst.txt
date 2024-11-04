@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_auto_examples_plot_pairwise_alignment.py>`
-        to download the full example code.
+        to download the full example code. or to run this example in your browser via Binder
 
 .. rst-class:: sphx-glr-example-title
 
@@ -31,11 +31,7 @@ data in a clean fashion.
 To run this example, you must launch IPython via ``ipython
 --matplotlib`` in a terminal, or use ``jupyter-notebook``.
 
-.. contents:: **Contents**
-    :local:
-    :depth: 1
-
-.. GENERATED FROM PYTHON SOURCE LINES 23-32
+.. GENERATED FROM PYTHON SOURCE LINES 18-27
 
 Retrieve the data
 -----------------
@@ -47,7 +43,7 @@ df is a dataframe with metadata about each of them.
 mask is an appropriate nifti image to select the data.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 32-37
+.. GENERATED FROM PYTHON SOURCE LINES 27-32
 
 .. code-block:: Python
 
@@ -71,22 +67,22 @@ mask is an appropriate nifti image to select the data.
     Dataset created in /home/runner/nilearn_data/ibc
 
     Downloading data from https://osf.io/pcvje/download ...
-     ...done. (1 seconds, 0 min)
+     ...done. (3 seconds, 0 min)
     Extracting data from /home/runner/nilearn_data/ibc/8e275a34345802c5c273312d85957d6c/download..... done.
     Downloading data from https://osf.io/yvju3/download ...
      ...done. (2 seconds, 0 min)
     Extracting data from /home/runner/nilearn_data/ibc/fe06df963fcb3fd454f63a33f0864e8d/download..... done.
     Downloading data from https://osf.io/8z23h/download ...
-    Downloaded 20701184 of 21185337 bytes (97.7%,    0.0s remaining) ...done. (3 seconds, 0 min)
+     ...done. (2 seconds, 0 min)
     Extracting data from /home/runner/nilearn_data/ibc/100352739b7501f0ed04920933b4be36/download..... done.
     Downloading data from https://osf.io/e9kbm/download ...
-    Downloaded 16867328 of 21196887 bytes (79.6%,    0.3s remaining) ...done. (2 seconds, 0 min)
+    Downloaded 8421376 of 21196887 bytes (39.7%,    1.6s remaining)    Downloaded 18358272 of 21196887 bytes (86.6%,    0.3s remaining) ...done. (5 seconds, 0 min)
     Extracting data from /home/runner/nilearn_data/ibc/331a0a579c6e46c0911502a96215b358/download..... done.
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 38-44
+.. GENERATED FROM PYTHON SOURCE LINES 33-39
 
 Define a masker
 ---------------
@@ -95,7 +91,7 @@ We define a nilearn masker that will be used to handle relevant data.
   'http://nilearn.github.io/manipulating_images/masker_objects.html'
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 44-51
+.. GENERATED FROM PYTHON SOURCE LINES 39-46
 
 .. code-block:: Python
 
@@ -523,7 +519,7 @@ We define a nilearn masker that will be used to handle relevant data.
     <br />
     <br />
 
-.. GENERATED FROM PYTHON SOURCE LINES 52-62
+.. GENERATED FROM PYTHON SOURCE LINES 47-57
 
 Prepare the data
 ----------------
@@ -536,7 +532,7 @@ advantage of these "duplicates to create a training and a testing set that
 contains roughly the same signals but acquired totally independently.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 62-80
+.. GENERATED FROM PYTHON SOURCE LINES 57-75
 
 .. code-block:: Python
 
@@ -566,19 +562,19 @@ contains roughly the same signals but acquired totally independently.
 
  .. code-block:: none
 
-    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_alignment.py:67: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_alignment.py:62: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
       source_train = df[df.subject == "sub-01"][df.acquisition == "ap"].path.values
-    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_alignment.py:68: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_alignment.py:63: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
       target_train = df[df.subject == "sub-02"][df.acquisition == "ap"].path.values
-    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_alignment.py:76: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_alignment.py:71: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
       source_test = df[df.subject == "sub-01"][df.acquisition == "pa"].path.values
-    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_alignment.py:77: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_alignment.py:72: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
       target_test = df[df.subject == "sub-02"][df.acquisition == "pa"].path.values
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 81-89
+.. GENERATED FROM PYTHON SOURCE LINES 76-84
 
 Define the estimator, fit it and predict
 ----------------------------------------
@@ -589,7 +585,7 @@ common model proposed in the literature:
   pieces, this parcellation creates group of functionnally similar voxels.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 89-100
+.. GENERATED FROM PYTHON SOURCE LINES 84-95
 
 .. code-block:: Python
 
@@ -623,7 +619,7 @@ common model proposed in the literature:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 101-108
+.. GENERATED FROM PYTHON SOURCE LINES 96-103
 
 Score the baseline and the prediction
 -------------------------------------
@@ -633,7 +629,7 @@ correlation between its profile of activation without and with alignment,
 to see if alignment was able to predict a signal more alike the ground truth.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 108-121
+.. GENERATED FROM PYTHON SOURCE LINES 103-116
 
 .. code-block:: Python
 
@@ -657,14 +653,14 @@ to see if alignment was able to predict a signal more alike the ground truth.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 122-126
+.. GENERATED FROM PYTHON SOURCE LINES 117-121
 
 Plotting the measures
 ---------------------
 Finally we plot both scores
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 126-138
+.. GENERATED FROM PYTHON SOURCE LINES 121-133
 
 .. code-block:: Python
 
@@ -704,15 +700,16 @@ Finally we plot both scores
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 139-141
+.. GENERATED FROM PYTHON SOURCE LINES 134-137
 
 We can see on the plot that after alignment the prediction made for one
 subject data, informed by another subject are greatly improved.
 
 
+
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 39.989 seconds)
+   **Total running time of the script:** (1 minutes 43.681 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_pairwise_alignment.py:
@@ -720,6 +717,13 @@ subject data, informed by another subject are greatly improved.
 .. only:: html
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
+
+    .. container:: binder-badge
+
+      .. image:: images/binder_badge_logo.svg
+        :target: https://mybinder.org/v2/gh/nilearn/nilearn/main?urlpath=lab/tree/notebooks/auto_examples/plot_pairwise_alignment.ipynb
+        :alt: Launch binder
+        :width: 150 px
 
     .. container:: sphx-glr-download sphx-glr-download-jupyter
 
