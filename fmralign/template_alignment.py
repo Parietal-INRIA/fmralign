@@ -331,6 +331,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             'all CPUs', -2 'all CPUs but one', and so on.
         verbose: integer, optional (default = 0)
             Indicate the level of verbosity. By default, nothing is printed.
+
         """
         self.template = None
         self.template_history = None
