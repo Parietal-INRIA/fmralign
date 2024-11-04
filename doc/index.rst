@@ -132,7 +132,7 @@ Featured examples
    :titlesonly:
 
    quickstart.md
-   auto_examples/reference.rst
+   auto_examples/index.rst
    user_guide.rst
    modules/index.rst
 
