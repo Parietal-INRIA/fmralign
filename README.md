@@ -1,7 +1,7 @@
 # fmralign
 
 ![build](https://img.shields.io/github/actions/workflow/status/parietal-inria/fmralign/testing.yml?event=push&style=for-the-badge)
-![python version](https://img.shields.io/badge/python-3.9_|_3.10_|_3.11|_3.12|_3.13-blue?style=for-the-badge)
+![python version](https://img.shields.io/badge/python-3.9_|_3.10_|_3.11|_3.12-blue?style=for-the-badge)
 ![license](https://img.shields.io/github/license/parietal-inria/fmralign?style=for-the-badge)
 
 [Functional alignment for fMRI](https://parietal-inria.github.io/fmralign-docs) (functional Magnetic Resonance Imaging) data.
