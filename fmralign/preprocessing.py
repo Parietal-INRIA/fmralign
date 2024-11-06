@@ -1,6 +1,6 @@
 import os
 import warnings
-from typing import Any, Sequence
+from typing import Any, Sequence, Self
 
 from nibabel.nifti1 import Nifti1Image
 import numpy as np
@@ -114,10 +114,11 @@ class Preprocessor(BaseEstimator, TransformerMixin):  # type: ignore
 
     def fit(
         self,
-        imgs: Sequence[Any],
-    ) -> None:
+        imgs: Sequence[Nifti1Image],
+    ) -> Self:
         self._fit_masker(imgs)
         self._one_parcellation(imgs)
+        return self
 
     def transform(
         self,
