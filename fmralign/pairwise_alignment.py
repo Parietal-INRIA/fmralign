@@ -12,46 +12,6 @@ from fmralign._utils import _make_parcellation, piecewise_transform
 from fmralign.preprocessing import Preprocessor
 
 
-def generate_Xi_Yi(labels, X, Y, masker, verbose):
-    """Generate source and target data X_i and Y_i for each piece i.
-
-    Parameters
-    ----------
-    labels : list of ints (len n_features)
-        Parcellation of features in clusters
-    X: Niimg-like object
-        Source data
-    Y: Niimg-like object
-        Target data
-    masker: instance of NiftiMasker or MultiNiftiMasker
-        Masker to be used on the data. For more information see:
-        http://nilearn.github.io/manipulating_images/masker_objects.html
-    verbose: integer, optional.
-        Indicate the level of verbosity.
-
-    Yields
-    -------
-    X_i: ndarray
-        Source data for piece i (shape : n_samples, n_features)
-    Y_i: ndarray
-        Target data for piece i (shape : n_samples, n_features)
-
-    """
-    X_ = masker.transform(X)
-    Y_ = masker.transform(Y)
-    unique_labels = np.unique(labels)
-
-    for k in range(len(unique_labels)):
-        label = unique_labels[k]
-        i = label == labels
-        if (k + 1) % 25 == 0 and verbose > 0:
-            print(
-                "Fitting parcel: " + str(k + 1) + "/" + str(len(unique_labels))
-            )
-        # should return X_i Y_i
-        yield X_[:, i], Y_[:, i]
-
-
 def fit_one_piece(X_i, Y_i, alignment_method):
     """Align source and target data in one piece i, X_i and Y_i, using
     alignment method and learn transformation to map X to Y.
