@@ -1,20 +1,15 @@
 # -*- coding: utf-8 -*-
 """ Module for pairwise functional alignment
 """
-import os
 import warnings
 
-import nibabel as nib
 import numpy as np
 from joblib import Memory, Parallel, delayed
-from nilearn.image import concat_imgs, load_img
-from nilearn._utils.masker_validation import check_embedded_masker
 from sklearn.base import BaseEstimator, TransformerMixin, clone
-from sklearn.model_selection import ShuffleSplit
 
 from fmralign import alignment_methods
+from fmralign.preprocessing import Preprocessor
 from fmralign._utils import (
-    _intersect_clustering_mask,
     _make_parcellation,
     piecewise_transform,
 )
@@ -53,7 +48,9 @@ def generate_Xi_Yi(labels, X, Y, masker, verbose):
         label = unique_labels[k]
         i = label == labels
         if (k + 1) % 25 == 0 and verbose > 0:
-            print("Fitting parcel: " + str(k + 1) + "/" + str(len(unique_labels)))
+            print(
+                "Fitting parcel: " + str(k + 1) + "/" + str(len(unique_labels))
+            )
         # should return X_i Y_i
         yield X_[:, i], Y_[:, i]
 
@@ -194,7 +191,6 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         alignment_method,
         n_pieces=1,
         clustering="kmeans",
-        n_bags=1,
         mask=None,
         smoothing_fwhm=None,
         standardize=False,
@@ -212,8 +208,6 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         """
         If n_pieces > 1, decomposes the images into regions
         and align each source/target region independantly.
-        If n_bags > 1, this parcellation process is applied multiple time
-        and the resulting models are bagged.
 
         Parameters
         ----------
@@ -233,10 +227,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
             clustering of voxels based on functional signal, passed to
             nilearn.regions.parcellations
             If 3D Niimg, image used as predefined clustering,
-            n_bags and n_pieces are then ignored.
-        n_bags: int, optional (default = 1)
-            If 1 : one estimator is fitted.
-            If >1 number of bagged parcellations and estimators used.
+            n_pieces is then ignored.
         mask: Niimg-like object, instance of NiftiMasker or
                                 MultiNiftiMasker, optional (default = None)
             Mask to be used on data. If an instance of masker is passed,
@@ -283,7 +274,6 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         """
         self.n_pieces = n_pieces
         self.alignment_method = alignment_method
-        self.n_bags = n_bags
         self.clustering = clustering
         self.mask = mask
         self.smoothing_fwhm = smoothing_fwhm
@@ -314,60 +304,34 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         -------
         self
         """
-        self.masker_ = check_embedded_masker(self)
-        self.masker_.n_jobs = self.n_jobs
-
-        if self.masker_.mask_img is None:
-            self.masker_.fit([X])
-        else:
-            self.masker_.fit()
-
-        if isinstance(self.clustering, nib.nifti1.Nifti1Image) or os.path.isfile(
-            self.clustering
-        ):
-            # check that clustering provided fills the mask, if not, reduce the mask
-            if 0 in self.masker_.transform(self.clustering):
-                reduced_mask = _intersect_clustering_mask(
-                    self.clustering, self.masker_.mask_img
-                )
-                self.mask = reduced_mask
-                self.masker_ = check_embedded_masker(self)
-                self.masker_.n_jobs = self.n_jobs
-                self.masker_.fit()
-                warnings.warn(
-                    "Mask used was bigger than clustering provided. "
-                    + "Its intersection with the clustering was used instead."
-                )
-
-        if isinstance(X, (list, np.ndarray)):
-            X_ = concat_imgs(X)
-        else:
-            X_ = load_img(X)
-        if isinstance(X, (list, np.ndarray)):
-            Y_ = concat_imgs(Y)
-        else:
-            Y_ = load_img(Y)
-
-        self.fit_, self.labels_ = [], []
-        rs = ShuffleSplit(n_splits=self.n_bags, test_size=0.8, random_state=0)
-
-        outputs = Parallel(n_jobs=self.n_jobs, prefer="threads", verbose=self.verbose)(
-            delayed(fit_one_parcellation)(
-                X_,
-                Y_,
-                self.alignment_method,
-                self.masker_,
-                self.n_pieces,
-                self.clustering,
-                clustering_index,
-                self.n_jobs,
-                self.verbose,
-            )
-            for clustering_index, _ in rs.split(range(X_.shape[-1]))
+        self.preprocessor = Preprocessor(
+            n_pieces=self.n_pieces,
+            clustering=self.clustering,
+            mask=self.mask,
+            smoothing_fwhm=self.smoothing_fwhm,
+            standardize=self.standardize,
+            detrend=self.detrend,
+            low_pass=self.low_pass,
+            high_pass=self.high_pass,
+            t_r=self.t_r,
+            target_affine=self.target_affine,
+            target_shape=self.target_shape,
+            memory=self.memory,
+            memory_level=self.memory_level,
+            n_jobs=self.n_jobs,
+            verbose=self.verbose,
         )
-        # change split
-        self.labels_ = [output[0] for output in outputs]
-        self.fit_ = [output[1] for output in outputs]
+
+        X_, Y_ = self.preprocessor.fit_transform([X, Y])
+        self.mask = self.preprocessor.masker_.mask_img_
+        self.labels_ = self.preprocessor.labels
+
+        self.fit_ = Parallel(
+            self.n_jobs, prefer="threads", verbose=self.verbose
+        )(
+            delayed(fit_one_piece)(X_i, Y_i, self.alignment_method)
+            for X_i, Y_i in zip(X_, Y_)
+        )
 
         return self
 
@@ -384,17 +348,30 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         X_transform: Niimg-like object
             Predicted data
         """
-        if isinstance(X, (list, np.ndarray)):
-            X = concat_imgs(X)
-        X_ = self.masker_.transform(X)
+        if not hasattr(self, "fit_"):
+            raise ValueError(
+                "This instance has not been fitted yet. "
+                "Please call 'fit' before 'transform'."
+            )
+        X_preprocessed_list = self.preprocessor.transform(X)
+        if len(X_preprocessed_list) == 1:
+            X_transform = _transform_data(
+                X_preprocessed_list[0],
+                self.preprocessor.masker_,
+                self.labels_,
+                self.fit_,
+            )
+        else:
+            X_transform = Parallel(
+                self.n_jobs, prefer="threads", verbose=self.verbose
+            )(
+                delayed(_transform_data)(
+                    X_, self.preprocessor.masker_, self.labels_, self.fit_
+                )
+                for X_ in X_preprocessed_list
+            )
 
-        X_transform = np.zeros_like(X_)
-        for i in range(self.n_bags):
-            X_transform += piecewise_transform(self.labels_[i], self.fit_[i], X_)
-
-        X_transform /= self.n_bags
-
-        return self.masker_.inverse_transform(X_transform)
+        return X_transform
 
     # Make inherited function harmless
     def fit_transform(self):
@@ -402,3 +379,12 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         raise AttributeError(
             "type object 'PairwiseAlignment' has no attribute 'fit_transform'"
         )
+
+
+def _transform_data(X, masker_, labels, fit):
+    data_transformed = piecewise_transform(
+        labels,
+        fit,
+        X,
+    )
+    return masker_.inverse_transform(data_transformed)

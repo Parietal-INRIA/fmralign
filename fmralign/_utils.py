@@ -5,7 +5,7 @@ import warnings
 import nibabel as nib
 import numpy as np
 from nilearn._utils.niimg_conversions import check_same_fov
-from nilearn.image import index_img, new_img_like, smooth_img
+from nilearn.image import new_img_like, smooth_img
 from nilearn.masking import apply_mask_fmri, intersect_masks
 from nilearn.regions.parcellations import Parcellations
 
@@ -16,7 +16,9 @@ def _intersect_clustering_mask(clustering, mask):
     new_ = np.zeros_like(dat)
     new_[dat > 0] = 1
     clustering_mask = new_img_like(clustering, new_)
-    return intersect_masks([clustering_mask, mask], threshold=1, connected=True)
+    return intersect_masks(
+        [clustering_mask, mask], threshold=1, connected=True
+    )
 
 
 def piecewise_transform(labels, estimators, X):
@@ -29,20 +31,22 @@ def piecewise_transform(labels, estimators, X):
         Parcellation of features in clusters
     estimators: list of estimators with transform() method
         I-th estimator will be applied on the i-th cluster of features
-    X: nd array (n_samples, n_features)
-        Data to transform
+    X: list of nd arrays
+        Pieces of data to be transformed
 
     Returns
     -------
-    X_transform: nd array (n_features, n_samples)
+    X_transform: nd array (n_samples, n_features)
         Transformed data
     """
     unique_labels = np.unique(labels)
-    X_transform = np.zeros_like(X)
+    n_features = len(labels)
+    n_samples = X[0].shape[0]
+    X_transform = np.zeros((n_samples, n_features))
 
     for i in range(len(unique_labels)):
         label = unique_labels[i]
-        X_transform[:, labels == label] = estimators[i].transform(X[:, labels == label])
+        X_transform[:, labels == label] = estimators[i].transform(X[i])
     return X_transform
 
 
@@ -71,7 +75,7 @@ def _check_labels(labels, threshold=1000):
 
 
 def _make_parcellation(
-    imgs, clustering_index, clustering, n_pieces, masker, smoothing_fwhm=5, verbose=0
+    imgs, clustering, n_pieces, masker, smoothing_fwhm=5, verbose=0
 ):
     """
     Use nilearn Parcellation class in our pipeline.
@@ -82,9 +86,6 @@ def _make_parcellation(
     ----------
     imgs: Niimgs
         data to cluster
-    clustering_index: list of integers
-        Clustering is performed on a subset of the data chosen randomly
-        in timeframes. This index carries this subset.
     clustering: string or 3D Niimg
         If you aim for speed, choose k-means (and check kmeans_smoothing_fwhm parameter)
         If you want spatially connected and/or reproducible regions use 'ward'
@@ -106,23 +107,26 @@ def _make_parcellation(
         Parcellation of features in clusters
     """
     # check if clustering is provided
-    if isinstance(clustering, nib.nifti1.Nifti1Image) or os.path.isfile(clustering):
+    if isinstance(clustering, nib.nifti1.Nifti1Image) or os.path.isfile(
+        clustering
+    ):
         check_same_fov(masker.mask_img_, clustering)
         labels = apply_mask_fmri(clustering, masker.mask_img_).astype(int)
 
     # otherwise check it's needed, if not return 1 everywhere
     elif n_pieces == 1:
-        labels = np.ones(int(masker.mask_img_.get_fdata().sum()), dtype=np.int8)
+        labels = np.ones(
+            int(masker.mask_img_.get_fdata().sum()), dtype=np.int8
+        )
 
     # otherwise check requested clustering method
     elif isinstance(clustering, str) and n_pieces > 1:
-        imgs_subset = index_img(imgs, clustering_index)
         if (clustering in ["kmeans", "hierarchical_kmeans"]) and (
             smoothing_fwhm is not None
         ):
-            images_to_parcel = smooth_img(imgs_subset, smoothing_fwhm)
+            images_to_parcel = smooth_img(imgs, smoothing_fwhm)
         else:
-            images_to_parcel = imgs_subset
+            images_to_parcel = imgs
         parcellation = Parcellations(
             method=clustering,
             n_parcels=n_pieces,
@@ -140,7 +144,9 @@ def _make_parcellation(
             )
             err.args += (errmsg,)
             raise err
-        labels = apply_mask_fmri(parcellation.labels_img_, masker.mask_img_).astype(int)
+        labels = apply_mask_fmri(
+            parcellation.labels_img_, masker.mask_img_
+        ).astype(int)
 
     if verbose > 0:
         unique_labels, counts = np.unique(labels, return_counts=True)
