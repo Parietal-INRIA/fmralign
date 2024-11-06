@@ -351,6 +351,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
                 "Please call 'fit' before 'transform'."
             )
         X_preprocessed_list = self.preprocessor.transform(X)
+        # If only one image is provided, return the transformed image
         if len(X_preprocessed_list) == 1:
             X_transform = _transform_data(
                 X_preprocessed_list[0],
@@ -358,6 +359,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
                 self.labels_,
                 self.fit_,
             )
+        # If multiple images are provided, return a list of transformed images
         else:
             X_transform = Parallel(
                 self.n_jobs, prefer="threads", verbose=self.verbose
