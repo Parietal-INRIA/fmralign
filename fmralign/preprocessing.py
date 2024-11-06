@@ -1,23 +1,17 @@
 import os
 import warnings
-from typing import Any, Self, Sequence
 
 import numpy as np
 from joblib import Memory, Parallel, delayed
 from nibabel.nifti1 import Nifti1Image
 from nilearn._utils.masker_validation import check_embedded_masker
 from nilearn.image import concat_imgs
-from nilearn.input_data import MultiNiftiMasker, NiftiMasker
 from sklearn.base import BaseEstimator, TransformerMixin
 
 from fmralign._utils import _intersect_clustering_mask, _make_parcellation
 
 
-def _transform_img(
-    img: Nifti1Image,
-    masker: MultiNiftiMasker | NiftiMasker,
-    labels: list[int],
-) -> Sequence[Any]:
+def _transform_img(img, masker, labels):
     if img.shape[:-1] != masker.mask_img_.shape:
         raise ValueError(
             f"All images must have the same shape as the mask. "
@@ -31,7 +25,7 @@ def _transform_img(
     return X_
 
 
-class Preprocessor(BaseEstimator, TransformerMixin):  # type: ignore
+class Preprocessor(BaseEstimator, TransformerMixin):
     def __init__(
         self,
         n_pieces=1,
@@ -67,7 +61,7 @@ class Preprocessor(BaseEstimator, TransformerMixin):  # type: ignore
         self.verbose = verbose
         self.labels = None
 
-    def _fit_masker(self, imgs: Sequence[Nifti1Image]) -> None:
+    def _fit_masker(self, imgs):
         self.masker_ = check_embedded_masker(self)
         self.masker_.n_jobs = self.n_jobs
 
@@ -100,7 +94,7 @@ class Preprocessor(BaseEstimator, TransformerMixin):  # type: ignore
                     + "Its intersection with the clustering was used instead."
                 )
 
-    def _one_parcellation(self, imgs: Sequence[Nifti1Image]) -> None:
+    def _one_parcellation(self, imgs):
         if isinstance(imgs, list):
             imgs = concat_imgs(imgs)
         self.labels = _make_parcellation(
@@ -112,18 +106,12 @@ class Preprocessor(BaseEstimator, TransformerMixin):  # type: ignore
             verbose=self.verbose,
         )
 
-    def fit(
-        self,
-        imgs: Sequence[Nifti1Image],
-    ) -> Self:
+    def fit(self, imgs):
         self._fit_masker(imgs)
         self._one_parcellation(imgs)
         return self
 
-    def transform(
-        self,
-        imgs: Sequence[Nifti1Image],
-    ) -> Any:
+    def transform(self, imgs):
         if isinstance(imgs, Nifti1Image):
             imgs = [imgs]
 
