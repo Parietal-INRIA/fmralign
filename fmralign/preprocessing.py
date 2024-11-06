@@ -1,13 +1,13 @@
 import os
 import warnings
-from typing import Any, Sequence, Self
+from typing import Any, Self, Sequence
 
-from nibabel.nifti1 import Nifti1Image
 import numpy as np
 from joblib import Memory, Parallel, delayed
+from nibabel.nifti1 import Nifti1Image
 from nilearn._utils.masker_validation import check_embedded_masker
-from nilearn.input_data import MultiNiftiMasker, NiftiMasker
 from nilearn.image import concat_imgs
+from nilearn.input_data import MultiNiftiMasker, NiftiMasker
 from sklearn.base import BaseEstimator, TransformerMixin
 
 from fmralign._utils import _intersect_clustering_mask, _make_parcellation
