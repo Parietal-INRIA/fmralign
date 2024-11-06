@@ -2,17 +2,22 @@ import os
 import warnings
 from typing import Any, Sequence
 
-import nibabel as nib
+from nibabel.nifti1 import Nifti1Image
 import numpy as np
 from joblib import Memory, Parallel, delayed
 from nilearn._utils.masker_validation import check_embedded_masker
+from nilearn.input_data import MultiNiftiMasker, NiftiMasker
 from nilearn.image import concat_imgs
 from sklearn.base import BaseEstimator, TransformerMixin
 
 from fmralign._utils import _intersect_clustering_mask, _make_parcellation
 
 
-def _transform_img(img, masker, labels) -> Sequence[Any]:
+def _transform_img(
+    img: Nifti1Image,
+    masker: MultiNiftiMasker | NiftiMasker,
+    labels: list[int],
+) -> Sequence[Any]:
     if img.shape[:-1] != masker.mask_img_.shape:
         raise ValueError(
             f"All images must have the same shape as the mask. "
@@ -26,7 +31,7 @@ def _transform_img(img, masker, labels) -> Sequence[Any]:
     return X_
 
 
-class Preprocessor(BaseEstimator, TransformerMixin):
+class Preprocessor(BaseEstimator, TransformerMixin):  # type: ignore
     def __init__(
         self,
         n_pieces=1,
@@ -62,11 +67,11 @@ class Preprocessor(BaseEstimator, TransformerMixin):
         self.verbose = verbose
         self.labels = None
 
-    def _fit_masker(self, imgs: Sequence[Any]) -> None:
+    def _fit_masker(self, imgs: Sequence[Nifti1Image]) -> None:
         self.masker_ = check_embedded_masker(self)
         self.masker_.n_jobs = self.n_jobs
 
-        if isinstance(imgs, nib.nifti1.Nifti1Image):
+        if isinstance(imgs, Nifti1Image):
             imgs = [imgs]
         # Assert that all images have the same shape
         if len(set([img.shape for img in imgs])) > 1:
@@ -78,9 +83,9 @@ class Preprocessor(BaseEstimator, TransformerMixin):
         else:
             self.masker_.fit()
 
-        if isinstance(
-            self.clustering, nib.nifti1.Nifti1Image
-        ) or os.path.isfile(self.clustering):
+        if isinstance(self.clustering, Nifti1Image) or os.path.isfile(
+            self.clustering
+        ):
             # check that clustering provided fills the mask, if not, reduce the mask
             if 0 in self.masker_.transform(self.clustering):
                 reduced_mask = _intersect_clustering_mask(
@@ -95,7 +100,7 @@ class Preprocessor(BaseEstimator, TransformerMixin):
                     + "Its intersection with the clustering was used instead."
                 )
 
-    def _one_parcellation(self, imgs: Sequence[Any]) -> None:
+    def _one_parcellation(self, imgs: Sequence[Nifti1Image]) -> None:
         if isinstance(imgs, list):
             imgs = concat_imgs(imgs)
         self.labels = _make_parcellation(
@@ -110,16 +115,15 @@ class Preprocessor(BaseEstimator, TransformerMixin):
     def fit(
         self,
         imgs: Sequence[Any],
-    ):
+    ) -> None:
         self._fit_masker(imgs)
         self._one_parcellation(imgs)
-        return self
 
     def transform(
         self,
-        imgs: Sequence[Any],
-    ) -> Sequence[Any]:
-        if isinstance(imgs, nib.nifti1.Nifti1Image):
+        imgs: Sequence[Nifti1Image],
+    ) -> Any:
+        if isinstance(imgs, Nifti1Image):
             imgs = [imgs]
 
         parcelled_data = Parallel(n_jobs=self.n_jobs)(
