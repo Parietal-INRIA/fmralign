@@ -79,6 +79,15 @@ def fit_one_piece(X_i, Y_i, alignment_method):
     return alignment_algo
 
 
+def _transform_data(X, masker_, labels, fit):
+    data_transformed = piecewise_transform(
+        labels,
+        fit,
+        X,
+    )
+    return masker_.inverse_transform(data_transformed)
+
+
 class PairwiseAlignment(BaseEstimator, TransformerMixin):
     """
     Decompose the source and target images into regions and align corresponding
@@ -280,12 +289,3 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         raise AttributeError(
             "type object 'PairwiseAlignment' has no attribute 'fit_transform'"
         )
-
-
-def _transform_data(X, masker_, labels, fit):
-    data_transformed = piecewise_transform(
-        labels,
-        fit,
-        X,
-    )
-    return masker_.inverse_transform(data_transformed)
