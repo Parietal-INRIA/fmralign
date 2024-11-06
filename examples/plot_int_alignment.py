@@ -104,6 +104,7 @@ average_subject = masker.inverse_transform(average_img)
 #
 
 from nilearn.image import index_img
+
 from fmralign.alignment_methods import IndividualizedNeuralTuning
 from fmralign.hyperalignment.piecewise_alignment import PiecewiseAlignment
 from fmralign.hyperalignment.regions import compute_parcels

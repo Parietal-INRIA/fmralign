@@ -1,10 +1,11 @@
 """Some tools to compute correlation matrices. Functions in this module are
 meant to be used as a test for the hyperalignment algorithm only."""
 
-import numpy as np
-from sklearn.manifold import MDS
-from scipy.optimize import linear_sum_assignment
 from itertools import combinations
+
+import numpy as np
+from scipy.optimize import linear_sum_assignment
+from sklearn.manifold import MDS
 
 
 def compute_pearson_corr(X, Y, linear_assignment: bool = False):

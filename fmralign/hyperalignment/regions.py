@@ -7,23 +7,23 @@ Author: Denis Fouchard, INRIA Saclay, MIND, 2023.
 """
 
 import functools
+import warnings
+
 import numpy as np
 from joblib import Parallel, delayed
-from nilearn import image, masking
-from nilearn._utils import check_niimg_4d, check_niimg_3d
-from nilearn.image.resampling import coord_transform
-import warnings
-from sklearn import neighbors
-from scipy.spatial import distance_matrix
-from nilearn._utils.niimg_conversions import (
-    safe_get_data,
-)
-from .linalg import procrustes
-from .linalg import ridge
-from .local_template import compute_template
-from fmralign._utils import _make_parcellation
-from nilearn.maskers import NiftiMasker
 from nibabel.nifti1 import Nifti1Image
+from nilearn import image, masking
+from nilearn._utils import check_niimg_3d, check_niimg_4d
+from nilearn._utils.niimg_conversions import safe_get_data
+from nilearn.image.resampling import coord_transform
+from nilearn.maskers import NiftiMasker
+from scipy.spatial import distance_matrix
+from sklearn import neighbors
+
+from fmralign._utils import _make_parcellation
+
+from .linalg import procrustes, ridge
+from .local_template import compute_template
 
 ###################################################################################################
 # Compute parcels

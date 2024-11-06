@@ -8,11 +8,8 @@ from joblib import Memory, Parallel, delayed
 from sklearn.base import BaseEstimator, TransformerMixin, clone
 
 from fmralign import alignment_methods
+from fmralign._utils import _make_parcellation, piecewise_transform
 from fmralign.preprocessing import Preprocessor
-from fmralign._utils import (
-    _make_parcellation,
-    piecewise_transform,
-)
 
 
 def generate_Xi_Yi(labels, X, Y, masker, verbose):

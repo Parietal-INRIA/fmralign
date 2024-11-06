@@ -1,19 +1,15 @@
-import nibabel as nib
-import warnings
 import os
+import warnings
+from typing import Any, Sequence
+
+import nibabel as nib
 import numpy as np
-
-from typing import Sequence, Any
-
+from joblib import Memory, Parallel, delayed
 from nilearn._utils.masker_validation import check_embedded_masker
 from nilearn.image import concat_imgs
 from sklearn.base import BaseEstimator, TransformerMixin
-from joblib import Memory, Parallel, delayed
 
-from fmralign._utils import (
-    _intersect_clustering_mask,
-    _make_parcellation,
-)
+from fmralign._utils import _intersect_clustering_mask, _make_parcellation
 
 
 def _transform_img(img, masker, labels) -> Sequence[Any]:

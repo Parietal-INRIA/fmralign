@@ -1,14 +1,11 @@
-from fmralign.alignment_methods import IndividualizedNeuralTuning as INT
-from fmralign.fetch_example_data import (
-    generate_dummy_signal,
-    generate_dummy_searchlights,
-)
 import numpy as np
 
-from fmralign.hyperalignment.correlation import (
-    tuning_correlation,
-    stimulus_correlation,
+from fmralign.alignment_methods import IndividualizedNeuralTuning as INT
+from fmralign.fetch_example_data import (
+    generate_dummy_searchlights,
+    generate_dummy_signal,
 )
+from fmralign.hyperalignment.correlation import stimulus_correlation, tuning_correlation
 
 
 def test_int_fit_predict():

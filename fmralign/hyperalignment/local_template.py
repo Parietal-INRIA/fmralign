@@ -6,8 +6,7 @@ import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.utils.extmath import randomized_svd
 
-from .linalg import safe_svd
-from .linalg import procrustes
+from .linalg import procrustes, safe_svd
 
 
 def PCA_decomposition(

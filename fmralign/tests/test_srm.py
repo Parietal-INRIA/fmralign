@@ -1,16 +1,15 @@
-import pytest
-
 import numpy as np
-from sklearn.base import clone
-from nilearn.maskers import NiftiMasker
+import pytest
 from fastsrm.identifiable_srm import IdentifiableFastSRM
+from nilearn.maskers import NiftiMasker
+from sklearn.base import clone
 
-from fmralign.srm import PiecewiseModel, Identity
+from fmralign.srm import Identity, PiecewiseModel
 
 
 def to_niimgs(X, dim):
-    from nilearn.masking import unmask_from_to_3d_array
     import nibabel
+    from nilearn.masking import unmask_from_to_3d_array
 
     p = np.prod(dim)
     assert len(dim) == 3

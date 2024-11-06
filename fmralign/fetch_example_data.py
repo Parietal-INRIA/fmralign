@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import os
 
-import pandas as pd
-from nilearn.datasets._utils import fetch_files, get_dataset_dir
-from fastsrm.srm import projection
 import numpy as np
+import pandas as pd
+from fastsrm.srm import projection
+from nilearn.datasets._utils import fetch_files, get_dataset_dir
 
 
 def fetch_ibc_subjects_contrasts(subjects, data_dir=None, verbose=1):

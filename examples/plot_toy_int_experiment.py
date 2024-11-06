@@ -14,15 +14,16 @@ To run this example, you must launch IPython via ``ipython
 --matplotlib`` in a terminal, or use ``jupyter-notebook``.
 """
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+
 from fmralign.alignment_methods import IndividualizedNeuralTuning as INT
 from fmralign.fetch_example_data import generate_dummy_signal
 from fmralign.hyperalignment.correlation import (
-    tuning_correlation,
-    stimulus_correlation,
     compute_pearson_corr,
     matrix_MDS,
+    stimulus_correlation,
+    tuning_correlation,
 )
 
 ###############################################################################

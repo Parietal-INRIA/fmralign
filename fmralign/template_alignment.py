@@ -8,9 +8,10 @@ Uses functional alignment on Niimgs and predicts new subjects' unseen images.
 
 import numpy as np
 from joblib import Memory, Parallel, delayed
-from nilearn.image import concat_imgs, index_img, load_img
 from nilearn._utils.masker_validation import check_embedded_masker
+from nilearn.image import concat_imgs, index_img, load_img
 from sklearn.base import BaseEstimator, TransformerMixin
+
 from fmralign.pairwise_alignment import PairwiseAlignment
 
 

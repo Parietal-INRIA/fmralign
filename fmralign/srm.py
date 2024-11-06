@@ -8,16 +8,15 @@ Implementation from fastSRM is taken from H. Richard
 import os
 import warnings
 
-import numpy as np
 import nibabel as nib
-from sklearn.base import clone
-from joblib import delayed, Parallel
-from nilearn.image import concat_imgs, load_img
-from sklearn.model_selection import ShuffleSplit
-from sklearn.base import BaseEstimator, TransformerMixin
+import numpy as np
+from joblib import Parallel, delayed
 from nilearn._utils.masker_validation import check_embedded_masker
+from nilearn.image import concat_imgs, load_img
+from sklearn.base import BaseEstimator, TransformerMixin, clone
+from sklearn.model_selection import ShuffleSplit
 
-from ._utils import _make_parcellation, _intersect_clustering_mask
+from ._utils import _intersect_clustering_mask, _make_parcellation
 
 
 class Identity(BaseEstimator, TransformerMixin):
