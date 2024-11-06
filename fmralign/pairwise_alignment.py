@@ -79,64 +79,6 @@ def fit_one_piece(X_i, Y_i, alignment_method):
     return alignment_algo
 
 
-def fit_one_parcellation(
-    X_,
-    Y_,
-    alignment_method,
-    masker,
-    n_pieces,
-    clustering,
-    clustering_index,
-    n_jobs,
-    verbose,
-):
-    """Create one parcellation of n_pieces and align each source and target
-    data in one piece i, X_i and Y_i, using alignment method
-    and learn transformation to map X to Y.
-
-    Parameters
-    ----------
-    X_: Niimg-like object
-        Source data
-    Y_: Niimg-like object
-        Target data
-    alignment_method: string
-        algorithm used to perform alignment between each region of X_ and Y_
-    masker: instance of NiftiMasker or MultiNiftiMasker
-        Masker to be used on the data. For more information see:
-        http://nilearn.github.io/manipulating_images/masker_objects.html
-    n_pieces: n_pieces: int,
-        Number of regions in which the data is parcellated for alignment
-    clustering: string or 3D Niimg
-        method used to perform parcellation of data.
-        If 3D Niimg, image used as predefined clustering.
-    clustering_index: list of integers
-        Clustering is performed on a 20% subset of the data chosen randomly
-        in timeframes. This index carry this subset.
-    n_jobs: integer, optional
-        The number of CPUs to use to do the computation. -1 means
-        'all CPUs', -2 'all CPUs but one', and so on.
-    verbose: integer, optional
-        Indicate the level of verbosity. By default, nothing is printed
-
-    Returns
-    -------
-    alignment_algo
-        Instance of alignment estimator class fitted for X_i, Y_i
-    """
-    # choose indexes maybe with index_img to not
-    labels = _make_parcellation(
-        X_, clustering_index, clustering, n_pieces, masker, verbose=verbose
-    )
-
-    fit = Parallel(n_jobs, prefer="threads", verbose=verbose)(
-        delayed(fit_one_piece)(X_i, Y_i, alignment_method)
-        for X_i, Y_i in generate_Xi_Yi(labels, X_, Y_, masker, verbose)
-    )
-
-    return labels, fit
-
-
 class PairwiseAlignment(BaseEstimator, TransformerMixin):
     """
     Decompose the source and target images into regions and align corresponding
