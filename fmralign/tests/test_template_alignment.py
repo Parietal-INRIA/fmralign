@@ -4,8 +4,14 @@ from nilearn.image import concat_imgs, index_img, math_img
 from nilearn.maskers import NiftiMasker
 from numpy.testing import assert_array_almost_equal
 
-from fmralign.template_alignment import TemplateAlignment, _rescaled_euclidean_mean
-from fmralign.tests.utils import random_niimg, zero_mean_coefficient_determination
+from fmralign.template_alignment import (
+    TemplateAlignment,
+    _rescaled_euclidean_mean,
+)
+from fmralign.tests.utils import (
+    random_niimg,
+    zero_mean_coefficient_determination,
+)
 
 
 def test_template_identity():
@@ -42,7 +48,6 @@ def test_template_identity():
         {
             "alignment_method": "identity",
             "n_pieces": 3,
-            "n_bags": 2,
             "mask": masker,
         },
     ]
@@ -84,7 +89,9 @@ def test_template_identity():
     # test wrong images input in fit() and transform method
     with pytest.raises(Exception):
         assert algo.transform(
-            [n * [im]] * 2, train_index=train_inds[-1], test_index=test_inds[-1]
+            [n * [im]] * 2,
+            train_index=train_inds[-1],
+            test_index=test_inds[-1],
         )
         assert algo.fit([im])
         assert algo.transform(
@@ -119,7 +126,7 @@ def test_template_closer_to_target():
         "diagonal",
     ]:
         algo = TemplateAlignment(
-            alignment_method=alignment_method, n_pieces=3, n_bags=2, mask=masker
+            alignment_method=alignment_method, n_pieces=3, mask=masker
         )
         # Learn template
         algo.fit(subs)

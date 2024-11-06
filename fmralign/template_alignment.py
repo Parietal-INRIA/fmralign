@@ -55,7 +55,6 @@ def _align_images_to_template(
     alignment_method,
     n_pieces,
     clustering,
-    n_bags,
     masker,
     memory,
     memory_level,
@@ -74,7 +73,6 @@ def _align_images_to_template(
             n_pieces=n_pieces,
             alignment_method=alignment_method,
             clustering=clustering,
-            n_bags=n_bags,
             mask=masker,
             memory=memory,
             memory_level=memory_level,
@@ -93,7 +91,6 @@ def _create_template(
     alignment_method,
     n_pieces,
     clustering,
-    n_bags,
     masker,
     memory,
     memory_level,
@@ -133,7 +130,9 @@ def _create_template(
     aligned_imgs = imgs
     template_history = []
     for iter in range(n_iter):
-        template = _rescaled_euclidean_mean(aligned_imgs, masker, scale_template)
+        template = _rescaled_euclidean_mean(
+            aligned_imgs, masker, scale_template
+        )
         if 0 < iter < n_iter - 1:
             template_history.append(template)
         aligned_imgs = _align_images_to_template(
@@ -142,7 +141,6 @@ def _create_template(
             alignment_method,
             n_pieces,
             clustering,
-            n_bags,
             masker,
             memory,
             memory_level,
@@ -160,7 +158,6 @@ def _map_template_to_image(
     alignment_method,
     n_pieces,
     clustering,
-    n_bags,
     masker,
     memory,
     memory_level,
@@ -193,7 +190,6 @@ def _map_template_to_image(
         n_pieces=n_pieces,
         alignment_method=alignment_method,
         clustering=clustering,
-        n_bags=n_bags,
         mask=masker,
         memory=memory,
         memory_level=memory_level,
@@ -244,7 +240,6 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         scale_template=False,
         n_iter=2,
         save_template=None,
-        n_bags=1,
         mask=None,
         smoothing_fwhm=None,
         standardize=False,
@@ -278,7 +273,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             clustering of voxels based on functional signal,
             passed to nilearn.regions.parcellations
             If 3D Niimg, image used as predefined clustering,
-            n_bags and n_pieces are then ignored.
+            n_pieces is then ignored.
         scale_template: boolean, default False
             rescale template after each inference so that it keeps
             the same norm as the average of training images.
@@ -288,9 +283,6 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
            the template is simply the mean of the input images.
         save_template: None or string(optional)
             If not None, path to which the template will be saved.
-        n_bags: int, optional (default = 1)
-            If 1 : one estimator is fitted.
-            If >1 number of bagged parcellations and estimators used.
         mask: Niimg-like object, instance of NiftiMasker or
                                 MultiNiftiMasker, optional (default = None)
             Mask to be used on data. If an instance of masker is passed, then its
@@ -342,7 +334,6 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         self.n_iter = n_iter
         self.scale_template = scale_template
         self.save_template = save_template
-        self.n_bags = n_bags
         self.mask = mask
         self.smoothing_fwhm = smoothing_fwhm
         self.standardize = standardize
@@ -406,7 +397,6 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             self.alignment_method,
             self.n_pieces,
             self.clustering,
-            self.n_bags,
             self.masker_,
             self.memory,
             self.memory_level,
@@ -475,7 +465,9 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
                 "greater index in train_index or test_index."
             )
 
-        fitted_mappings = Parallel(self.n_jobs, prefer="threads", verbose=self.verbose)(
+        fitted_mappings = Parallel(
+            self.n_jobs, prefer="threads", verbose=self.verbose
+        )(
             delayed(_map_template_to_image)(
                 img,
                 train_index,
@@ -483,7 +475,6 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
                 self.alignment_method,
                 self.n_pieces,
                 self.clustering,
-                self.n_bags,
                 self.masker_,
                 self.memory,
                 self.memory_level,
@@ -493,7 +484,9 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             for img in imgs
         )
 
-        predicted_imgs = Parallel(self.n_jobs, prefer="threads", verbose=self.verbose)(
+        predicted_imgs = Parallel(
+            self.n_jobs, prefer="threads", verbose=self.verbose
+        )(
             delayed(_predict_from_template_and_mapping)(
                 self.template, test_index, mapping
             )
