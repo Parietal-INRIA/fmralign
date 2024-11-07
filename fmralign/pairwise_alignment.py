@@ -8,7 +8,7 @@ from joblib import Memory, Parallel, delayed
 from sklearn.base import BaseEstimator, TransformerMixin, clone
 
 from fmralign import alignment_methods
-from fmralign._utils import piecewise_transform
+from fmralign._utils import transform_one_img
 from fmralign.preprocessing import Preprocessor
 
 
@@ -77,15 +77,6 @@ def fit_one_piece(X_i, Y_i, alignment_method):
         )
         raise NotImplementedError(warn_msg)
     return alignment_algo
-
-
-def _transform_data(X, masker_, labels, fit):
-    data_transformed = piecewise_transform(
-        labels,
-        fit,
-        X,
-    )
-    return masker_.inverse_transform(data_transformed)
 
 
 class PairwiseAlignment(BaseEstimator, TransformerMixin):
@@ -230,7 +221,9 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
             verbose=self.verbose,
         )
 
-        X_, Y_ = self.preprocessor.fit_transform([X, Y])
+        parceled_source, parceled_target = self.preprocessor.fit_transform(
+            [X, Y]
+        )
         self.mask = self.preprocessor.masker_.mask_img_
         self.labels_ = self.preprocessor.labels
 
@@ -238,7 +231,9 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
             self.n_jobs, prefer="threads", verbose=self.verbose
         )(
             delayed(fit_one_piece)(X_i, Y_i, self.alignment_method)
-            for X_i, Y_i in zip(X_, Y_)
+            for X_i, Y_i in zip(
+                parceled_source.tolist(), parceled_target.tolist()
+            )
         )
 
         return self
@@ -253,7 +248,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
 
         Returns
         -------
-        X_transform: Niimg-like object
+        transformed_img: Niimg-like object
             Predicted data
         """
         if not hasattr(self, "fit_"):
@@ -261,27 +256,18 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
                 "This instance has not been fitted yet. "
                 "Please call 'fit' before 'transform'."
             )
-        X_preprocessed_list = self.preprocessor.transform(X)
-        # If only one image is provided, return the transformed image
-        if len(X_preprocessed_list) == 1:
-            X_transform = _transform_data(
-                X_preprocessed_list[0],
-                self.preprocessor.masker_,
-                self.labels_,
-                self.fit_,
-            )
-        # If multiple images are provided, return a list of transformed images
+        parceled_data_list = self.preprocessor.transform(X)
+        transformed_img = Parallel(
+            self.n_jobs, prefer="threads", verbose=self.verbose
+        )(
+            delayed(transform_one_img)(parceled_data, self.fit_)
+            for parceled_data in parceled_data_list
+        )
+        if len(transformed_img) == 1:
+            return transformed_img[0]
         else:
-            X_transform = Parallel(
-                self.n_jobs, prefer="threads", verbose=self.verbose
-            )(
-                delayed(_transform_data)(
-                    X_, self.preprocessor.masker_, self.labels_, self.fit_
-                )
-                for X_ in X_preprocessed_list
-            )
-
-        return X_transform
+            return transformed_img
+        return transformed_img
 
     # Make inherited function harmless
     def fit_transform(self):
