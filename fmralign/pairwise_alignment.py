@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-""" Module for pairwise functional alignment
-"""
+"""Module for pairwise functional alignment."""
+
 import warnings
 
 import numpy as np
@@ -30,10 +30,10 @@ def fit_one_piece(X_i, Y_i, alignment_method):
             (imported from functional_alignment.alignment_methods)
     Returns
     -------
+
     alignment_algo
         Instance of alignment estimator class fitted for X_i, Y_i
     """
-
     if alignment_method == "identity":
         alignment_algo = alignment_methods.Identity()
     elif alignment_method == "scaled_orthogonal":
@@ -80,10 +80,8 @@ def fit_one_piece(X_i, Y_i, alignment_method):
 
 
 class PairwiseAlignment(BaseEstimator, TransformerMixin):
-    """
-    Decompose the source and target images into regions and align corresponding
-    regions independently.
-    """
+    """Decompose the source and target images into regions and align
+    corresponding regions independently."""
 
     def __init__(
         self,
@@ -104,9 +102,8 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         n_jobs=1,
         verbose=0,
     ):
-        """
-        If n_pieces > 1, decomposes the images into regions
-        and align each source/target region independantly.
+        """If n_pieces > 1, decomposes the images into regions and align each
+        source/target region independantly.
 
         Parameters
         ----------
@@ -169,7 +166,6 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
             'all CPUs', -2 'all CPUs but one', and so on.
         verbose: integer, optional (default = 0)
             Indicate the level of verbosity. By default, nothing is printed.
-
         """
         self.n_pieces = n_pieces
         self.alignment_method = alignment_method
@@ -189,7 +185,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         self.verbose = verbose
 
     def fit(self, X, Y):
-        """Fit data X and Y and learn transformation to map X to Y
+        """Fit data X and Y and learn transformation to map X to Y.
 
         Parameters
         ----------
@@ -221,25 +217,20 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
             verbose=self.verbose,
         )
 
-        parceled_source, parceled_target = self.preprocessor.fit_transform(
-            [X, Y]
-        )
+        parceled_source, parceled_target = self.preprocessor.fit_transform([X, Y])
+        self.masker = self.preprocessor.masker_
         self.mask = self.preprocessor.masker_.mask_img_
         self.labels_ = self.preprocessor.labels
 
-        self.fit_ = Parallel(
-            self.n_jobs, prefer="threads", verbose=self.verbose
-        )(
+        self.fit_ = Parallel(self.n_jobs, prefer="threads", verbose=self.verbose)(
             delayed(fit_one_piece)(X_i, Y_i, self.alignment_method)
-            for X_i, Y_i in zip(
-                parceled_source.tolist(), parceled_target.tolist()
-            )
+            for X_i, Y_i in zip(parceled_source.tolist(), parceled_target.tolist())
         )
 
         return self
 
     def transform(self, X):
-        """Predict data from X
+        """Predict data from X.
 
         Parameters
         ----------
@@ -257,9 +248,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
                 "Please call 'fit' before 'transform'."
             )
         parceled_data_list = self.preprocessor.transform(X)
-        transformed_img = Parallel(
-            self.n_jobs, prefer="threads", verbose=self.verbose
-        )(
+        transformed_img = Parallel(self.n_jobs, prefer="threads", verbose=self.verbose)(
             delayed(transform_one_img)(parceled_data, self.fit_)
             for parceled_data in parceled_data_list
         )
@@ -271,7 +260,10 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
 
     # Make inherited function harmless
     def fit_transform(self):
-        """Parent method not applicable here. Will raise AttributeError if called."""
+        """Parent method not applicable here.
+
+        Will raise AttributeError if called.
+        """
         raise AttributeError(
             "type object 'PairwiseAlignment' has no attribute 'fit_transform'"
         )
