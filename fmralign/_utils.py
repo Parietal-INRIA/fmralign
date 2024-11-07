@@ -10,6 +10,55 @@ from nilearn.masking import apply_mask_fmri, intersect_masks
 from nilearn.regions.parcellations import Parcellations
 
 
+class ParceledData:
+    def __init__(self, data, masker, labels):
+        self.data = data
+        self.masker = masker
+        self.labels = labels
+        self.unique_labels = np.unique(labels)
+        self.n_pieces = len(self.unique_labels)
+
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            return self.data[:, self.labels == self.unique_labels[key]]
+        elif isinstance(key, slice):
+            raise NotImplementedError("Slicing is not implemented.")
+        else:
+            raise ValueError("Invalid key type.")
+
+    def tolist(self):
+        if isinstance(self.data, np.ndarray):
+            return [self[i] for i in range(self.n_pieces)]
+
+    def tonifti(self):
+        return self.masker.inverse_transform(self.data)
+
+
+def transform_one_img(parceled_data, fit):
+    transformed_data = piecewise_transform(
+        parceled_data,
+        fit,
+    )
+    transformed_img = transformed_data.tonifti()
+    return transformed_img
+
+
+def _img_to_parceled_data(img, masker, labels):
+    data = masker.transform(img)
+    return ParceledData(data, masker, labels)
+
+
+def _parcels_to_array(parceled_img, labels):
+    unique_labels = np.unique(labels)
+    n_features = len(labels)
+    n_samples = parceled_img[0].shape[0]
+    aggregate_img = np.zeros((n_samples, n_features))
+    for i in range(len(unique_labels)):
+        label = unique_labels[i]
+        aggregate_img[:, labels == label] = parceled_img[i]
+    return aggregate_img
+
+
 def _intersect_clustering_mask(clustering, mask):
     """Take 3D Niimg clustering and bigger mask, output reduced mask."""
     dat = clustering.get_fdata()
@@ -21,33 +70,32 @@ def _intersect_clustering_mask(clustering, mask):
     )
 
 
-def piecewise_transform(labels, estimators, X):
+def piecewise_transform(parceled_data, estimators):
     """
-    Apply a piecewise transform to X.
+    Apply a piecewise transform to parceled_data.
 
     Parameters
     ----------
-    labels: list of ints (len n_features)
-        Parcellation of features in clusters
+    parceled_data: ParceledData
+        Data to transform
     estimators: list of estimators with transform() method
         I-th estimator will be applied on the i-th cluster of features
-    X: list of nd arrays
-        Pieces of data to be transformed
 
     Returns
     -------
-    X_transform: nd array (n_samples, n_features)
+    parceled_data: ParceledData
         Transformed data
     """
-    unique_labels = np.unique(labels)
-    n_features = len(labels)
-    n_samples = X[0].shape[0]
-    X_transform = np.zeros((n_samples, n_features))
-
-    for i in range(len(unique_labels)):
-        label = unique_labels[i]
-        X_transform[:, labels == label] = estimators[i].transform(X[i])
-    return X_transform
+    transformed_data_list = []
+    for i in range(len(estimators)):
+        transformed_data_list.append(estimators[i].transform(parceled_data[i]))
+    # Convert transformed_data_list to ParceledData
+    parceled_data = ParceledData(
+        _parcels_to_array(transformed_data_list, parceled_data.labels),
+        parceled_data.masker,
+        parceled_data.labels,
+    )
+    return parceled_data
 
 
 def _remove_empty_labels(labels):
