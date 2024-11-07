@@ -1,7 +1,6 @@
 import os
 import warnings
 
-import numpy as np
 from joblib import Memory, Parallel, delayed
 from nibabel.nifti1 import Nifti1Image
 from nilearn._utils.masker_validation import check_embedded_masker
