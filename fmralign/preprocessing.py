@@ -8,36 +8,11 @@ from nilearn._utils.masker_validation import check_embedded_masker
 from nilearn.image import concat_imgs
 from sklearn.base import BaseEstimator, TransformerMixin
 
-from fmralign._utils import _intersect_clustering_mask, _make_parcellation
-
-
-def _transform_img(img, masker, labels):
-    data = masker.transform(img)
-    return ParcelledData(data, masker, labels)
-
-
-class ParcelledData:
-    def __init__(self, data, masker, labels):
-        self.data = data
-        self.masker = masker
-        self.labels = labels
-        self.unique_labels = np.unique(labels)
-        self.n_pieces = len(self.unique_labels)
-
-    def __getitem__(self, key):
-        if isinstance(key, int):
-            return self.data[:, self.labels == self.unique_labels[key]]
-        elif isinstance(key, slice):
-            raise NotImplementedError("Slicing is not implemented.")
-        else:
-            raise ValueError("Invalid key type.")
-
-    def tolist(self):
-        if isinstance(self.data, np.ndarray):
-            return [self[i] for i in range(self.n_pieces)]
-
-    def tonifti(self):
-        return self.masker.inverse_transform(self.data)
+from fmralign._utils import (
+    _intersect_clustering_mask,
+    _make_parcellation,
+    _img_to_parceled_data,
+)
 
 
 class Preprocessor(BaseEstimator, TransformerMixin):
@@ -139,7 +114,7 @@ class Preprocessor(BaseEstimator, TransformerMixin):
             imgs = [imgs]
 
         parcelled_data = Parallel(n_jobs=self.n_jobs)(
-            delayed(_transform_img)(
+            delayed(_img_to_parceled_data)(
                 img,
                 self.masker_,
                 self.labels,
@@ -147,8 +122,4 @@ class Preprocessor(BaseEstimator, TransformerMixin):
             for img in imgs
         )
 
-        # Unpack the list if only one image was provided
-        if len(imgs) == 1:
-            return parcelled_data[0]
-        else:
-            return parcelled_data
+        return parcelled_data
