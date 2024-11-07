@@ -12,17 +12,32 @@ from fmralign._utils import _intersect_clustering_mask, _make_parcellation
 
 
 def _transform_img(img, masker, labels):
-    if img.shape[:-1] != masker.mask_img_.shape:
-        raise ValueError(
-            f"All images must have the same shape as the mask. "
-            f"Expected shape {masker.mask_img_.shape}, "
-            f"but got {img.shape[:-1]}."
-        )
     data = masker.transform(img)
-    X_ = []
-    for i in np.unique(labels):
-        X_.append(data[:, labels == i])
-    return X_
+    return ParcelledData(data, masker, labels)
+
+
+class ParcelledData:
+    def __init__(self, data, masker, labels):
+        self.data = data
+        self.masker = masker
+        self.labels = labels
+        self.unique_labels = np.unique(labels)
+        self.n_pieces = len(self.unique_labels)
+
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            return self.data[:, self.labels == self.unique_labels[key]]
+        elif isinstance(key, slice):
+            raise NotImplementedError("Slicing is not implemented.")
+        else:
+            raise ValueError("Invalid key type.")
+
+    def tolist(self):
+        if isinstance(self.data, np.ndarray):
+            return [self[i] for i in range(self.n_pieces)]
+
+    def tonifti(self):
+        return self.masker.inverse_transform(self.data)
 
 
 class Preprocessor(BaseEstimator, TransformerMixin):
@@ -106,6 +121,14 @@ class Preprocessor(BaseEstimator, TransformerMixin):
             verbose=self.verbose,
         )
 
+    def get_labels(self):
+        if self.labels is None:
+            raise ValueError(
+                "Labels have not been computed yet,"
+                "call fit before get_labels."
+            )
+        return self.labels
+
     def fit(self, imgs):
         self._fit_masker(imgs)
         self._one_parcellation(imgs)
@@ -123,4 +146,9 @@ class Preprocessor(BaseEstimator, TransformerMixin):
             )
             for img in imgs
         )
-        return parcelled_data
+
+        # Unpack the list if only one image was provided
+        if len(imgs) == 1:
+            return parcelled_data[0]
+        else:
+            return parcelled_data
