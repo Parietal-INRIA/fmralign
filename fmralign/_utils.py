@@ -11,6 +11,18 @@ from nilearn.regions.parcellations import Parcellations
 
 
 class ParceledData:
+    """A class for managing parceled data, such as neuroimaging data.
+
+    Parameters
+    ----------
+        data: np.ndarray
+            The data array.
+        masker: nilearn.maskers.NiftiMasker
+            The masker used to transform the data.
+        labels: np.ndarray
+            The parcel labels.
+    """
+
     def __init__(self, data, masker, labels):
         self.data = data
         self.masker = masker
@@ -19,27 +31,71 @@ class ParceledData:
         self.n_pieces = len(self.unique_labels)
 
     def __getitem__(self, key):
+        """Retrieve data for a specific parcel or a list of parcels.
+
+        Parameters
+        ----------
+        key: int or slice
+            The index or slice of the parcels to retrieve.
+
+        Returns
+        -------
+        np.ndarray: The data for the specified parcel(s).
+        """
         if isinstance(key, int):
             return self.data[:, self.labels == self.unique_labels[key]]
         elif isinstance(key, slice):
-            raise NotImplementedError("Slicing is not implemented.")
+            start = key.start if key.start is not None else 0
+            stop = key.stop if key.stop is not None else self.n_pieces
+            step = key.step if key.step is not None else 1
+            return [
+                self.data[:, self.labels == self.unique_labels[i]]
+                for i in range(start, stop, step)
+            ]
         else:
             raise ValueError("Invalid key type.")
 
-    def tolist(self):
+    def get_parcel(self, label):
+        """Retrieve data for specific parcel labels.
+
+        Parameters
+        ----------
+        label: int
+            The label of the parcel to retrieve.
+
+        Returns
+        -------
+        np.ndarray: The data for the specified parcel.
+        """
+        return self.data[:, self.labels == label]
+
+    def to_list(self):
+        """Convert the parceled data to a list of np.ndarray.
+
+        Returns
+        -------
+        list: A list of np.ndarray, where each element
+            corresponds to the data for a parcel.
+        """
         if isinstance(self.data, np.ndarray):
             return [self[i] for i in range(self.n_pieces)]
 
-    def tonifti(self):
+    def to_img(self):
+        """Convert the parceled data back to an image.
+
+        Returns
+        -------
+        nibabel.Nifti1Image: The image reconstructed from the parceled data.
+        """
         return self.masker.inverse_transform(self.data)
 
 
-def transform_one_img(parceled_data, fit):
+def _transform_one_img(parceled_data, fit):
     transformed_data = piecewise_transform(
         parceled_data,
         fit,
     )
-    transformed_img = transformed_data.tonifti()
+    transformed_img = transformed_data.to_img()
     return transformed_img
 
 
@@ -52,11 +108,11 @@ def _parcels_to_array(parceled_img, labels):
     unique_labels = np.unique(labels)
     n_features = len(labels)
     n_samples = parceled_img[0].shape[0]
-    aggregate_img = np.zeros((n_samples, n_features))
+    data = np.zeros((n_samples, n_features))
     for i in range(len(unique_labels)):
         label = unique_labels[i]
-        aggregate_img[:, labels == label] = parceled_img[i]
-    return aggregate_img
+        data[:, labels == label] = parceled_img[i]
+    return data
 
 
 def _intersect_clustering_mask(clustering, mask):
@@ -71,8 +127,7 @@ def _intersect_clustering_mask(clustering, mask):
 
 
 def piecewise_transform(parceled_data, estimators):
-    """
-    Apply a piecewise transform to parceled_data.
+    """Apply a piecewise transform to parceled_data.
 
     Parameters
     ----------
@@ -125,10 +180,10 @@ def _check_labels(labels, threshold=1000):
 def _make_parcellation(
     imgs, clustering, n_pieces, masker, smoothing_fwhm=5, verbose=0
 ):
-    """
-    Use nilearn Parcellation class in our pipeline.
-    It is used to find local regions of the brain in which alignment will be later applied.
-    For alignment computational efficiency, regions should be of hundreds of voxels.
+    """Use nilearn Parcellation class in our pipeline. It is used to find local
+    regions of the brain in which alignment will be later applied. For
+    alignment computational efficiency, regions should be of hundreds of
+    voxels.
 
     Parameters
     ----------
