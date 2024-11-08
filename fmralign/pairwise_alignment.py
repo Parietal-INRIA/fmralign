@@ -8,7 +8,7 @@ from joblib import Memory, Parallel, delayed
 from sklearn.base import BaseEstimator, TransformerMixin, clone
 
 from fmralign import alignment_methods
-from fmralign._utils import transform_one_img
+from fmralign._utils import _transform_one_img
 from fmralign.preprocessing import Preprocessor
 
 
@@ -217,14 +217,20 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
             verbose=self.verbose,
         )
 
-        parceled_source, parceled_target = self.preprocessor.fit_transform([X, Y])
+        parceled_source, parceled_target = self.preprocessor.fit_transform(
+            [X, Y]
+        )
         self.masker = self.preprocessor.masker_
         self.mask = self.preprocessor.masker_.mask_img_
         self.labels_ = self.preprocessor.labels
 
-        self.fit_ = Parallel(self.n_jobs, prefer="threads", verbose=self.verbose)(
+        self.fit_ = Parallel(
+            self.n_jobs, prefer="threads", verbose=self.verbose
+        )(
             delayed(fit_one_piece)(X_i, Y_i, self.alignment_method)
-            for X_i, Y_i in zip(parceled_source.tolist(), parceled_target.tolist())
+            for X_i, Y_i in zip(
+                parceled_source.to_list(), parceled_target.to_list()
+            )
         )
 
         return self
@@ -248,8 +254,10 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
                 "Please call 'fit' before 'transform'."
             )
         parceled_data_list = self.preprocessor.transform(X)
-        transformed_img = Parallel(self.n_jobs, prefer="threads", verbose=self.verbose)(
-            delayed(transform_one_img)(parceled_data, self.fit_)
+        transformed_img = Parallel(
+            self.n_jobs, prefer="threads", verbose=self.verbose
+        )(
+            delayed(_transform_one_img)(parceled_data, self.fit_)
             for parceled_data in parceled_data_list
         )
         if len(transformed_img) == 1:
