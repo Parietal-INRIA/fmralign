@@ -28,6 +28,7 @@ class Preprocessor(BaseEstimator, TransformerMixin):
         low_pass=None,
         high_pass=None,
         t_r=None,
+        labels=None,
         memory=Memory(location=None),
         memory_level=0,
         n_jobs=1,
@@ -44,11 +45,11 @@ class Preprocessor(BaseEstimator, TransformerMixin):
         self.t_r = t_r
         self.target_affine = target_affine
         self.target_shape = target_shape
+        self.labels = labels
         self.memory = memory
         self.memory_level = memory_level
         self.n_jobs = n_jobs
         self.verbose = verbose
-        self.labels = None
 
     def _fit_masker(self, imgs):
         self.masker_ = check_embedded_masker(self)
@@ -103,7 +104,7 @@ class Preprocessor(BaseEstimator, TransformerMixin):
             )
         return self.labels
 
-    def fit(self, imgs):
+    def fit(self, imgs, y=None):
         self._fit_masker(imgs)
         self._one_parcellation(imgs)
         return self
