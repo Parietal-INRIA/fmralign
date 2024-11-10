@@ -47,7 +47,3 @@ def test_make_parcellation():
             np.hstack([np.ones(2000), 4 * np.ones(800)]), np.eye(4)
         )
         _make_parcellation(img, clustering_method, n_pieces, masker)
-
-
-if __name__ == "__main__":
-    test_make_parcellation()

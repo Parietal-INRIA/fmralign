@@ -168,7 +168,3 @@ def test_standardization():
     data_array = transformed_data[0].data
     assert np.abs(np.mean(data_array)) < 1e-5
     assert np.abs(np.std(data_array) - 1.0) < 1e-5
-
-
-if __name__ == "__main__":
-    test_scikit_learn_compatibility()
