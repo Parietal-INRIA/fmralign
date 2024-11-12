@@ -36,7 +36,7 @@ files, df, mask = fetch_ibc_subjects_contrasts(["sub-01", "sub-02"])
 # First, we fetch and plot the complete atlas
 
 from nilearn import datasets, plotting
-from nilearn.image import load_img, new_img_like, resample_to_img
+from nilearn.image import concat_imgs, load_img, new_img_like, resample_to_img
 
 atlas_yeo_2011 = datasets.fetch_atlas_yeo_2011()
 atlas = load_img(atlas_yeo_2011.thick_7)
@@ -44,7 +44,9 @@ atlas = load_img(atlas_yeo_2011.thick_7)
 # Select visual cortex, create a mask and resample it to the right resolution
 
 mask_visual = new_img_like(atlas, atlas.get_fdata() == 1)
-resampled_mask_visual = resample_to_img(mask_visual, mask, interpolation="nearest")
+resampled_mask_visual = resample_to_img(
+    mask_visual, mask, interpolation="nearest"
+)
 
 # Plot the mask we will use
 plotting.plot_roi(
@@ -82,8 +84,12 @@ roi_masker = NiftiMasker(mask_img=resampled_mask_visual).fit()
 # * target train: AP contrasts for subject sub-02
 #
 
-source_train = df[df.subject == "sub-01"][df.acquisition == "ap"].path.values
-target_train = df[df.subject == "sub-02"][df.acquisition == "ap"].path.values
+source_train = concat_imgs(
+    df[df.subject == "sub-01"][df.acquisition == "ap"].path.values
+)
+target_train = concat_imgs(
+    df[df.subject == "sub-02"][df.acquisition == "ap"].path.values
+)
 
 # The testing set:
 # * source test: PA contrasts for subject one, used to predict
@@ -92,8 +98,12 @@ target_train = df[df.subject == "sub-02"][df.acquisition == "ap"].path.values
 #   to score our predictions
 #
 
-source_test = df[df.subject == "sub-01"][df.acquisition == "pa"].path.values
-target_test = df[df.subject == "sub-02"][df.acquisition == "pa"].path.values
+source_test = concat_imgs(
+    df[df.subject == "sub-01"][df.acquisition == "pa"].path.values
+)
+target_test = concat_imgs(
+    df[df.subject == "sub-02"][df.acquisition == "pa"].path.values
+)
 
 ###############################################################################
 # Choose the number of regions for local alignment
