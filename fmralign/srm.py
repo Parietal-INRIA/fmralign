@@ -299,18 +299,18 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
         """
         unique_labels = np.unique(self.labels_[0])
         n_comps = self.srm.n_components
-        n_subs = len(self.fit_[0][0].basis_list)
-        full_basis_list = np.zeros(shape=(n_subs, len(self.labels_[0]), n_comps))
+        n_subs = len(self.fit_[0].basis_list)
+        full_basis_list = np.zeros(shape=(n_subs, len(self.labels_), n_comps))
 
         for k in range(len(unique_labels)):
             label = unique_labels[k]
-            k_estim = self.fit_[0][k]
-            i = label == self.labels_[0]
+            k_estim = self.fit_[k]
+            i = label == self.labels_
             p_comps = k_estim.n_components
             for s, basis in enumerate(k_estim.basis_list):
                 full_basis_list[s, i, :] = np.pad(
                     basis, ((0, n_comps - p_comps), (0, 0)), mode="constant"
-                ).T
+                )
 
         basis_imgs = [
             self.masker_.inverse_transform(full_basis.T)
