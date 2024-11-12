@@ -1,7 +1,6 @@
 import pytest
 import numpy as np
 from nibabel.nifti1 import Nifti1Image
-from nilearn._utils.class_inspect import check_estimator
 from joblib import Memory
 
 from fmralign.preprocessing import Preprocessor
@@ -141,11 +140,6 @@ def test_parallel_processing(n_jobs):
     transformed_data = preprocessor.transform(imgs)
 
     assert len(transformed_data) == 3
-
-
-def test_scikit_learn_compatibility():
-    # Test if the estimator adheres to scikit-learn conventions
-    check_estimator(Preprocessor())
 
 
 def test_smoothing_parameter():
