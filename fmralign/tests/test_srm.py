@@ -18,7 +18,9 @@ def to_niimgs(X, dim):
     mask[: X.shape[-1]] = 1
     assert mask.sum() == X.shape[1]
     mask = mask.reshape(dim)
-    X = np.rollaxis(np.array([unmask_from_to_3d_array(x, mask) for x in X]), 0, start=4)
+    X = np.rollaxis(
+        np.array([unmask_from_to_3d_array(x, mask) for x in X]), 0, start=4
+    )
     affine = np.eye(4)
     return (
         nibabel.Nifti1Image(X, affine),
@@ -26,7 +28,6 @@ def to_niimgs(X, dim):
     )
 
 
-n_bags = 1
 n_pieces = 1
 n_timeframes_align = 1000
 n_timeframes_test = 200
@@ -43,8 +44,12 @@ masker = NiftiMasker(mask_img=mask).fit()
 
 train_data, test_data = {}, {}
 for i in range(n_subjects):
-    train_data[i] = masker.inverse_transform(np.random.rand(n_timeframes_align, 8))
-    test_data[i] = masker.inverse_transform(np.random.rand(n_timeframes_test, 8))
+    train_data[i] = masker.inverse_transform(
+        np.random.rand(n_timeframes_align, 8)
+    )
+    test_data[i] = masker.inverse_transform(
+        np.random.rand(n_timeframes_test, 8)
+    )
 masker = NiftiMasker(mask_img=mask).fit()
 
 n_components = 3
@@ -64,7 +69,6 @@ def test_output_no_clustering(algo):
         psrm = PiecewiseModel(
             "identity",
             n_pieces=n_pieces,
-            n_bags=n_bags,
             clustering="kmeans",
             mask=masker,
             n_jobs=-1,
@@ -75,7 +79,6 @@ def test_output_no_clustering(algo):
         psrm = PiecewiseModel(
             algo,
             n_pieces=n_pieces,
-            n_bags=n_bags,
             clustering="kmeans",
             mask=masker,
             n_jobs=-1,
@@ -89,21 +92,18 @@ def test_output_no_clustering(algo):
         srm_SR = np.mean(srm_SR, axis=0)
 
     np.shape(psrm.reduced_sr)
-    assert np.shape(psrm.reduced_sr) == (
-        n_bags,
-        n_pieces,
-        n_comp,
-        n_timeframes_align,
-    )
-    assert np.shape(psrm.labels_) == (n_bags, n_voxels)
-    assert np.shape(psrm.fit_) == (n_bags, n_pieces)
-    np.testing.assert_almost_equal(psrm.reduced_sr[0][0], srm_SR)
+    assert np.shape(psrm.reduced_sr) == (n_pieces, n_comp, n_timeframes_align)
+    assert len(psrm.labels_) == n_voxels
+    assert len(psrm.fit_) == n_pieces
+    np.testing.assert_almost_equal(psrm.reduced_sr[0], srm_SR)
 
-    algo.add_subjects([masker.transform(list(train_data.values())[-1]).T], srm_SR)
+    algo.add_subjects(
+        [masker.transform(list(train_data.values())[-1]).T], srm_SR
+    )
     psrm.add_subjects([list(train_data.values())[-1]])
 
-    np.testing.assert_almost_equal(psrm.reduced_sr[0][0], srm_SR)
-    np.testing.assert_almost_equal(psrm.fit_[0][0].basis_list, algo.basis_list)
+    np.testing.assert_almost_equal(psrm.reduced_sr[0], srm_SR)
+    np.testing.assert_almost_equal(psrm.fit_[0].basis_list, algo.basis_list)
 
     aligned_test = psrm.transform(test_data.values())
     if hasattr(algo, "aggregate"):
@@ -188,7 +188,10 @@ def test_wrongshape(algo):
         S1 = np.array(
             [
                 clone(algo).fit_transform(
-                    [masker.transform(x).T[cluster == i] for x in [X1, X2, X3, X4]]
+                    [
+                        masker.transform(x).T[cluster == i]
+                        for x in [X1, X2, X3, X4]
+                    ]
                 )
                 for i in [1, 2]
             ]
