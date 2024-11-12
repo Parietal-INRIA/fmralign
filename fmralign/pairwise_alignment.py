@@ -223,6 +223,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         self.masker = self.preprocessor.masker_
         self.mask = self.preprocessor.masker_.mask_img_
         self.labels_ = self.preprocessor.labels
+        self.n_pieces = self.preprocessor.n_pieces
 
         self.fit_ = Parallel(
             self.n_jobs, prefer="threads", verbose=self.verbose

@@ -1,5 +1,6 @@
 import os
 import warnings
+import numpy as np
 
 from joblib import Memory, Parallel, delayed
 from nibabel.nifti1 import Nifti1Image
@@ -95,6 +96,9 @@ class Preprocessor(BaseEstimator, TransformerMixin):
             smoothing_fwhm=self.smoothing_fwhm,
             verbose=self.verbose,
         )
+        # Update the number of pieces if the
+        # user provided a custom clustering
+        self.n_pieces = len(np.unique(self.labels))
 
     def get_labels(self):
         if self.labels is None:
