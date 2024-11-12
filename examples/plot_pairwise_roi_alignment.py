@@ -39,7 +39,7 @@ files, df, mask = fetch_ibc_subjects_contrasts(["sub-01", "sub-02"])
 #
 
 from nilearn import datasets
-from nilearn.image import load_img, new_img_like, resample_to_img
+from nilearn.image import concat_imgs, load_img, new_img_like, resample_to_img
 from nilearn.plotting import plot_roi
 
 atlas_yeo_2011 = datasets.fetch_atlas_yeo_2011()
@@ -49,7 +49,9 @@ atlas = load_img(atlas_yeo)
 # Select visual cortex, create a mask and resample it to the right resolution
 
 mask_visual = new_img_like(atlas, atlas.get_fdata() == 1)
-resampled_mask_visual = resample_to_img(mask_visual, mask, interpolation="nearest")
+resampled_mask_visual = resample_to_img(
+    mask_visual, mask, interpolation="nearest"
+)
 
 # Plot the mask we will use
 plot_roi(
@@ -85,8 +87,12 @@ roi_masker = NiftiMasker(mask_img=resampled_mask_visual).fit()
 # * source train: AP contrasts for subject sub-01
 # * target train: AP contrasts for subject sub-02
 
-source_train = df[df.subject == "sub-01"][df.acquisition == "ap"].path.values
-target_train = df[df.subject == "sub-02"][df.acquisition == "ap"].path.values
+source_train = concat_imgs(
+    df[df.subject == "sub-01"][df.acquisition == "ap"].path.values
+)
+target_train = concat_imgs(
+    df[df.subject == "sub-02"][df.acquisition == "ap"].path.values
+)
 
 # The testing fold:
 # * source test: PA contrasts for subject sub-01, used to predict
@@ -94,8 +100,12 @@ target_train = df[df.subject == "sub-02"][df.acquisition == "ap"].path.values
 # * target test: PA contrasts for subject sub-02, used as a ground truth
 #   to score our predictions
 
-source_test = df[df.subject == "sub-01"][df.acquisition == "pa"].path.values
-target_test = df[df.subject == "sub-02"][df.acquisition == "pa"].path.values
+source_test = concat_imgs(
+    df[df.subject == "sub-01"][df.acquisition == "pa"].path.values
+)
+target_test = concat_imgs(
+    df[df.subject == "sub-02"][df.acquisition == "pa"].path.values
+)
 
 ###############################################################################
 # Define the estimator, fit it and predict
