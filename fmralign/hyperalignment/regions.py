@@ -75,10 +75,8 @@ def compute_parcels(
             mask_img=mask, standardize=True, smoothing_fwhm=smoothing_fwhm
         )
     # Parcellation
-    indexes = [1]
     labels = _make_parcellation(
         imgs=niimg,
-        clustering_index=indexes,
         clustering="kmeans",
         n_pieces=n_parcels,
         masker=mask,
@@ -442,7 +440,9 @@ def piece_procrustes(
 
 
     """
-    sl_func = functools.partial(procrustes, reflection=reflection, scaling=scaling)
+    sl_func = functools.partial(
+        procrustes, reflection=reflection, scaling=scaling
+    )
     T = iter_hyperalignment(
         X,
         Y,
@@ -539,7 +539,9 @@ def template(
 
     template = np.zeros_like(X[0])
     if weights is not None:
-        for local_template, w, region in zip(local_templates, weights, regions):
+        for local_template, w, region in zip(
+            local_templates, weights, regions
+        ):
             template[:, region] += local_template * w[np.newaxis]
     else:
         for local_template, region in zip(local_templates, regions):
