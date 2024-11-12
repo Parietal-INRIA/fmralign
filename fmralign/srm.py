@@ -221,6 +221,7 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
         self.masker_ = self.preprocessor.masker_
         self.mask = self.preprocessor.masker_.mask_img_
         self.labels_ = self.preprocessor.labels
+        self.n_pieces = self.preprocessor.n_pieces
 
         outputs = Parallel(
             n_jobs=self.n_jobs, prefer="threads", verbose=self.verbose
