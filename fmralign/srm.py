@@ -5,7 +5,6 @@ Implementation from fastSRM is taken from H. Richard
 # Author: T. Bazeille
 # License: simplified BSD
 
-import warnings
 
 import numpy as np
 from joblib import Parallel, delayed
@@ -240,13 +239,13 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
 
     def add_subjects(self, imgs):
         """Add subject without recalculating SR"""
-        for labels, srm, reduced_sr in zip(self.labels_, self.fit_, self.reduced_sr):
-            for X_i, piece_srm, piece_sr in zip(
-                list(generate_X_is(labels, imgs, self.masker_, self.verbose)),
-                srm,
-                reduced_sr,
-            ):
-                piece_srm.add_subjects(X_i, piece_sr)
+        for i in range(self.n_pieces):
+            self.fit_[i]
+            X_i = _get_parcel_across_subjects(
+                self.preprocessor.transform(imgs), i
+            )
+            srm = self.fit_[i]
+            srm.add_subjects(X_i, self.reduced_sr[i])
         return self
 
     def transform(self, imgs):
