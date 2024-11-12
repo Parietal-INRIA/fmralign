@@ -260,30 +260,26 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
 
         !!!Not implemented for n_bags>1
         """
-        if self.n_bags > 1:
-            warnings.warn("n_bags > 1 is not yet supported for this method.")
 
         n_comps = self.srm.n_components
         aligned_imgs = []
-        for labels, srm in zip(self.labels_, self.fit_):
-            bag_align = []
-            for X_i, piece_srm in zip(
-                list(generate_X_is(labels, imgs, self.masker_, self.verbose)),
-                srm,
-            ):
-                piece_align = piece_srm.transform(X_i)
-                p_comps = piece_srm.n_components
-                if p_comps != n_comps:
-                    piece_align = [
-                        np.pad(
-                            t,
-                            ((0, n_comps - p_comps), (0, 0)),
-                            mode="constant",
-                        )
-                        for t in piece_align
-                    ]
-                bag_align.append(piece_align)
-            aligned_imgs.append(bag_align)
+        imgs_prep = self.preprocessor.transform(imgs)
+        bag_align = []
+        for i, piece_srm in enumerate(self.fit_):
+            X_i = [parceled_data[i].T for parceled_data in imgs_prep]
+            piece_align = piece_srm.transform(X_i)
+            p_comps = piece_srm.n_components
+            if p_comps != n_comps:
+                piece_align = [
+                    np.pad(
+                        t,
+                        ((0, n_comps - p_comps), (0, 0)),
+                        mode="constant",
+                    )
+                    for t in piece_align
+                ]
+            bag_align.append(piece_align)
+        aligned_imgs.append(bag_align)
         reordered_aligned = np.moveaxis(aligned_imgs[0], [1], [0])
         if self.reshape is False:
             return reordered_aligned
