@@ -1,11 +1,11 @@
-import pytest
 import numpy as np
-from nibabel.nifti1 import Nifti1Image
+import pytest
 from joblib import Memory
+from nibabel.nifti1 import Nifti1Image
 
+from fmralign._utils import ParceledData
 from fmralign.preprocessing import Preprocessor
 from fmralign.tests.utils import random_niimg
-from fmralign._utils import ParceledData
 
 
 def test_init_default_params():

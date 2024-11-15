@@ -1,7 +1,7 @@
 import os
 import warnings
-import numpy as np
 
+import numpy as np
 from joblib import Memory, Parallel, delayed
 from nibabel.nifti1 import Nifti1Image
 from nilearn._utils.masker_validation import check_embedded_masker
@@ -9,9 +9,9 @@ from nilearn.image import concat_imgs
 from sklearn.base import BaseEstimator, TransformerMixin
 
 from fmralign._utils import (
+    _img_to_parceled_data,
     _intersect_clustering_mask,
     _make_parcellation,
-    _img_to_parceled_data,
 )
 
 

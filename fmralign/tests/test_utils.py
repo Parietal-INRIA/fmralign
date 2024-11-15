@@ -5,7 +5,7 @@ import pytest
 from nilearn.maskers import NiftiMasker
 from numpy.testing import assert_array_almost_equal, assert_array_equal
 
-from fmralign._utils import _make_parcellation, ParceledData
+from fmralign._utils import ParceledData, _make_parcellation
 from fmralign.tests.utils import random_niimg, sample_parceled_data
 
 
