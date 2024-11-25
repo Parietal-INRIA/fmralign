@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-""" Test module to adapt quickly fmralign for piecewise srm
+"""Test module to adapt quickly fmralign for piecewise srm
 Implementation from fastSRM is taken from H. Richard
 """
 # Author: T. Bazeille
@@ -8,16 +8,15 @@ Implementation from fastSRM is taken from H. Richard
 import os
 import warnings
 
-import numpy as np
 import nibabel as nib
-from sklearn.base import clone
-from joblib import delayed, Parallel
-from nilearn.image import concat_imgs, load_img
-from sklearn.model_selection import ShuffleSplit
-from sklearn.base import BaseEstimator, TransformerMixin
+import numpy as np
+from joblib import Parallel, delayed
 from nilearn._utils.masker_validation import check_embedded_masker
+from nilearn.image import concat_imgs, load_img
+from sklearn.base import BaseEstimator, TransformerMixin, clone
+from sklearn.model_selection import ShuffleSplit
 
-from ._utils import _make_parcellation, _intersect_clustering_mask
+from ._utils import _intersect_clustering_mask, _make_parcellation
 
 
 class Identity(BaseEstimator, TransformerMixin):
@@ -73,7 +72,9 @@ def generate_X_is(labels, X_list, masker, verbose):
         label = unique_labels[k]
         i = label == labels
         if (k + 1) % 25 == 0 and verbose > 0:
-            print("Fitting parcel: " + str(k + 1) + "/" + str(len(unique_labels)))
+            print(
+                "Fitting parcel: " + str(k + 1) + "/" + str(len(unique_labels))
+            )
         # should return X_i Y_i
 
         yield [X_[:, i].T for X_ in masked_X_list]
@@ -322,9 +323,9 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
         else:
             self.masker_.fit()
 
-        if isinstance(self.clustering, nib.nifti1.Nifti1Image) or os.path.isfile(
-            self.clustering
-        ):
+        if isinstance(
+            self.clustering, nib.nifti1.Nifti1Image
+        ) or os.path.isfile(self.clustering):
             # check that clustering provided fills the mask, if not, reduce the mask
             if 0 in self.masker_.transform(self.clustering):
                 reduced_mask = _intersect_clustering_mask(
@@ -341,7 +342,9 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
 
         rs = ShuffleSplit(n_splits=self.n_bags, test_size=0.8, random_state=0)
 
-        outputs = Parallel(n_jobs=self.n_jobs, prefer="threads", verbose=self.verbose)(
+        outputs = Parallel(
+            n_jobs=self.n_jobs, prefer="threads", verbose=self.verbose
+        )(
             delayed(fit_one_parcellation)(
                 imgs,
                 self.srm,
@@ -352,7 +355,9 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
                 self.n_jobs,
                 self.verbose,
             )
-            for clustering_index, _ in rs.split(range(load_img(imgs[0]).shape[-1]))
+            for clustering_index, _ in rs.split(
+                range(load_img(imgs[0]).shape[-1])
+            )
         )
 
         self.labels_ = [output[0] for output in outputs]
@@ -362,7 +367,9 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
 
     def add_subjects(self, imgs):
         """Add subject without recalculating SR"""
-        for labels, srm, reduced_sr in zip(self.labels_, self.fit_, self.reduced_sr):
+        for labels, srm, reduced_sr in zip(
+            self.labels_, self.fit_, self.reduced_sr
+        ):
             for X_i, piece_srm, piece_sr in zip(
                 list(generate_X_is(labels, imgs, self.masker_, self.verbose)),
                 srm,
@@ -423,7 +430,9 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
         unique_labels = np.unique(self.labels_[0])
         n_comps = self.srm.n_components
         n_subs = len(self.fit_[0][0].basis_list)
-        full_basis_list = np.zeros(shape=(n_subs, len(self.labels_[0]), n_comps))
+        full_basis_list = np.zeros(
+            shape=(n_subs, len(self.labels_[0]), n_comps)
+        )
 
         for k in range(len(unique_labels)):
             label = unique_labels[k]

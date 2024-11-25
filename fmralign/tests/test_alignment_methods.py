@@ -3,15 +3,15 @@
 import numpy as np
 import pytest
 from numpy.testing import assert_array_almost_equal
-from scipy.sparse import csc_matrix
 from scipy.linalg import orthogonal_procrustes
+from scipy.sparse import csc_matrix
 
 from fmralign.alignment_methods import (
     DiagonalAlignment,
+    FugwAlignment,
     Hungarian,
     Identity,
     OptimalTransportAlignment,
-    FugwAlignment,
     POTAlignment,
     RidgeAlignment,
     ScaledOrthogonalAlignment,

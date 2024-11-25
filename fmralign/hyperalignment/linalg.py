@@ -8,8 +8,7 @@ searchlight algorithm), and ``svd_pca`` performs PCA based on
 """
 
 import numpy as np
-from scipy.linalg import LinAlgError
-from scipy.linalg import svd
+from scipy.linalg import LinAlgError, svd
 
 __all__ = ["safe_svd", "svd_pca", "ridge"]
 

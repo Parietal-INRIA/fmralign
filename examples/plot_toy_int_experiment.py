@@ -14,15 +14,16 @@ To run this example, you must launch IPython via ``ipython
 --matplotlib`` in a terminal, or use ``jupyter-notebook``.
 """
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+
 from fmralign.alignment_methods import IndividualizedNeuralTuning as INT
 from fmralign.fetch_example_data import generate_dummy_signal
 from fmralign.hyperalignment.correlation import (
-    tuning_correlation,
-    stimulus_correlation,
     compute_pearson_corr,
     matrix_MDS,
+    stimulus_correlation,
+    tuning_correlation,
 )
 
 ###############################################################################
@@ -143,7 +144,10 @@ ax[0, 1].set_title("MDS of predicted images, dim=2")
 # MDS of tunning matrices
 corr_tunning = compute_pearson_corr(tuning_pred_run_1, tuning_pred_run_2)
 T_first_part_transformed, T_second_part_transformed = matrix_MDS(
-    tuning_pred_run_1, tuning_pred_run_2, n_components=2, dissimilarity=1 - corr_tunning
+    tuning_pred_run_1,
+    tuning_pred_run_2,
+    n_components=2,
+    dissimilarity=1 - corr_tunning,
 )
 
 ax[0, 2].scatter(
@@ -171,16 +175,22 @@ ax[1, 0].imshow(correlation_stimulus_true_est_first_part)
 ax[1, 0].set_title("Correlation of estimated stimulus vs ground truth (Run 1)")
 ax[1, 0].set_xlabel("Latent components, Run 1")
 ax[1, 0].set_ylabel("Latent components, ground truth")
-fig.colorbar(ax[1, 0].imshow(correlation_stimulus_true_est_first_part), ax=ax[1, 0])
+fig.colorbar(
+    ax[1, 0].imshow(correlation_stimulus_true_est_first_part), ax=ax[1, 0]
+)
 
 correlation_stimulus_true_est_second_part = stimulus_correlation(
     stimulus_pred_run_2.T, stimulus_run_2.T
 )
 ax[1, 1].imshow(correlation_stimulus_true_est_second_part)
-ax[1, 1].set_title("Correlation of estimated stimulus vs ground truth (Run 2))")
+ax[1, 1].set_title(
+    "Correlation of estimated stimulus vs ground truth (Run 2))"
+)
 ax[1, 1].set_xlabel("Latent components, Run 2")
 ax[1, 1].set_ylabel("Latent components, ground truth")
-fig.colorbar(ax[1, 1].imshow(correlation_stimulus_true_est_second_part), ax=ax[1, 1])
+fig.colorbar(
+    ax[1, 1].imshow(correlation_stimulus_true_est_second_part), ax=ax[1, 1]
+)
 
 
 # Reconstruction
