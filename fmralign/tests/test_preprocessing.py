@@ -9,6 +9,7 @@ from fmralign.tests.utils import random_niimg
 
 
 def test_init_default_params():
+    """Test that Preprocessor initializes with default parameters"""
     preprocessor = Preprocessor()
     assert preprocessor.n_pieces == 1
     assert preprocessor.clustering == "kmeans"
@@ -20,6 +21,7 @@ def test_init_default_params():
 
 
 def test_init_custom_params():
+    """Test that Preprocessor initializes with custom parameters"""
     preprocessor = Preprocessor(
         n_pieces=2, clustering="ward", standardize=True, detrend=True, n_jobs=2
     )
@@ -31,6 +33,7 @@ def test_init_custom_params():
 
 
 def test_fit_single_image():
+    """Test that Preprocessor fits a single image"""
     img, _ = random_niimg((8, 7, 6))
     preprocessor = Preprocessor(n_pieces=2)
     fitted_preprocessor = preprocessor.fit(img)
@@ -42,6 +45,7 @@ def test_fit_single_image():
 
 
 def test_fit_multiple_images():
+    """Test that Preprocessor fits multiple images"""
     imgs = [random_niimg((8, 7, 6))[0]] * 3
     preprocessor = Preprocessor(n_pieces=2)
     fitted_preprocessor = preprocessor.fit(imgs)
@@ -51,6 +55,7 @@ def test_fit_multiple_images():
 
 
 def test_transform_single_image():
+    """Test that Preprocessor transforms a single image"""
     img, _ = random_niimg((8, 7, 6))
     preprocessor = Preprocessor(n_pieces=2)
     preprocessor.fit(img)
@@ -62,6 +67,7 @@ def test_transform_single_image():
 
 
 def test_transform_multiple_images():
+    """Test that Preprocessor transforms multiple images"""
     imgs = [random_niimg((8, 7, 6))[0]] * 3
     preprocessor = Preprocessor(n_pieces=2)
     preprocessor.fit(imgs)
@@ -70,12 +76,12 @@ def test_transform_multiple_images():
     assert isinstance(transformed_data, list)
     assert len(transformed_data) == 3
     assert all(
-        isinstance(parceled_data, ParceledData)
-        for parceled_data in transformed_data
+        isinstance(parceled_data, ParceledData) for parceled_data in transformed_data
     )
 
 
 def test_get_labels_before_fit():
+    """Test that Preprocessor raises ValueError if get_labels is called before fit"""
     preprocessor = Preprocessor()
     with pytest.raises(ValueError, match="Labels have not been computed yet"):
         preprocessor.get_labels()
@@ -93,6 +99,8 @@ def test_get_labels_after_fit():
 
 
 def test_different_shaped_images():
+    """Test that Preprocessor raises NotImplementedError for \
+        images of different shapes"""
     img, _ = random_niimg((8, 7, 6))
     # Create image with different shape
     different_data = np.random.rand(8, 7, 8)
@@ -109,6 +117,8 @@ def test_different_shaped_images():
 
 
 def test_clustering_with_mask():
+    """Test that Preprocessor raises ValueError if clustering is \
+        provided with a bigger mask"""
     clustering_data = np.ones((8, 7, 6))
     clustering_data[5:, :, :] = 0
     clustering_img = Nifti1Image(clustering_data, np.eye(4))
@@ -121,6 +131,7 @@ def test_clustering_with_mask():
 
 
 def test_memory_caching(tmp_path):
+    """Test that Preprocessor can use joblib memory caching"""
     img, _ = random_niimg((8, 7, 6))
     # Test that memory caching works
     memory = Memory(location=str(tmp_path), verbose=0)
@@ -134,6 +145,7 @@ def test_memory_caching(tmp_path):
 
 @pytest.mark.parametrize("n_jobs", [1, 2, -1])
 def test_parallel_processing(n_jobs):
+    """Test parallel processing with joblib"""
     imgs = [random_niimg((8, 7, 6))[0]] * 3
     preprocessor = Preprocessor(n_pieces=2, n_jobs=n_jobs)
     preprocessor.fit(imgs)
@@ -143,6 +155,7 @@ def test_parallel_processing(n_jobs):
 
 
 def test_smoothing_parameter():
+    """Test that Preprocessor applies smoothing"""
     img, _ = random_niimg((8, 7, 6))
     preprocessor = Preprocessor(smoothing_fwhm=4.0)
     preprocessor.fit(img)
@@ -153,6 +166,7 @@ def test_smoothing_parameter():
 
 
 def test_standardization():
+    """Test that Preprocessor standardizes data"""
     img, _ = random_niimg((8, 7, 6, 20))
     preprocessor = Preprocessor(standardize=True)
     preprocessor.fit(img)
