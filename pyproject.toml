@@ -35,7 +35,8 @@ requires-python = ">=3.9"
 [project.optional-dependencies]
 # Useful for development
 dev = [
-    "fmralign[jax,doc,test]"
+    "fmralign[jax,doc,test]",
+    "ruff"
 ]
 # For building the documentation
 doc = [
