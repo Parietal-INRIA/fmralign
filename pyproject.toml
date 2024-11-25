@@ -1,20 +1,15 @@
 [build-system]
-requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
+requires = ["hatchling", "hatch-vcs"]
 
 [project]
-name = "fmralign"
-description = "Functional alignment for fMRI"
-readme = "README.md"
-requires-python = ">=3.9"
-license = { file="LICENSE" }
 authors = [
-  { name="Elizabeth DuPre", email="emd222@cornell.edu" },
-  { name="Thomas Bazeille"},
-  { name="Bertrand Thirion"},
+    {name = "Elizabeth DuPre", email = "emd222@cornell.edu"},
+    {name = "Thomas Bazeille"},
+    {name = "Bertrand Thirion"}
 ]
 classifiers = [
-  "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3"
 ]
 dependencies = [
     "numpy<2",
@@ -28,51 +23,154 @@ dependencies = [
     "POT",
     "fastsrm",
     "fugw>=0.1.1",
-    "torch",
+    "torch"
 ]
+description = "Functional alignment for fMRI"
 dynamic = ["version"]
+license = {file = "LICENSE"}
+name = "fmralign"
+readme = "README.md"
+requires-python = ">=3.9"
 
 [project.optional-dependencies]
-# To use JAX-accelerated Optimal Transport
-jax = ["jax", "ott-jax > 0.3.0"]
-# For building the documentation
-doc = [
-  "coverage",
-  "myst-parser",
-  "numpydoc",
-  "ruamel.yaml",
-  "sphinx",
-  "sphinx-copybutton",
-  "sphinx-design",
-  "sphinx-gallery",
-  "sphinxcontrib-bibtex",
-  "sphinxext-opengraph",
-  "furo"
-]
-# For running unit and docstring tests
-test = [
-  "coverage",
-  "pytest>=6.0.0",
-  "pytest-cov",
-]
 # Useful for development
 dev = [
-  "fmralign[jax,doc,test]",
-  "isort",
-  "flynt",
-  "black",
-  "flake8",
-  "flake8-use-fstring",
+    "fmralign[jax,doc,test]"
 ]
-
-[tool.isort]
-profile = "black"
-
-[tool.hatch.version]
-source = "vcs"
+# For building the documentation
+doc = [
+    "coverage",
+    "myst-parser",
+    "numpydoc",
+    "ruamel.yaml",
+    "sphinx",
+    "sphinx-copybutton",
+    "sphinx-design",
+    "sphinx-gallery",
+    "sphinxcontrib-bibtex",
+    "sphinxext-opengraph",
+    "furo"
+]
+# To use JAX-accelerated Optimal Transport
+jax = ["jax", "ott-jax > 0.3.0"]
+# For running unit and docstring tests
+test = [
+    "coverage",
+    "pytest>=6.0.0",
+    "pytest-cov"
+]
 
 [tool.hatch.build.hooks.vcs]
 version-file = "fmralign/_version.py"
 
 [tool.hatch.metadata]
 allow-direct-references = true
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.ruff]
+extend-exclude = [
+    "doc/auto_examples/*"
+]
+include = ["pyproject.toml", "fmralign/**/*.py", "examples/**/*.py", "doc/**/*.py"]
+indent-width = 4
+line-length = 79
+
+[tool.ruff.format]
+docstring-code-format = true
+docstring-code-line-length = "dynamic"
+indent-style = "space"
+line-ending = "auto"
+quote-style = "double"
+skip-magic-trailing-comma = false
+
+[tool.ruff.lint]
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+fixable = ["ALL"]
+ignore = [
+    "ARG005",
+    "B028",
+    "B904",
+    "D105",
+    "D205",
+    "D208",
+    "D301",
+    "E741",
+    "ERA001",
+    "FURB105",
+    "N803",
+    "N806",
+    "PERF203",
+    "PIE790",
+    "PLR2004",
+    "PTH207",
+    "RUF012",
+    "UP038",  # https://github.com/astral-sh/ruff/issues/7871
+    # Avoid linter rules conflicting with the formatter
+    # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
+    "COM812",
+    "COM819",
+    "D206",
+    "D300",
+    "E111",
+    "E114",
+    "E117",
+    "ISC001",
+    "ISC002",
+    "Q000",
+    "Q001",
+    "Q002",
+    "Q003",
+    "W191"
+]
+# List of all the ruff rules (includes why the rule matters)
+# https://docs.astral.sh/ruff/rules/
+select = [
+    "ARG",
+    "B",
+    "C4",
+    "C90",
+    "D",
+    "E",
+    "ERA",
+    "F",
+    "FLY",
+    "FURB",
+    "I",
+    "N",
+    "NPY",
+    "PERF",
+    "PIE",
+    "PTH",
+    "PD",
+    "PGH",
+    "PLR",
+    "RUF",
+    "SIM",
+    "UP",
+    "W"
+]
+unfixable = []
+
+[tool.ruff.lint.mccabe]
+max-complexity = 41
+
+[tool.ruff.lint.per-file-ignores]
+"**/{doc}/*" = ["D103"]
+"**/{examples}/*" = ["B018", "D103", "D400", "E402"]
+"**/{tests}/*" = ["D100", "D101", "D102", "D103", "E402"]
+"__init__.py" = ["D104", "E402"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.pylint]
+# https://docs.astral.sh/ruff/settings/#lint_pylint_max-args
+max-args = 26
+# https://docs.astral.sh/ruff/settings/#lint_pylint_max-branches
+max-branches = 48
+# https://docs.astral.sh/ruff/settings/#lint_pylint_max-returns
+max-returns = 7
+# https://docs.astral.sh/ruff/settings/#lint_pylint_max-statements
+max-statements = 151
