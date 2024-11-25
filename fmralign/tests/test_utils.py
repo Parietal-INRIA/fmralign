@@ -51,6 +51,7 @@ def test_make_parcellation():
 
 
 def test_initialization():
+    """Test initialization of ParceledData class."""
     data, masker, labels = sample_parceled_data(n_pieces=2)
     parceled = ParceledData(data, masker, labels)
 
