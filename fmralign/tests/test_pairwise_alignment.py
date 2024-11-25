@@ -57,7 +57,9 @@ def test_pairwise_identity():
     clustering = new_img_like(mask_img, data_clust)
 
     # clustering is smaller than mask
-    assert (mask_img.get_fdata() > 0).sum() > (clustering.get_fdata() > 0).sum()
+    assert (mask_img.get_fdata() > 0).sum() > (
+        clustering.get_fdata() > 0
+    ).sum()
     algo = PairwiseAlignment(
         alignment_method="identity", mask=mask_img, clustering=clustering
     )

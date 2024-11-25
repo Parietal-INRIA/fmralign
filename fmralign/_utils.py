@@ -16,7 +16,9 @@ def _intersect_clustering_mask(clustering, mask):
     new_ = np.zeros_like(dat)
     new_[dat > 0] = 1
     clustering_mask = new_img_like(clustering, new_)
-    return intersect_masks([clustering_mask, mask], threshold=1, connected=True)
+    return intersect_masks(
+        [clustering_mask, mask], threshold=1, connected=True
+    )
 
 
 def piecewise_transform(labels, estimators, X):
@@ -42,7 +44,9 @@ def piecewise_transform(labels, estimators, X):
 
     for i in range(len(unique_labels)):
         label = unique_labels[i]
-        X_transform[:, labels == label] = estimators[i].transform(X[:, labels == label])
+        X_transform[:, labels == label] = estimators[i].transform(
+            X[:, labels == label]
+        )
     return X_transform
 
 
@@ -71,7 +75,13 @@ def _check_labels(labels, threshold=1000):
 
 
 def _make_parcellation(
-    imgs, clustering_index, clustering, n_pieces, masker, smoothing_fwhm=5, verbose=0
+    imgs,
+    clustering_index,
+    clustering,
+    n_pieces,
+    masker,
+    smoothing_fwhm=5,
+    verbose=0,
 ):
     """
     Use nilearn Parcellation class in our pipeline.
@@ -106,13 +116,17 @@ def _make_parcellation(
         Parcellation of features in clusters
     """
     # check if clustering is provided
-    if isinstance(clustering, nib.nifti1.Nifti1Image) or os.path.isfile(clustering):
+    if isinstance(clustering, nib.nifti1.Nifti1Image) or os.path.isfile(
+        clustering
+    ):
         check_same_fov(masker.mask_img_, clustering)
         labels = apply_mask_fmri(clustering, masker.mask_img_).astype(int)
 
     # otherwise check it's needed, if not return 1 everywhere
     elif n_pieces == 1:
-        labels = np.ones(int(masker.mask_img_.get_fdata().sum()), dtype=np.int8)
+        labels = np.ones(
+            int(masker.mask_img_.get_fdata().sum()), dtype=np.int8
+        )
 
     # otherwise check requested clustering method
     elif isinstance(clustering, str) and n_pieces > 1:
@@ -140,7 +154,9 @@ def _make_parcellation(
             )
             err.args += (errmsg,)
             raise err
-        labels = apply_mask_fmri(parcellation.labels_img_, masker.mask_img_).astype(int)
+        labels = apply_mask_fmri(
+            parcellation.labels_img_, masker.mask_img_
+        ).astype(int)
 
     if verbose > 0:
         unique_labels, counts = np.unique(labels, return_counts=True)
