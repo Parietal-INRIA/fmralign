@@ -14,7 +14,7 @@ repos:
       - id: trailing-whitespace
       - id: check-toml
 
-    # Checks for .rst files
+  # Checks for .rst files
   - repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.10.0
     hooks:
@@ -28,6 +28,7 @@ repos:
       - id: pretty-format-toml
         args: [--autofix, --indent, '4']
 
+  # Lint and format with Ruff
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.8.0
     hooks:
