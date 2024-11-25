@@ -1,3 +1,5 @@
+"""Module for preprocessing data before alignment."""
+
 import os
 import warnings
 
@@ -16,6 +18,68 @@ from fmralign._utils import (
 
 
 class Preprocessor(BaseEstimator, TransformerMixin):
+    """Class for masking Niimg-like objects and computing \
+        a parcellation in a parallel fashion.
+
+    Parameters
+    ----------
+    n_pieces: int, optional (default = 1)
+        Number of regions in which the data is parcellated for alignment.
+        If 1 the alignment is done on full scale data.
+        If >1, the voxels are clustered and alignment is performed
+        on each cluster applied to X and Y.
+    clustering : string or 3D Niimg optional (default : kmeans)
+        'kmeans', 'ward', 'rena', 'hierarchical_kmeans' method used for
+        clustering of voxels based on functional signal, passed to
+        nilearn.regions.parcellations
+        If 3D Niimg, image used as predefined clustering,
+        n_pieces is then ignored.
+    mask: Niimg-like object, instance of NiftiMasker or
+                            MultiNiftiMasker, optional (default = None)
+        Mask to be used on data. If an instance of masker is passed,
+        then its mask will be used. If no mask is given,
+        it will be computed automatically by a MultiNiftiMasker
+        with default parameters.
+    smoothing_fwhm: float, optional (default = None)
+        If smoothing_fwhm is not None, it gives the size in millimeters
+        of the spatial smoothing to apply to the signal.
+    standardize: boolean, optional (default = False)
+        If standardize is True, the time-series are centered and normed:
+        their variance is put to 1 in the time dimension.
+    detrend: boolean, optional (default = None)
+        This parameter is passed to nilearn.signal.clean.
+        Please see the related documentation for details
+    target_affine: 3x3 or 4x4 matrix, optional (default = None)
+        This parameter is passed to nilearn.image.resample_img.
+        Please see the related documentation for details.
+    target_shape: 3-tuple of integers, optional (default = None)
+        This parameter is passed to nilearn.image.resample_img.
+        Please see the related documentation for details.
+    low_pass: None or float, optional (default = None)
+        This parameter is passed to nilearn.signal.clean.
+        Please see the related documentation for details.
+    high_pass: None or float, optional (default = None)
+        This parameter is passed to nilearn.signal.clean.
+        Please see the related documentation for details.
+    t_r: float, optional (default = None)
+        This parameter is passed to nilearn.signal.clean.
+        Please see the related documentation for details.
+    labels: list of ints, optional (default = None)
+        Labels associated with the parcellation.
+    memory: instance of joblib.Memory or string (default = None)
+        Used to cache the masking process and results of algorithms.
+        By default, no caching is done. If a string is given, it is the
+        path to the caching directory.
+    memory_level: integer, optional (default = None)
+        Rough estimator of the amount of memory used by caching.
+        Higher value means more memory for caching.
+    n_jobs: integer, optional (default = 1)
+        The number of CPUs to use to do the computation. -1 means
+        'all CPUs', -2 'all CPUs but one', and so on.
+    verbose: integer, optional (default = 0)
+        Indicate the level of verbosity. By default, nothing is printed.
+    """
+
     def __init__(
         self,
         n_pieces=1,
@@ -53,6 +117,7 @@ class Preprocessor(BaseEstimator, TransformerMixin):
         self.verbose = verbose
 
     def _fit_masker(self, imgs):
+        """Fit the masker on a single or multiple images."""
         self.masker_ = check_embedded_masker(self)
         self.masker_.n_jobs = self.n_jobs
 
@@ -68,9 +133,7 @@ class Preprocessor(BaseEstimator, TransformerMixin):
         else:
             self.masker_.fit()
 
-        if isinstance(self.clustering, Nifti1Image) or os.path.isfile(
-            self.clustering
-        ):
+        if isinstance(self.clustering, Nifti1Image) or os.path.isfile(self.clustering):
             # check that clustering provided fills the mask, if not, reduce the mask
             if 0 in self.masker_.transform(self.clustering):
                 reduced_mask = _intersect_clustering_mask(
@@ -86,6 +149,7 @@ class Preprocessor(BaseEstimator, TransformerMixin):
                 )
 
     def _one_parcellation(self, imgs):
+        """Compute one parcellation for all images."""
         if isinstance(imgs, list):
             imgs = concat_imgs(imgs)
         self.labels = _make_parcellation(
@@ -101,23 +165,58 @@ class Preprocessor(BaseEstimator, TransformerMixin):
         self.n_pieces = len(np.unique(self.labels))
 
     def get_labels(self):
+        """Return the labels associated with the parcellation.
+
+        Returns
+        -------
+        list of ints (len n_features)
+            The labels associated with the parcellation.
+
+        Raises
+        ------
+        ValueError
+            If the `.fit` method has not been called before.
+        """
         if self.labels is None:
             raise ValueError(
-                "Labels have not been computed yet,"
-                "call fit before get_labels."
+                "Labels have not been computed yet," "call fit before get_labels."
             )
         return self.labels
 
     def fit(self, imgs, y=None):
+        """Fit the masker and compute the parcellation.
+
+        Parameters
+        ----------
+        imgs : Niimg-like object or `list` of Niimg-like objects
+            Images used to compute to fit the masker and compute the parcellation.
+        y : None
+            This parameter is unused. It is solely included for
+            scikit-learn compatibility.
+
+        """
         self._fit_masker(imgs)
         self._one_parcellation(imgs)
         return self
 
     def transform(self, imgs):
+        """Prepare data in parallel.
+
+        Parameters
+        ----------
+        imgs : Niimg-like object or `list` of Niimg-like objects
+            Images to be processed.
+
+        Returns
+        -------
+        parcelled_data : `list` of ParceledData
+            List of ParceledData objects containing the data and parcelation
+            information for each image.
+        """
         if isinstance(imgs, Nifti1Image):
             imgs = [imgs]
 
-        parcelled_data = Parallel(n_jobs=self.n_jobs)(
+        parceled_data = Parallel(n_jobs=self.n_jobs)(
             delayed(_img_to_parceled_data)(
                 img,
                 self.masker_,
@@ -126,4 +225,4 @@ class Preprocessor(BaseEstimator, TransformerMixin):
             for img in imgs
         )
 
-        return parcelled_data
+        return parceled_data
