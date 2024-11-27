@@ -8,9 +8,11 @@ from joblib import Memory, Parallel, delayed
 from nibabel.nifti1 import Nifti1Image
 from nilearn._utils.masker_validation import check_embedded_masker
 from nilearn.image import concat_imgs
+from nilearn.surface import SurfaceImage
 from sklearn.base import BaseEstimator, TransformerMixin
 
 from fmralign._utils import (
+    _concat_surf_imgs,
     _img_to_parceled_data,
     _intersect_clustering_mask,
     _make_parcellation,
@@ -118,40 +120,51 @@ class ParcellationMasker(BaseEstimator, TransformerMixin):
 
     def _fit_masker(self, imgs):
         """Fit the masker on a single or multiple images."""
-        self.masker_ = check_embedded_masker(self)
-        self.masker_.n_jobs = self.n_jobs
-
-        if isinstance(imgs, Nifti1Image):
+        if isinstance(imgs, (Nifti1Image, SurfaceImage)):
             imgs = [imgs]
         # Assert that all images have the same shape
         if len(set([img.shape for img in imgs])) > 1:
             raise NotImplementedError(
                 "fmralign does not support images of different shapes."
             )
-        if self.masker_.mask_img is None:
-            self.masker_.fit(imgs)
-        else:
-            self.masker_.fit()
 
-        if isinstance(self.clustering, Nifti1Image) or os.path.isfile(self.clustering):
-            # check that clustering provided fills the mask, if not, reduce the mask
-            if 0 in self.masker_.transform(self.clustering):
-                reduced_mask = _intersect_clustering_mask(
-                    self.clustering, self.masker_.mask_img
-                )
-                self.mask = reduced_mask
-                self.masker_ = check_embedded_masker(self)
-                self.masker_.n_jobs = self.n_jobs
+        masker_type = "surface" if isinstance(imgs[0], SurfaceImage) else "multi_nii"
+        self.masker_ = check_embedded_masker(self, masker_type=masker_type)
+        self.masker_.n_jobs = self.n_jobs
+
+        # Fit the masker for volume data
+        if masker_type == "multi_nii":
+            if self.masker_.mask_img is None:
+                self.masker_.fit(imgs)
+            else:
                 self.masker_.fit()
-                warnings.warn(
-                    "Mask used was bigger than clustering provided. "
-                    + "Its intersection with the clustering was used instead."
-                )
+
+            if isinstance(self.clustering, Nifti1Image) or os.path.isfile(
+                self.clustering
+            ):
+                # check that clustering provided fills the mask, if not, reduce the mask
+                if 0 in self.masker_.transform(self.clustering):
+                    reduced_mask = _intersect_clustering_mask(
+                        self.clustering, self.masker_.mask_img
+                    )
+                    self.mask = reduced_mask
+                    self.masker_ = check_embedded_masker(self)
+                    self.masker_.n_jobs = self.n_jobs
+                    self.masker_.fit()
+                    warnings.warn(
+                        "Mask used was bigger than clustering provided. "
+                        + "Its intersection with the clustering was used instead."
+                    )
+        else:
+            self.masker_.fit(imgs)
 
     def _one_parcellation(self, imgs):
         """Compute one parcellation for all images."""
         if isinstance(imgs, list):
-            imgs = concat_imgs(imgs)
+            if isinstance(imgs[0], (Nifti1Image)):
+                imgs = concat_imgs(imgs)
+            else:
+                imgs = _concat_surf_imgs(imgs)
         self.labels = _make_parcellation(
             imgs,
             self.clustering,
