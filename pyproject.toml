@@ -89,78 +89,15 @@ skip-magic-trailing-comma = false
 [tool.ruff.lint]
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 fixable = ["ALL"]
-ignore = [
-    "ARG005",
-    "B028",
-    "B904",
-    "D105",
-    "D205",
-    "D208",
-    "D301",
-    "E741",
-    "ERA001",
-    "FURB105",
-    "N803",
-    "N806",
-    "PERF203",
-    "PIE790",
-    "PLR2004",
-    "PTH207",
-    "RUF012",
-    "UP038",  # https://github.com/astral-sh/ruff/issues/7871
-    # Avoid linter rules conflicting with the formatter
-    # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
-    "COM812",
-    "COM819",
-    "D206",
-    "D300",
-    "E111",
-    "E114",
-    "E117",
-    "ISC001",
-    "ISC002",
-    "Q000",
-    "Q001",
-    "Q002",
-    "Q003",
-    "W191"
-]
-# List of all the ruff rules (includes why the rule matters)
-# https://docs.astral.sh/ruff/rules/
-select = [
-    "ARG",
-    "B",
-    "C4",
-    "C90",
-    "D",
-    "E",
-    "ERA",
-    "F",
-    "FLY",
-    "FURB",
-    "I",
-    "N",
-    "NPY",
-    "PERF",
-    "PIE",
-    "PTH",
-    "PD",
-    "PGH",
-    "PLR",
-    "RUF",
-    "SIM",
-    "UP",
-    "W"
-]
 unfixable = []
 
 [tool.ruff.lint.mccabe]
 max-complexity = 41
 
 [tool.ruff.lint.per-file-ignores]
-"**/{doc}/*" = ["D103"]
-"**/{examples}/*" = ["B018", "D103", "D400", "E402"]
-"**/{tests}/*" = ["D100", "D101", "D102", "D103", "E402"]
+"{doc}/*" = ["D103"]
+"{examples}/*" = ["B018", "D103", "D400", "E402"]
+"*/{tests}/*" = ["D100", "D101", "D102", "D103", "D104", "D205", "D400", "D401"]
 "__init__.py" = ["D104", "E402"]
 
 [tool.ruff.lint.pydocstyle]
