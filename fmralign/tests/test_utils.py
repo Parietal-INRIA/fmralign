@@ -189,7 +189,3 @@ def test_non_contiguous_labels():
     # Test accessing by label
     same_parcel = parceled.get_parcel(1)
     assert_array_equal(same_parcel, expected)
-
-
-if __name__ == "__main__":
-    test_non_contiguous_labels()
