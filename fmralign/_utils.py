@@ -8,6 +8,7 @@ from nilearn._utils.niimg_conversions import check_same_fov
 from nilearn.image import new_img_like, smooth_img
 from nilearn.masking import apply_mask_fmri, intersect_masks
 from nilearn.regions.parcellations import Parcellations
+from nilearn.surface import SurfaceImage
 
 
 class ParceledData:
@@ -258,3 +259,15 @@ def _make_parcellation(imgs, clustering, n_pieces, masker, smoothing_fwhm=5, ver
     _check_labels(labels)
 
     return labels
+
+
+def _concat_surf_imgs(imgs):
+    mesh = imgs[0].mesh
+    data_concat = {}
+    for key, val in mesh.parts.items():
+        for img in imgs:
+            if key not in data_concat:
+                data_concat[key] = img.data.parts[key]
+            else:
+                data_concat[key] = np.hstack((data_concat[key], img.data.parts[key]))
+    return SurfaceImage(mesh, data_concat)
