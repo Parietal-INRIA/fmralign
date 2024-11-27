@@ -5,7 +5,7 @@ from nibabel.nifti1 import Nifti1Image
 
 from fmralign._utils import ParceledData
 from fmralign.preprocessing import ParcellationMasker
-from fmralign.tests.utils import random_niimg
+from fmralign.tests.utils import random_niimg, surf_img
 
 
 def test_init_default_params():
@@ -176,3 +176,15 @@ def test_standardization():
     data_array = transformed_data[0].data
     assert np.abs(np.mean(data_array)) < 1e-5
     assert np.abs(np.std(data_array) - 1.0) < 1e-5
+
+
+def test_one_surface_image():
+    """Test that ParcellationMasker can handle surface images"""
+    img = surf_img(20)
+    pmasker = ParcellationMasker(n_pieces=2)
+    fitted_pmasker = pmasker.fit([img, img])
+
+    assert hasattr(fitted_pmasker, "masker_")
+    assert fitted_pmasker.labels is not None
+    assert isinstance(fitted_pmasker.labels, np.ndarray)
+    assert len(np.unique(fitted_pmasker.labels)) == 2  # n_pieces=2
