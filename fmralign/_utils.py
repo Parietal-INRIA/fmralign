@@ -15,12 +15,13 @@ class ParceledData:
 
     Parameters
     ----------
-        data: np.ndarray
-            The data array.
+        data: 2D :obj:`numpy.ndarray`
+            Signal for each :term:`voxel` inside the mask.
+            shape: (number of scans, number of voxels)
         masker: nilearn.maskers.NiftiMasker
             The masker used to transform the data.
-        labels: np.ndarray
-            The parcel labels.
+        labels: `list` of `int`
+            The parcels labels.
     """
 
     def __init__(self, data, masker, labels):
@@ -40,7 +41,9 @@ class ParceledData:
 
         Returns
         -------
-        np.ndarray: The data for the specified parcel(s).
+        numpy.ndarray: 2D array of shape (n_samples, n_features)
+            or `list` of 2D arrays is a slice is provided.
+            The data for the specified parcel(s).
         """
         if isinstance(key, int):
             return self.data[:, self.labels == self.unique_labels[key]]
@@ -65,16 +68,17 @@ class ParceledData:
 
         Returns
         -------
-        np.ndarray: The data for the specified parcel.
+        numpy.ndarray: 2D array of shape (n_samples, n_features)
+            The data for the specified parcel.
         """
         return self.data[:, self.labels == label]
 
     def to_list(self):
-        """Convert the parceled data to a list of np.ndarray.
+        """Convert the parceled data to a list of numpy.ndarray.
 
         Returns
         -------
-        list: A list of np.ndarray, where each element
+        list: A list of numpy.ndarray, where each element
             corresponds to the data for a parcel.
         """
         if isinstance(self.data, np.ndarray):
