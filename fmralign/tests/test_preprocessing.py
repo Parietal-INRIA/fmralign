@@ -4,62 +4,62 @@ from joblib import Memory
 from nibabel.nifti1 import Nifti1Image
 
 from fmralign._utils import ParceledData
-from fmralign.preprocessing import Preprocessor
+from fmralign.preprocessing import ParcellationMasker
 from fmralign.tests.utils import random_niimg
 
 
 def test_init_default_params():
-    """Test that Preprocessor initializes with default parameters"""
-    preprocessor = Preprocessor()
-    assert preprocessor.n_pieces == 1
-    assert preprocessor.clustering == "kmeans"
-    assert preprocessor.mask is None
-    assert preprocessor.smoothing_fwhm is None
-    assert preprocessor.standardize is False
-    assert preprocessor.detrend is False
-    assert preprocessor.labels is None
+    """Test that ParcellationMasker initializes with default parameters"""
+    pmasker = ParcellationMasker()
+    assert pmasker.n_pieces == 1
+    assert pmasker.clustering == "kmeans"
+    assert pmasker.mask is None
+    assert pmasker.smoothing_fwhm is None
+    assert pmasker.standardize is False
+    assert pmasker.detrend is False
+    assert pmasker.labels is None
 
 
 def test_init_custom_params():
-    """Test that Preprocessor initializes with custom parameters"""
-    preprocessor = Preprocessor(
+    """Test that ParcellationMasker initializes with custom parameters"""
+    pmasker = ParcellationMasker(
         n_pieces=2, clustering="ward", standardize=True, detrend=True, n_jobs=2
     )
-    assert preprocessor.n_pieces == 2
-    assert preprocessor.clustering == "ward"
-    assert preprocessor.standardize is True
-    assert preprocessor.detrend is True
-    assert preprocessor.n_jobs == 2
+    assert pmasker.n_pieces == 2
+    assert pmasker.clustering == "ward"
+    assert pmasker.standardize is True
+    assert pmasker.detrend is True
+    assert pmasker.n_jobs == 2
 
 
 def test_fit_single_image():
-    """Test that Preprocessor fits a single image"""
+    """Test that ParcellationMasker fits a single image"""
     img, _ = random_niimg((8, 7, 6))
-    preprocessor = Preprocessor(n_pieces=2)
-    fitted_preprocessor = preprocessor.fit(img)
+    pmasker = ParcellationMasker(n_pieces=2)
+    fitted_pmasker = pmasker.fit(img)
 
-    assert hasattr(fitted_preprocessor, "masker_")
-    assert fitted_preprocessor.labels is not None
-    assert isinstance(fitted_preprocessor.labels, np.ndarray)
-    assert len(np.unique(fitted_preprocessor.labels)) == 2  # n_pieces=2
+    assert hasattr(fitted_pmasker, "masker_")
+    assert fitted_pmasker.labels is not None
+    assert isinstance(fitted_pmasker.labels, np.ndarray)
+    assert len(np.unique(fitted_pmasker.labels)) == 2  # n_pieces=2
 
 
 def test_fit_multiple_images():
-    """Test that Preprocessor fits multiple images"""
+    """Test that ParcellationMasker fits multiple images"""
     imgs = [random_niimg((8, 7, 6))[0]] * 3
-    preprocessor = Preprocessor(n_pieces=2)
-    fitted_preprocessor = preprocessor.fit(imgs)
+    pmasker = ParcellationMasker(n_pieces=2)
+    fitted_pmasker = pmasker.fit(imgs)
 
-    assert hasattr(fitted_preprocessor, "masker_")
-    assert fitted_preprocessor.labels is not None
+    assert hasattr(fitted_pmasker, "masker_")
+    assert fitted_pmasker.labels is not None
 
 
 def test_transform_single_image():
-    """Test that Preprocessor transforms a single image"""
+    """Test that ParcellationMasker transforms a single image"""
     img, _ = random_niimg((8, 7, 6))
-    preprocessor = Preprocessor(n_pieces=2)
-    preprocessor.fit(img)
-    transformed_data = preprocessor.transform(img)
+    pmasker = ParcellationMasker(n_pieces=2)
+    pmasker.fit(img)
+    transformed_data = pmasker.transform(img)
 
     assert isinstance(transformed_data, list)
     assert len(transformed_data) == 1
@@ -67,11 +67,11 @@ def test_transform_single_image():
 
 
 def test_transform_multiple_images():
-    """Test that Preprocessor transforms multiple images"""
+    """Test that ParcellationMasker transforms multiple images"""
     imgs = [random_niimg((8, 7, 6))[0]] * 3
-    preprocessor = Preprocessor(n_pieces=2)
-    preprocessor.fit(imgs)
-    transformed_data = preprocessor.transform(imgs)
+    pmasker = ParcellationMasker(n_pieces=2)
+    pmasker.fit(imgs)
+    transformed_data = pmasker.transform(imgs)
 
     assert isinstance(transformed_data, list)
     assert len(transformed_data) == 3
@@ -81,17 +81,17 @@ def test_transform_multiple_images():
 
 
 def test_get_labels_before_fit():
-    """Test that Preprocessor raises ValueError if get_labels is called before fit"""
-    preprocessor = Preprocessor()
+    """Test that ParcellationMasker raises ValueError if get_labels is called before fit"""
+    pmasker = ParcellationMasker()
     with pytest.raises(ValueError, match="Labels have not been computed yet"):
-        preprocessor.get_labels()
+        pmasker.get_labels()
 
 
 def test_get_labels_after_fit():
     img, _ = random_niimg((8, 7, 6))
-    preprocessor = Preprocessor(n_pieces=2)
-    preprocessor.fit(img)
-    labels = preprocessor.get_labels()
+    pmasker = ParcellationMasker(n_pieces=2)
+    pmasker.fit(img)
+    labels = pmasker.get_labels()
 
     assert labels is not None
     assert isinstance(labels, np.ndarray)
@@ -99,7 +99,7 @@ def test_get_labels_after_fit():
 
 
 def test_different_shaped_images():
-    """Test that Preprocessor raises NotImplementedError for \
+    """Test that ParcellationMasker raises NotImplementedError for \
         images of different shapes"""
     img, _ = random_niimg((8, 7, 6))
     # Create image with different shape
@@ -107,36 +107,36 @@ def test_different_shaped_images():
     different_img = Nifti1Image(different_data, np.eye(4))
 
     imgs = [img, different_img]
-    preprocessor = Preprocessor()
+    pmasker = ParcellationMasker()
 
     with pytest.raises(
         NotImplementedError,
         match="fmralign does not support images of different shapes",
     ):
-        preprocessor.fit(imgs)
+        pmasker.fit(imgs)
 
 
 def test_clustering_with_mask():
-    """Test that Preprocessor raises ValueError if clustering is \
+    """Test that ParcellationMasker raises ValueError if clustering is \
         provided with a bigger mask"""
     clustering_data = np.ones((8, 7, 6))
     clustering_data[5:, :, :] = 0
     clustering_img = Nifti1Image(clustering_data, np.eye(4))
     img, dummy_mask = random_niimg((8, 7, 6))
-    preprocessor = Preprocessor(clustering=clustering_img, mask=dummy_mask)
+    pmasker = ParcellationMasker(clustering=clustering_img, mask=dummy_mask)
     with pytest.warns(
         UserWarning, match="Mask used was bigger than clustering provided"
     ):
-        preprocessor.fit(img)
+        pmasker.fit(img)
 
 
 def test_memory_caching(tmp_path):
-    """Test that Preprocessor can use joblib memory caching"""
+    """Test that ParcellationMasker can use joblib memory caching"""
     img, _ = random_niimg((8, 7, 6))
     # Test that memory caching works
     memory = Memory(location=str(tmp_path), verbose=0)
-    preprocessor = Preprocessor(memory=memory, memory_level=1)
-    preprocessor.fit(img)
+    pmasker = ParcellationMasker(memory=memory, memory_level=1)
+    pmasker.fit(img)
 
     # Check that cache directory is not empty
     cache_files = list(tmp_path.glob("joblib/*"))
@@ -147,30 +147,30 @@ def test_memory_caching(tmp_path):
 def test_parallel_processing(n_jobs):
     """Test parallel processing with joblib"""
     imgs = [random_niimg((8, 7, 6))[0]] * 3
-    preprocessor = Preprocessor(n_pieces=2, n_jobs=n_jobs)
-    preprocessor.fit(imgs)
-    transformed_data = preprocessor.transform(imgs)
+    pmasker = ParcellationMasker(n_pieces=2, n_jobs=n_jobs)
+    pmasker.fit(imgs)
+    transformed_data = pmasker.transform(imgs)
 
     assert len(transformed_data) == 3
 
 
 def test_smoothing_parameter():
-    """Test that Preprocessor applies smoothing"""
+    """Test that ParcellationMasker applies smoothing"""
     img, _ = random_niimg((8, 7, 6))
-    preprocessor = Preprocessor(smoothing_fwhm=4.0)
-    preprocessor.fit(img)
-    transformed_data = preprocessor.transform(img)
+    pmasker = ParcellationMasker(smoothing_fwhm=4.0)
+    pmasker.fit(img)
+    transformed_data = pmasker.transform(img)
 
     assert isinstance(transformed_data, list)
     assert len(transformed_data) == 1
 
 
 def test_standardization():
-    """Test that Preprocessor standardizes data"""
+    """Test that ParcellationMasker standardizes data"""
     img, _ = random_niimg((8, 7, 6, 20))
-    preprocessor = Preprocessor(standardize=True)
-    preprocessor.fit(img)
-    transformed_data = preprocessor.transform(img)
+    pmasker = ParcellationMasker(standardize=True)
+    pmasker.fit(img)
+    transformed_data = pmasker.transform(img)
 
     # Check if data is standardized (mean ≈ 0, std ≈ 1)
     data_array = transformed_data[0].data

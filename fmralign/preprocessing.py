@@ -17,7 +17,7 @@ from fmralign._utils import (
 )
 
 
-class Preprocessor(BaseEstimator, TransformerMixin):
+class ParcellationMasker(BaseEstimator, TransformerMixin):
     """Class for masking Niimg-like objects and computing \
         a parcellation in a parallel fashion.
 

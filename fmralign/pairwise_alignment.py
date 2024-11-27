@@ -9,7 +9,7 @@ from sklearn.base import BaseEstimator, TransformerMixin, clone
 
 from fmralign import alignment_methods
 from fmralign._utils import _transform_one_img
-from fmralign.preprocessing import Preprocessor
+from fmralign.preprocessing import ParcellationMasker
 
 
 def fit_one_piece(X_i, Y_i, alignment_method):
@@ -199,7 +199,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         -------
         self
         """
-        self.preprocessor = Preprocessor(
+        self.pmasker = ParcellationMasker(
             n_pieces=self.n_pieces,
             clustering=self.clustering,
             mask=self.mask,
@@ -217,21 +217,15 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
             verbose=self.verbose,
         )
 
-        parceled_source, parceled_target = self.preprocessor.fit_transform(
-            [X, Y]
-        )
-        self.masker = self.preprocessor.masker_
-        self.mask = self.preprocessor.masker_.mask_img_
-        self.labels_ = self.preprocessor.labels
-        self.n_pieces = self.preprocessor.n_pieces
+        parceled_source, parceled_target = self.pmasker.fit_transform([X, Y])
+        self.masker = self.pmasker.masker_
+        self.mask = self.pmasker.masker_.mask_img_
+        self.labels_ = self.pmasker.labels
+        self.n_pieces = self.pmasker.n_pieces
 
-        self.fit_ = Parallel(
-            self.n_jobs, prefer="threads", verbose=self.verbose
-        )(
+        self.fit_ = Parallel(self.n_jobs, prefer="threads", verbose=self.verbose)(
             delayed(fit_one_piece)(X_i, Y_i, self.alignment_method)
-            for X_i, Y_i in zip(
-                parceled_source.to_list(), parceled_target.to_list()
-            )
+            for X_i, Y_i in zip(parceled_source.to_list(), parceled_target.to_list())
         )
 
         return self
@@ -254,10 +248,8 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
                 "This instance has not been fitted yet. "
                 "Please call 'fit' before 'transform'."
             )
-        parceled_data_list = self.preprocessor.transform(X)
-        transformed_img = Parallel(
-            self.n_jobs, prefer="threads", verbose=self.verbose
-        )(
+        parceled_data_list = self.pmasker.transform(X)
+        transformed_img = Parallel(self.n_jobs, prefer="threads", verbose=self.verbose)(
             delayed(_transform_one_img)(parceled_data, self.fit_)
             for parceled_data in parceled_data_list
         )

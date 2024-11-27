@@ -10,7 +10,7 @@ import numpy as np
 from joblib import Parallel, delayed
 from sklearn.base import BaseEstimator, TransformerMixin, clone
 
-from fmralign.preprocessing import Preprocessor
+from fmralign.preprocessing import ParcellationMasker
 
 
 class Identity(BaseEstimator, TransformerMixin):
@@ -35,8 +35,7 @@ class Identity(BaseEstimator, TransformerMixin):
 
 def _get_parcel_across_subjects(parceled_data, parcel_id):
     parcel_across_subjects = [
-        parceled_data[i].to_list()[parcel_id].T
-        for i in range(len(parceled_data))
+        parceled_data[i].to_list()[parcel_id].T for i in range(len(parceled_data))
     ]
     return parcel_across_subjects
 
@@ -200,7 +199,7 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
             Length : n_samples
 
         """
-        self.preprocessor = Preprocessor(
+        self.pmasker = ParcellationMasker(
             n_pieces=self.n_pieces,
             clustering=self.clustering,
             mask=self.mask,
@@ -217,15 +216,13 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
             n_jobs=self.n_jobs,
             verbose=self.verbose,
         )
-        parceled_data = self.preprocessor.fit_transform(imgs)
-        self.masker_ = self.preprocessor.masker_
-        self.mask = self.preprocessor.masker_.mask_img_
-        self.labels_ = self.preprocessor.labels
-        self.n_pieces = self.preprocessor.n_pieces
+        parceled_data = self.pmasker.fit_transform(imgs)
+        self.masker_ = self.pmasker.masker_
+        self.mask = self.pmasker.masker_.mask_img_
+        self.labels_ = self.pmasker.labels
+        self.n_pieces = self.pmasker.n_pieces
 
-        outputs = Parallel(
-            n_jobs=self.n_jobs, prefer="threads", verbose=self.verbose
-        )(
+        outputs = Parallel(n_jobs=self.n_jobs, prefer="threads", verbose=self.verbose)(
             delayed(fit_one_piece)(
                 _get_parcel_across_subjects(parceled_data, i),
                 self.srm,
@@ -233,7 +230,7 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
             for i in range(self.n_pieces)
         )
 
-        self.labels_ = self.preprocessor.labels
+        self.labels_ = self.pmasker.labels
         self.fit_ = [output[0] for output in outputs]
         self.reduced_sr = [output[1] for output in outputs]
         return self
@@ -242,9 +239,7 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
         """Add subject without recalculating SR"""
         for i in range(self.n_pieces):
             self.fit_[i]
-            X_i = _get_parcel_across_subjects(
-                self.preprocessor.transform(imgs), i
-            )
+            X_i = _get_parcel_across_subjects(self.pmasker.transform(imgs), i)
             srm = self.fit_[i]
             srm.add_subjects(X_i, self.reduced_sr[i])
         return self
@@ -264,7 +259,7 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
 
         n_comps = self.srm.n_components
         aligned_imgs = []
-        imgs_prep = self.preprocessor.transform(imgs)
+        imgs_prep = self.pmasker.transform(imgs)
         bag_align = []
         for i, piece_srm in enumerate(self.fit_):
             X_i = [parceled_data[i].T for parceled_data in imgs_prep]
