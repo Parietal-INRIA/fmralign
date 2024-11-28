@@ -133,7 +133,9 @@ class ParcellationMasker(BaseEstimator, TransformerMixin):
         else:
             self.masker_.fit()
 
-        if isinstance(self.clustering, Nifti1Image) or os.path.isfile(self.clustering):
+        if isinstance(self.clustering, Nifti1Image) or os.path.isfile(
+            self.clustering
+        ):
             # check that clustering provided fills the mask, if not, reduce the mask
             if 0 in self.masker_.transform(self.clustering):
                 reduced_mask = _intersect_clustering_mask(
@@ -179,7 +181,8 @@ class ParcellationMasker(BaseEstimator, TransformerMixin):
         """
         if self.labels is None:
             raise ValueError(
-                "Labels have not been computed yet," "call fit before get_labels."
+                "Labels have not been computed yet,"
+                "call fit before get_labels."
             )
         return self.labels
 

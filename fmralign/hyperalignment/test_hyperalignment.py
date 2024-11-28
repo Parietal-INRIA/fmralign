@@ -5,7 +5,10 @@ from fmralign.fetch_example_data import (
     generate_dummy_searchlights,
     generate_dummy_signal,
 )
-from fmralign.hyperalignment.correlation import stimulus_correlation, tuning_correlation
+from fmralign.hyperalignment.correlation import (
+    stimulus_correlation,
+    tuning_correlation,
+)
 
 
 def test_int_fit_predict():

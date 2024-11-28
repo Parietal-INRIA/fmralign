@@ -184,7 +184,9 @@ def _check_labels(labels, threshold=1000):
     pass
 
 
-def _make_parcellation(imgs, clustering, n_pieces, masker, smoothing_fwhm=5, verbose=0):
+def _make_parcellation(
+    imgs, clustering, n_pieces, masker, smoothing_fwhm=5, verbose=0
+):
     """Compute a parcellation of the data.
 
     Use nilearn Parcellation class in our pipeline. It is used to find local

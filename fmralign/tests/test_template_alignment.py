@@ -4,8 +4,14 @@ from nilearn.image import concat_imgs, index_img, math_img
 from nilearn.maskers import NiftiMasker
 from numpy.testing import assert_array_almost_equal
 
-from fmralign.template_alignment import TemplateAlignment, _rescaled_euclidean_mean
-from fmralign.tests.utils import random_niimg, zero_mean_coefficient_determination
+from fmralign.template_alignment import (
+    TemplateAlignment,
+    _rescaled_euclidean_mean,
+)
+from fmralign.tests.utils import (
+    random_niimg,
+    zero_mean_coefficient_determination,
+)
 
 
 def test_template_identity():
