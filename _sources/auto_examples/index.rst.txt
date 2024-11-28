@@ -55,23 +55,6 @@ Examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="In this tutorial, we show how to better predict new contrasts for a target subject using many source subjects corresponding contrasts. For this purpose, we create a template to which we align the target subject, using shared information. We then predict new images for the target and compare them to a baseline.">
-
-.. only:: html
-
-  .. image:: /auto_examples/images/thumb/sphx_glr_plot_template_alignment_thumb.png
-    :alt:
-
-  :ref:`sphx_glr_auto_examples_plot_template_alignment.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Template-based prediction.</div>
-    </div>
-
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="In this tutorial, we compare various methods of alignment on a pairwise alignment problem for Individual Brain Charting subjects. For each subject, we have a lot of functional informations in the form of several task-based contrast per subject. We will just work here on a ROI.">
 
 .. only:: html
@@ -84,6 +67,23 @@ Examples
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Alignment methods benchmark (pairwise ROI case).</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In this tutorial, we show how to better predict new contrasts for a target subject using many source subjects corresponding contrasts. For this purpose, we create a template to which we align the target subject, using shared information. We then predict new images for the target and compare them to a baseline.">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_plot_template_alignment_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_plot_template_alignment.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Template-based prediction.</div>
     </div>
 
 
@@ -150,8 +150,8 @@ Examples
 
    /auto_examples/plot_pairwise_alignment
    /auto_examples/plot_pairwise_roi_alignment
-   /auto_examples/plot_template_alignment
    /auto_examples/plot_alignment_methods_benchmark
+   /auto_examples/plot_template_alignment
    /auto_examples/plot_int_alignment
    /auto_examples/plot_toy_int_experiment
    /auto_examples/plot_alignment_simulated_2D_data

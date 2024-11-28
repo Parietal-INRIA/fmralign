@@ -223,8 +223,8 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../auto_examples/index.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_pairwise_alignment.html">Pairwise functional alignment.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_pairwise_roi_alignment.html">Pairwise functional alignment on a ROI.</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_template_alignment.html">Template-based prediction.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_alignment_methods_benchmark.html">Alignment methods benchmark (pairwise ROI case).</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_template_alignment.html">Template-based prediction.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_int_alignment.html">Co-smoothing prediction using the Individual Neural Tuning Model</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_toy_int_experiment.html">Individual Neural Tuning Model on simulated data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_alignment_simulated_2D_data.html">Alignment on simulated 2D data.</a></li>
@@ -304,9 +304,10 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Memory</span><span class="p">,</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
-<span class="kn">from</span> <span class="nn">nilearn.image</span> <span class="kn">import</span> <span class="n">concat_imgs</span><span class="p">,</span> <span class="n">index_img</span><span class="p">,</span> <span class="n">load_img</span>
 <span class="kn">from</span> <span class="nn">nilearn._utils.masker_validation</span> <span class="kn">import</span> <span class="n">check_embedded_masker</span>
+<span class="kn">from</span> <span class="nn">nilearn.image</span> <span class="kn">import</span> <span class="n">concat_imgs</span><span class="p">,</span> <span class="n">index_img</span><span class="p">,</span> <span class="n">load_img</span>
 <span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span>
+
 <span class="kn">from</span> <span class="nn">fmralign.pairwise_alignment</span> <span class="kn">import</span> <span class="n">PairwiseAlignment</span>
 
 
@@ -428,7 +429,9 @@
     <span class="n">aligned_imgs</span> <span class="o">=</span> <span class="n">imgs</span>
     <span class="n">template_history</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="nb">iter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_iter</span><span class="p">):</span>
-        <span class="n">template</span> <span class="o">=</span> <span class="n">_rescaled_euclidean_mean</span><span class="p">(</span><span class="n">aligned_imgs</span><span class="p">,</span> <span class="n">masker</span><span class="p">,</span> <span class="n">scale_template</span><span class="p">)</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">_rescaled_euclidean_mean</span><span class="p">(</span>
+            <span class="n">aligned_imgs</span><span class="p">,</span> <span class="n">masker</span><span class="p">,</span> <span class="n">scale_template</span>
+        <span class="p">)</span>
         <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="nb">iter</span> <span class="o">&lt;</span> <span class="n">n_iter</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">template_history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
         <span class="n">aligned_imgs</span> <span class="o">=</span> <span class="n">_align_images_to_template</span><span class="p">(</span>
@@ -775,7 +778,9 @@
                 <span class="s2">&quot;greater index in train_index or test_index.&quot;</span>
             <span class="p">)</span>
 
-        <span class="n">fitted_mappings</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="s2">&quot;threads&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)(</span>
+        <span class="n">fitted_mappings</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="s2">&quot;threads&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span>
+        <span class="p">)(</span>
             <span class="n">delayed</span><span class="p">(</span><span class="n">_map_template_to_image</span><span class="p">)(</span>
                 <span class="n">img</span><span class="p">,</span>
                 <span class="n">train_index</span><span class="p">,</span>
@@ -793,7 +798,9 @@
             <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">imgs</span>
         <span class="p">)</span>
 
-        <span class="n">predicted_imgs</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="s2">&quot;threads&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)(</span>
+        <span class="n">predicted_imgs</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="s2">&quot;threads&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span>
+        <span class="p">)(</span>
             <span class="n">delayed</span><span class="p">(</span><span class="n">_predict_from_template_and_mapping</span><span class="p">)(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">,</span> <span class="n">test_index</span><span class="p">,</span> <span class="n">mapping</span>
             <span class="p">)</span>

@@ -184,12 +184,13 @@ We define an estimator using the class TemplateAlignment:
     new template space.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 105-111
+.. GENERATED FROM PYTHON SOURCE LINES 105-112
 
 .. code-block:: Python
 
 
     from nilearn.image import index_img
+
     from fmralign.alignment_methods import IndividualizedNeuralTuning
     from fmralign.hyperalignment.piecewise_alignment import PiecewiseAlignment
     from fmralign.hyperalignment.regions import compute_parcels
@@ -201,7 +202,7 @@ We define an estimator using the class TemplateAlignment:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 112-120
+.. GENERATED FROM PYTHON SOURCE LINES 113-121
 
 Predict new data for left-out subject
 -------------------------------------
@@ -212,7 +213,7 @@ For each train subject and for the template, the AP contrasts are sorted from
 0, to 53, and then the PA contrasts from 53 to 106.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 120-159
+.. GENERATED FROM PYTHON SOURCE LINES 121-162
 
 .. code-block:: Python
 
@@ -225,7 +226,9 @@ For each train subject and for the template, the AP contrasts are sorted from
     target_test_masked = np.array(masked_imgs)[:, test_index, :]
 
 
-    parcels = compute_parcels(niimg=template_train[0], mask=masker, n_parcels=100, n_jobs=5)
+    parcels = compute_parcels(
+        niimg=template_train[0], mask=masker, n_parcels=100, n_jobs=5
+    )
     denoiser = PiecewiseAlignment(n_jobs=5)
     denoised_signal = denoiser.fit_transform(X=denoising_data, regions=parcels)
     target_denoised_data = denoised_signal[-1]
@@ -270,12 +273,12 @@ For each train subject and for the template, the AP contrasts are sorted from
     [Parallel(n_jobs=5)]: Using backend LokyBackend with 5 concurrent workers.
     [Parallel(n_jobs=5)]: Done  40 tasks      | elapsed:    1.8s
     [Parallel(n_jobs=5)]: Done 100 out of 100 | elapsed:    2.1s finished
-    [Parallel(n_jobs=1)]: Done  49 tasks      | elapsed:    5.6s
+    [Parallel(n_jobs=1)]: Done  49 tasks      | elapsed:    5.5s
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 160-167
+.. GENERATED FROM PYTHON SOURCE LINES 163-170
 
 Score the baseline and the prediction
 -------------------------------------
@@ -285,7 +288,7 @@ measure the correlation between its profile of activation without and with
 alignment, to see if alignment was able to predict a signal more alike the ground truth.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 167-183
+.. GENERATED FROM PYTHON SOURCE LINES 170-186
 
 .. code-block:: Python
 
@@ -312,14 +315,14 @@ alignment, to see if alignment was able to predict a signal more alike the groun
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 184-188
+.. GENERATED FROM PYTHON SOURCE LINES 187-191
 
 Plotting the measures
 ---------------------
 Finally we plot both scores
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 188-200
+.. GENERATED FROM PYTHON SOURCE LINES 191-203
 
 .. code-block:: Python
 
@@ -359,14 +362,14 @@ Finally we plot both scores
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 201-205
+.. GENERATED FROM PYTHON SOURCE LINES 204-208
 
 We observe that creating a template and aligning a new subject to it yields
 a prediction that is better correlated with the ground truth than just using
 the average activations of subjects.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 205-207
+.. GENERATED FROM PYTHON SOURCE LINES 208-210
 
 .. code-block:: Python
 
@@ -382,7 +385,7 @@ the average activations of subjects.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (2 minutes 15.527 seconds)
+   **Total running time of the script:** (2 minutes 15.250 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_int_alignment.py:

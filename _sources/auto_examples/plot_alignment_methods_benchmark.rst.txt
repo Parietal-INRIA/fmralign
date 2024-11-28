@@ -65,7 +65,7 @@ Extract a mask for the visual cortex from Yeo Atlas
 ---------------------------------------------------
 First, we fetch and plot the complete atlas
 
-.. GENERATED FROM PYTHON SOURCE LINES 37-58
+.. GENERATED FROM PYTHON SOURCE LINES 37-60
 
 .. code-block:: Python
 
@@ -79,7 +79,9 @@ First, we fetch and plot the complete atlas
     # Select visual cortex, create a mask and resample it to the right resolution
 
     mask_visual = new_img_like(atlas, atlas.get_fdata() == 1)
-    resampled_mask_visual = resample_to_img(mask_visual, mask, interpolation="nearest")
+    resampled_mask_visual = resample_to_img(
+        mask_visual, mask, interpolation="nearest"
+    )
 
     # Plot the mask we will use
     plotting.plot_roi(
@@ -104,11 +106,11 @@ First, we fetch and plot the complete atlas
  .. code-block:: none
 
 
-    <nilearn.plotting.displays._slicers.OrthoSlicer object at 0x7fd836b52a90>
+    <nilearn.plotting.displays._slicers.OrthoSlicer object at 0x7f69637fa4d0>
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 59-64
+.. GENERATED FROM PYTHON SOURCE LINES 61-66
 
 Define a masker
 ---------------
@@ -116,7 +118,7 @@ We define a nilearn masker that will be used to handle relevant data.
 For more information, visit :
 'http://nilearn.github.io/manipulating_images/masker_objects.html'
 
-.. GENERATED FROM PYTHON SOURCE LINES 64-69
+.. GENERATED FROM PYTHON SOURCE LINES 66-71
 
 .. code-block:: Python
 
@@ -132,7 +134,7 @@ For more information, visit :
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 70-79
+.. GENERATED FROM PYTHON SOURCE LINES 72-81
 
 Prepare the data
 ----------------
@@ -144,7 +146,7 @@ in the final data, we will take  advantage of these pseudo-duplicates to
 create a training and a testing set that contains roughly the same signals
 but acquired independently.
 
-.. GENERATED FROM PYTHON SOURCE LINES 79-98
+.. GENERATED FROM PYTHON SOURCE LINES 81-100
 
 .. code-block:: Python
 
@@ -175,19 +177,19 @@ but acquired independently.
 
  .. code-block:: none
 
-    /home/runner/work/fmralign/fmralign/examples/plot_alignment_methods_benchmark.py:85: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+    /home/runner/work/fmralign/fmralign/examples/plot_alignment_methods_benchmark.py:87: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
       source_train = df[df.subject == "sub-01"][df.acquisition == "ap"].path.values
-    /home/runner/work/fmralign/fmralign/examples/plot_alignment_methods_benchmark.py:86: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+    /home/runner/work/fmralign/fmralign/examples/plot_alignment_methods_benchmark.py:88: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
       target_train = df[df.subject == "sub-02"][df.acquisition == "ap"].path.values
-    /home/runner/work/fmralign/fmralign/examples/plot_alignment_methods_benchmark.py:95: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+    /home/runner/work/fmralign/fmralign/examples/plot_alignment_methods_benchmark.py:97: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
       source_test = df[df.subject == "sub-01"][df.acquisition == "pa"].path.values
-    /home/runner/work/fmralign/fmralign/examples/plot_alignment_methods_benchmark.py:96: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+    /home/runner/work/fmralign/fmralign/examples/plot_alignment_methods_benchmark.py:98: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
       target_test = df[df.subject == "sub-02"][df.acquisition == "pa"].path.values
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 99-105
+.. GENERATED FROM PYTHON SOURCE LINES 101-107
 
 Choose the number of regions for local alignment
 ------------------------------------------------
@@ -196,7 +198,7 @@ regions so that each of them is approximately 200 voxels wide. Then our
 estimator will first make a functional clustering of voxels based on train
 data to divide them into meaningful regions.
 
-.. GENERATED FROM PYTHON SOURCE LINES 105-113
+.. GENERATED FROM PYTHON SOURCE LINES 107-115
 
 .. code-block:: Python
 
@@ -222,7 +224,7 @@ data to divide them into meaningful regions.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 114-126
+.. GENERATED FROM PYTHON SOURCE LINES 116-128
 
 Define the estimators, fit them and do a prediction
 ---------------------------------------------------
@@ -237,7 +239,7 @@ On each region, we search for a transformation R that is either :
 Then for each method we define the estimator fit it, predict the new image and plot
 its correlation with the real signal.
 
-.. GENERATED FROM PYTHON SOURCE LINES 126-155
+.. GENERATED FROM PYTHON SOURCE LINES 128-157
 
 .. code-block:: Python
 
@@ -357,7 +359,7 @@ its correlation with the real signal.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 156-161
+.. GENERATED FROM PYTHON SOURCE LINES 158-163
 
 We can observe that all alignment methods perform better than identity
 (no alignment). Ridge is the best performing method, followed by Optimal
@@ -368,7 +370,7 @@ it yields.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 28.246 seconds)
+   **Total running time of the script:** (1 minutes 28.161 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_alignment_methods_benchmark.py:

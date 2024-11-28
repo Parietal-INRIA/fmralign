@@ -158,7 +158,7 @@ a S shape. Here the dimension of our distributions will `(n_points, 2)`
 since we want to be able to plot each voxel in a point. In real cases
 however we have tens or hundreds of observations that characterize each point.
 
-.. GENERATED FROM PYTHON SOURCE LINES 131-165
+.. GENERATED FROM PYTHON SOURCE LINES 131-167
 
 .. code-block:: Python
 
@@ -180,7 +180,9 @@ however we have tens or hundreds of observations that characterize each point.
     # We make a target distribution Y as well
     Y = np.asarray(
         [
-            _rotate((x[origin_index], y[origin_index]), (x_, y_), math.radians(-10))
+            _rotate(
+                (x[origin_index], y[origin_index]), (x_, y_), math.radians(-10)
+            )
             for x_, y_ in zip(x, y)
         ]
     )
@@ -220,7 +222,7 @@ however we have tens or hundreds of observations that characterize each point.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 166-172
+.. GENERATED FROM PYTHON SOURCE LINES 168-174
 
 Alignment : finding the right transform
 ---------------------------------------
@@ -229,7 +231,7 @@ idea of alignment is to find a transform, let's call it `R`, between the
 source `X` and the target `Y` that will handle that. Now we will showcase
 on our simple 2D example different kind of transformation we can look for.
 
-.. GENERATED FROM PYTHON SOURCE LINES 172-179
+.. GENERATED FROM PYTHON SOURCE LINES 174-181
 
 .. code-block:: Python
 
@@ -247,7 +249,7 @@ on our simple 2D example different kind of transformation we can look for.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 180-185
+.. GENERATED FROM PYTHON SOURCE LINES 182-187
 
 Orthogonal alignment
 --------------------
@@ -255,7 +257,7 @@ The first idea proposed in Haxby, 2011 was to compute an orthogonal mixing
 matrix `R` and a scaling `sc` such that Frobenius norm: math:
 ` | |sc RX - Y | | ^ 2` is minimized.
 
-.. GENERATED FROM PYTHON SOURCE LINES 185-199
+.. GENERATED FROM PYTHON SOURCE LINES 187-201
 
 .. code-block:: Python
 
@@ -297,7 +299,7 @@ matrix `R` and a scaling `sc` such that Frobenius norm: math:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 200-206
+.. GENERATED FROM PYTHON SOURCE LINES 202-208
 
 Ridge alignment
 ---------------
@@ -306,7 +308,7 @@ penalize its L2 norm. This is a ridge regression, which means we search `R`
 such that Frobenius  norm :math:`|| XR - Y ||^2 + alpha * ||R||^2`
 is minimized with cross-validation.
 
-.. GENERATED FROM PYTHON SOURCE LINES 206-218
+.. GENERATED FROM PYTHON SOURCE LINES 208-220
 
 .. code-block:: Python
 
@@ -346,7 +348,7 @@ is minimized with cross-validation.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 219-228
+.. GENERATED FROM PYTHON SOURCE LINES 221-230
 
 Optimal Transport alignment
 ---------------------------
@@ -358,7 +360,7 @@ optimal coupling between `X` and `Y` with entropic regularization.
 This way of finding a transform uses more geometrical information from the
 distributions.
 
-.. GENERATED FROM PYTHON SOURCE LINES 228-235
+.. GENERATED FROM PYTHON SOURCE LINES 230-237
 
 .. code-block:: Python
 
@@ -396,7 +398,7 @@ distributions.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.630 seconds)
+   **Total running time of the script:** (0 minutes 1.677 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_alignment_simulated_2D_data.py:

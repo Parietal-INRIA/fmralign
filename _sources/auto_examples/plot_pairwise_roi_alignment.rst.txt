@@ -69,7 +69,7 @@ Extract a mask for the visual cortex from Yeo Atlas
 First, we fetch and plot the complete atlas
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 40-63
+.. GENERATED FROM PYTHON SOURCE LINES 40-65
 
 .. code-block:: Python
 
@@ -85,7 +85,9 @@ First, we fetch and plot the complete atlas
     # Select visual cortex, create a mask and resample it to the right resolution
 
     mask_visual = new_img_like(atlas, atlas.get_fdata() == 1)
-    resampled_mask_visual = resample_to_img(mask_visual, mask, interpolation="nearest")
+    resampled_mask_visual = resample_to_img(
+        mask_visual, mask, interpolation="nearest"
+    )
 
     # Plot the mask we will use
     plot_roi(
@@ -116,11 +118,11 @@ First, we fetch and plot the complete atlas
      ...done. (0 seconds, 0 min)
     Extracting data from /home/runner/nilearn_data/yeo_2011/d7a5390bfb7686fb41fa64cc2ba058d0/Yeo_JNeurophysiol11_MNI152.zip..... done.
 
-    <nilearn.plotting.displays._slicers.OrthoSlicer object at 0x7fd836c12ed0>
+    <nilearn.plotting.displays._slicers.OrthoSlicer object at 0x7f6939f0c150>
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 64-70
+.. GENERATED FROM PYTHON SOURCE LINES 66-72
 
 Definine a masker
 -----------------
@@ -129,7 +131,7 @@ For more information, visit :
 'http://nilearn.github.io/manipulating_images/masker_objects.html'
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 70-75
+.. GENERATED FROM PYTHON SOURCE LINES 72-77
 
 .. code-block:: Python
 
@@ -145,7 +147,7 @@ For more information, visit :
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 76-82
+.. GENERATED FROM PYTHON SOURCE LINES 78-84
 
 Prepare the data
 ----------------
@@ -154,7 +156,7 @@ two independent sessions with a different phase encoding:
 Antero-posterior(AP) or Postero-anterior(PA).
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 82-100
+.. GENERATED FROM PYTHON SOURCE LINES 84-102
 
 .. code-block:: Python
 
@@ -184,19 +186,19 @@ Antero-posterior(AP) or Postero-anterior(PA).
 
  .. code-block:: none
 
-    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_roi_alignment.py:88: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_roi_alignment.py:90: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
       source_train = df[df.subject == "sub-01"][df.acquisition == "ap"].path.values
-    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_roi_alignment.py:89: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_roi_alignment.py:91: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
       target_train = df[df.subject == "sub-02"][df.acquisition == "ap"].path.values
-    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_roi_alignment.py:97: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_roi_alignment.py:99: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
       source_test = df[df.subject == "sub-01"][df.acquisition == "pa"].path.values
-    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_roi_alignment.py:98: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_roi_alignment.py:100: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
       target_test = df[df.subject == "sub-02"][df.acquisition == "pa"].path.values
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 101-111
+.. GENERATED FROM PYTHON SOURCE LINES 103-113
 
 Define the estimator, fit it and predict
 ----------------------------------------
@@ -209,7 +211,7 @@ n_pieces to 1. We learn alignment estimator on train data and use it to
 predict target test data.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 111-120
+.. GENERATED FROM PYTHON SOURCE LINES 113-122
 
 .. code-block:: Python
 
@@ -230,7 +232,7 @@ predict target test data.
 
  .. code-block:: none
 
-    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:69: UserWarning: 
+    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:73: UserWarning: 
      Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
      parcel 1 : 6631 voxels
       warnings.warn(warning)
@@ -238,7 +240,7 @@ predict target test data.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 121-129
+.. GENERATED FROM PYTHON SOURCE LINES 123-131
 
 Score the baseline and the prediction
 -------------------------------------
@@ -249,7 +251,7 @@ and with alignment, to see if alignment was able to predict a signal more
 alike the ground truth.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 129-142
+.. GENERATED FROM PYTHON SOURCE LINES 131-144
 
 .. code-block:: Python
 
@@ -280,14 +282,14 @@ alike the ground truth.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 143-147
+.. GENERATED FROM PYTHON SOURCE LINES 145-149
 
 Plotting the measures
 ---------------------
 Finally we plot both scores.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 147-159
+.. GENERATED FROM PYTHON SOURCE LINES 149-161
 
 .. code-block:: Python
 
@@ -334,7 +336,7 @@ Finally we plot both scores.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 160-162
+.. GENERATED FROM PYTHON SOURCE LINES 162-164
 
 We can see on the plot that after alignment, the prediction made for one
 subject data, informed by another subject are greatly improved.
@@ -342,7 +344,7 @@ subject data, informed by another subject are greatly improved.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 23.363 seconds)
+   **Total running time of the script:** (0 minutes 22.425 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_pairwise_roi_alignment.py:

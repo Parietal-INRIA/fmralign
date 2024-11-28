@@ -11,7 +11,7 @@
 <meta property="og:image" content="https://nilearn.github.io/_static/nilearn-logo.png" />
 <meta property="og:image:alt" content="Nilearn" />
 <meta name="description" content="In this tutorial, we show how to better predict new contrasts for a target subject using many source subjects corresponding contrasts. For this purpose, we create a template to which we align the t..." />
-<link rel="search" title="Search" href="../search.html" /><link rel="next" title="Alignment methods benchmark (pairwise ROI case)." href="plot_alignment_methods_benchmark.html" /><link rel="prev" title="Pairwise functional alignment on a ROI." href="plot_pairwise_roi_alignment.html" />
+<link rel="search" title="Search" href="../search.html" /><link rel="next" title="Co-smoothing prediction using the Individual Neural Tuning Model" href="plot_int_alignment.html" /><link rel="prev" title="Alignment methods benchmark (pairwise ROI case)." href="plot_alignment_methods_benchmark.html" />
 
     <link rel="shortcut icon" href="../_static/favicon.ico"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
         <title>Template-based prediction. - fmralign</title>
@@ -232,8 +232,8 @@
 <li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="plot_pairwise_alignment.html">Pairwise functional alignment.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_pairwise_roi_alignment.html">Pairwise functional alignment on a ROI.</a></li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Template-based prediction.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_alignment_methods_benchmark.html">Alignment methods benchmark (pairwise ROI case).</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Template-based prediction.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_int_alignment.html">Co-smoothing prediction using the Individual Neural Tuning Model</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_toy_int_experiment.html">Individual Neural Tuning Model on simulated data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_alignment_simulated_2D_data.html">Alignment on simulated 2D data.</a></li>
@@ -352,18 +352,21 @@ mask is a binary image used to extract grey matter regions.</p>
 </pre></div>
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Downloading data from https://osf.io/qn5b6/download ...
- ...done. (2 seconds, 0 min)
+
+Downloaded 9633792 of 21197218 bytes (45.4%,    1.2s remaining)
+Downloaded 20873216 of 21197218 bytes (98.5%,    0.0s remaining) ...done. (5 seconds, 0 min)
 Extracting data from /home/runner/nilearn_data/ibc/cd396fed594eb866baecd48b70ddf7e7/download..... done.
 Downloading data from https://osf.io/u74a3/download ...
 
-Downloaded 9273344 of 21185350 bytes (43.8%,    1.3s remaining) ...done. (3 seconds, 0 min)
+Downloaded 9306112 of 21185350 bytes (43.9%,    1.3s remaining) ...done. (4 seconds, 0 min)
 Extracting data from /home/runner/nilearn_data/ibc/fc5556cc3678df4f4ab566414382180a/download..... done.
 Downloading data from https://osf.io/83bje/download ...
 
-Downloaded 13049856 of 21188335 bytes (61.6%,    0.6s remaining) ...done. (3 seconds, 0 min)
+Downloaded 16850944 of 21188335 bytes (79.5%,    0.3s remaining) ...done. (3 seconds, 0 min)
 Extracting data from /home/runner/nilearn_data/ibc/1beaa1b5a1734a1afbf1c844e1f7a60e/download..... done.
 Downloading data from https://osf.io/43j69/download ...
- ...done. (3 seconds, 0 min)
+
+Downloaded 16859136 of 21187400 bytes (79.6%,    0.3s remaining) ...done. (3 seconds, 0 min)
 Extracting data from /home/runner/nilearn_data/ibc/75e62c44985852e000c2b2865badf72d/download..... done.
 </pre></div>
 </div>
@@ -554,7 +557,7 @@ Parameter smoothing_fwhm :
     Masker parameter None - overriding estimator parameter 4.0
 
   warnings.warn(warn_str)
-/home/runner/work/fmralign/fmralign/fmralign/_utils.py:69: UserWarning:
+/home/runner/work/fmralign/fmralign/fmralign/_utils.py:73: UserWarning:
  Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
  parcel 84 : 1105 voxels
   warnings.warn(warning)
@@ -576,7 +579,9 @@ alignment, to see if alignment was able to predict a signal more alike the groun
     <span class="n">score_voxelwise</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">target_test</span></a><span class="p">,</span> <a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">prediction_from_average</span></a><span class="p">,</span> <span class="n">masker</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="s2">&quot;corr&quot;</span><span class="p">)</span>
 <span class="p">)</span>
 <a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">template_score</span></a> <span class="o">=</span> <span class="n">masker</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span>
-    <span class="n">score_voxelwise</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">target_test</span></a><span class="p">,</span> <a href="https://docs.python.org/3.9/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">prediction_from_template</span></a><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">masker</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="s2">&quot;corr&quot;</span><span class="p">)</span>
+    <span class="n">score_voxelwise</span><span class="p">(</span>
+        <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">target_test</span></a><span class="p">,</span> <a href="https://docs.python.org/3.9/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">prediction_from_template</span></a><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">masker</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="s2">&quot;corr&quot;</span>
+    <span class="p">)</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -603,7 +608,7 @@ alignment, to see if alignment was able to predict a signal more alike the groun
 <p>We observe that creating a template and aligning a new subject to it yields
 a prediction that is better correlated with the ground truth than just using
 the average activations of subjects.</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (22 minutes 15.630 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (22 minutes 34.816 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-template-alignment-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/nilearn/nilearn/main?urlpath=lab/tree/notebooks/auto_examples/plot_template_alignment.ipynb"><img alt="Launch binder" src="../_images/binder_badge_logo.svg" style="width: 150px;" />
@@ -628,23 +633,23 @@ the average activations of subjects.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="plot_alignment_methods_benchmark.html">
+          <a class="next-page" href="plot_int_alignment.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Alignment methods benchmark (pairwise ROI case).</div>
+                <div class="title">Co-smoothing prediction using the Individual Neural Tuning Model</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="plot_pairwise_roi_alignment.html">
+          <a class="prev-page" href="plot_alignment_methods_benchmark.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Pairwise functional alignment on a ROI.</div>
+                <div class="title">Alignment methods benchmark (pairwise ROI case).</div>
                 
               </div>
             </a>
