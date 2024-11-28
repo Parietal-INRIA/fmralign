@@ -252,7 +252,9 @@ def multithread_compute_correlation(
 
     assert X.shape == Y.shape
     n_s = X.shape[0]
-    coordinates = list(combinations(range(n_s), 2)) + [(i, i) for i in range(n_s)]
+    coordinates = list(combinations(range(n_s), 2)) + [
+        (i, i) for i in range(n_s)
+    ]
     results = Parallel(n_jobs=n_jobs)(
         delayed(thread_compute_correlation)(
             X,

@@ -4,8 +4,14 @@ from nilearn.image import concat_imgs, index_img, math_img
 from nilearn.maskers import NiftiMasker
 from numpy.testing import assert_array_almost_equal
 
-from fmralign.template_alignment import TemplateAlignment, _rescaled_euclidean_mean
-from fmralign.tests.utils import random_niimg, zero_mean_coefficient_determination
+from fmralign.template_alignment import (
+    TemplateAlignment,
+    _rescaled_euclidean_mean,
+)
+from fmralign.tests.utils import (
+    random_niimg,
+    zero_mean_coefficient_determination,
+)
 
 
 def test_template_identity():
@@ -65,12 +71,15 @@ def test_template_identity():
         )
 
     # test transform() with wrong indexes length or content (on previous fitted algo)
-    train_inds, test_inds = [[0, 1], [1, 10], [4, 11], [0, 1, 2]], [
-        [6, 8, 29],
-        [4, 6],
-        [4, 11],
-        [4, 5],
-    ]
+    train_inds, test_inds = (
+        [[0, 1], [1, 10], [4, 11], [0, 1, 2]],
+        [
+            [6, 8, 29],
+            [4, 6],
+            [4, 11],
+            [4, 5],
+        ],
+    )
 
     for train_ind, test_ind in zip(train_inds, test_inds):
         with pytest.raises(Exception):

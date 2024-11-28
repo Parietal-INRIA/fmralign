@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-""" Test module to adapt quickly fmralign for piecewise srm
+"""Test module to adapt quickly fmralign for piecewise srm
 Implementation from fastSRM is taken from H. Richard
 """
 # Author: T. Bazeille
 # License: simplified BSD
-
 
 import numpy as np
 from joblib import Parallel, delayed
@@ -34,8 +33,10 @@ class Identity(BaseEstimator, TransformerMixin):
 
 
 def _get_parcel_across_subjects(parceled_data, parcel_id):
+    """Get the list of parcels for a given parcel_id across subjects."""
     parcel_across_subjects = [
-        parceled_data[i].to_list()[parcel_id].T for i in range(len(parceled_data))
+        parceled_data[i].to_list()[parcel_id].T
+        for i in range(len(parceled_data))
     ]
     return parcel_across_subjects
 
@@ -222,7 +223,9 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
         self.labels_ = self.pmasker.labels
         self.n_pieces = self.pmasker.n_pieces
 
-        outputs = Parallel(n_jobs=self.n_jobs, prefer="threads", verbose=self.verbose)(
+        outputs = Parallel(
+            n_jobs=self.n_jobs, prefer="threads", verbose=self.verbose
+        )(
             delayed(fit_one_piece)(
                 _get_parcel_across_subjects(parceled_data, i),
                 self.srm,

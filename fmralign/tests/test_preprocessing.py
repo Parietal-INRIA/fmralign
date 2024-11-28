@@ -76,7 +76,8 @@ def test_transform_multiple_images():
     assert isinstance(transformed_data, list)
     assert len(transformed_data) == 3
     assert all(
-        isinstance(parceled_data, ParceledData) for parceled_data in transformed_data
+        isinstance(parceled_data, ParceledData)
+        for parceled_data in transformed_data
     )
 
 

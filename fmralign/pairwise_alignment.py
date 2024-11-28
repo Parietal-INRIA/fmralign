@@ -223,9 +223,13 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         self.labels_ = self.pmasker.labels
         self.n_pieces = self.pmasker.n_pieces
 
-        self.fit_ = Parallel(self.n_jobs, prefer="threads", verbose=self.verbose)(
+        self.fit_ = Parallel(
+            self.n_jobs, prefer="threads", verbose=self.verbose
+        )(
             delayed(fit_one_piece)(X_i, Y_i, self.alignment_method)
-            for X_i, Y_i in zip(parceled_source.to_list(), parceled_target.to_list())
+            for X_i, Y_i in zip(
+                parceled_source.to_list(), parceled_target.to_list()
+            )
         )
 
         return self
@@ -249,7 +253,9 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
                 "Please call 'fit' before 'transform'."
             )
         parceled_data_list = self.pmasker.transform(X)
-        transformed_img = Parallel(self.n_jobs, prefer="threads", verbose=self.verbose)(
+        transformed_img = Parallel(
+            self.n_jobs, prefer="threads", verbose=self.verbose
+        )(
             delayed(_transform_one_img)(parceled_data, self.fit_)
             for parceled_data in parceled_data_list
         )

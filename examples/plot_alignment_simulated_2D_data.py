@@ -146,7 +146,9 @@ X[:, 1] += 4
 # We make a target distribution Y as well
 Y = np.asarray(
     [
-        _rotate((x[origin_index], y[origin_index]), (x_, y_), math.radians(-10))
+        _rotate(
+            (x[origin_index], y[origin_index]), (x_, y_), math.radians(-10)
+        )
         for x_, y_ in zip(x, y)
     ]
 )

@@ -192,7 +192,8 @@ class ParcellationMasker(BaseEstimator, TransformerMixin):
         """
         if self.labels is None:
             raise ValueError(
-                "Labels have not been computed yet," "call fit before get_labels."
+                "Labels have not been computed yet,"
+                "call fit before get_labels."
             )
         return self.labels
 
