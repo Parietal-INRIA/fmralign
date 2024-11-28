@@ -1,4 +1,4 @@
-""" Local template computation functions. Those functions are part of the warp hyperalignment
+"""Local template computation functions. Those functions are part of the warp hyperalignment
 introducted by Feilong Ma et al. 2023.
 """
 
@@ -48,7 +48,11 @@ def PCA_decomposition(
             else:
                 U, s, Vt = randomized_svd(
                     X,
-                    (n_components if n_components is not None else min(X.shape)),
+                    (
+                        n_components
+                        if n_components is not None
+                        else min(X.shape)
+                    ),
                     random_state=0,
                 )
                 if adjust_ns:
@@ -70,7 +74,9 @@ def PCA_decomposition(
     elif flavor == "svd":
         U, s, Vt = safe_svd(X)
         if adjust_ns:
-            XX = U[:, :n_components] * (s[np.newaxis, :n_components] / np.sqrt(ns))
+            XX = U[:, :n_components] * (
+                s[np.newaxis, :n_components] / np.sqrt(ns)
+            )
         else:
             XX = U[:, :n_components] * (s[np.newaxis, :n_components])
         cc = Vt[:n_components].reshape(-1, ns, nv)
@@ -79,7 +85,9 @@ def PCA_decomposition(
         raise NotImplementedError
 
 
-def compute_PCA_template(X, sl=None, n_components=None, flavor="sklearn", demean=False):
+def compute_PCA_template(
+    X, sl=None, n_components=None, flavor="sklearn", demean=False
+):
     """
     Compute the PCA template from the input data.
 
@@ -110,7 +118,11 @@ def compute_PCA_template(X, sl=None, n_components=None, flavor="sklearn", demean
     n = min(X_.shape[1], X_.shape[2])
     n_components = min(n, n_components)
     XX, cc = PCA_decomposition(
-        X_, n_components=n_components, flavor=flavor, adjust_ns=True, demean=demean
+        X_,
+        n_components=n_components,
+        flavor=flavor,
+        adjust_ns=True,
+        demean=demean,
     )
     return XX.astype(np.float32)
 
@@ -144,7 +156,11 @@ def compute_PCA_var1_template(
     if sl is not None:
         X = X[:, :, sl]
     XX, cc = PCA_decomposition(
-        X, n_components=n_components, flavor=flavor, adjust_ns=False, demean=demean
+        X,
+        n_components=n_components,
+        flavor=flavor,
+        adjust_ns=False,
+        demean=demean,
     )
     w = np.sqrt(np.sum(cc**2, axis=2)).mean(axis=1)
     XX *= w[np.newaxis]
@@ -192,7 +208,9 @@ def compute_template(
         "pcav1": compute_PCA_var1_template,
     }
     if kind in mapping:
-        tmpl = mapping[kind](X, sl=region, n_components=n_components, demean=demean)
+        tmpl = mapping[kind](
+            X, sl=region, n_components=n_components, demean=demean
+        )
     else:
         raise ValueError("Unknown template kind")
 

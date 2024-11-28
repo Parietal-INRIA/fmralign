@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Module implementing alignment estimators on ndarrays."""
+
 import warnings
 
 import numpy as np

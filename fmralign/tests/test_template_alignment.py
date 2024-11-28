@@ -65,12 +65,15 @@ def test_template_identity():
         )
 
     # test transform() with wrong indexes length or content (on previous fitted algo)
-    train_inds, test_inds = [[0, 1], [1, 10], [4, 11], [0, 1, 2]], [
-        [6, 8, 29],
-        [4, 6],
-        [4, 11],
-        [4, 5],
-    ]
+    train_inds, test_inds = (
+        [[0, 1], [1, 10], [4, 11], [0, 1, 2]],
+        [
+            [6, 8, 29],
+            [4, 6],
+            [4, 11],
+            [4, 5],
+        ],
+    )
 
     for train_ind, test_ind in zip(train_inds, test_inds):
         with pytest.raises(Exception):

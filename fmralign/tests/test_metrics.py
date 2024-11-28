@@ -41,7 +41,9 @@ def test_score_voxelwise():
 
 def test_normalized_reconstruction_error():
     A = np.asarray([[1, 1.2, 1, 1.2, 1], [1, 1, 1, 0.2, 1], [1, -1, 1, -1, 1]])
-    B = np.asarray([[0, 0.2, 0, 0.2, 0], [0.2, 1, 1, 1, 1], [-1, 1, -1, 1, -1]])
+    B = np.asarray(
+        [[0, 0.2, 0, 0.2, 0], [0.2, 1, 1, 1, 1], [-1, 1, -1, 1, -1]]
+    )
 
     avg_norm_rec = metrics.normalized_reconstruction_error(
         A, B, multioutput="uniform_average"

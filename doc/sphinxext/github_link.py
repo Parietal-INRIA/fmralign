@@ -23,12 +23,14 @@ def _linkcode_resolve(domain, info, package, url_fmt, revision):
     This is called by sphinx.ext.linkcode
 
     An example with a long-untouched module that everyone has
-    >>> _linkcode_resolve('py', {'module': 'tty',
-    ...                          'fullname': 'setraw'},
-    ...                   package='tty',
-    ...                   url_fmt='https://hg.python.org/cpython/file/'
-    ...                           '{revision}/Lib/{package}/{path}#L{lineno}',
-    ...                   revision='xxxx')
+    >>> _linkcode_resolve(
+    ...     "py",
+    ...     {"module": "tty", "fullname": "setraw"},
+    ...     package="tty",
+    ...     url_fmt="https://hg.python.org/cpython/file/"
+    ...     "{revision}/Lib/{package}/{path}#L{lineno}",
+    ...     revision="xxxx",
+    ... )
     'https://hg.python.org/cpython/file/xxxx/Lib/tty/tty.py#L18'
     """
 
@@ -59,12 +61,16 @@ def _linkcode_resolve(domain, info, package, url_fmt, revision):
     if not fn:
         return
 
-    fn = os.path.relpath(fn, start=os.path.dirname(__import__(package).__file__))
+    fn = os.path.relpath(
+        fn, start=os.path.dirname(__import__(package).__file__)
+    )
     try:
         lineno = inspect.getsourcelines(obj)[1]
     except Exception:
         lineno = ""
-    return url_fmt.format(revision=revision, package=package, path=fn, lineno=lineno)
+    return url_fmt.format(
+        revision=revision, package=package, path=fn, lineno=lineno
+    )
 
 
 def make_linkcode_resolve(package, url_fmt):

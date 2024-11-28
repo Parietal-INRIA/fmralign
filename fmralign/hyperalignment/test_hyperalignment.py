@@ -13,16 +13,18 @@ def test_int_fit_predict():
     and if decomposition is working. Without proper searchlight input
     (ie all voxels are used)"""
     # Create random data
-    X_train, X_test, S_true_first_part, S_true_second_part, _ = generate_dummy_signal(
-        n_subjects=7,
-        n_timepoints=50,
-        n_voxels=300,
-        S_std=1,
-        T_std=1,
-        latent_dim=6,
-        SNR=100,
-        generative_method="custom",
-        seed=0,
+    X_train, X_test, S_true_first_part, S_true_second_part, _ = (
+        generate_dummy_signal(
+            n_subjects=7,
+            n_timepoints=50,
+            n_voxels=300,
+            S_std=1,
+            T_std=1,
+            latent_dim=6,
+            SNR=100,
+            generative_method="custom",
+            seed=0,
+        )
     )
 
     # Testing without searchlights
@@ -48,7 +50,9 @@ def test_int_fit_predict():
 
     corr1 = tuning_correlation(tuning_data_run_1, tuning_data_run_2)
     corr2 = stimulus_correlation(stimulus_run_1.T, S_true_first_part.T)
-    corr3 = stimulus_correlation(S_estimated_second_part.T, S_true_second_part.T)
+    corr3 = stimulus_correlation(
+        S_estimated_second_part.T, S_true_second_part.T
+    )
     corr4 = tuning_correlation(X_pred, X_test)
 
     # Check that the correlation between the two parts of the data is high
@@ -87,8 +91,12 @@ def test_int_with_searchlight():
     )
 
     # Test INT on the two parts of the data (ie different runs of the experiment)
-    model1 = INT(n_components=6, searchlights=searchlights, dists=dists, radius=5)
-    model2 = INT(n_components=6, searchlights=searchlights, dists=dists, radius=5)
+    model1 = INT(
+        n_components=6, searchlights=searchlights, dists=dists, radius=5
+    )
+    model2 = INT(
+        n_components=6, searchlights=searchlights, dists=dists, radius=5
+    )
     model1.fit(X_train)
     model2.fit(X_test)
     X_pred = model1.transform(X_test)

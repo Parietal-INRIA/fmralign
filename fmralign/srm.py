@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-""" Test module to adapt quickly fmralign for piecewise srm
+"""Test module to adapt quickly fmralign for piecewise srm
 Implementation from fastSRM is taken from H. Richard
 """
 # Author: T. Bazeille
