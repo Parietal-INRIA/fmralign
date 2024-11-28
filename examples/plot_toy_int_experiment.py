@@ -147,7 +147,7 @@ T_first_part_transformed, T_second_part_transformed = matrix_MDS(
     tuning_pred_run_1,
     tuning_pred_run_2,
     n_components=2,
-    dissimilarity=1 - corr_tunning,
+    dissimilarity=(1 - corr_tunning),
 )
 
 ax[0, 2].scatter(
