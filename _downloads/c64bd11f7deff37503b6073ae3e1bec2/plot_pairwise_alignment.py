@@ -37,6 +37,7 @@ files, df, mask = fetch_ibc_subjects_contrasts(["sub-01", "sub-02"])
 #   'http://nilearn.github.io/manipulating_images/masker_objects.html'
 #
 
+from nilearn.image import concat_imgs
 from nilearn.maskers import NiftiMasker
 
 masker = NiftiMasker(mask_img=mask)
@@ -59,8 +60,12 @@ masker.fit()
 # * source train: AP contrasts for subject sub-01
 # * target train: AP contrasts for subject sub-02
 
-source_train = df[df.subject == "sub-01"][df.acquisition == "ap"].path.values
-target_train = df[df.subject == "sub-02"][df.acquisition == "ap"].path.values
+source_train = concat_imgs(
+    df[df.subject == "sub-01"][df.acquisition == "ap"].path.values
+)
+target_train = concat_imgs(
+    df[df.subject == "sub-02"][df.acquisition == "ap"].path.values
+)
 
 # The testing fold:
 # * source test: PA contrasts for subject sub-01, used to predict
@@ -68,8 +73,12 @@ target_train = df[df.subject == "sub-02"][df.acquisition == "ap"].path.values
 # * target test: PA contrasts for subject sub-02, used as a ground truth
 #   to score our predictions
 
-source_test = df[df.subject == "sub-01"][df.acquisition == "pa"].path.values
-target_test = df[df.subject == "sub-02"][df.acquisition == "pa"].path.values
+source_test = concat_imgs(
+    df[df.subject == "sub-01"][df.acquisition == "pa"].path.values
+)
+target_test = concat_imgs(
+    df[df.subject == "sub-02"][df.acquisition == "pa"].path.values
+)
 
 
 ###############################################################################

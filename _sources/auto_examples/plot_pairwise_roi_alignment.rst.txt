@@ -75,7 +75,7 @@ First, we fetch and plot the complete atlas
 
 
     from nilearn import datasets
-    from nilearn.image import load_img, new_img_like, resample_to_img
+    from nilearn.image import concat_imgs, load_img, new_img_like, resample_to_img
     from nilearn.plotting import plot_roi
 
     atlas_yeo_2011 = datasets.fetch_atlas_yeo_2011()
@@ -115,10 +115,10 @@ First, we fetch and plot the complete atlas
     Dataset created in /home/runner/nilearn_data/yeo_2011
 
     Downloading data from ftp://surfer.nmr.mgh.harvard.edu/pub/data/Yeo_JNeurophysiol11_MNI152.zip ...
-     ...done. (0 seconds, 0 min)
+     ...done. (1 seconds, 0 min)
     Extracting data from /home/runner/nilearn_data/yeo_2011/d7a5390bfb7686fb41fa64cc2ba058d0/Yeo_JNeurophysiol11_MNI152.zip..... done.
 
-    <nilearn.plotting.displays._slicers.OrthoSlicer object at 0x7f6939f0c150>
+    <nilearn.plotting.displays._slicers.OrthoSlicer object at 0x7f2554124250>
 
 
 
@@ -156,7 +156,7 @@ two independent sessions with a different phase encoding:
 Antero-posterior(AP) or Postero-anterior(PA).
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 84-102
+.. GENERATED FROM PYTHON SOURCE LINES 84-110
 
 .. code-block:: Python
 
@@ -166,8 +166,12 @@ Antero-posterior(AP) or Postero-anterior(PA).
     # * source train: AP contrasts for subject sub-01
     # * target train: AP contrasts for subject sub-02
 
-    source_train = df[df.subject == "sub-01"][df.acquisition == "ap"].path.values
-    target_train = df[df.subject == "sub-02"][df.acquisition == "ap"].path.values
+    source_train = concat_imgs(
+        df[df.subject == "sub-01"][df.acquisition == "ap"].path.values
+    )
+    target_train = concat_imgs(
+        df[df.subject == "sub-02"][df.acquisition == "ap"].path.values
+    )
 
     # The testing fold:
     # * source test: PA contrasts for subject sub-01, used to predict
@@ -175,8 +179,12 @@ Antero-posterior(AP) or Postero-anterior(PA).
     # * target test: PA contrasts for subject sub-02, used as a ground truth
     #   to score our predictions
 
-    source_test = df[df.subject == "sub-01"][df.acquisition == "pa"].path.values
-    target_test = df[df.subject == "sub-02"][df.acquisition == "pa"].path.values
+    source_test = concat_imgs(
+        df[df.subject == "sub-01"][df.acquisition == "pa"].path.values
+    )
+    target_test = concat_imgs(
+        df[df.subject == "sub-02"][df.acquisition == "pa"].path.values
+    )
 
 
 
@@ -186,19 +194,19 @@ Antero-posterior(AP) or Postero-anterior(PA).
 
  .. code-block:: none
 
-    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_roi_alignment.py:90: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
-      source_train = df[df.subject == "sub-01"][df.acquisition == "ap"].path.values
     /home/runner/work/fmralign/fmralign/examples/plot_pairwise_roi_alignment.py:91: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
-      target_train = df[df.subject == "sub-02"][df.acquisition == "ap"].path.values
-    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_roi_alignment.py:99: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
-      source_test = df[df.subject == "sub-01"][df.acquisition == "pa"].path.values
-    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_roi_alignment.py:100: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
-      target_test = df[df.subject == "sub-02"][df.acquisition == "pa"].path.values
+      df[df.subject == "sub-01"][df.acquisition == "ap"].path.values
+    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_roi_alignment.py:94: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+      df[df.subject == "sub-02"][df.acquisition == "ap"].path.values
+    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_roi_alignment.py:104: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+      df[df.subject == "sub-01"][df.acquisition == "pa"].path.values
+    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_roi_alignment.py:107: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+      df[df.subject == "sub-02"][df.acquisition == "pa"].path.values
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 103-113
+.. GENERATED FROM PYTHON SOURCE LINES 111-121
 
 Define the estimator, fit it and predict
 ----------------------------------------
@@ -211,7 +219,7 @@ n_pieces to 1. We learn alignment estimator on train data and use it to
 predict target test data.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 113-122
+.. GENERATED FROM PYTHON SOURCE LINES 121-130
 
 .. code-block:: Python
 
@@ -232,7 +240,7 @@ predict target test data.
 
  .. code-block:: none
 
-    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:73: UserWarning: 
+    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning: 
      Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
      parcel 1 : 6631 voxels
       warnings.warn(warning)
@@ -240,7 +248,7 @@ predict target test data.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 123-131
+.. GENERATED FROM PYTHON SOURCE LINES 131-139
 
 Score the baseline and the prediction
 -------------------------------------
@@ -251,7 +259,7 @@ and with alignment, to see if alignment was able to predict a signal more
 alike the ground truth.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 131-144
+.. GENERATED FROM PYTHON SOURCE LINES 139-152
 
 .. code-block:: Python
 
@@ -282,14 +290,14 @@ alike the ground truth.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 145-149
+.. GENERATED FROM PYTHON SOURCE LINES 153-157
 
 Plotting the measures
 ---------------------
 Finally we plot both scores.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 149-161
+.. GENERATED FROM PYTHON SOURCE LINES 157-169
 
 .. code-block:: Python
 
@@ -336,7 +344,7 @@ Finally we plot both scores.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 162-164
+.. GENERATED FROM PYTHON SOURCE LINES 170-172
 
 We can see on the plot that after alignment, the prediction made for one
 subject data, informed by another subject are greatly improved.
@@ -344,7 +352,7 @@ subject data, informed by another subject are greatly improved.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 22.425 seconds)
+   **Total running time of the script:** (0 minutes 21.589 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_pairwise_roi_alignment.py:

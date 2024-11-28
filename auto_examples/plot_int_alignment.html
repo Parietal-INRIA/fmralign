@@ -11,7 +11,7 @@
 <meta property="og:image" content="https://nilearn.github.io/_static/nilearn-logo.png" />
 <meta property="og:image:alt" content="Nilearn" />
 <meta name="description" content="In this tutorial, we show how to better predict new contrasts for a target subject using many source subjects corresponding contrasts. For this purpose, we create a template to which we align the t..." />
-<link rel="search" title="Search" href="../search.html" /><link rel="next" title="Individual Neural Tuning Model on simulated data" href="plot_toy_int_experiment.html" /><link rel="prev" title="Template-based prediction." href="plot_template_alignment.html" />
+<link rel="search" title="Search" href="../search.html" /><link rel="next" title="Individual Neural Tuning Model on simulated data" href="plot_toy_int_experiment.html" /><link rel="prev" title="Alignment methods benchmark (pairwise ROI case)." href="plot_alignment_methods_benchmark.html" />
 
     <link rel="shortcut icon" href="../_static/favicon.ico"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
         <title>Co-smoothing prediction using the Individual Neural Tuning Model - fmralign</title>
@@ -231,9 +231,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="plot_pairwise_alignment.html">Pairwise functional alignment.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_template_alignment.html">Template-based prediction.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_pairwise_roi_alignment.html">Pairwise functional alignment on a ROI.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_alignment_methods_benchmark.html">Alignment methods benchmark (pairwise ROI case).</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_template_alignment.html">Template-based prediction.</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Co-smoothing prediction using the Individual Neural Tuning Model</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_toy_int_experiment.html">Individual Neural Tuning Model on simulated data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_alignment_simulated_2D_data.html">Alignment on simulated 2D data.</a></li>
@@ -477,13 +477,13 @@ For each train subject and for the template, the AP contrasts are sorted from
 </pre></div>
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[Loading/Parcel] : Parcellating...
-Minimum length parcel:  41
+Minimum length parcel:  5
 [RegionAlignment] Shape of input data:  (6, 53, 46448)
 [ParcelAlignment]Computing global template M ...
 [Parallel(n_jobs=5)]: Using backend LokyBackend with 5 concurrent workers.
-[Parallel(n_jobs=5)]: Done  40 tasks      | elapsed:    1.8s
+[Parallel(n_jobs=5)]: Done  40 tasks      | elapsed:    1.7s
 [Parallel(n_jobs=5)]: Done 100 out of 100 | elapsed:    2.1s finished
-[Parallel(n_jobs=1)]: Done  49 tasks      | elapsed:    5.5s
+[Parallel(n_jobs=1)]: Done  49 tasks      | elapsed:    8.0s
 </pre></div>
 </div>
 </section>
@@ -534,7 +534,7 @@ the average activations of subjects.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plotting</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (2 minutes 15.250 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (2 minutes 18.769 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-int-alignment-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/nilearn/nilearn/main?urlpath=lab/tree/notebooks/auto_examples/plot_int_alignment.ipynb"><img alt="Launch binder" src="../_images/binder_badge_logo.svg" style="width: 150px;" />
@@ -568,14 +568,14 @@ the average activations of subjects.</p>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="plot_template_alignment.html">
+          <a class="prev-page" href="plot_alignment_methods_benchmark.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Template-based prediction.</div>
+                <div class="title">Alignment methods benchmark (pairwise ROI case).</div>
                 
               </div>
             </a>

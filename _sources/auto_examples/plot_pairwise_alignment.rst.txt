@@ -67,16 +67,16 @@ mask is an appropriate nifti image to select the data.
     Dataset created in /home/runner/nilearn_data/ibc
 
     Downloading data from https://osf.io/pcvje/download ...
-     ...done. (2 seconds, 0 min)
+     ...done. (3 seconds, 0 min)
     Extracting data from /home/runner/nilearn_data/ibc/8e275a34345802c5c273312d85957d6c/download..... done.
     Downloading data from https://osf.io/yvju3/download ...
-     ...done. (2 seconds, 0 min)
+     ...done. (3 seconds, 0 min)
     Extracting data from /home/runner/nilearn_data/ibc/fe06df963fcb3fd454f63a33f0864e8d/download..... done.
     Downloading data from https://osf.io/8z23h/download ...
-    Downloaded 16834560 of 21185337 bytes (79.5%,    0.3s remaining) ...done. (3 seconds, 0 min)
+    Downloaded 16875520 of 21185337 bytes (79.7%,    0.3s remaining) ...done. (3 seconds, 0 min)
     Extracting data from /home/runner/nilearn_data/ibc/100352739b7501f0ed04920933b4be36/download..... done.
     Downloading data from https://osf.io/e9kbm/download ...
-    Downloaded 16834560 of 21196887 bytes (79.4%,    0.3s remaining) ...done. (4 seconds, 0 min)
+    Downloaded 4726784 of 21196887 bytes (22.3%,    3.5s remaining)    Downloaded 10215424 of 21196887 bytes (48.2%,    2.2s remaining)    Downloaded 15179776 of 21196887 bytes (71.6%,    1.2s remaining)    Downloaded 20930560 of 21196887 bytes (98.7%,    0.1s remaining) ...done. (7 seconds, 0 min)
     Extracting data from /home/runner/nilearn_data/ibc/331a0a579c6e46c0911502a96215b358/download..... done.
 
 
@@ -91,11 +91,12 @@ We define a nilearn masker that will be used to handle relevant data.
   'http://nilearn.github.io/manipulating_images/masker_objects.html'
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 39-46
+.. GENERATED FROM PYTHON SOURCE LINES 39-47
 
 .. code-block:: Python
 
 
+    from nilearn.image import concat_imgs
     from nilearn.maskers import NiftiMasker
 
     masker = NiftiMasker(mask_img=mask)
@@ -519,7 +520,7 @@ We define a nilearn masker that will be used to handle relevant data.
     <br />
     <br />
 
-.. GENERATED FROM PYTHON SOURCE LINES 47-57
+.. GENERATED FROM PYTHON SOURCE LINES 48-58
 
 Prepare the data
 ----------------
@@ -532,7 +533,7 @@ advantage of these "duplicates to create a training and a testing set that
 contains roughly the same signals but acquired totally independently.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 57-75
+.. GENERATED FROM PYTHON SOURCE LINES 58-84
 
 .. code-block:: Python
 
@@ -541,8 +542,12 @@ contains roughly the same signals but acquired totally independently.
     # * source train: AP contrasts for subject sub-01
     # * target train: AP contrasts for subject sub-02
 
-    source_train = df[df.subject == "sub-01"][df.acquisition == "ap"].path.values
-    target_train = df[df.subject == "sub-02"][df.acquisition == "ap"].path.values
+    source_train = concat_imgs(
+        df[df.subject == "sub-01"][df.acquisition == "ap"].path.values
+    )
+    target_train = concat_imgs(
+        df[df.subject == "sub-02"][df.acquisition == "ap"].path.values
+    )
 
     # The testing fold:
     # * source test: PA contrasts for subject sub-01, used to predict
@@ -550,8 +555,12 @@ contains roughly the same signals but acquired totally independently.
     # * target test: PA contrasts for subject sub-02, used as a ground truth
     #   to score our predictions
 
-    source_test = df[df.subject == "sub-01"][df.acquisition == "pa"].path.values
-    target_test = df[df.subject == "sub-02"][df.acquisition == "pa"].path.values
+    source_test = concat_imgs(
+        df[df.subject == "sub-01"][df.acquisition == "pa"].path.values
+    )
+    target_test = concat_imgs(
+        df[df.subject == "sub-02"][df.acquisition == "pa"].path.values
+    )
 
 
 
@@ -562,19 +571,19 @@ contains roughly the same signals but acquired totally independently.
 
  .. code-block:: none
 
-    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_alignment.py:62: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
-      source_train = df[df.subject == "sub-01"][df.acquisition == "ap"].path.values
-    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_alignment.py:63: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
-      target_train = df[df.subject == "sub-02"][df.acquisition == "ap"].path.values
-    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_alignment.py:71: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
-      source_test = df[df.subject == "sub-01"][df.acquisition == "pa"].path.values
-    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_alignment.py:72: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
-      target_test = df[df.subject == "sub-02"][df.acquisition == "pa"].path.values
+    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_alignment.py:64: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+      df[df.subject == "sub-01"][df.acquisition == "ap"].path.values
+    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_alignment.py:67: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+      df[df.subject == "sub-02"][df.acquisition == "ap"].path.values
+    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_alignment.py:77: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+      df[df.subject == "sub-01"][df.acquisition == "pa"].path.values
+    /home/runner/work/fmralign/fmralign/examples/plot_pairwise_alignment.py:80: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+      df[df.subject == "sub-02"][df.acquisition == "pa"].path.values
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 76-84
+.. GENERATED FROM PYTHON SOURCE LINES 85-93
 
 Define the estimator, fit it and predict
 ----------------------------------------
@@ -585,7 +594,7 @@ common model proposed in the literature:
   pieces, this parcellation creates group of functionnally similar voxels.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 84-95
+.. GENERATED FROM PYTHON SOURCE LINES 93-104
 
 .. code-block:: Python
 
@@ -619,7 +628,7 @@ common model proposed in the literature:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 96-103
+.. GENERATED FROM PYTHON SOURCE LINES 105-112
 
 Score the baseline and the prediction
 -------------------------------------
@@ -629,7 +638,7 @@ correlation between its profile of activation without and with alignment,
 to see if alignment was able to predict a signal more alike the ground truth.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 103-116
+.. GENERATED FROM PYTHON SOURCE LINES 112-125
 
 .. code-block:: Python
 
@@ -653,14 +662,14 @@ to see if alignment was able to predict a signal more alike the ground truth.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 117-121
+.. GENERATED FROM PYTHON SOURCE LINES 126-130
 
 Plotting the measures
 ---------------------
 Finally we plot both scores
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 121-133
+.. GENERATED FROM PYTHON SOURCE LINES 130-142
 
 .. code-block:: Python
 
@@ -700,7 +709,7 @@ Finally we plot both scores
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 134-137
+.. GENERATED FROM PYTHON SOURCE LINES 143-146
 
 We can see on the plot that after alignment the prediction made for one
 subject data, informed by another subject are greatly improved.
@@ -709,7 +718,7 @@ subject data, informed by another subject are greatly improved.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 41.613 seconds)
+   **Total running time of the script:** (1 minutes 44.856 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_pairwise_alignment.py:

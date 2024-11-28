@@ -66,16 +66,16 @@ mask is a binary image used to extract grey matter regions.
  .. code-block:: none
 
     Downloading data from https://osf.io/qn5b6/download ...
-    Downloaded 9633792 of 21197218 bytes (45.4%,    1.2s remaining)    Downloaded 20873216 of 21197218 bytes (98.5%,    0.0s remaining) ...done. (5 seconds, 0 min)
+     ...done. (2 seconds, 0 min)
     Extracting data from /home/runner/nilearn_data/ibc/cd396fed594eb866baecd48b70ddf7e7/download..... done.
     Downloading data from https://osf.io/u74a3/download ...
-    Downloaded 9306112 of 21185350 bytes (43.9%,    1.3s remaining) ...done. (4 seconds, 0 min)
+    Downloaded 4251648 of 21185350 bytes (20.1%,    4.0s remaining)    Downloaded 8921088 of 21185350 bytes (42.1%,    2.8s remaining)    Downloaded 13639680 of 21185350 bytes (64.4%,    1.7s remaining)    Downloaded 18595840 of 21185350 bytes (87.8%,    0.6s remaining) ...done. (8 seconds, 0 min)
     Extracting data from /home/runner/nilearn_data/ibc/fc5556cc3678df4f4ab566414382180a/download..... done.
     Downloading data from https://osf.io/83bje/download ...
-    Downloaded 16850944 of 21188335 bytes (79.5%,    0.3s remaining) ...done. (3 seconds, 0 min)
+    Downloaded 5242880 of 21188335 bytes (24.7%,    3.2s remaining)    Downloaded 9428992 of 21188335 bytes (44.5%,    2.6s remaining)    Downloaded 14139392 of 21188335 bytes (66.7%,    1.5s remaining)    Downloaded 19628032 of 21188335 bytes (92.6%,    0.3s remaining) ...done. (8 seconds, 0 min)
     Extracting data from /home/runner/nilearn_data/ibc/1beaa1b5a1734a1afbf1c844e1f7a60e/download..... done.
     Downloading data from https://osf.io/43j69/download ...
-    Downloaded 16859136 of 21187400 bytes (79.6%,    0.3s remaining) ...done. (3 seconds, 0 min)
+    Downloaded 8429568 of 21187400 bytes (39.8%,    1.6s remaining) ...done. (3 seconds, 0 min)
     Extracting data from /home/runner/nilearn_data/ibc/75e62c44985852e000c2b2865badf72d/download..... done.
 
 
@@ -228,6 +228,19 @@ We define an estimator using the class TemplateAlignment:
         Masker parameter None - overriding estimator parameter 4.0
 
       warnings.warn(warn_str)
+    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning: 
+     Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
+     parcel 8 : 1178 voxels
+     parcel 9 : 1095 voxels
+     parcel 16 : 1209 voxels
+     parcel 20 : 1084 voxels
+     parcel 23 : 1067 voxels
+     parcel 46 : 1164 voxels
+     parcel 47 : 1045 voxels
+     parcel 111 : 1182 voxels
+     parcel 113 : 1206 voxels
+     parcel 149 : 1229 voxels
+      warnings.warn(warning)
     /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
     Parameter mask_strategy :
         Masker parameter background - overriding estimator parameter epi
@@ -235,6 +248,22 @@ We define an estimator using the class TemplateAlignment:
         Masker parameter None - overriding estimator parameter 4.0
 
       warnings.warn(warn_str)
+    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning: 
+     Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
+     parcel 15 : 1272 voxels
+     parcel 24 : 1098 voxels
+     parcel 28 : 1552 voxels
+     parcel 31 : 1307 voxels
+     parcel 45 : 1318 voxels
+     parcel 66 : 1336 voxels
+     parcel 82 : 1399 voxels
+     parcel 90 : 1232 voxels
+     parcel 92 : 1099 voxels
+     parcel 95 : 1369 voxels
+     parcel 100 : 1305 voxels
+     parcel 113 : 1431 voxels
+     parcel 114 : 1003 voxels
+      warnings.warn(warning)
     /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
     Parameter mask_strategy :
         Masker parameter background - overriding estimator parameter epi
@@ -242,6 +271,23 @@ We define an estimator using the class TemplateAlignment:
         Masker parameter None - overriding estimator parameter 4.0
 
       warnings.warn(warn_str)
+    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning: 
+     Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
+     parcel 9 : 1268 voxels
+     parcel 24 : 1835 voxels
+     parcel 51 : 1141 voxels
+     parcel 57 : 1216 voxels
+     parcel 67 : 1884 voxels
+     parcel 70 : 1045 voxels
+     parcel 76 : 1421 voxels
+     parcel 85 : 1242 voxels
+     parcel 87 : 1362 voxels
+     parcel 95 : 1458 voxels
+     parcel 96 : 1352 voxels
+     parcel 118 : 1674 voxels
+     parcel 133 : 1661 voxels
+     parcel 141 : 1292 voxels
+      warnings.warn(warning)
     /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
     Parameter mask_strategy :
         Masker parameter background - overriding estimator parameter epi
@@ -249,6 +295,20 @@ We define an estimator using the class TemplateAlignment:
         Masker parameter None - overriding estimator parameter 4.0
 
       warnings.warn(warn_str)
+    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning: 
+     Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
+     parcel 2 : 1161 voxels
+     parcel 9 : 1158 voxels
+     parcel 13 : 1264 voxels
+     parcel 36 : 1062 voxels
+     parcel 39 : 1231 voxels
+     parcel 79 : 1111 voxels
+     parcel 97 : 1051 voxels
+     parcel 123 : 1243 voxels
+     parcel 130 : 1388 voxels
+     parcel 138 : 1143 voxels
+     parcel 147 : 1218 voxels
+      warnings.warn(warning)
     /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
     Parameter mask_strategy :
         Masker parameter background - overriding estimator parameter epi
@@ -256,6 +316,20 @@ We define an estimator using the class TemplateAlignment:
         Masker parameter None - overriding estimator parameter 4.0
 
       warnings.warn(warn_str)
+    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning: 
+     Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
+     parcel 2 : 1296 voxels
+     parcel 12 : 1001 voxels
+     parcel 28 : 1024 voxels
+     parcel 33 : 1119 voxels
+     parcel 59 : 1206 voxels
+     parcel 72 : 1098 voxels
+     parcel 87 : 1194 voxels
+     parcel 88 : 1038 voxels
+     parcel 96 : 1071 voxels
+     parcel 108 : 1097 voxels
+     parcel 147 : 1247 voxels
+      warnings.warn(warning)
     /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
     Parameter mask_strategy :
         Masker parameter background - overriding estimator parameter epi
@@ -263,6 +337,20 @@ We define an estimator using the class TemplateAlignment:
         Masker parameter None - overriding estimator parameter 4.0
 
       warnings.warn(warn_str)
+    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning: 
+     Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
+     parcel 9 : 1198 voxels
+     parcel 17 : 1057 voxels
+     parcel 28 : 1161 voxels
+     parcel 32 : 1133 voxels
+     parcel 48 : 1080 voxels
+     parcel 61 : 1046 voxels
+     parcel 101 : 1021 voxels
+     parcel 107 : 1122 voxels
+     parcel 120 : 1315 voxels
+     parcel 134 : 1286 voxels
+     parcel 136 : 1089 voxels
+      warnings.warn(warning)
     /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
     Parameter mask_strategy :
         Masker parameter background - overriding estimator parameter epi
@@ -270,6 +358,20 @@ We define an estimator using the class TemplateAlignment:
         Masker parameter None - overriding estimator parameter 4.0
 
       warnings.warn(warn_str)
+    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning: 
+     Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
+     parcel 44 : 1034 voxels
+     parcel 45 : 1001 voxels
+     parcel 77 : 1371 voxels
+     parcel 80 : 1110 voxels
+     parcel 83 : 1071 voxels
+     parcel 87 : 1495 voxels
+     parcel 91 : 1126 voxels
+     parcel 119 : 1066 voxels
+     parcel 131 : 1143 voxels
+     parcel 138 : 1233 voxels
+     parcel 142 : 1268 voxels
+      warnings.warn(warning)
     /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
     Parameter mask_strategy :
         Masker parameter background - overriding estimator parameter epi
@@ -277,6 +379,12 @@ We define an estimator using the class TemplateAlignment:
         Masker parameter None - overriding estimator parameter 4.0
 
       warnings.warn(warn_str)
+    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning: 
+     Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
+     parcel 49 : 1018 voxels
+     parcel 74 : 1011 voxels
+     parcel 132 : 1119 voxels
+      warnings.warn(warning)
     /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
     Parameter mask_strategy :
         Masker parameter background - overriding estimator parameter epi
@@ -284,6 +392,21 @@ We define an estimator using the class TemplateAlignment:
         Masker parameter None - overriding estimator parameter 4.0
 
       warnings.warn(warn_str)
+    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning: 
+     Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
+     parcel 2 : 1454 voxels
+     parcel 17 : 1247 voxels
+     parcel 26 : 1361 voxels
+     parcel 39 : 1017 voxels
+     parcel 40 : 1541 voxels
+     parcel 65 : 1148 voxels
+     parcel 68 : 1312 voxels
+     parcel 79 : 1274 voxels
+     parcel 93 : 1521 voxels
+     parcel 102 : 1371 voxels
+     parcel 136 : 1553 voxels
+     parcel 149 : 1039 voxels
+      warnings.warn(warning)
     /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
     Parameter mask_strategy :
         Masker parameter background - overriding estimator parameter epi
@@ -291,6 +414,21 @@ We define an estimator using the class TemplateAlignment:
         Masker parameter None - overriding estimator parameter 4.0
 
       warnings.warn(warn_str)
+    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning: 
+     Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
+     parcel 4 : 1223 voxels
+     parcel 8 : 1439 voxels
+     parcel 9 : 1031 voxels
+     parcel 11 : 1316 voxels
+     parcel 16 : 1173 voxels
+     parcel 18 : 1270 voxels
+     parcel 37 : 1616 voxels
+     parcel 53 : 1212 voxels
+     parcel 101 : 1042 voxels
+     parcel 128 : 1180 voxels
+     parcel 132 : 1021 voxels
+     parcel 141 : 1437 voxels
+      warnings.warn(warning)
 
 
 
@@ -340,10 +478,6 @@ For each train subject and for the template, the AP contrasts are sorted from
         Masker parameter None - overriding estimator parameter 4.0
 
       warnings.warn(warn_str)
-    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:73: UserWarning: 
-     Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
-     parcel 84 : 1105 voxels
-      warnings.warn(warning)
 
 
 
@@ -441,7 +575,7 @@ the average activations of subjects.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (22 minutes 34.816 seconds)
+   **Total running time of the script:** (17 minutes 54.108 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_template_alignment.py:

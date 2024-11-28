@@ -222,9 +222,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../auto_examples/index.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_pairwise_alignment.html">Pairwise functional alignment.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_template_alignment.html">Template-based prediction.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_pairwise_roi_alignment.html">Pairwise functional alignment on a ROI.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_alignment_methods_benchmark.html">Alignment methods benchmark (pairwise ROI case).</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_template_alignment.html">Template-based prediction.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_int_alignment.html">Co-smoothing prediction using the Individual Neural Tuning Model</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_toy_int_experiment.html">Individual Neural Tuning Model on simulated data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_alignment_simulated_2D_data.html">Alignment on simulated 2D data.</a></li>
@@ -295,65 +295,17 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for fmralign.pairwise_alignment</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;Module for pairwise functional alignment&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;Module for pairwise functional alignment.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 
-<span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nib</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Memory</span><span class="p">,</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
-<span class="kn">from</span> <span class="nn">nilearn._utils.masker_validation</span> <span class="kn">import</span> <span class="n">check_embedded_masker</span>
-<span class="kn">from</span> <span class="nn">nilearn.image</span> <span class="kn">import</span> <span class="n">concat_imgs</span><span class="p">,</span> <span class="n">load_img</span>
 <span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">,</span> <span class="n">clone</span>
-<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">ShuffleSplit</span>
 
 <span class="kn">from</span> <span class="nn">fmralign</span> <span class="kn">import</span> <span class="n">alignment_methods</span>
-<span class="kn">from</span> <span class="nn">fmralign._utils</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">_intersect_clustering_mask</span><span class="p">,</span>
-    <span class="n">_make_parcellation</span><span class="p">,</span>
-    <span class="n">piecewise_transform</span><span class="p">,</span>
-<span class="p">)</span>
-
-
-<span class="k">def</span> <span class="nf">generate_Xi_Yi</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">masker</span><span class="p">,</span> <span class="n">verbose</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate source and target data X_i and Y_i for each piece i.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    labels : list of ints (len n_features)</span>
-<span class="sd">        Parcellation of features in clusters</span>
-<span class="sd">    X: Niimg-like object</span>
-<span class="sd">        Source data</span>
-<span class="sd">    Y: Niimg-like object</span>
-<span class="sd">        Target data</span>
-<span class="sd">    masker: instance of NiftiMasker or MultiNiftiMasker</span>
-<span class="sd">        Masker to be used on the data. For more information see:</span>
-<span class="sd">        http://nilearn.github.io/manipulating_images/masker_objects.html</span>
-<span class="sd">    verbose: integer, optional.</span>
-<span class="sd">        Indicate the level of verbosity.</span>
-
-<span class="sd">    Yields</span>
-<span class="sd">    -------</span>
-<span class="sd">    X_i: ndarray</span>
-<span class="sd">        Source data for piece i (shape : n_samples, n_features)</span>
-<span class="sd">    Y_i: ndarray</span>
-<span class="sd">        Target data for piece i (shape : n_samples, n_features)</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">X_</span> <span class="o">=</span> <span class="n">masker</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-    <span class="n">Y_</span> <span class="o">=</span> <span class="n">masker</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
-    <span class="n">unique_labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
-
-    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_labels</span><span class="p">)):</span>
-        <span class="n">label</span> <span class="o">=</span> <span class="n">unique_labels</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
-        <span class="n">i</span> <span class="o">=</span> <span class="n">label</span> <span class="o">==</span> <span class="n">labels</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">25</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span>
-                <span class="s2">&quot;Fitting parcel: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_labels</span><span class="p">))</span>
-            <span class="p">)</span>
-        <span class="c1"># should return X_i Y_i</span>
-        <span class="k">yield</span> <span class="n">X_</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">Y_</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span>
+<span class="kn">from</span> <span class="nn">fmralign._utils</span> <span class="kn">import</span> <span class="n">_transform_one_img</span>
+<span class="kn">from</span> <span class="nn">fmralign.preprocessing</span> <span class="kn">import</span> <span class="n">ParcellationMasker</span>
 
 
 <span class="k">def</span> <span class="nf">fit_one_piece</span><span class="p">(</span><span class="n">X_i</span><span class="p">,</span> <span class="n">Y_i</span><span class="p">,</span> <span class="n">alignment_method</span><span class="p">):</span>
@@ -374,10 +326,10 @@
 <span class="sd">            (imported from functional_alignment.alignment_methods)</span>
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
+
 <span class="sd">    alignment_algo</span>
 <span class="sd">        Instance of alignment estimator class fitted for X_i, Y_i</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">if</span> <span class="n">alignment_method</span> <span class="o">==</span> <span class="s2">&quot;identity&quot;</span><span class="p">:</span>
         <span class="n">alignment_algo</span> <span class="o">=</span> <span class="n">alignment_methods</span><span class="o">.</span><span class="n">Identity</span><span class="p">()</span>
     <span class="k">elif</span> <span class="n">alignment_method</span> <span class="o">==</span> <span class="s2">&quot;scaled_orthogonal&quot;</span><span class="p">:</span>
@@ -423,71 +375,11 @@
     <span class="k">return</span> <span class="n">alignment_algo</span>
 
 
-<span class="k">def</span> <span class="nf">fit_one_parcellation</span><span class="p">(</span>
-    <span class="n">X_</span><span class="p">,</span>
-    <span class="n">Y_</span><span class="p">,</span>
-    <span class="n">alignment_method</span><span class="p">,</span>
-    <span class="n">masker</span><span class="p">,</span>
-    <span class="n">n_pieces</span><span class="p">,</span>
-    <span class="n">clustering</span><span class="p">,</span>
-    <span class="n">clustering_index</span><span class="p">,</span>
-    <span class="n">n_jobs</span><span class="p">,</span>
-    <span class="n">verbose</span><span class="p">,</span>
-<span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create one parcellation of n_pieces and align each source and target</span>
-<span class="sd">    data in one piece i, X_i and Y_i, using alignment method</span>
-<span class="sd">    and learn transformation to map X to Y.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    X_: Niimg-like object</span>
-<span class="sd">        Source data</span>
-<span class="sd">    Y_: Niimg-like object</span>
-<span class="sd">        Target data</span>
-<span class="sd">    alignment_method: string</span>
-<span class="sd">        algorithm used to perform alignment between each region of X_ and Y_</span>
-<span class="sd">    masker: instance of NiftiMasker or MultiNiftiMasker</span>
-<span class="sd">        Masker to be used on the data. For more information see:</span>
-<span class="sd">        http://nilearn.github.io/manipulating_images/masker_objects.html</span>
-<span class="sd">    n_pieces: n_pieces: int,</span>
-<span class="sd">        Number of regions in which the data is parcellated for alignment</span>
-<span class="sd">    clustering: string or 3D Niimg</span>
-<span class="sd">        method used to perform parcellation of data.</span>
-<span class="sd">        If 3D Niimg, image used as predefined clustering.</span>
-<span class="sd">    clustering_index: list of integers</span>
-<span class="sd">        Clustering is performed on a 20% subset of the data chosen randomly</span>
-<span class="sd">        in timeframes. This index carry this subset.</span>
-<span class="sd">    n_jobs: integer, optional</span>
-<span class="sd">        The number of CPUs to use to do the computation. -1 means</span>
-<span class="sd">        &#39;all CPUs&#39;, -2 &#39;all CPUs but one&#39;, and so on.</span>
-<span class="sd">    verbose: integer, optional</span>
-<span class="sd">        Indicate the level of verbosity. By default, nothing is printed</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    alignment_algo</span>
-<span class="sd">        Instance of alignment estimator class fitted for X_i, Y_i</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># choose indexes maybe with index_img to not</span>
-    <span class="n">labels</span> <span class="o">=</span> <span class="n">_make_parcellation</span><span class="p">(</span>
-        <span class="n">X_</span><span class="p">,</span> <span class="n">clustering_index</span><span class="p">,</span> <span class="n">clustering</span><span class="p">,</span> <span class="n">n_pieces</span><span class="p">,</span> <span class="n">masker</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span>
-    <span class="p">)</span>
-
-    <span class="n">fit</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="s2">&quot;threads&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)(</span>
-        <span class="n">delayed</span><span class="p">(</span><span class="n">fit_one_piece</span><span class="p">)(</span><span class="n">X_i</span><span class="p">,</span> <span class="n">Y_i</span><span class="p">,</span> <span class="n">alignment_method</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">X_i</span><span class="p">,</span> <span class="n">Y_i</span> <span class="ow">in</span> <span class="n">generate_Xi_Yi</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">X_</span><span class="p">,</span> <span class="n">Y_</span><span class="p">,</span> <span class="n">masker</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
-    <span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">labels</span><span class="p">,</span> <span class="n">fit</span>
-
-
 <div class="viewcode-block" id="PairwiseAlignment">
 <a class="viewcode-back" href="../../modules/generated/fmralign.pairwise_alignment.PairwiseAlignment.html#fmralign.pairwise_alignment.PairwiseAlignment">[docs]</a>
 <span class="k">class</span> <span class="nc">PairwiseAlignment</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Decompose the source and target images into regions and align corresponding</span>
-<span class="sd">    regions independently.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Decompose the source and target images into regions and align</span>
+<span class="sd">    corresponding regions independently.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="PairwiseAlignment.__init__">
 <a class="viewcode-back" href="../../modules/generated/fmralign.pairwise_alignment.PairwiseAlignment.html#fmralign.pairwise_alignment.PairwiseAlignment.__init__">[docs]</a>
@@ -496,7 +388,6 @@
         <span class="n">alignment_method</span><span class="p">,</span>
         <span class="n">n_pieces</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">clustering</span><span class="o">=</span><span class="s2">&quot;kmeans&quot;</span><span class="p">,</span>
-        <span class="n">n_bags</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">smoothing_fwhm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">standardize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -511,11 +402,8 @@
         <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        If n_pieces &gt; 1, decomposes the images into regions</span>
-<span class="sd">        and align each source/target region independantly.</span>
-<span class="sd">        If n_bags &gt; 1, this parcellation process is applied multiple time</span>
-<span class="sd">        and the resulting models are bagged.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;If n_pieces &gt; 1, decomposes the images into regions and align each</span>
+<span class="sd">        source/target region independantly.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -535,10 +423,7 @@
 <span class="sd">            clustering of voxels based on functional signal, passed to</span>
 <span class="sd">            nilearn.regions.parcellations</span>
 <span class="sd">            If 3D Niimg, image used as predefined clustering,</span>
-<span class="sd">            n_bags and n_pieces are then ignored.</span>
-<span class="sd">        n_bags: int, optional (default = 1)</span>
-<span class="sd">            If 1 : one estimator is fitted.</span>
-<span class="sd">            If &gt;1 number of bagged parcellations and estimators used.</span>
+<span class="sd">            n_pieces is then ignored.</span>
 <span class="sd">        mask: Niimg-like object, instance of NiftiMasker or</span>
 <span class="sd">                                MultiNiftiMasker, optional (default = None)</span>
 <span class="sd">            Mask to be used on data. If an instance of masker is passed,</span>
@@ -581,11 +466,9 @@
 <span class="sd">            &#39;all CPUs&#39;, -2 &#39;all CPUs but one&#39;, and so on.</span>
 <span class="sd">        verbose: integer, optional (default = 0)</span>
 <span class="sd">            Indicate the level of verbosity. By default, nothing is printed.</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_pieces</span> <span class="o">=</span> <span class="n">n_pieces</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">alignment_method</span> <span class="o">=</span> <span class="n">alignment_method</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_bags</span> <span class="o">=</span> <span class="n">n_bags</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clustering</span> <span class="o">=</span> <span class="n">clustering</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">smoothing_fwhm</span> <span class="o">=</span> <span class="n">smoothing_fwhm</span>
@@ -603,7 +486,7 @@
 
 
     <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit data X and Y and learn transformation to map X to Y</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit data X and Y and learn transformation to map X to Y.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -617,67 +500,43 @@
 <span class="sd">        -------</span>
 <span class="sd">        self</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">masker_</span> <span class="o">=</span> <span class="n">check_embedded_masker</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">masker_</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">masker_</span><span class="o">.</span><span class="n">mask_img</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">masker_</span><span class="o">.</span><span class="n">fit</span><span class="p">([</span><span class="n">X</span><span class="p">])</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">masker_</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="p">,</span> <span class="n">nib</span><span class="o">.</span><span class="n">nifti1</span><span class="o">.</span><span class="n">Nifti1Image</span>
-        <span class="p">)</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="p">):</span>
-            <span class="c1"># check that clustering provided fills the mask, if not, reduce the mask</span>
-            <span class="k">if</span> <span class="mi">0</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">masker_</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="p">):</span>
-                <span class="n">reduced_mask</span> <span class="o">=</span> <span class="n">_intersect_clustering_mask</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">masker_</span><span class="o">.</span><span class="n">mask_img</span>
-                <span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">reduced_mask</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">masker_</span> <span class="o">=</span> <span class="n">check_embedded_masker</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">masker_</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">masker_</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
-                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                    <span class="s2">&quot;Mask used was bigger than clustering provided. &quot;</span>
-                    <span class="o">+</span> <span class="s2">&quot;Its intersection with the clustering was used instead.&quot;</span>
-                <span class="p">)</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
-            <span class="n">X_</span> <span class="o">=</span> <span class="n">concat_imgs</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">X_</span> <span class="o">=</span> <span class="n">load_img</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
-            <span class="n">Y_</span> <span class="o">=</span> <span class="n">concat_imgs</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">Y_</span> <span class="o">=</span> <span class="n">load_img</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">fit_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels_</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
-        <span class="n">rs</span> <span class="o">=</span> <span class="n">ShuffleSplit</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_bags</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-
-        <span class="n">outputs</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span>
-            <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="s2">&quot;threads&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span>
-        <span class="p">)(</span>
-            <span class="n">delayed</span><span class="p">(</span><span class="n">fit_one_parcellation</span><span class="p">)(</span>
-                <span class="n">X_</span><span class="p">,</span>
-                <span class="n">Y_</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">alignment_method</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">masker_</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">n_pieces</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="p">,</span>
-                <span class="n">clustering_index</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">clustering_index</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">rs</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">X_</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pmasker</span> <span class="o">=</span> <span class="n">ParcellationMasker</span><span class="p">(</span>
+            <span class="n">n_pieces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_pieces</span><span class="p">,</span>
+            <span class="n">clustering</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="p">,</span>
+            <span class="n">mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">,</span>
+            <span class="n">smoothing_fwhm</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">smoothing_fwhm</span><span class="p">,</span>
+            <span class="n">standardize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">standardize</span><span class="p">,</span>
+            <span class="n">detrend</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">detrend</span><span class="p">,</span>
+            <span class="n">low_pass</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">low_pass</span><span class="p">,</span>
+            <span class="n">high_pass</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">high_pass</span><span class="p">,</span>
+            <span class="n">t_r</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">t_r</span><span class="p">,</span>
+            <span class="n">target_affine</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target_affine</span><span class="p">,</span>
+            <span class="n">target_shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target_shape</span><span class="p">,</span>
+            <span class="n">memory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">memory</span><span class="p">,</span>
+            <span class="n">memory_level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">memory_level</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="c1"># change split</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">labels_</span> <span class="o">=</span> <span class="p">[</span><span class="n">output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fit_</span> <span class="o">=</span> <span class="p">[</span><span class="n">output</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">]</span>
+
+        <span class="n">parceled_source</span><span class="p">,</span> <span class="n">parceled_target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pmasker</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">([</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">masker</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pmasker</span><span class="o">.</span><span class="n">masker_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pmasker</span><span class="o">.</span><span class="n">masker_</span><span class="o">.</span><span class="n">mask_img_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pmasker</span><span class="o">.</span><span class="n">labels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_pieces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pmasker</span><span class="o">.</span><span class="n">n_pieces</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit_</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="s2">&quot;threads&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span>
+        <span class="p">)(</span>
+            <span class="n">delayed</span><span class="p">(</span><span class="n">fit_one_piece</span><span class="p">)(</span><span class="n">X_i</span><span class="p">,</span> <span class="n">Y_i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alignment_method</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">X_i</span><span class="p">,</span> <span class="n">Y_i</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                <span class="n">parceled_source</span><span class="o">.</span><span class="n">to_list</span><span class="p">(),</span> <span class="n">parceled_target</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Predict data from X</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Predict data from X.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -686,26 +545,33 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        X_transform: Niimg-like object</span>
+<span class="sd">        transformed_img: Niimg-like object</span>
 <span class="sd">            Predicted data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
-            <span class="n">X</span> <span class="o">=</span> <span class="n">concat_imgs</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-        <span class="n">X_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">masker_</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-
-        <span class="n">X_transform</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">X_</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_bags</span><span class="p">):</span>
-            <span class="n">X_transform</span> <span class="o">+=</span> <span class="n">piecewise_transform</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">labels_</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">X_</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;fit_&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;This instance has not been fitted yet. &quot;</span>
+                <span class="s2">&quot;Please call &#39;fit&#39; before &#39;transform&#39;.&quot;</span>
             <span class="p">)</span>
-
-        <span class="n">X_transform</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_bags</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">masker_</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">X_transform</span><span class="p">)</span>
+        <span class="n">parceled_data_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pmasker</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">transformed_img</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="s2">&quot;threads&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span>
+        <span class="p">)(</span>
+            <span class="n">delayed</span><span class="p">(</span><span class="n">_transform_one_img</span><span class="p">)(</span><span class="n">parceled_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">parceled_data</span> <span class="ow">in</span> <span class="n">parceled_data_list</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">transformed_img</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">transformed_img</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">transformed_img</span>
+        <span class="k">return</span> <span class="n">transformed_img</span>
 
     <span class="c1"># Make inherited function harmless</span>
     <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parent method not applicable here. Will raise AttributeError if called.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parent method not applicable here.</span>
+
+<span class="sd">        Will raise AttributeError if called.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
             <span class="s2">&quot;type object &#39;PairwiseAlignment&#39; has no attribute &#39;fit_transform&#39;&quot;</span>
         <span class="p">)</span></div>
