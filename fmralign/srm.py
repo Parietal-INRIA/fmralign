@@ -33,6 +33,7 @@ class Identity(BaseEstimator, TransformerMixin):
 
 
 def _get_parcel_across_subjects(parceled_data, parcel_id):
+    """Get the list of parcels for a given parcel_id across subjects."""
     parcel_across_subjects = [
         parceled_data[i].to_list()[parcel_id].T
         for i in range(len(parceled_data))
