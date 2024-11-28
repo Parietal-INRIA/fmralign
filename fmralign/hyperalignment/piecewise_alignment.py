@@ -6,13 +6,14 @@ See the ```nilearn``` documentation for more details:
 """
 
 import numpy as np
+from joblib import Parallel, delayed
 from sklearn.base import BaseEstimator, TransformerMixin
+
 from .regions import (
-    template,
     piece_ridge,
     searchlight_weights,
+    template,
 )
-from joblib import Parallel, delayed
 
 
 class PiecewiseAlignment(BaseEstimator, TransformerMixin):

@@ -1,7 +1,7 @@
 import nibabel
 import numpy as np
-from numpy.random import default_rng
 from nilearn.maskers import NiftiMasker
+from numpy.random import default_rng
 from numpy.testing import assert_array_almost_equal
 
 

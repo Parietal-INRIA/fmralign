@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import os
 
-import pandas as pd
-from nilearn.datasets._utils import fetch_files, get_dataset_dir
-from fastsrm.srm import projection
 import numpy as np
+import pandas as pd
+from fastsrm.srm import projection
+from nilearn.datasets._utils import fetch_files, get_dataset_dir
 
 
 def fetch_ibc_subjects_contrasts(subjects, data_dir=None, verbose=1):
@@ -45,9 +45,13 @@ def fetch_ibc_subjects_contrasts(subjects, data_dir=None, verbose=1):
     """
     # The URLs can be retrieved from the nilearn account on OSF
     if subjects == "all":
-        subjects = ["sub-{i:02d}" for i in [1, 2, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15]]
+        subjects = [
+            "sub-{i:02d}" for i in [1, 2, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15]
+        ]
     dataset_name = "ibc"
-    data_dir = get_dataset_dir(dataset_name, data_dir=data_dir, verbose=verbose)
+    data_dir = get_dataset_dir(
+        dataset_name, data_dir=data_dir, verbose=verbose
+    )
 
     # download or retrieve metadatas, put it in a dataframe,
     # list all condition and specify path to the right directory
@@ -64,7 +68,9 @@ def fetch_ibc_subjects_contrasts(subjects, data_dir=None, verbose=1):
     )
     metadata_df = pd.read_csv(metadata_path[0])
     conditions = metadata_df.condition.unique()
-    metadata_df["path"] = metadata_df["path"].str.replace("path_to_dir", data_dir)
+    metadata_df["path"] = metadata_df["path"].str.replace(
+        "path_to_dir", data_dir
+    )
     # filter the dataframe to return only rows relevant for subjects argument
     metadata_df = metadata_df[metadata_df.subject.isin(subjects)]
 
@@ -202,7 +208,10 @@ def generate_dummy_signal(
     data_train, data_test = [], []
     Ts = []
     for _ in range(n_subjects):
-        if generative_method == "custom" or generative_method == "multiviewica":
+        if (
+            generative_method == "custom"
+            or generative_method == "multiviewica"
+        ):
             W = T_mean + T_std * np.random.randn(latent_dim, n_voxels)
         else:
             W = projection(rng.randn(latent_dim, n_voxels))

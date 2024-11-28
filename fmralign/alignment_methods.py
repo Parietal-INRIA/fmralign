@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 """Module implementing alignment estimators on ndarrays."""
+
 import warnings
 
 import numpy as np
-import torch
+import ot
 import scipy
+import torch
+from fugw.mappings import FUGW, FUGWSparse
+from fugw.scripts import coarse_to_fine, lmds
 from joblib import Parallel, delayed
 from scipy import linalg
-import ot
 from scipy.optimize import linear_sum_assignment
 from scipy.sparse import diags
 from scipy.spatial.distance import cdist
@@ -18,9 +21,6 @@ from sklearn.metrics.pairwise import pairwise_distances
 # Fast implementation for parallelized computing
 from fmralign.hyperalignment.linalg import safe_svd, svd_pca
 from fmralign.hyperalignment.piecewise_alignment import PiecewiseAlignment
-
-from fugw.mappings import FUGW, FUGWSparse
-from fugw.scripts import coarse_to_fine, lmds
 
 
 def scaled_procrustes(X, Y, scaling=False, primal=None):

@@ -1,16 +1,15 @@
-import pytest
-
 import numpy as np
-from sklearn.base import clone
-from nilearn.maskers import NiftiMasker
+import pytest
 from fastsrm.identifiable_srm import IdentifiableFastSRM
+from nilearn.maskers import NiftiMasker
+from sklearn.base import clone
 
-from fmralign.srm import PiecewiseModel, Identity
+from fmralign.srm import Identity, PiecewiseModel
 
 
 def to_niimgs(X, dim):
-    from nilearn.masking import unmask_from_to_3d_array
     import nibabel
+    from nilearn.masking import unmask_from_to_3d_array
 
     p = np.prod(dim)
     assert len(dim) == 3
@@ -19,7 +18,9 @@ def to_niimgs(X, dim):
     mask[: X.shape[-1]] = 1
     assert mask.sum() == X.shape[1]
     mask = mask.reshape(dim)
-    X = np.rollaxis(np.array([unmask_from_to_3d_array(x, mask) for x in X]), 0, start=4)
+    X = np.rollaxis(
+        np.array([unmask_from_to_3d_array(x, mask) for x in X]), 0, start=4
+    )
     affine = np.eye(4)
     return (
         nibabel.Nifti1Image(X, affine),
@@ -44,8 +45,12 @@ masker = NiftiMasker(mask_img=mask).fit()
 
 train_data, test_data = {}, {}
 for i in range(n_subjects):
-    train_data[i] = masker.inverse_transform(np.random.rand(n_timeframes_align, 8))
-    test_data[i] = masker.inverse_transform(np.random.rand(n_timeframes_test, 8))
+    train_data[i] = masker.inverse_transform(
+        np.random.rand(n_timeframes_align, 8)
+    )
+    test_data[i] = masker.inverse_transform(
+        np.random.rand(n_timeframes_test, 8)
+    )
 masker = NiftiMasker(mask_img=mask).fit()
 
 n_components = 3
@@ -100,7 +105,9 @@ def test_output_no_clustering(algo):
     assert np.shape(psrm.fit_) == (n_bags, n_pieces)
     np.testing.assert_almost_equal(psrm.reduced_sr[0][0], srm_SR)
 
-    algo.add_subjects([masker.transform(list(train_data.values())[-1]).T], srm_SR)
+    algo.add_subjects(
+        [masker.transform(list(train_data.values())[-1]).T], srm_SR
+    )
     psrm.add_subjects([list(train_data.values())[-1]])
 
     np.testing.assert_almost_equal(psrm.reduced_sr[0][0], srm_SR)
@@ -189,7 +196,10 @@ def test_wrongshape(algo):
         S1 = np.array(
             [
                 clone(algo).fit_transform(
-                    [masker.transform(x).T[cluster == i] for x in [X1, X2, X3, X4]]
+                    [
+                        masker.transform(x).T[cluster == i]
+                        for x in [X1, X2, X3, X4]
+                    ]
                 )
                 for i in [1, 2]
             ]

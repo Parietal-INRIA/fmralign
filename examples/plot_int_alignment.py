@@ -104,6 +104,7 @@ average_subject = masker.inverse_transform(average_img)
 #
 
 from nilearn.image import index_img
+
 from fmralign.alignment_methods import IndividualizedNeuralTuning
 from fmralign.hyperalignment.piecewise_alignment import PiecewiseAlignment
 from fmralign.hyperalignment.regions import compute_parcels
@@ -126,7 +127,9 @@ training_data = np.array(masked_imgs)[:-1]
 target_test_masked = np.array(masked_imgs)[:, test_index, :]
 
 
-parcels = compute_parcels(niimg=template_train[0], mask=masker, n_parcels=100, n_jobs=5)
+parcels = compute_parcels(
+    niimg=template_train[0], mask=masker, n_parcels=100, n_jobs=5
+)
 denoiser = PiecewiseAlignment(n_jobs=5)
 denoised_signal = denoiser.fit_transform(X=denoising_data, regions=parcels)
 target_denoised_data = denoised_signal[-1]
