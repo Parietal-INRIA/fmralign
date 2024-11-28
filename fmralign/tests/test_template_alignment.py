@@ -48,7 +48,6 @@ def test_template_identity():
         {
             "alignment_method": "identity",
             "n_pieces": 3,
-            "n_bags": 2,
             "mask": masker,
         },
     ]
@@ -130,10 +129,7 @@ def test_template_closer_to_target():
         "diagonal",
     ]:
         algo = TemplateAlignment(
-            alignment_method=alignment_method,
-            n_pieces=3,
-            n_bags=2,
-            mask=masker,
+            alignment_method=alignment_method, n_pieces=3, mask=masker
         )
         # Learn template
         algo.fit(subs)

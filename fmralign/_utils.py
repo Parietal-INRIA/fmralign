@@ -5,9 +5,121 @@ import warnings
 import nibabel as nib
 import numpy as np
 from nilearn._utils.niimg_conversions import check_same_fov
-from nilearn.image import index_img, new_img_like, smooth_img
+from nilearn.image import new_img_like, smooth_img
 from nilearn.masking import apply_mask_fmri, intersect_masks
 from nilearn.regions.parcellations import Parcellations
+
+
+class ParceledData:
+    """A class for managing parceled data, such as neuroimaging data.
+
+    Parameters
+    ----------
+        data: 2D :obj:`numpy.ndarray`
+            Signal for each :term:`voxel` inside the mask.
+            shape: (number of scans, number of voxels)
+        masker: nilearn.maskers.NiftiMasker
+            The masker used to transform the data.
+        labels: `list` of `int`
+            The parcels labels.
+    """
+
+    def __init__(self, data, masker, labels):
+        self.data = data
+        self.masker = masker
+        self.labels = labels
+        self.unique_labels = np.unique(labels)
+        self.n_pieces = len(self.unique_labels)
+
+    def __getitem__(self, key):
+        """Retrieve data for a specific parcel or a list of parcels.
+
+        Parameters
+        ----------
+        key: int or slice
+            The index or slice of the parcels to retrieve.
+
+        Returns
+        -------
+        numpy.ndarray: 2D array of shape (n_samples, n_features)
+            or `list` of 2D arrays is a slice is provided.
+            The data for the specified parcel(s).
+        """
+        if isinstance(key, int):
+            return self.data[:, self.labels == self.unique_labels[key]]
+        elif isinstance(key, slice):
+            start = key.start if key.start is not None else 0
+            stop = key.stop if key.stop is not None else self.n_pieces
+            step = key.step if key.step is not None else 1
+            return [
+                self.data[:, self.labels == self.unique_labels[i]]
+                for i in range(start, stop, step)
+            ]
+        else:
+            raise ValueError("Invalid key type.")
+
+    def get_parcel(self, label):
+        """Retrieve data for specific parcel labels.
+
+        Parameters
+        ----------
+        label: int
+            The label of the parcel to retrieve.
+
+        Returns
+        -------
+        numpy.ndarray: 2D array of shape (n_samples, n_features)
+            The data for the specified parcel.
+        """
+        return self.data[:, self.labels == label]
+
+    def to_list(self):
+        """Convert the parceled data to a list of numpy.ndarray.
+
+        Returns
+        -------
+        list: A list of numpy.ndarray, where each element
+            corresponds to the data for a parcel.
+        """
+        if isinstance(self.data, np.ndarray):
+            return [self[i] for i in range(self.n_pieces)]
+
+    def to_img(self):
+        """Convert the parceled data back to an image.
+
+        Returns
+        -------
+        nibabel.Nifti1Image: The image reconstructed from the parceled data.
+        """
+        return self.masker.inverse_transform(self.data)
+
+
+def _transform_one_img(parceled_data, fit):
+    """Apply a transformation to a single `ParceledData` object."""
+    transformed_data = piecewise_transform(
+        parceled_data,
+        fit,
+    )
+    transformed_img = transformed_data.to_img()
+    return transformed_img
+
+
+def _img_to_parceled_data(img, masker, labels):
+    """Convert a 3D Niimg to a ParceledData object."""
+    data = masker.transform(img)
+    return ParceledData(data, masker, labels)
+
+
+def _parcels_to_array(parceled_img, labels):
+    """Convert a list of parcels  to a 2D array."""
+    unique_labels = np.unique(labels)
+    n_features = len(labels)
+    n_samples = parceled_img[0].shape[0]
+    data = np.zeros((n_samples, n_features))
+    for i in range(len(unique_labels)):
+        label = unique_labels[i]
+        data[:, labels == label] = parceled_img[i]
+    return data
 
 
 def _intersect_clustering_mask(clustering, mask):
@@ -21,33 +133,31 @@ def _intersect_clustering_mask(clustering, mask):
     )
 
 
-def piecewise_transform(labels, estimators, X):
-    """
-    Apply a piecewise transform to X.
+def piecewise_transform(parceled_data, estimators):
+    """Apply a piecewise transform to parceled_data.
 
     Parameters
     ----------
-    labels: list of ints (len n_features)
-        Parcellation of features in clusters
+    parceled_data: ParceledData
+        Data to transform
     estimators: list of estimators with transform() method
         I-th estimator will be applied on the i-th cluster of features
-    X: nd array (n_samples, n_features)
-        Data to transform
 
     Returns
     -------
-    X_transform: nd array (n_features, n_samples)
+    parceled_data: ParceledData
         Transformed data
     """
-    unique_labels = np.unique(labels)
-    X_transform = np.zeros_like(X)
-
-    for i in range(len(unique_labels)):
-        label = unique_labels[i]
-        X_transform[:, labels == label] = estimators[i].transform(
-            X[:, labels == label]
-        )
-    return X_transform
+    transformed_data_list = []
+    for i in range(len(estimators)):
+        transformed_data_list.append(estimators[i].transform(parceled_data[i]))
+    # Convert transformed_data_list to ParceledData
+    parceled_data = ParceledData(
+        _parcels_to_array(transformed_data_list, parceled_data.labels),
+        parceled_data.masker,
+        parceled_data.labels,
+    )
+    return parceled_data
 
 
 def _remove_empty_labels(labels):
@@ -75,26 +185,19 @@ def _check_labels(labels, threshold=1000):
 
 
 def _make_parcellation(
-    imgs,
-    clustering_index,
-    clustering,
-    n_pieces,
-    masker,
-    smoothing_fwhm=5,
-    verbose=0,
+    imgs, clustering, n_pieces, masker, smoothing_fwhm=5, verbose=0
 ):
-    """
-    Use nilearn Parcellation class in our pipeline.
-    It is used to find local regions of the brain in which alignment will be later applied.
-    For alignment computational efficiency, regions should be of hundreds of voxels.
+    """Compute a parcellation of the data.
+
+    Use nilearn Parcellation class in our pipeline. It is used to find local
+    regions of the brain in which alignment will be later applied. For
+    alignment computational efficiency, regions should be of hundreds of
+    voxels.
 
     Parameters
     ----------
     imgs: Niimgs
         data to cluster
-    clustering_index: list of integers
-        Clustering is performed on a subset of the data chosen randomly
-        in timeframes. This index carries this subset.
     clustering: string or 3D Niimg
         If you aim for speed, choose k-means (and check kmeans_smoothing_fwhm parameter)
         If you want spatially connected and/or reproducible regions use 'ward'
@@ -130,13 +233,12 @@ def _make_parcellation(
 
     # otherwise check requested clustering method
     elif isinstance(clustering, str) and n_pieces > 1:
-        imgs_subset = index_img(imgs, clustering_index)
         if (clustering in ["kmeans", "hierarchical_kmeans"]) and (
             smoothing_fwhm is not None
         ):
-            images_to_parcel = smooth_img(imgs_subset, smoothing_fwhm)
+            images_to_parcel = smooth_img(imgs, smoothing_fwhm)
         else:
-            images_to_parcel = imgs_subset
+            images_to_parcel = imgs
         parcellation = Parcellations(
             method=clustering,
             n_parcels=n_pieces,

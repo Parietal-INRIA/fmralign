@@ -9,11 +9,7 @@ import numpy as np
 from joblib import Parallel, delayed
 from sklearn.base import BaseEstimator, TransformerMixin
 
-from .regions import (
-    piece_ridge,
-    searchlight_weights,
-    template,
-)
+from .regions import piece_ridge, searchlight_weights, template
 
 
 class PiecewiseAlignment(BaseEstimator, TransformerMixin):

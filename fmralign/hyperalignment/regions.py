@@ -14,9 +14,7 @@ from joblib import Parallel, delayed
 from nibabel.nifti1 import Nifti1Image
 from nilearn import image, masking
 from nilearn._utils import check_niimg_3d, check_niimg_4d
-from nilearn._utils.niimg_conversions import (
-    safe_get_data,
-)
+from nilearn._utils.niimg_conversions import safe_get_data
 from nilearn.image.resampling import coord_transform
 from nilearn.maskers import NiftiMasker
 from scipy.spatial import distance_matrix
@@ -77,10 +75,8 @@ def compute_parcels(
             mask_img=mask, standardize=True, smoothing_fwhm=smoothing_fwhm
         )
     # Parcellation
-    indexes = [1]
     labels = _make_parcellation(
         imgs=niimg,
-        clustering_index=indexes,
         clustering="kmeans",
         n_pieces=n_parcels,
         masker=mask,

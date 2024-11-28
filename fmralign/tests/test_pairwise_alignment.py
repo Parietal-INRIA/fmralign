@@ -32,13 +32,11 @@ def test_pairwise_identity():
         {
             "alignment_method": "identity",
             "n_pieces": 3,
-            "n_bags": 4,
             "mask": mask_img,
         },
         {
             "alignment_method": "identity",
             "n_pieces": 3,
-            "n_bags": 3,
             "mask": mask_img,
             "n_jobs": 2,
         },
@@ -97,7 +95,6 @@ def test_models_against_identity():
                 mask=masker,
                 clustering=clustering,
                 n_pieces=2,
-                n_bags=1,
                 n_jobs=1,
             )
             algo.fit(img1, img2)

@@ -4,6 +4,8 @@ from nilearn.maskers import NiftiMasker
 from numpy.random import default_rng
 from numpy.testing import assert_array_almost_equal
 
+from fmralign._utils import _make_parcellation
+
 
 def zero_mean_coefficient_determination(
     y_true, y_pred, sample_weight=None, multioutput="uniform_average"
@@ -121,3 +123,12 @@ def assert_model_align_better_than_identity(algo, img1, img2, mask=None):
         masker.transform(img2), masker.transform(im_test)
     )
     assert algo_score >= identity_baseline_score
+
+
+def sample_parceled_data(n_pieces=1):
+    """Create sample data for testing"""
+    img, mask_img = random_niimg((8, 7, 6, 20))
+    masker = NiftiMasker(mask_img=mask_img)
+    data = masker.fit_transform(img)
+    labels = _make_parcellation(img, "kmeans", n_pieces, masker)
+    return data, masker, labels
