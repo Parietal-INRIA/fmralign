@@ -177,3 +177,26 @@ def test_standardization():
     data_array = transformed_data[0].data
     assert np.abs(np.mean(data_array)) < 1e-5
     assert np.abs(np.std(data_array) - 1.0) < 1e-5
+
+
+def test_get_parcellation():
+    """Test that ParcellationMasker returns the parcellation mask"""
+    n_pieces = 2
+    img, _ = random_niimg((8, 7, 6))
+    pmasker = ParcellationMasker(n_pieces=n_pieces)
+    pmasker.fit(img)
+    parcellation_img = pmasker.get_parcellation()
+    labels = pmasker.get_labels()
+
+    assert isinstance(parcellation_img, Nifti1Image)
+    assert parcellation_img.shape == img.shape
+
+    masker = pmasker.masker_
+    data = masker.transform(parcellation_img)
+
+    assert np.allclose(data, labels)
+    assert len(np.unique(data)) == n_pieces
+
+
+if __name__ == "__main__":
+    test_get_parcellation()
