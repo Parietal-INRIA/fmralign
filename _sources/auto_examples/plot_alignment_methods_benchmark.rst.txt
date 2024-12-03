@@ -56,6 +56,12 @@ df is a dataframe with metadata about each of them.
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    [get_dataset_dir] Dataset found in /home/runner/nilearn_data/ibc
+
 
 
 
@@ -105,8 +111,14 @@ First, we fetch and plot the complete atlas
 
  .. code-block:: none
 
+    [get_dataset_dir] Dataset found in /home/runner/nilearn_data/yeo_2011
+    /home/runner/work/fmralign/fmralign/examples/plot_alignment_methods_benchmark.py:47: FutureWarning: 'force_resample' will be set to 'True' by default in Nilearn 0.13.0.
+    Use 'force_resample=True' to suppress this warning.
+      resampled_mask_visual = resample_to_img(
+    /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/image/resampling.py:807: FutureWarning: From release 0.13.0 onwards, this function will, by default, copy the header of the input image to the output. Currently, the header is reset to the default Nifti1Header. To suppress this warning and use the new behavior, set `copy_header=True`.
+      return resample_img(
 
-    <nilearn.plotting.displays._slicers.OrthoSlicer object at 0x7f25828fdc10>
+    <nilearn.plotting.displays._slicers.OrthoSlicer object at 0x7f63f7daf850>
 
 
 
@@ -319,13 +331,15 @@ its correlation with the real signal.
 
  .. code-block:: none
 
-    /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+    [PairwiseAlignment.fit] Resampling mask
+    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
     Parameter mask_strategy :
         Masker parameter background - overriding estimator parameter epi
     Parameter smoothing_fwhm :
         Masker parameter None - overriding estimator parameter 4.0
 
-      warnings.warn(warn_str)
+      parcellation.fit(images_to_parcel)
+    [PairwiseAlignment.fit] Resampling mask
     /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning: 
      Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
      parcel 1 : 1725 voxels
@@ -335,15 +349,17 @@ its correlation with the real signal.
       warnings.warn(warning)
     /home/runner/work/fmralign/fmralign/fmralign/metrics.py:62: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
       pearsonr(X_gt[:, vox], X_pred[:, vox])[
-    /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1317: UserWarning: Non-finite values detected. These values will be replaced with zeros.
+    /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1416: UserWarning: Non-finite values detected. These values will be replaced with zeros.
       safe_get_data(stat_map_img, ensure_finite=True),
-    /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+    [PairwiseAlignment.fit] Resampling mask
+    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
     Parameter mask_strategy :
         Masker parameter background - overriding estimator parameter epi
     Parameter smoothing_fwhm :
         Masker parameter None - overriding estimator parameter 4.0
 
-      warnings.warn(warn_str)
+      parcellation.fit(images_to_parcel)
+    [PairwiseAlignment.fit] Resampling mask
     /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning: 
      Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
      parcel 1 : 1725 voxels
@@ -353,15 +369,17 @@ its correlation with the real signal.
       warnings.warn(warning)
     /home/runner/work/fmralign/fmralign/fmralign/metrics.py:62: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
       pearsonr(X_gt[:, vox], X_pred[:, vox])[
-    /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1317: UserWarning: Non-finite values detected. These values will be replaced with zeros.
+    /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1416: UserWarning: Non-finite values detected. These values will be replaced with zeros.
       safe_get_data(stat_map_img, ensure_finite=True),
-    /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+    [PairwiseAlignment.fit] Resampling mask
+    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
     Parameter mask_strategy :
         Masker parameter background - overriding estimator parameter epi
     Parameter smoothing_fwhm :
         Masker parameter None - overriding estimator parameter 4.0
 
-      warnings.warn(warn_str)
+      parcellation.fit(images_to_parcel)
+    [PairwiseAlignment.fit] Resampling mask
     /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning: 
      Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
      parcel 1 : 1725 voxels
@@ -371,15 +389,17 @@ its correlation with the real signal.
       warnings.warn(warning)
     /home/runner/work/fmralign/fmralign/fmralign/metrics.py:62: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
       pearsonr(X_gt[:, vox], X_pred[:, vox])[
-    /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1317: UserWarning: Non-finite values detected. These values will be replaced with zeros.
+    /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1416: UserWarning: Non-finite values detected. These values will be replaced with zeros.
       safe_get_data(stat_map_img, ensure_finite=True),
-    /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+    [PairwiseAlignment.fit] Resampling mask
+    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
     Parameter mask_strategy :
         Masker parameter background - overriding estimator parameter epi
     Parameter smoothing_fwhm :
         Masker parameter None - overriding estimator parameter 4.0
 
-      warnings.warn(warn_str)
+      parcellation.fit(images_to_parcel)
+    [PairwiseAlignment.fit] Resampling mask
     /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning: 
      Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
      parcel 1 : 1725 voxels
@@ -389,7 +409,7 @@ its correlation with the real signal.
       warnings.warn(warning)
     /home/runner/work/fmralign/fmralign/fmralign/metrics.py:62: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
       pearsonr(X_gt[:, vox], X_pred[:, vox])[
-    /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1317: UserWarning: Non-finite values detected. These values will be replaced with zeros.
+    /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1416: UserWarning: Non-finite values detected. These values will be replaced with zeros.
       safe_get_data(stat_map_img, ensure_finite=True),
 
 
@@ -406,7 +426,7 @@ it yields.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 3.514 seconds)
+   **Total running time of the script:** (1 minutes 3.509 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_alignment_methods_benchmark.py:

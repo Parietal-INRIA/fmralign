@@ -351,27 +351,49 @@ mask is a binary image used to extract grey matter regions.</p>
 <span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Downloading data from https://osf.io/qn5b6/download ...
- ...done. (2 seconds, 0 min)
-Extracting data from /home/runner/nilearn_data/ibc/cd396fed594eb866baecd48b70ddf7e7/download..... done.
-Downloading data from https://osf.io/u74a3/download ...
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[get_dataset_dir] Dataset found in /home/runner/nilearn_data/ibc
+[fetch_single_file] Downloading data from https://osf.io/qn5b6/download ...
+[_chunk_report_] Downloaded 1597440 of 21197218 bytes (7.5%%,   12.3s remaining)
+[_chunk_report_] Downloaded 14688256 of 21197218 bytes (69.3%%,    0.9s
+remaining)
+[fetch_single_file]  ...done. (4 seconds, 0 min)
 
-Downloaded 4251648 of 21185350 bytes (20.1%,    4.0s remaining)
-Downloaded 8921088 of 21185350 bytes (42.1%,    2.8s remaining)
-Downloaded 13639680 of 21185350 bytes (64.4%,    1.7s remaining)
-Downloaded 18595840 of 21185350 bytes (87.8%,    0.6s remaining) ...done. (8 seconds, 0 min)
-Extracting data from /home/runner/nilearn_data/ibc/fc5556cc3678df4f4ab566414382180a/download..... done.
-Downloading data from https://osf.io/83bje/download ...
+[uncompress_file] Extracting data from
+/home/runner/nilearn_data/ibc/cd396fed594eb866baecd48b70ddf7e7/download...
+[uncompress_file] .. done.
 
-Downloaded 5242880 of 21188335 bytes (24.7%,    3.2s remaining)
-Downloaded 9428992 of 21188335 bytes (44.5%,    2.6s remaining)
-Downloaded 14139392 of 21188335 bytes (66.7%,    1.5s remaining)
-Downloaded 19628032 of 21188335 bytes (92.6%,    0.3s remaining) ...done. (8 seconds, 0 min)
-Extracting data from /home/runner/nilearn_data/ibc/1beaa1b5a1734a1afbf1c844e1f7a60e/download..... done.
-Downloading data from https://osf.io/43j69/download ...
+[fetch_single_file] Downloading data from https://osf.io/u74a3/download ...
+[_chunk_report_] Downloaded 1589248 of 21185350 bytes (7.5%%,   12.5s remaining)
+[_chunk_report_] Downloaded 12328960 of 21185350 bytes (58.2%%,    1.5s
+remaining)
+[_chunk_report_] Downloaded 17039360 of 21185350 bytes (80.4%%,    0.8s
+remaining)
+[fetch_single_file]  ...done. (8 seconds, 0 min)
 
-Downloaded 8429568 of 21187400 bytes (39.8%,    1.6s remaining) ...done. (3 seconds, 0 min)
-Extracting data from /home/runner/nilearn_data/ibc/75e62c44985852e000c2b2865badf72d/download..... done.
+[uncompress_file] Extracting data from
+/home/runner/nilearn_data/ibc/fc5556cc3678df4f4ab566414382180a/download...
+[uncompress_file] .. done.
+
+[fetch_single_file] Downloading data from https://osf.io/83bje/download ...
+[_chunk_report_] Downloaded 2080768 of 21188335 bytes (9.8%%,    9.2s remaining)
+[_chunk_report_] Downloaded 14729216 of 21188335 bytes (69.5%%,    0.9s
+remaining)
+[fetch_single_file]  ...done. (4 seconds, 0 min)
+
+[uncompress_file] Extracting data from
+/home/runner/nilearn_data/ibc/1beaa1b5a1734a1afbf1c844e1f7a60e/download...
+[uncompress_file] .. done.
+
+[fetch_single_file] Downloading data from https://osf.io/43j69/download ...
+[_chunk_report_] Downloaded 4964352 of 21187400 bytes (23.4%%,    3.3s
+remaining)
+[_chunk_report_] Downloaded 19210240 of 21187400 bytes (90.7%%,    0.2s
+remaining)
+[fetch_single_file]  ...done. (5 seconds, 0 min)
+
+[uncompress_file] Extracting data from
+/home/runner/nilearn_data/ibc/75e62c44985852e000c2b2865badf72d/download...
+[uncompress_file] .. done.
 </pre></div>
 </div>
 </section>
@@ -382,9 +404,9 @@ Extracting data from /home/runner/nilearn_data/ibc/75e62c44985852e000c2b2865badf
 ‘<a class="reference external" href="http://nilearn.github.io/manipulating_images/masker_objects.html">http://nilearn.github.io/manipulating_images/masker_objects.html</a>’</p>
 </dd>
 </dl>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">nilearn.maskers</span> <span class="kn">import</span> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.base.BaseEstimator.html#sklearn.base.BaseEstimator" title="sklearn.base.BaseEstimator" class="sphx-glr-backref-module-sklearn-base sphx-glr-backref-type-py-class"><span class="n">NiftiMasker</span></a>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">nilearn.maskers</span> <span class="kn">import</span> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.base.TransformerMixin.html#sklearn.base.TransformerMixin" title="sklearn.base.TransformerMixin" class="sphx-glr-backref-module-sklearn-base sphx-glr-backref-type-py-class"><span class="n">NiftiMasker</span></a>
 
-<span class="n">masker</span> <span class="o">=</span> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.base.BaseEstimator.html#sklearn.base.BaseEstimator" title="sklearn.base.BaseEstimator" class="sphx-glr-backref-module-sklearn-base sphx-glr-backref-type-py-class"><span class="n">NiftiMasker</span></a><span class="p">(</span><a href="https://docs.python.org/3.9/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mask_img</span></a><span class="o">=</span><a href="https://docs.python.org/3.9/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mask_img</span></a><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+<span class="n">masker</span> <span class="o">=</span> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.base.TransformerMixin.html#sklearn.base.TransformerMixin" title="sklearn.base.TransformerMixin" class="sphx-glr-backref-module-sklearn-base sphx-glr-backref-type-py-class"><span class="n">NiftiMasker</span></a><span class="p">(</span><a href="https://docs.python.org/3.9/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mask_img</span></a><span class="o">=</span><a href="https://docs.python.org/3.9/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mask_img</span></a><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>
@@ -454,18 +476,21 @@ new template space.</p></li>
 <span class="n">template_estim</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><a href="https://docs.python.org/3.9/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">template_train</span></a><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/fmralign/fmralign/examples/plot_template_alignment.py:109: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
 Parameter detrend :
     Masker parameter False - overriding estimator parameter None
 
-  warnings.warn(warn_str)
-/opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+  template_estim.fit(template_train)
+[TemplateAlignment.fit] Resampling mask
+[TemplateAlignment.fit] Resampling mask
+/home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
 Parameter mask_strategy :
     Masker parameter background - overriding estimator parameter epi
 Parameter smoothing_fwhm :
     Masker parameter None - overriding estimator parameter 4.0
 
-  warnings.warn(warn_str)
+  parcellation.fit(images_to_parcel)
+[TemplateAlignment.fit] Resampling mask
 /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning:
  Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
  parcel 8 : 1178 voxels
@@ -479,13 +504,15 @@ Parameter smoothing_fwhm :
  parcel 113 : 1206 voxels
  parcel 149 : 1229 voxels
   warnings.warn(warning)
-/opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+[TemplateAlignment.fit] Resampling mask
+/home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
 Parameter mask_strategy :
     Masker parameter background - overriding estimator parameter epi
 Parameter smoothing_fwhm :
     Masker parameter None - overriding estimator parameter 4.0
 
-  warnings.warn(warn_str)
+  parcellation.fit(images_to_parcel)
+[TemplateAlignment.fit] Resampling mask
 /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning:
  Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
  parcel 15 : 1272 voxels
@@ -502,13 +529,15 @@ Parameter smoothing_fwhm :
  parcel 113 : 1431 voxels
  parcel 114 : 1003 voxels
   warnings.warn(warning)
-/opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+[TemplateAlignment.fit] Resampling mask
+/home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
 Parameter mask_strategy :
     Masker parameter background - overriding estimator parameter epi
 Parameter smoothing_fwhm :
     Masker parameter None - overriding estimator parameter 4.0
 
-  warnings.warn(warn_str)
+  parcellation.fit(images_to_parcel)
+[TemplateAlignment.fit] Resampling mask
 /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning:
  Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
  parcel 9 : 1268 voxels
@@ -526,13 +555,15 @@ Parameter smoothing_fwhm :
  parcel 133 : 1661 voxels
  parcel 141 : 1292 voxels
   warnings.warn(warning)
-/opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+[TemplateAlignment.fit] Resampling mask
+/home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
 Parameter mask_strategy :
     Masker parameter background - overriding estimator parameter epi
 Parameter smoothing_fwhm :
     Masker parameter None - overriding estimator parameter 4.0
 
-  warnings.warn(warn_str)
+  parcellation.fit(images_to_parcel)
+[TemplateAlignment.fit] Resampling mask
 /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning:
  Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
  parcel 2 : 1161 voxels
@@ -547,13 +578,15 @@ Parameter smoothing_fwhm :
  parcel 138 : 1143 voxels
  parcel 147 : 1218 voxels
   warnings.warn(warning)
-/opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+[TemplateAlignment.fit] Resampling mask
+/home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
 Parameter mask_strategy :
     Masker parameter background - overriding estimator parameter epi
 Parameter smoothing_fwhm :
     Masker parameter None - overriding estimator parameter 4.0
 
-  warnings.warn(warn_str)
+  parcellation.fit(images_to_parcel)
+[TemplateAlignment.fit] Resampling mask
 /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning:
  Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
  parcel 2 : 1296 voxels
@@ -568,13 +601,15 @@ Parameter smoothing_fwhm :
  parcel 108 : 1097 voxels
  parcel 147 : 1247 voxels
   warnings.warn(warning)
-/opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+[TemplateAlignment.fit] Resampling mask
+/home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
 Parameter mask_strategy :
     Masker parameter background - overriding estimator parameter epi
 Parameter smoothing_fwhm :
     Masker parameter None - overriding estimator parameter 4.0
 
-  warnings.warn(warn_str)
+  parcellation.fit(images_to_parcel)
+[TemplateAlignment.fit] Resampling mask
 /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning:
  Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
  parcel 9 : 1198 voxels
@@ -589,13 +624,15 @@ Parameter smoothing_fwhm :
  parcel 134 : 1286 voxels
  parcel 136 : 1089 voxels
   warnings.warn(warning)
-/opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+[TemplateAlignment.fit] Resampling mask
+/home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
 Parameter mask_strategy :
     Masker parameter background - overriding estimator parameter epi
 Parameter smoothing_fwhm :
     Masker parameter None - overriding estimator parameter 4.0
 
-  warnings.warn(warn_str)
+  parcellation.fit(images_to_parcel)
+[TemplateAlignment.fit] Resampling mask
 /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning:
  Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
  parcel 44 : 1034 voxels
@@ -610,26 +647,30 @@ Parameter smoothing_fwhm :
  parcel 138 : 1233 voxels
  parcel 142 : 1268 voxels
   warnings.warn(warning)
-/opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+[TemplateAlignment.fit] Resampling mask
+/home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
 Parameter mask_strategy :
     Masker parameter background - overriding estimator parameter epi
 Parameter smoothing_fwhm :
     Masker parameter None - overriding estimator parameter 4.0
 
-  warnings.warn(warn_str)
+  parcellation.fit(images_to_parcel)
+[TemplateAlignment.fit] Resampling mask
 /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning:
  Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
  parcel 49 : 1018 voxels
  parcel 74 : 1011 voxels
  parcel 132 : 1119 voxels
   warnings.warn(warning)
-/opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+[TemplateAlignment.fit] Resampling mask
+/home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
 Parameter mask_strategy :
     Masker parameter background - overriding estimator parameter epi
 Parameter smoothing_fwhm :
     Masker parameter None - overriding estimator parameter 4.0
 
-  warnings.warn(warn_str)
+  parcellation.fit(images_to_parcel)
+[TemplateAlignment.fit] Resampling mask
 /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning:
  Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
  parcel 2 : 1454 voxels
@@ -645,13 +686,15 @@ Parameter smoothing_fwhm :
  parcel 136 : 1553 voxels
  parcel 149 : 1039 voxels
   warnings.warn(warning)
-/opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+[TemplateAlignment.fit] Resampling mask
+/home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
 Parameter mask_strategy :
     Masker parameter background - overriding estimator parameter epi
 Parameter smoothing_fwhm :
     Masker parameter None - overriding estimator parameter 4.0
 
-  warnings.warn(warn_str)
+  parcellation.fit(images_to_parcel)
+[TemplateAlignment.fit] Resampling mask
 /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning:
  Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
  parcel 4 : 1223 voxels
@@ -692,13 +735,15 @@ For each train subject and for the template, the AP contrasts are sorted from
 <a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">prediction_from_average</span></a> <span class="o">=</span> <span class="n">index_img</span><span class="p">(</span><a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">average_subject</span></a><span class="p">,</span> <a href="https://docs.python.org/3.9/library/stdtypes.html#range" title="builtins.range" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">test_index</span></a><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[TemplateAlignment.wrapped] Resampling mask
+/home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
 Parameter mask_strategy :
     Masker parameter background - overriding estimator parameter epi
 Parameter smoothing_fwhm :
     Masker parameter None - overriding estimator parameter 4.0
 
-  warnings.warn(warn_str)
+  parcellation.fit(images_to_parcel)
+[TemplateAlignment.wrapped] Resampling mask
 </pre></div>
 </div>
 </section>
@@ -746,7 +791,7 @@ alignment, to see if alignment was able to predict a signal more alike the groun
 <p>We observe that creating a template and aligning a new subject to it yields
 a prediction that is better correlated with the ground truth than just using
 the average activations of subjects.</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (17 minutes 54.108 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (17 minutes 49.881 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-template-alignment-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/nilearn/nilearn/main?urlpath=lab/tree/notebooks/auto_examples/plot_template_alignment.ipynb"><img alt="Launch binder" src="../_images/binder_badge_logo.svg" style="width: 150px;" />

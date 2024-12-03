@@ -346,28 +346,48 @@ mask is an appropriate nifti image to select the data.</p>
 <a href="https://docs.python.org/3.9/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">files</span></a><span class="p">,</span> <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.core.frame.DataFrame" class="sphx-glr-backref-module-pandas-core-frame sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">df</span></a><span class="p">,</span> <a href="https://docs.python.org/3.9/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mask</span></a> <span class="o">=</span> <span class="n">fetch_ibc_subjects_contrasts</span><span class="p">([</span><span class="s2">&quot;sub-01&quot;</span><span class="p">,</span> <span class="s2">&quot;sub-02&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Added README.md to /home/runner/nilearn_data
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[_add_readme_to_default_data_locations] Added README.md to
+/home/runner/nilearn_data
+[get_dataset_dir] Dataset created in /home/runner/nilearn_data/ibc
+[fetch_single_file] Downloading data from https://osf.io/pcvje/download ...
+[fetch_single_file]  ...done. (2 seconds, 0 min)
 
+[uncompress_file] Extracting data from
+/home/runner/nilearn_data/ibc/8e275a34345802c5c273312d85957d6c/download...
+[uncompress_file] .. done.
 
-Dataset created in /home/runner/nilearn_data/ibc
+[fetch_single_file] Downloading data from https://osf.io/yvju3/download ...
+[fetch_single_file]  ...done. (2 seconds, 0 min)
 
-Downloading data from https://osf.io/pcvje/download ...
- ...done. (3 seconds, 0 min)
-Extracting data from /home/runner/nilearn_data/ibc/8e275a34345802c5c273312d85957d6c/download..... done.
-Downloading data from https://osf.io/yvju3/download ...
- ...done. (3 seconds, 0 min)
-Extracting data from /home/runner/nilearn_data/ibc/fe06df963fcb3fd454f63a33f0864e8d/download..... done.
-Downloading data from https://osf.io/8z23h/download ...
+[uncompress_file] Extracting data from
+/home/runner/nilearn_data/ibc/fe06df963fcb3fd454f63a33f0864e8d/download...
+[uncompress_file] .. done.
 
-Downloaded 16875520 of 21185337 bytes (79.7%,    0.3s remaining) ...done. (3 seconds, 0 min)
-Extracting data from /home/runner/nilearn_data/ibc/100352739b7501f0ed04920933b4be36/download..... done.
-Downloading data from https://osf.io/e9kbm/download ...
+[fetch_single_file] Downloading data from https://osf.io/8z23h/download ...
+[_chunk_report_] Downloaded 2351104 of 21185337 bytes (11.1%%,    8.0s
+remaining)
+[_chunk_report_] Downloaded 6832128 of 21185337 bytes (32.2%%,    4.4s
+remaining)
+[_chunk_report_] Downloaded 11272192 of 21185337 bytes (53.2%%,    2.7s
+remaining)
+[_chunk_report_] Downloaded 15712256 of 21185337 bytes (74.2%%,    1.4s
+remaining)
+[fetch_single_file]  ...done. (9 seconds, 0 min)
 
-Downloaded 4726784 of 21196887 bytes (22.3%,    3.5s remaining)
-Downloaded 10215424 of 21196887 bytes (48.2%,    2.2s remaining)
-Downloaded 15179776 of 21196887 bytes (71.6%,    1.2s remaining)
-Downloaded 20930560 of 21196887 bytes (98.7%,    0.1s remaining) ...done. (7 seconds, 0 min)
-Extracting data from /home/runner/nilearn_data/ibc/331a0a579c6e46c0911502a96215b358/download..... done.
+[uncompress_file] Extracting data from
+/home/runner/nilearn_data/ibc/100352739b7501f0ed04920933b4be36/download...
+[uncompress_file] .. done.
+
+[fetch_single_file] Downloading data from https://osf.io/e9kbm/download ...
+[_chunk_report_] Downloaded 2514944 of 21196887 bytes (11.9%%,    7.4s
+remaining)
+[_chunk_report_] Downloaded 16826368 of 21196887 bytes (79.4%%,    0.5s
+remaining)
+[fetch_single_file]  ...done. (5 seconds, 0 min)
+
+[uncompress_file] Extracting data from
+/home/runner/nilearn_data/ibc/331a0a579c6e46c0911502a96215b358/download...
+[uncompress_file] .. done.
 </pre></div>
 </div>
 </section>
@@ -379,9 +399,9 @@ Extracting data from /home/runner/nilearn_data/ibc/331a0a579c6e46c0911502a96215b
 </dd>
 </dl>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">nilearn.image</span> <span class="kn">import</span> <span class="n">concat_imgs</span>
-<span class="kn">from</span> <span class="nn">nilearn.maskers</span> <span class="kn">import</span> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.base.BaseEstimator.html#sklearn.base.BaseEstimator" title="sklearn.base.BaseEstimator" class="sphx-glr-backref-module-sklearn-base sphx-glr-backref-type-py-class"><span class="n">NiftiMasker</span></a>
+<span class="kn">from</span> <span class="nn">nilearn.maskers</span> <span class="kn">import</span> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.base.TransformerMixin.html#sklearn.base.TransformerMixin" title="sklearn.base.TransformerMixin" class="sphx-glr-backref-module-sklearn-base sphx-glr-backref-type-py-class"><span class="n">NiftiMasker</span></a>
 
-<span class="n">masker</span> <span class="o">=</span> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.base.BaseEstimator.html#sklearn.base.BaseEstimator" title="sklearn.base.BaseEstimator" class="sphx-glr-backref-module-sklearn-base sphx-glr-backref-type-py-class"><span class="n">NiftiMasker</span></a><span class="p">(</span><span class="n">mask_img</span><span class="o">=</span><a href="https://docs.python.org/3.9/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mask</span></a><span class="p">)</span>
+<span class="n">masker</span> <span class="o">=</span> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.base.TransformerMixin.html#sklearn.base.TransformerMixin" title="sklearn.base.TransformerMixin" class="sphx-glr-backref-module-sklearn-base sphx-glr-backref-type-py-class"><span class="n">NiftiMasker</span></a><span class="p">(</span><span class="n">mask_img</span><span class="o">=</span><a href="https://docs.python.org/3.9/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mask</span></a><span class="p">)</span>
 <a href="https://docs.python.org/3.9/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mask</span></a>
 <span class="n">masker</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
 </pre></div>
@@ -791,7 +811,9 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
   /* fitted */
   background-color: var(--sklearn-color-fitted-level-3);
 }
-</style><div id="sk-container-id-1" class="sk-top-container"><div class="sk-text-repr-fallback"><pre>NiftiMasker(mask_img=&#x27;/home/runner/nilearn_data/ibc/gm_mask_3mm.nii.gz&#x27;)</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br />On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden><div class="sk-item"><div class="sk-estimator fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-1" type="checkbox" checked><label for="sk-estimator-id-1" class="sk-toggleable__label fitted sk-toggleable__label-arrow fitted">&nbsp;NiftiMasker<span class="sk-estimator-doc-link fitted">i<span>Fitted</span></span></label><div class="sk-toggleable__content fitted"><pre>NiftiMasker(mask_img=&#x27;/home/runner/nilearn_data/ibc/gm_mask_3mm.nii.gz&#x27;)</pre></div> </div></div></div></div>
+</style><div id="sk-container-id-1" class="sk-top-container"><div class="sk-text-repr-fallback"><pre>NiftiMasker(mask_img=&#x27;/home/runner/nilearn_data/ibc/gm_mask_3mm.nii.gz&#x27;,
+            memory=Memory(location=None))</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br />On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden><div class="sk-item"><div class="sk-estimator fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-1" type="checkbox" checked><label for="sk-estimator-id-1" class="sk-toggleable__label fitted sk-toggleable__label-arrow fitted">&nbsp;NiftiMasker<span class="sk-estimator-doc-link fitted">i<span>Fitted</span></span></label><div class="sk-toggleable__content fitted"><pre>NiftiMasker(mask_img=&#x27;/home/runner/nilearn_data/ibc/gm_mask_3mm.nii.gz&#x27;,
+            memory=Memory(location=None))</pre></div> </div></div></div></div>
 </div>
 <br />
 <br /></section>
@@ -859,13 +881,15 @@ common model proposed in the literature:
 <a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">target_pred</span></a> <span class="o">=</span> <span class="n">alignment_estimator</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">source_test</span></a><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[PairwiseAlignment.fit] Resampling mask
+/home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
 Parameter mask_strategy :
     Masker parameter background - overriding estimator parameter epi
 Parameter smoothing_fwhm :
     Masker parameter None - overriding estimator parameter 4.0
 
-  warnings.warn(warn_str)
+  parcellation.fit(images_to_parcel)
+[PairwiseAlignment.fit] Resampling mask
 </pre></div>
 </div>
 </section>
@@ -910,7 +934,7 @@ to see if alignment was able to predict a signal more alike the ground truth.</p
 </ul>
 <p>We can see on the plot that after alignment the prediction made for one
 subject data, informed by another subject are greatly improved.</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 44.856 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 46.271 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-pairwise-alignment-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/nilearn/nilearn/main?urlpath=lab/tree/notebooks/auto_examples/plot_pairwise_alignment.ipynb"><img alt="Launch binder" src="../_images/binder_badge_logo.svg" style="width: 150px;" />

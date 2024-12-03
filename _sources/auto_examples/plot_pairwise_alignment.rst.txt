@@ -60,24 +60,49 @@ mask is an appropriate nifti image to select the data.
 
  .. code-block:: none
 
+    [_add_readme_to_default_data_locations] Added README.md to 
+    /home/runner/nilearn_data
+    [get_dataset_dir] Dataset created in /home/runner/nilearn_data/ibc
+    [fetch_single_file] Downloading data from https://osf.io/pcvje/download ...
+    [fetch_single_file]  ...done. (2 seconds, 0 min)
 
-    Added README.md to /home/runner/nilearn_data
+    [uncompress_file] Extracting data from 
+    /home/runner/nilearn_data/ibc/8e275a34345802c5c273312d85957d6c/download...
+    [uncompress_file] .. done.
 
+    [fetch_single_file] Downloading data from https://osf.io/yvju3/download ...
+    [fetch_single_file]  ...done. (2 seconds, 0 min)
 
-    Dataset created in /home/runner/nilearn_data/ibc
+    [uncompress_file] Extracting data from 
+    /home/runner/nilearn_data/ibc/fe06df963fcb3fd454f63a33f0864e8d/download...
+    [uncompress_file] .. done.
 
-    Downloading data from https://osf.io/pcvje/download ...
-     ...done. (3 seconds, 0 min)
-    Extracting data from /home/runner/nilearn_data/ibc/8e275a34345802c5c273312d85957d6c/download..... done.
-    Downloading data from https://osf.io/yvju3/download ...
-     ...done. (3 seconds, 0 min)
-    Extracting data from /home/runner/nilearn_data/ibc/fe06df963fcb3fd454f63a33f0864e8d/download..... done.
-    Downloading data from https://osf.io/8z23h/download ...
-    Downloaded 16875520 of 21185337 bytes (79.7%,    0.3s remaining) ...done. (3 seconds, 0 min)
-    Extracting data from /home/runner/nilearn_data/ibc/100352739b7501f0ed04920933b4be36/download..... done.
-    Downloading data from https://osf.io/e9kbm/download ...
-    Downloaded 4726784 of 21196887 bytes (22.3%,    3.5s remaining)    Downloaded 10215424 of 21196887 bytes (48.2%,    2.2s remaining)    Downloaded 15179776 of 21196887 bytes (71.6%,    1.2s remaining)    Downloaded 20930560 of 21196887 bytes (98.7%,    0.1s remaining) ...done. (7 seconds, 0 min)
-    Extracting data from /home/runner/nilearn_data/ibc/331a0a579c6e46c0911502a96215b358/download..... done.
+    [fetch_single_file] Downloading data from https://osf.io/8z23h/download ...
+    [_chunk_report_] Downloaded 2351104 of 21185337 bytes (11.1%%,    8.0s 
+    remaining)
+    [_chunk_report_] Downloaded 6832128 of 21185337 bytes (32.2%%,    4.4s 
+    remaining)
+    [_chunk_report_] Downloaded 11272192 of 21185337 bytes (53.2%%,    2.7s 
+    remaining)
+    [_chunk_report_] Downloaded 15712256 of 21185337 bytes (74.2%%,    1.4s 
+    remaining)
+    [fetch_single_file]  ...done. (9 seconds, 0 min)
+
+    [uncompress_file] Extracting data from 
+    /home/runner/nilearn_data/ibc/100352739b7501f0ed04920933b4be36/download...
+    [uncompress_file] .. done.
+
+    [fetch_single_file] Downloading data from https://osf.io/e9kbm/download ...
+    [_chunk_report_] Downloaded 2514944 of 21196887 bytes (11.9%%,    7.4s 
+    remaining)
+    [_chunk_report_] Downloaded 16826368 of 21196887 bytes (79.4%%,    0.5s 
+    remaining)
+    [fetch_single_file]  ...done. (5 seconds, 0 min)
+
+    [uncompress_file] Extracting data from 
+    /home/runner/nilearn_data/ibc/331a0a579c6e46c0911502a96215b358/download...
+    [uncompress_file] .. done.
+
 
 
 
@@ -515,7 +540,9 @@ We define a nilearn masker that will be used to handle relevant data.
       /* fitted */
       background-color: var(--sklearn-color-fitted-level-3);
     }
-    </style><div id="sk-container-id-1" class="sk-top-container"><div class="sk-text-repr-fallback"><pre>NiftiMasker(mask_img=&#x27;/home/runner/nilearn_data/ibc/gm_mask_3mm.nii.gz&#x27;)</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br />On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden><div class="sk-item"><div class="sk-estimator fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-1" type="checkbox" checked><label for="sk-estimator-id-1" class="sk-toggleable__label fitted sk-toggleable__label-arrow fitted">&nbsp;NiftiMasker<span class="sk-estimator-doc-link fitted">i<span>Fitted</span></span></label><div class="sk-toggleable__content fitted"><pre>NiftiMasker(mask_img=&#x27;/home/runner/nilearn_data/ibc/gm_mask_3mm.nii.gz&#x27;)</pre></div> </div></div></div></div>
+    </style><div id="sk-container-id-1" class="sk-top-container"><div class="sk-text-repr-fallback"><pre>NiftiMasker(mask_img=&#x27;/home/runner/nilearn_data/ibc/gm_mask_3mm.nii.gz&#x27;,
+                memory=Memory(location=None))</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br />On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden><div class="sk-item"><div class="sk-estimator fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-1" type="checkbox" checked><label for="sk-estimator-id-1" class="sk-toggleable__label fitted sk-toggleable__label-arrow fitted">&nbsp;NiftiMasker<span class="sk-estimator-doc-link fitted">i<span>Fitted</span></span></label><div class="sk-toggleable__content fitted"><pre>NiftiMasker(mask_img=&#x27;/home/runner/nilearn_data/ibc/gm_mask_3mm.nii.gz&#x27;,
+                memory=Memory(location=None))</pre></div> </div></div></div></div>
     </div>
     <br />
     <br />
@@ -617,13 +644,15 @@ common model proposed in the literature:
 
  .. code-block:: none
 
-    /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/_utils/masker_validation.py:113: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+    [PairwiseAlignment.fit] Resampling mask
+    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
     Parameter mask_strategy :
         Masker parameter background - overriding estimator parameter epi
     Parameter smoothing_fwhm :
         Masker parameter None - overriding estimator parameter 4.0
 
-      warnings.warn(warn_str)
+      parcellation.fit(images_to_parcel)
+    [PairwiseAlignment.fit] Resampling mask
 
 
 
@@ -718,7 +747,7 @@ subject data, informed by another subject are greatly improved.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 44.856 seconds)
+   **Total running time of the script:** (1 minutes 46.271 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_pairwise_alignment.py:
