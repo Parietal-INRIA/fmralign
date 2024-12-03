@@ -69,7 +69,7 @@ def fetch_ibc_subjects_contrasts(subjects, data_dir=None, verbose=1):
     metadata_df = pd.read_csv(metadata_path[0])
     conditions = metadata_df.condition.unique()
     metadata_df["path"] = metadata_df["path"].str.replace(
-        "path_to_dir", data_dir
+        "path_to_dir", str(data_dir)
     )
     # filter the dataframe to return only rows relevant for subjects argument
     metadata_df = metadata_df[metadata_df.subject.isin(subjects)]
