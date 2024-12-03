@@ -6,6 +6,7 @@ import warnings
 import numpy as np
 from joblib import Memory, Parallel, delayed
 from sklearn.base import BaseEstimator, TransformerMixin, clone
+from sklearn.utils.validation import check_is_fitted
 
 from fmralign import alignment_methods
 from fmralign._utils import _transform_one_img
@@ -85,7 +86,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
 
     def __init__(
         self,
-        alignment_method,
+        alignment_method="identity",
         n_pieces=1,
         clustering="kmeans",
         mask=None,
@@ -274,3 +275,26 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         raise AttributeError(
             "type object 'PairwiseAlignment' has no attribute 'fit_transform'"
         )
+
+    def get_parcellation(self):
+        """Get the parcellation masker used for alignment.
+
+        Returns
+        -------
+        labels: `list` of `int`
+            Labels of the parcellation masker.
+        parcellation_img: Niimg-like object
+            Parcellation image.
+        """
+        if hasattr(self, "pmasker"):
+            check_is_fitted(self)
+            labels = self.pmasker.get_labels()
+            parcellation_img = self.pmasker.get_parcellation()
+            return labels, parcellation_img
+        else:
+            raise AttributeError(
+                (
+                    "Parcellation has not been computed yet,"
+                    "please fit the alignment estimator first."
+                )
+            )
