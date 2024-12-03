@@ -196,7 +196,3 @@ def test_get_parcellation():
 
     assert np.allclose(data, labels)
     assert len(np.unique(data)) == n_pieces
-
-
-if __name__ == "__main__":
-    test_get_parcellation()
