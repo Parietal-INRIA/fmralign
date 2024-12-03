@@ -123,6 +123,14 @@ class ParcellationMasker(BaseEstimator, TransformerMixin):
 
         if isinstance(imgs, Nifti1Image):
             imgs = [imgs]
+        # If images are 3D, add a fourth dimension
+        for i, img in enumerate(imgs):
+            if len(img.shape) == 3:
+                imgs[i] = Nifti1Image(
+                    np.expand_dims(img.get_fdata(), axis=-1),
+                    img.affine,
+                    img.header,
+                )
         # Assert that all images have the same shape
         if len(set([img.shape for img in imgs])) > 1:
             raise NotImplementedError(
