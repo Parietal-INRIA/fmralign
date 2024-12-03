@@ -262,7 +262,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             * either 'identity', 'scaled_orthogonal', 'optimal_transport',
             'ridge_cv', 'permutation', 'diagonal',
             * or an instance of one of alignment classes (imported from
-            functional_alignment.alignment_methods)
+            fmralign.alignment_methods)
         n_pieces: int, optional (default = 1)
             Number of regions in which the data is parcellated for alignment.
             If 1 the alignment is done on full scale data.
