@@ -200,7 +200,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         -------
         self
         """
-        self.pmasker = ParcellationMasker(
+        self.parcel_masker = ParcellationMasker(
             n_pieces=self.n_pieces,
             clustering=self.clustering,
             mask=self.mask,
@@ -218,11 +218,13 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
             verbose=self.verbose,
         )
 
-        parceled_source, parceled_target = self.pmasker.fit_transform([X, Y])
-        self.masker = self.pmasker.masker_
-        self.mask = self.pmasker.masker_.mask_img_
-        self.labels_ = self.pmasker.labels
-        self.n_pieces = self.pmasker.n_pieces
+        parceled_source, parceled_target = self.parcel_masker.fit_transform(
+            [X, Y]
+        )
+        self.masker = self.parcel_masker.masker_
+        self.mask = self.parcel_masker.masker_.mask_img_
+        self.labels_ = self.parcel_masker.labels
+        self.n_pieces = self.parcel_masker.n_pieces
 
         self.fit_ = Parallel(
             self.n_jobs, prefer="threads", verbose=self.verbose
@@ -253,7 +255,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
                 "This instance has not been fitted yet. "
                 "Please call 'fit' before 'transform'."
             )
-        parceled_data_list = self.pmasker.transform(X)
+        parceled_data_list = self.parcel_masker.transform(X)
         transformed_img = Parallel(
             self.n_jobs, prefer="threads", verbose=self.verbose
         )(
@@ -286,10 +288,10 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         parcellation_img: Niimg-like object
             Parcellation image.
         """
-        if hasattr(self, "pmasker"):
+        if hasattr(self, "parcel_masker"):
             check_is_fitted(self)
-            labels = self.pmasker.get_labels()
-            parcellation_img = self.pmasker.get_parcellation()
+            labels = self.parcel_masker.get_labels()
+            parcellation_img = self.parcel_masker.get_parcellation()
             return labels, parcellation_img
         else:
             raise AttributeError(
