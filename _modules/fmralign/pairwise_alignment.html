@@ -302,6 +302,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Memory</span><span class="p">,</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
 <span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">,</span> <span class="n">clone</span>
+<span class="kn">from</span> <span class="nn">sklearn.utils.validation</span> <span class="kn">import</span> <span class="n">check_is_fitted</span>
 
 <span class="kn">from</span> <span class="nn">fmralign</span> <span class="kn">import</span> <span class="n">alignment_methods</span>
 <span class="kn">from</span> <span class="nn">fmralign._utils</span> <span class="kn">import</span> <span class="n">_transform_one_img</span>
@@ -385,7 +386,7 @@
 <a class="viewcode-back" href="../../modules/generated/fmralign.pairwise_alignment.PairwiseAlignment.html#fmralign.pairwise_alignment.PairwiseAlignment.__init__">[docs]</a>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">alignment_method</span><span class="p">,</span>
+        <span class="n">alignment_method</span><span class="o">=</span><span class="s2">&quot;identity&quot;</span><span class="p">,</span>
         <span class="n">n_pieces</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">clustering</span><span class="o">=</span><span class="s2">&quot;kmeans&quot;</span><span class="p">,</span>
         <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -500,7 +501,7 @@
 <span class="sd">        -------</span>
 <span class="sd">        self</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pmasker</span> <span class="o">=</span> <span class="n">ParcellationMasker</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parcel_masker</span> <span class="o">=</span> <span class="n">ParcellationMasker</span><span class="p">(</span>
             <span class="n">n_pieces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_pieces</span><span class="p">,</span>
             <span class="n">clustering</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="p">,</span>
             <span class="n">mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">,</span>
@@ -518,11 +519,13 @@
             <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="n">parceled_source</span><span class="p">,</span> <span class="n">parceled_target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pmasker</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">([</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">masker</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pmasker</span><span class="o">.</span><span class="n">masker_</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pmasker</span><span class="o">.</span><span class="n">masker_</span><span class="o">.</span><span class="n">mask_img_</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">labels_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pmasker</span><span class="o">.</span><span class="n">labels</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_pieces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pmasker</span><span class="o">.</span><span class="n">n_pieces</span>
+        <span class="n">parceled_source</span><span class="p">,</span> <span class="n">parceled_target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parcel_masker</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">masker</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parcel_masker</span><span class="o">.</span><span class="n">masker_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parcel_masker</span><span class="o">.</span><span class="n">masker_</span><span class="o">.</span><span class="n">mask_img_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parcel_masker</span><span class="o">.</span><span class="n">labels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_pieces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parcel_masker</span><span class="o">.</span><span class="n">n_pieces</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">fit_</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="s2">&quot;threads&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span>
@@ -553,7 +556,7 @@
                 <span class="s2">&quot;This instance has not been fitted yet. &quot;</span>
                 <span class="s2">&quot;Please call &#39;fit&#39; before &#39;transform&#39;.&quot;</span>
             <span class="p">)</span>
-        <span class="n">parceled_data_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pmasker</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">parceled_data_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parcel_masker</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
         <span class="n">transformed_img</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="s2">&quot;threads&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span>
         <span class="p">)(</span>
@@ -574,7 +577,30 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
             <span class="s2">&quot;type object &#39;PairwiseAlignment&#39; has no attribute &#39;fit_transform&#39;&quot;</span>
-        <span class="p">)</span></div>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_parcellation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the parcellation masker used for alignment.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        labels: `list` of `int`</span>
+<span class="sd">            Labels of the parcellation masker.</span>
+<span class="sd">        parcellation_img: Niimg-like object</span>
+<span class="sd">            Parcellation image.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;parcel_masker&quot;</span><span class="p">):</span>
+            <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parcel_masker</span><span class="o">.</span><span class="n">get_labels</span><span class="p">()</span>
+            <span class="n">parcellation_img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parcel_masker</span><span class="o">.</span><span class="n">get_parcellation</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">labels</span><span class="p">,</span> <span class="n">parcellation_img</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="s2">&quot;Parcellation has not been computed yet,&quot;</span>
+                    <span class="s2">&quot;please fit the alignment estimator first.&quot;</span>
+                <span class="p">)</span>
+            <span class="p">)</span></div>
 
 </pre></div>
         </article>
