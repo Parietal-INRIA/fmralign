@@ -186,6 +186,16 @@ class ParcellationMasker(BaseEstimator, TransformerMixin):
             )
         return self.labels
 
+    def get_parcellation(self):
+        """Return the parcellation image.
+
+        Returns
+        -------
+        parcellation : `nibabel.Nifti1Image`
+            Parcellation image.
+        """
+        return self.masker_.inverse_transform(self.get_labels())
+
     def fit(self, imgs, y=None):
         """Fit the masker and compute the parcellation.
 
