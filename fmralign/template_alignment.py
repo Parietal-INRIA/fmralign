@@ -8,14 +8,15 @@ Uses functional alignment on Niimgs and predicts new subjects' unseen images.
 
 import numpy as np
 from joblib import Memory, Parallel, delayed
-from nilearn._utils.masker_validation import check_embedded_masker
-from nilearn.image import concat_imgs, index_img, load_img
+from nilearn.image import index_img, load_img
 from sklearn.base import BaseEstimator, TransformerMixin
 
-from fmralign.pairwise_alignment import PairwiseAlignment
+from fmralign._utils import _parcels_to_array
+from fmralign.pairwise_alignment import PairwiseAlignment, fit_one_piece
+from fmralign.preprocessing import ParcellationMasker
 
 
-def _rescaled_euclidean_mean(imgs, masker, scale_average=False):
+def _rescaled_euclidean_mean(subjects_data, scale_average=False):
     """
     Make the Euclidian average of images.
 
@@ -32,34 +33,60 @@ def _rescaled_euclidean_mean(imgs, masker, scale_average=False):
 
     Returns
     -------
-    average_img: Niimg
+    average_img: ndarray
         Average of imgs, with same shape as one img
     """
-    masked_imgs = [masker.transform(img) for img in imgs]
-    average_img = np.mean(masked_imgs, axis=0)
+    average_data = np.mean(subjects_data, axis=0)
     scale = 1
     if scale_average:
         X_norm = 0
-        for img in masked_imgs:
-            X_norm += np.linalg.norm(img)
-        X_norm /= len(masked_imgs)
-        scale = X_norm / np.linalg.norm(average_img)
-    average_img *= scale
+        for data in subjects_data:
+            X_norm += np.linalg.norm(data)
+        X_norm /= len(subjects_data)
+        scale = X_norm / np.linalg.norm(average_data)
+    average_data *= scale
 
-    return masker.inverse_transform(average_img)
+    return average_data
+
+
+def _reconstruct_template(fit, labels, masker):
+    """
+    Reconstruct template from fit output.
+
+    Parameters
+    ----------
+    fit: list of list of np.ndarray
+        Each element of the list is the list of parcels data for one subject.
+    labels: np.ndarray
+        Labels of the parcels.
+    masker: instance of NiftiMasker or MultiNiftiMasker
+        Masker to be used on the data.
+
+    Returns
+    -------
+    template_img: 4D Niimg object
+        Models the barycenter of input imgs
+    template_history: list of 4D Niimgs
+        List of the intermediate templates computed at the end of each iteration
+    """
+    template_parcels = [fit_i["template_data"] for fit_i in fit]
+    template_data = _parcels_to_array(template_parcels, labels)
+    template_img = masker.inverse_transform(template_data)
+
+    n_iter = len(fit[0]["template_history"])
+    template_history = []
+    for i in range(n_iter):
+        template_parcels = [fit_j["template_history"][i] for fit_j in fit]
+        template_data = _parcels_to_array(template_parcels, labels)
+        template_history.append(masker.inverse_transform(template_data))
+
+    return template_img, template_history
 
 
 def _align_images_to_template(
-    imgs,
+    subjects_data,
     template,
     alignment_method,
-    n_pieces,
-    clustering,
-    masker,
-    memory,
-    memory_level,
-    n_jobs,
-    verbose,
 ):
     """
     Convenience function.
@@ -67,21 +94,18 @@ def _align_images_to_template(
     aligning each of them to a common target, the template.
     All arguments are used in PairwiseAlignment.
     """
-    aligned_imgs = []
-    for img in imgs:
-        piecewise_estimator = PairwiseAlignment(
-            n_pieces=n_pieces,
-            alignment_method=alignment_method,
-            clustering=clustering,
-            mask=masker,
-            memory=memory,
-            memory_level=memory_level,
-            n_jobs=n_jobs,
-            verbose=verbose,
+    aligned_data = []
+    piecewise_estimators = []
+    for subject_data in subjects_data:
+        piecewise_estimator = fit_one_piece(
+            subject_data,
+            template,
+            alignment_method,
         )
-        piecewise_estimator.fit(img, template)
-        aligned_imgs.append(piecewise_estimator.transform(img))
-    return aligned_imgs
+        piecewise_estimator.fit(subject_data, template)
+        piecewise_estimators.append(piecewise_estimator)
+        aligned_data.append(piecewise_estimator.transform(subject_data))
+    return aligned_data, piecewise_estimators
 
 
 def _fit_local_template(
