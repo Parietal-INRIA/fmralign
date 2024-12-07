@@ -392,39 +392,45 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
 
         """
 
-        # Check if the input is a list, if list of lists, concatenate each subjects
-        # data into one unique image.
-        if not isinstance(imgs, (list, np.ndarray)) or len(imgs) < 2:
-            raise ValueError(
-                "The method TemplateAlignment.fit() need a list input. "
-                "Each element of the list (Niimg-like or list of Niimgs) "
-                "is the data for one subject."
+        self.parcel_masker = ParcellationMasker(
+            n_pieces=self.n_pieces,
+            clustering=self.clustering,
+            mask=self.mask,
+            smoothing_fwhm=self.smoothing_fwhm,
+            standardize=self.standardize,
+            detrend=self.detrend,
+            low_pass=self.low_pass,
+            high_pass=self.high_pass,
+            t_r=self.t_r,
+            target_affine=self.target_affine,
+            target_shape=self.target_shape,
+            memory=self.memory,
+            memory_level=self.memory_level,
+            n_jobs=self.n_jobs,
+            verbose=self.verbose,
+        )
+
+        subjects_data = self.parcel_masker.fit_transform(imgs)
+        parcels_data = index_by_parcel(subjects_data)
+        self.masker = self.parcel_masker.masker_
+        self.mask = self.parcel_masker.masker_.mask_img_
+        self.labels_ = self.parcel_masker.labels
+        self.n_pieces = self.parcel_masker.n_pieces
+
+        self.fit_ = Parallel(
+            self.n_jobs, prefer="threads", verbose=self.verbose
+        )(
+            delayed(_fit_local_template)(
+                parcel_i,
+                self.n_iter,
+                self.scale_template,
+                self.alignment_method,
             )
-        else:
-            if isinstance(imgs[0], (list, np.ndarray)):
-                imgs = [concat_imgs(img) for img in imgs]
+            for parcel_i in parcels_data
+        )
 
-        self.masker_ = check_embedded_masker(self)
-        self.masker_.n_jobs = self.n_jobs  # self.n_jobs
-
-        # if masker_ has been provided a mask_img
-        if self.masker_.mask_img is None:
-            self.masker_.fit(imgs)
-        else:
-            self.masker_.fit()
-
-        self.template, self.template_history = _create_template(
-            imgs,
-            self.n_iter,
-            self.scale_template,
-            self.alignment_method,
-            self.n_pieces,
-            self.clustering,
-            self.masker_,
-            self.memory,
-            self.memory_level,
-            self.n_jobs,
-            self.verbose,
+        self.template, self.template_history = _reconstruct_template(
+            self.fit_, self.labels_, self.masker
         )
         if self.save_template is not None:
             self.template.to_filename(self.save_template)
