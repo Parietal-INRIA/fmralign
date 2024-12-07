@@ -8,7 +8,6 @@ Uses functional alignment on Niimgs and predicts new subjects' unseen images.
 
 import numpy as np
 from joblib import Memory, Parallel, delayed
-from nilearn.image import index_img
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
@@ -162,31 +161,6 @@ def _fit_local_template(
         "template_history": template_history,
         "estimators": subjects_estimators,
     }
-
-
-def _predict_from_template_and_mapping(template, test_index, mapping):
-    """
-    From a template and an alignment estimator, predict new contrasts.
-
-    Parameters
-    ----------
-    template: list of 3D Niimgs
-        Learnt in a first step now used to predict some new data
-    test_index:
-        Index of the images not used to learn the alignment mapping and so
-        predictable without overfitting
-    mapping: instance of PairwiseAlignment class
-        Alignment estimator that must have been fitted already
-
-    Returns
-    -------
-    transformed_image: list of Niimgs
-        Prediction corresponding to each template image with index in test_index
-        once realigned to the new subjects
-    """
-    image_to_transform = index_img(template, test_index)
-    transformed_image = mapping.transform(image_to_transform)
-    return transformed_image
 
 
 def index_by_parcel(subjects_data):
