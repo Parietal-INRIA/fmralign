@@ -181,13 +181,13 @@ def test_standardization():
     assert np.abs(np.std(data_array) - 1.0) < 1e-5
 
 
-def test_get_parcellation():
+def test_get_parcellatio_img():
     """Test that ParcellationMasker returns the parcellation mask"""
     n_pieces = 2
     img, _ = random_niimg((8, 7, 6))
     parcel_masker = ParcellationMasker(n_pieces=n_pieces)
     parcel_masker.fit(img)
-    parcellation_img = parcel_masker.get_parcellation()
+    parcellation_img = parcel_masker.get_parcellation_img()
     labels = parcel_masker.get_labels()
 
     assert isinstance(parcellation_img, Nifti1Image)
