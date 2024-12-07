@@ -164,55 +164,6 @@ def _fit_local_template(
     }
 
 
-def _map_template_to_image(
-    imgs,
-    train_index,
-    template,
-    alignment_method,
-    n_pieces,
-    clustering,
-    masker,
-    memory,
-    memory_level,
-    n_jobs,
-    verbose,
-):
-    """
-    Learn alignment operator from the template toward new images.
-
-    Parameters
-    ----------
-    imgs: list of 3D Niimgs
-        Target images to learn mapping from the template to a new subject
-    train_index: list of int
-        Matching index between imgs and the corresponding template images to use
-        to learn alignment. len(train_index) must be equal to len(imgs)
-    template: list of 3D Niimgs
-        Learnt in a first step now used as source image
-    All other arguments are the same are passed to PairwiseAlignment
-
-
-    Returns
-    -------
-    mapping: instance of PairwiseAlignment class
-        Alignment estimator fitted to align the template with the input images
-    """
-
-    mapping_image = index_img(template, train_index)
-    mapping = PairwiseAlignment(
-        n_pieces=n_pieces,
-        alignment_method=alignment_method,
-        clustering=clustering,
-        mask=masker,
-        memory=memory,
-        memory_level=memory_level,
-        n_jobs=n_jobs,
-        verbose=verbose,
-    )
-    mapping.fit(mapping_image, imgs)
-    return mapping
-
-
 def _predict_from_template_and_mapping(template, test_index, mapping):
     """
     From a template and an alignment estimator, predict new contrasts.
