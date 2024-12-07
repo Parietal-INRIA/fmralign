@@ -84,18 +84,11 @@ def _align_images_to_template(
     return aligned_imgs
 
 
-def _create_template(
-    imgs,
+def _fit_local_template(
+    subjects_data,
     n_iter,
     scale_template,
     alignment_method,
-    n_pieces,
-    clustering,
-    masker,
-    memory,
-    memory_level,
-    n_jobs,
-    verbose,
 ):
     """
     Create template through alternate minimization.
@@ -127,28 +120,23 @@ def _create_template(
         List of the intermediate templates computed at the end of each iteration
     """
 
-    aligned_imgs = imgs
+    aligned_data = subjects_data
     template_history = []
     for iter in range(n_iter):
-        template = _rescaled_euclidean_mean(
-            aligned_imgs, masker, scale_template
-        )
+        template = _rescaled_euclidean_mean(aligned_data, scale_template)
         if 0 < iter < n_iter - 1:
             template_history.append(template)
-        aligned_imgs = _align_images_to_template(
-            imgs,
+        aligned_data, subjects_estimators = _align_images_to_template(
+            subjects_data,
             template,
             alignment_method,
-            n_pieces,
-            clustering,
-            masker,
-            memory,
-            memory_level,
-            n_jobs,
-            verbose,
         )
 
-    return template, template_history
+    return {
+        "template_data": template,
+        "template_history": template_history,
+        "estimators": subjects_estimators,
+    }
 
 
 def _map_template_to_image(
