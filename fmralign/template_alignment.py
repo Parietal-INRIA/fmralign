@@ -8,10 +8,11 @@ Uses functional alignment on Niimgs and predicts new subjects' unseen images.
 
 import numpy as np
 from joblib import Memory, Parallel, delayed
-from nilearn.image import index_img, load_img
+from nilearn.image import index_img
 from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.utils.validation import check_is_fitted
 
-from fmralign._utils import _parcels_to_array
+from fmralign._utils import _parcels_to_array, _transform_one_img
 from fmralign.pairwise_alignment import PairwiseAlignment, fit_one_piece
 from fmralign.preprocessing import ParcellationMasker
 
@@ -447,7 +448,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         if self.save_template is not None:
             self.template.to_filename(self.save_template)
 
-    def transform(self, imgs, train_index, test_index):
+    def transform(self, img, subject_index=None):
         """
         Learn alignment between new subject and template calculated during fit,
         then predict other conditions for this new subject.
@@ -474,66 +475,48 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             Each Niimg has the same length as the list test_index
 
         """
-
-        if not isinstance(imgs, (list, np.ndarray)):
+        if not hasattr(self, "fit_"):
             raise ValueError(
-                "The method TemplateAlignment.transform() need a list input. "
-                "Each element of the list (Niimg-like or list of Niimgs) "
-                "is the data used to align one new subject with images "
-                "indexed by train_index."
+                "This instance has not been fitted yet. "
+                "Please call 'fit' before 'transform'."
             )
+
+        if subject_index is None:
+            alignment_estimator = PairwiseAlignment(
+                n_pieces=self.n_pieces,
+                alignment_method=self.alignment_method,
+                clustering=self.parcel_masker.get_parcellation_img(),
+                mask=self.masker,
+                smoothing_fwhm=self.smoothing_fwhm,
+                standardize=self.standardize,
+                detrend=self.detrend,
+                target_affine=self.target_affine,
+                target_shape=self.target_shape,
+                low_pass=self.low_pass,
+                high_pass=self.high_pass,
+                t_r=self.t_r,
+                memory=self.memory,
+                memory_level=self.memory_level,
+                n_jobs=self.n_jobs,
+                verbose=self.verbose,
+            )
+            alignment_estimator.fit(img, self.template)
+            return alignment_estimator.transform(img)
         else:
-            if isinstance(imgs[0], (list, np.ndarray)) and len(imgs[0]) != len(
-                train_index
-            ):
-                raise ValueError(
-                    "Each element of imgs (Niimg-like or list of Niimgs) "
-                    "should have the same length as the length of train_index."
-                )
-            elif load_img(imgs[0]).shape[-1] != len(train_index):
-                raise ValueError(
-                    "Each element of imgs (Niimg-like or list of Niimgs) "
-                    "should have the same length as the length of train_index."
-                )
-
-        template_length = self.template.shape[-1]
-        if not (
-            all(i < template_length for i in test_index)
-            and all(i < template_length for i in train_index)
-        ):
-            raise ValueError(
-                f"Template has {template_length} images but you provided a "
-                "greater index in train_index or test_index."
+            parceled_data_list = self.parcel_masker.transform(img)
+            subject_estimators = [
+                fit_i["estimators"][subject_index] for fit_i in self.fit_
+            ]
+            transformed_img = Parallel(
+                self.n_jobs, prefer="threads", verbose=self.verbose
+            )(
+                delayed(_transform_one_img)(parceled_data, subject_estimators)
+                for parceled_data in parceled_data_list
             )
-
-        fitted_mappings = Parallel(
-            self.n_jobs, prefer="threads", verbose=self.verbose
-        )(
-            delayed(_map_template_to_image)(
-                img,
-                train_index,
-                self.template,
-                self.alignment_method,
-                self.n_pieces,
-                self.clustering,
-                self.masker_,
-                self.memory,
-                self.memory_level,
-                self.n_jobs,
-                self.verbose,
-            )
-            for img in imgs
-        )
-
-        predicted_imgs = Parallel(
-            self.n_jobs, prefer="threads", verbose=self.verbose
-        )(
-            delayed(_predict_from_template_and_mapping)(
-                self.template, test_index, mapping
-            )
-            for mapping in fitted_mappings
-        )
-        return predicted_imgs
+            if len(transformed_img) == 1:
+                return transformed_img[0]
+            else:
+                return transformed_img
 
     # Make inherited function harmless
     def fit_transform(self):
@@ -541,3 +524,26 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         raise AttributeError(
             "type object 'PairwiseAlignment' has no attribute 'fit_transform'"
         )
+
+    def get_parcellation(self):
+        """Get the parcellation masker used for alignment.
+
+        Returns
+        -------
+        labels: `list` of `int`
+            Labels of the parcellation masker.
+        parcellation_img: Niimg-like object
+            Parcellation image.
+        """
+        if hasattr(self, "parcel_masker"):
+            check_is_fitted(self)
+            labels = self.parcel_masker.get_labels()
+            parcellation_img = self.parcel_masker.get_parcellation_img()
+            return labels, parcellation_img
+        else:
+            raise AttributeError(
+                (
+                    "Parcellation has not been computed yet,"
+                    "please fit the alignment estimator first."
+                )
+            )
