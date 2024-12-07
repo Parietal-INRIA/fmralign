@@ -225,6 +225,29 @@ def _predict_from_template_and_mapping(template, test_index, mapping):
     return transformed_image
 
 
+def index_by_parcel(subjects_data):
+    """
+    Index data by parcel.
+
+    Parameters
+    ----------
+    subjects_data: list of list of numpy.ndarray
+        Each element of the list is the list of parcels
+        data for one subject.
+
+    Returns
+    -------
+    list of list of numpy.ndarray
+        Each element of the list is the list of subjects
+        data for one parcel.
+    """
+    n_pieces = subjects_data[0].n_pieces
+    return [
+        [subject_data[i] for subject_data in subjects_data]
+        for i in range(n_pieces)
+    ]
+
+
 class TemplateAlignment(BaseEstimator, TransformerMixin):
     """
     Decompose the source images into regions and summarize subjects information
