@@ -163,13 +163,13 @@ def _fit_local_template(
     }
 
 
-def index_by_parcel(subjects_data):
+def _index_by_parcel(subjects_parcels):
     """
     Index data by parcel.
 
     Parameters
     ----------
-    subjects_data: list of list of numpy.ndarray
+    subjects_parcels: list of list of numpy.ndarray
         Each element of the list is the list of parcels
         data for one subject.
 
@@ -179,9 +179,9 @@ def index_by_parcel(subjects_data):
         Each element of the list is the list of subjects
         data for one parcel.
     """
-    n_pieces = subjects_data[0].n_pieces
+    n_pieces = subjects_parcels[0].n_pieces
     return [
-        [subject_data[i] for subject_data in subjects_data]
+        [subject_parcels[i] for subject_parcels in subjects_parcels]
         for i in range(n_pieces)
     ]
 
