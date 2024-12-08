@@ -18,22 +18,19 @@ from fmralign.preprocessing import ParcellationMasker
 
 def _rescaled_euclidean_mean(subjects_data, scale_average=False):
     """
-    Make the Euclidian average of images.
+    Make the Euclidian average of `numpy.ndarray`.
 
     Parameters
     ----------
-    imgs: list of Niimgs
-        Each img is 3D by default, but can also be 4D.
-    masker: instance of NiftiMasker or MultiNiftiMasker
-        Masker to be used on the data.
+    subjects_data: `list` of `numpy.ndarray`
+        Each element of the list is the data for one subject.
     scale_average: boolean
-        If true, the returned average is scaled to have the average norm of imgs
-        If false, it will usually have a smaller norm than initial average
-        because noise will cancel across images
+        If true, average is rescaled so that it keeps the same norm as the
+        average of training images.
 
     Returns
     -------
-    average_img: ndarray
+    average_data: ndarray
         Average of imgs, with same shape as one img
     """
     average_data = np.mean(subjects_data, axis=0)
@@ -55,9 +52,9 @@ def _reconstruct_template(fit, labels, masker):
 
     Parameters
     ----------
-    fit: list of list of np.ndarray
+    fit: list of list of numpy.ndarray
         Each element of the list is the list of parcels data for one subject.
-    labels: np.ndarray
+    labels: numpy.ndarray
         Labels of the parcels.
     masker: instance of NiftiMasker or MultiNiftiMasker
         Masker to be used on the data.
@@ -90,9 +87,24 @@ def _align_images_to_template(
 ):
     """
     Convenience function.
-    For a list of images, return the list of estimators (PairwiseAlignment instances)
+    For a list of ndarrays, return the list of alignment estimators
     aligning each of them to a common target, the template.
-    All arguments are used in PairwiseAlignment.
+
+    Parameters
+    ----------
+    subjects_data: `list` of `numpy.ndarray`
+        Each element of the list is the data for one subject.
+    template: `numpy.ndarray`
+        The target data.
+    alignment_method: string
+        Algorithm used to perform alignment between sources and template.
+
+    Returns
+    -------
+    aligned_data: `list` of `numpy.ndarray`
+        List of aligned data.
+    piecewise_estimators: `list` of `PairwiseAlignment`
+        List of `Alignment` estimators.
     """
     aligned_data = []
     piecewise_estimators = []
@@ -117,31 +129,33 @@ def _fit_local_template(
     """
     Create template through alternate minimization.
     Compute iteratively :
-    * T minimizing sum(||R_i X_i-T||) which is the mean of aligned images (RX_i)
+    * T minimizing sum(||R X-T||) which is the mean of aligned images (RX)
     * align initial images to new template T
-        (find transform R_i minimizing ||R_i X_i-T|| for each img X_i)
+        (find transform R minimizing ||R X-T|| for each img X)
 
 
     Parameters
     ----------
-    imgs: List of Niimg-like objects
-       See http://nilearn.github.io/manipulating_images/input_output.html
-       source data. Every img must have the same length (n_sample)
-    scale_template: boolean
-        If true, template is rescaled after each inference so that it keeps
-        the same norm as the average of training images.
+    imgs: `list` of `numpy.ndarray`
+        Each element of the list is the data for one subject.
     n_iter: int
        Number of iterations in the alternate minimization. Each image is
        aligned n_iter times to the evolving template. If n_iter = 0,
        the template is simply the mean of the input images.
-    All other arguments are the same are passed to PairwiseAlignment
+    scale_template: boolean
+        If true, template is rescaled after each inference so that it keeps
+        the same norm as the average of training images.
+    alignment_method: string
+        Algorithm used to perform alignment between sources and template.
 
     Returns
     -------
-    template: list of 3D Niimgs of length (n_sample)
-        Models the barycenter of input imgs
-    template_history: list of list of 3D Niimgs
-        List of the intermediate templates computed at the end of each iteration
+    template_data: `numpy.ndarray`
+        Template data.
+    template_history: `list` of `numpy.ndarray`
+        List of the intermediate templates computed at the end of each iteration.
+    piecewise_estimators: `list` of `PairwiseAlignment`
+        List of `Alignment` estimators.
     """
 
     aligned_data = subjects_data
@@ -375,29 +389,24 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
 
     def transform(self, img, subject_index=None):
         """
-        Learn alignment between new subject and template calculated during fit,
-        then predict other conditions for this new subject.
-        Alignment is learnt between imgs and conditions in the template indexed by train_index.
-        Prediction correspond to conditions in the template index by test_index.
+        Transform a (new) subject image into the template space.
 
         Parameters
         ----------
-        imgs: List of 3D Niimg-like objects
-            Target subjects known data.
-            Every img must have length (number of sample) train_index.
-        train_index: list of ints
-            Indexes of the 3D samples used to map each img to the template.
-            Every index should be smaller than the number of images in the template.
-        test_index: list of ints
-            Indexes of the 3D samples to predict from the template and the mapping.
-            Every index should be smaller than the number of images in the template.
+        img: 4D Niimg-like object
+            Subject image.
+        subject_index: int, optional (default = None)
+            Index of the subject to be transformed. It should
+            correspond to the index of the subject in the list of
+            subjects used to fit the template. If None, a new
+            `PairwiseAlignment` object is fitted between the new
+            subject and the template before transforming.
 
 
         Returns
         -------
-        predicted_imgs: List of 3D Niimg-like objects
-            Target subjects predicted data.
-            Each Niimg has the same length as the list test_index
+        predicted_imgs: 4D Niimg object
+            Transformed data.
 
         """
         if not hasattr(self, "fit_"):
