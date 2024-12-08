@@ -110,9 +110,9 @@ def _align_images_to_template(
 
 def _fit_local_template(
     subjects_data,
-    n_iter,
-    scale_template,
-    alignment_method,
+    n_iter=2,
+    scale_template=False,
+    alignment_method="identity",
 ):
     """
     Create template through alternate minimization.
