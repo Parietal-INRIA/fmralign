@@ -348,8 +348,8 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             verbose=self.verbose,
         )
 
-        subjects_data = self.parcel_masker.fit_transform(imgs)
-        parcels_data = index_by_parcel(subjects_data)
+        subjects_parcels = self.parcel_masker.fit_transform(imgs)
+        parcels_data = _index_by_parcel(subjects_parcels)
         self.masker = self.parcel_masker.masker_
         self.mask = self.parcel_masker.masker_.mask_img_
         self.labels_ = self.parcel_masker.labels
