@@ -237,12 +237,12 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
 
         return self
 
-    def transform(self, X):
+    def transform(self, img):
         """Predict data from X.
 
         Parameters
         ----------
-        X: Niimg-like object
+        img: Niimg-like object
             Source data
 
         Returns
@@ -255,7 +255,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
                 "This instance has not been fitted yet. "
                 "Please call 'fit' before 'transform'."
             )
-        parceled_data_list = self.parcel_masker.transform(X)
+        parceled_data_list = self.parcel_masker.transform(img)
         transformed_img = Parallel(
             self.n_jobs, prefer="threads", verbose=self.verbose
         )(
@@ -266,7 +266,6 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
             return transformed_img[0]
         else:
             return transformed_img
-        return transformed_img
 
     # Make inherited function harmless
     def fit_transform(self):
@@ -291,7 +290,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         if hasattr(self, "parcel_masker"):
             check_is_fitted(self)
             labels = self.parcel_masker.get_labels()
-            parcellation_img = self.parcel_masker.get_parcellation()
+            parcellation_img = self.parcel_masker.get_parcellation_img()
             return labels, parcellation_img
         else:
             raise AttributeError(
