@@ -6,6 +6,7 @@ import warnings
 import numpy as np
 from joblib import Memory, Parallel, delayed
 from sklearn.base import BaseEstimator, TransformerMixin, clone
+from sklearn.utils.validation import check_is_fitted
 
 from fmralign import alignment_methods
 from fmralign._utils import _transform_one_img
@@ -85,7 +86,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
 
     def __init__(
         self,
-        alignment_method,
+        alignment_method="identity",
         n_pieces=1,
         clustering="kmeans",
         mask=None,
@@ -199,7 +200,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         -------
         self
         """
-        self.pmasker = ParcellationMasker(
+        self.parcel_masker = ParcellationMasker(
             n_pieces=self.n_pieces,
             clustering=self.clustering,
             mask=self.mask,
@@ -217,11 +218,13 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
             verbose=self.verbose,
         )
 
-        parceled_source, parceled_target = self.pmasker.fit_transform([X, Y])
-        self.masker = self.pmasker.masker_
-        self.mask = self.pmasker.masker_.mask_img_
-        self.labels_ = self.pmasker.labels
-        self.n_pieces = self.pmasker.n_pieces
+        parceled_source, parceled_target = self.parcel_masker.fit_transform(
+            [X, Y]
+        )
+        self.masker = self.parcel_masker.masker_
+        self.mask = self.parcel_masker.masker_.mask_img_
+        self.labels_ = self.parcel_masker.labels
+        self.n_pieces = self.parcel_masker.n_pieces
 
         self.fit_ = Parallel(
             self.n_jobs, prefer="threads", verbose=self.verbose
@@ -252,7 +255,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
                 "This instance has not been fitted yet. "
                 "Please call 'fit' before 'transform'."
             )
-        parceled_data_list = self.pmasker.transform(X)
+        parceled_data_list = self.parcel_masker.transform(X)
         transformed_img = Parallel(
             self.n_jobs, prefer="threads", verbose=self.verbose
         )(
@@ -274,3 +277,26 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         raise AttributeError(
             "type object 'PairwiseAlignment' has no attribute 'fit_transform'"
         )
+
+    def get_parcellation(self):
+        """Get the parcellation masker used for alignment.
+
+        Returns
+        -------
+        labels: `list` of `int`
+            Labels of the parcellation masker.
+        parcellation_img: Niimg-like object
+            Parcellation image.
+        """
+        if hasattr(self, "parcel_masker"):
+            check_is_fitted(self)
+            labels = self.parcel_masker.get_labels()
+            parcellation_img = self.parcel_masker.get_parcellation()
+            return labels, parcellation_img
+        else:
+            raise AttributeError(
+                (
+                    "Parcellation has not been computed yet,"
+                    "please fit the alignment estimator first."
+                )
+            )

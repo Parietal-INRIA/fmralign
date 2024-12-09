@@ -3,6 +3,7 @@ import copy
 
 import numpy as np
 import pytest
+from nibabel import Nifti1Image
 from nilearn.image import new_img_like
 from nilearn.maskers import NiftiMasker
 
@@ -103,3 +104,29 @@ def test_models_against_identity():
                 ground_truth, masker.transform(im_test)
             )
             assert algo_score >= identity_baseline_score
+
+
+def test_parcellation_retrieval():
+    """Test that PairwiseAlignment returns both the\n
+    labels and the parcellation image"""
+    n_pieces = 3
+    img1, _ = random_niimg((8, 7, 6))
+    img2, _ = random_niimg((8, 7, 6))
+    alignment = PairwiseAlignment(n_pieces=n_pieces)
+    alignment.fit(img1, img2)
+
+    labels, parcellation_image = alignment.get_parcellation()
+    assert isinstance(labels, np.ndarray)
+    assert len(np.unique(labels)) == n_pieces
+    assert isinstance(parcellation_image, Nifti1Image)
+    assert parcellation_image.shape == img1.shape
+
+
+def test_parcellation_before_fit():
+    """Test that PairwiseAlignment raises an error if\n
+    the parcellation is retrieved before fitting"""
+    alignment = PairwiseAlignment()
+    with pytest.raises(
+        AttributeError, match="Parcellation has not been computed yet"
+    ):
+        alignment.get_parcellation()

@@ -200,7 +200,7 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
             Length : n_samples
 
         """
-        self.pmasker = ParcellationMasker(
+        self.parcel_masker = ParcellationMasker(
             n_pieces=self.n_pieces,
             clustering=self.clustering,
             mask=self.mask,
@@ -217,11 +217,11 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
             n_jobs=self.n_jobs,
             verbose=self.verbose,
         )
-        parceled_data = self.pmasker.fit_transform(imgs)
-        self.masker_ = self.pmasker.masker_
-        self.mask = self.pmasker.masker_.mask_img_
-        self.labels_ = self.pmasker.labels
-        self.n_pieces = self.pmasker.n_pieces
+        parceled_data = self.parcel_masker.fit_transform(imgs)
+        self.masker_ = self.parcel_masker.masker_
+        self.mask = self.parcel_masker.masker_.mask_img_
+        self.labels_ = self.parcel_masker.labels
+        self.n_pieces = self.parcel_masker.n_pieces
 
         outputs = Parallel(
             n_jobs=self.n_jobs, prefer="threads", verbose=self.verbose
@@ -233,7 +233,7 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
             for i in range(self.n_pieces)
         )
 
-        self.labels_ = self.pmasker.labels
+        self.labels_ = self.parcel_masker.labels
         self.fit_ = [output[0] for output in outputs]
         self.reduced_sr = [output[1] for output in outputs]
         return self
@@ -242,7 +242,9 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
         """Add subject without recalculating SR"""
         for i in range(self.n_pieces):
             self.fit_[i]
-            X_i = _get_parcel_across_subjects(self.pmasker.transform(imgs), i)
+            X_i = _get_parcel_across_subjects(
+                self.parcel_masker.transform(imgs), i
+            )
             srm = self.fit_[i]
             srm.add_subjects(X_i, self.reduced_sr[i])
         return self
@@ -262,7 +264,7 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
 
         n_comps = self.srm.n_components
         aligned_imgs = []
-        imgs_prep = self.pmasker.transform(imgs)
+        imgs_prep = self.parcel_masker.transform(imgs)
         bag_align = []
         for i, piece_srm in enumerate(self.fit_):
             X_i = [parceled_data[i].T for parceled_data in imgs_prep]
