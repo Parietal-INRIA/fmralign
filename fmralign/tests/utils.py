@@ -132,3 +132,9 @@ def sample_parceled_data(n_pieces=1):
     data = masker.fit_transform(img)
     labels = _make_parcellation(img, "kmeans", n_pieces, masker)
     return data, masker, labels
+
+
+def sample_subjects_data(n_subjects=3):
+    """Sample data in one parcel for n_subjects"""
+    subjects_data = [np.random.rand(10, 20) for _ in range(n_subjects)]
+    return subjects_data

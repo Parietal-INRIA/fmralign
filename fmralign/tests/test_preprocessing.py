@@ -190,13 +190,13 @@ def test_one_contrast():
     pmasker.fit([img1, img2])
 
 
-def test_get_parcellation():
+def test_get_parcellation_img():
     """Test that ParcellationMasker returns the parcellation mask"""
     n_pieces = 2
     img, _ = random_niimg((8, 7, 6))
     parcel_masker = ParcellationMasker(n_pieces=n_pieces)
     parcel_masker.fit(img)
-    parcellation_img = parcel_masker.get_parcellation()
+    parcellation_img = parcel_masker.get_parcellation_img()
     labels = parcel_masker.get_labels()
 
     assert isinstance(parcellation_img, Nifti1Image)
@@ -207,4 +207,3 @@ def test_get_parcellation():
 
     assert np.allclose(data, labels)
     assert len(np.unique(data)) == n_pieces
-
