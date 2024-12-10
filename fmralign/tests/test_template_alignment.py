@@ -243,7 +243,7 @@ def test_parcellation_retrieval():
     assert isinstance(labels, np.ndarray)
     assert len(np.unique(labels)) == n_pieces
     assert isinstance(parcellation_image, Nifti1Image)
-    assert parcellation_image.shape == imgs[0].shape
+    assert parcellation_image.shape == imgs[0].shape[:-1]
 
 
 def test_parcellation_before_fit():
@@ -256,3 +256,7 @@ def test_parcellation_before_fit():
         match="Parcellation has not been computed yet",
     ):
         alignment.get_parcellation()
+
+
+if __name__ == "__main__":
+    test_parcellation_retrieval()
