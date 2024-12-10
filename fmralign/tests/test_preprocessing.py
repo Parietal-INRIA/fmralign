@@ -181,7 +181,16 @@ def test_standardization():
     assert np.abs(np.std(data_array) - 1.0) < 1e-5
 
 
-def test_get_parcellatio_img():
+def test_one_contrast():
+    """Test that ParcellationMasker handles both 3D and\n
+    4D images in the case of one contrast"""
+    img1, _ = random_niimg((8, 7, 6))
+    img2, _ = random_niimg((8, 7, 6, 1))
+    pmasker = ParcellationMasker()
+    pmasker.fit([img1, img2])
+
+
+def test_get_parcellation_img():
     """Test that ParcellationMasker returns the parcellation mask"""
     n_pieces = 2
     img, _ = random_niimg((8, 7, 6))
@@ -198,3 +207,4 @@ def test_get_parcellatio_img():
 
     assert np.allclose(data, labels)
     assert len(np.unique(data)) == n_pieces
+
