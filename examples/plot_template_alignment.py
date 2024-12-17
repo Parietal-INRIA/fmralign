@@ -66,7 +66,7 @@ template_train = []
 for i in range(5):
     template_train.append(concat_imgs(imgs[i]))
 
-# sub-07 will be our left-out subject.
+# sub-07 (that is 5th in the list) will be our left-out subject.
 # We make a single 4D Niimg from our list of 3D filenames.
 
 left_out_subject = concat_imgs(imgs[5])
