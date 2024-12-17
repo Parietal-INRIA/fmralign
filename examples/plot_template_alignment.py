@@ -8,7 +8,7 @@ computed across multiple source subjects. For this purpose, we create a template
 using Procrustes alignment (hyperalignment) to which we align the target subject,
 using shared information. We then compare the voxelwise similarity between the
 target subject and the template to the similarity between the target subject and
-the anatomical euclidean average of the source subjects.
+the anatomical Euclidean average of the source subjects.
 
 We mostly rely on Python common packages and on nilearn to handle
 functional data in a clean fashion.
