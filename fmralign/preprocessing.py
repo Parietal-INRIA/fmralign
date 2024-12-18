@@ -194,7 +194,7 @@ class ParcellationMasker(BaseEstimator, TransformerMixin):
             )
         return self.labels
 
-    def get_parcellation(self):
+    def get_parcellation_img(self):
         """Return the parcellation image.
 
         Returns
