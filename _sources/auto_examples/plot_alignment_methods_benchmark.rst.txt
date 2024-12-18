@@ -115,10 +115,10 @@ First, we fetch and plot the complete atlas
     /home/runner/work/fmralign/fmralign/examples/plot_alignment_methods_benchmark.py:47: FutureWarning: 'force_resample' will be set to 'True' by default in Nilearn 0.13.0.
     Use 'force_resample=True' to suppress this warning.
       resampled_mask_visual = resample_to_img(
-    /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/image/resampling.py:807: FutureWarning: From release 0.13.0 onwards, this function will, by default, copy the header of the input image to the output. Currently, the header is reset to the default Nifti1Header. To suppress this warning and use the new behavior, set `copy_header=True`.
+    /opt/hostedtoolcache/Python/3.11.11/x64/lib/python3.11/site-packages/nilearn/image/resampling.py:807: FutureWarning: From release 0.13.0 onwards, this function will, by default, copy the header of the input image to the output. Currently, the header is reset to the default Nifti1Header. To suppress this warning and use the new behavior, set `copy_header=True`.
       return resample_img(
 
-    <nilearn.plotting.displays._slicers.OrthoSlicer object at 0x7f568bed9150>
+    <nilearn.plotting.displays._slicers.OrthoSlicer object at 0x7fadd0806e10>
 
 
 
@@ -349,7 +349,7 @@ its correlation with the real signal.
       warnings.warn(warning)
     /home/runner/work/fmralign/fmralign/fmralign/metrics.py:62: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
       pearsonr(X_gt[:, vox], X_pred[:, vox])[
-    /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1416: UserWarning: Non-finite values detected. These values will be replaced with zeros.
+    /opt/hostedtoolcache/Python/3.11.11/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1416: UserWarning: Non-finite values detected. These values will be replaced with zeros.
       safe_get_data(stat_map_img, ensure_finite=True),
     [PairwiseAlignment.fit] Resampling mask
     /home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
@@ -369,7 +369,7 @@ its correlation with the real signal.
       warnings.warn(warning)
     /home/runner/work/fmralign/fmralign/fmralign/metrics.py:62: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
       pearsonr(X_gt[:, vox], X_pred[:, vox])[
-    /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1416: UserWarning: Non-finite values detected. These values will be replaced with zeros.
+    /opt/hostedtoolcache/Python/3.11.11/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1416: UserWarning: Non-finite values detected. These values will be replaced with zeros.
       safe_get_data(stat_map_img, ensure_finite=True),
     [PairwiseAlignment.fit] Resampling mask
     /home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
@@ -389,7 +389,7 @@ its correlation with the real signal.
       warnings.warn(warning)
     /home/runner/work/fmralign/fmralign/fmralign/metrics.py:62: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
       pearsonr(X_gt[:, vox], X_pred[:, vox])[
-    /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1416: UserWarning: Non-finite values detected. These values will be replaced with zeros.
+    /opt/hostedtoolcache/Python/3.11.11/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1416: UserWarning: Non-finite values detected. These values will be replaced with zeros.
       safe_get_data(stat_map_img, ensure_finite=True),
     [PairwiseAlignment.fit] Resampling mask
     /home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
@@ -409,7 +409,7 @@ its correlation with the real signal.
       warnings.warn(warning)
     /home/runner/work/fmralign/fmralign/fmralign/metrics.py:62: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
       pearsonr(X_gt[:, vox], X_pred[:, vox])[
-    /opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1416: UserWarning: Non-finite values detected. These values will be replaced with zeros.
+    /opt/hostedtoolcache/Python/3.11.11/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1416: UserWarning: Non-finite values detected. These values will be replaced with zeros.
       safe_get_data(stat_map_img, ensure_finite=True),
 
 
@@ -426,7 +426,7 @@ it yields.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 4.556 seconds)
+   **Total running time of the script:** (1 minutes 2.879 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_alignment_methods_benchmark.py:

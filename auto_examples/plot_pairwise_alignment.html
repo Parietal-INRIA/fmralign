@@ -11,7 +11,7 @@
 <meta property="og:image" content="https://nilearn.github.io/_static/nilearn-logo.png" />
 <meta property="og:image:alt" content="Nilearn" />
 <meta name="description" content="In this tutorial, we show how to better predict new contrasts for a target subject using source subject corresponding contrasts and data in common. We mostly rely on python common packages and on n..." />
-<link rel="search" title="Search" href="../search.html" /><link rel="next" title="Template-based prediction." href="plot_template_alignment.html" /><link rel="prev" title="Examples" href="index.html" />
+<link rel="search" title="Search" href="../search.html" /><link rel="next" title="Pairwise functional alignment on a ROI." href="plot_pairwise_roi_alignment.html" /><link rel="prev" title="Template-based prediction." href="plot_template_alignment.html" />
 
     <link rel="shortcut icon" href="../_static/favicon.ico"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
         <title>Pairwise functional alignment. - fmralign</title>
@@ -230,8 +230,8 @@
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Pairwise functional alignment.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_template_alignment.html">Template-based prediction.</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Pairwise functional alignment.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_pairwise_roi_alignment.html">Pairwise functional alignment on a ROI.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_alignment_methods_benchmark.html">Alignment methods benchmark (pairwise ROI case).</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_int_alignment.html">Co-smoothing prediction using the Individual Neural Tuning Model</a></li>
@@ -346,40 +346,7 @@ mask is an appropriate nifti image to select the data.</p>
 <a href="https://docs.python.org/3.9/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">files</span></a><span class="p">,</span> <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.core.frame.DataFrame" class="sphx-glr-backref-module-pandas-core-frame sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">df</span></a><span class="p">,</span> <a href="https://docs.python.org/3.9/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mask</span></a> <span class="o">=</span> <span class="n">fetch_ibc_subjects_contrasts</span><span class="p">([</span><span class="s2">&quot;sub-01&quot;</span><span class="p">,</span> <span class="s2">&quot;sub-02&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[_add_readme_to_default_data_locations] Added README.md to
-/home/runner/nilearn_data
-[get_dataset_dir] Dataset created in /home/runner/nilearn_data/ibc
-[fetch_single_file] Downloading data from https://osf.io/pcvje/download ...
-[fetch_single_file]  ...done. (2 seconds, 0 min)
-
-[uncompress_file] Extracting data from
-/home/runner/nilearn_data/ibc/8e275a34345802c5c273312d85957d6c/download...
-[uncompress_file] .. done.
-
-[fetch_single_file] Downloading data from https://osf.io/yvju3/download ...
-[fetch_single_file]  ...done. (2 seconds, 0 min)
-
-[uncompress_file] Extracting data from
-/home/runner/nilearn_data/ibc/fe06df963fcb3fd454f63a33f0864e8d/download...
-[uncompress_file] .. done.
-
-[fetch_single_file] Downloading data from https://osf.io/8z23h/download ...
-[_chunk_report_] Downloaded 18178048 of 21185337 bytes (85.8%%,    0.2s
-remaining)
-[fetch_single_file]  ...done. (3 seconds, 0 min)
-
-[uncompress_file] Extracting data from
-/home/runner/nilearn_data/ibc/100352739b7501f0ed04920933b4be36/download...
-[uncompress_file] .. done.
-
-[fetch_single_file] Downloading data from https://osf.io/e9kbm/download ...
-[_chunk_report_] Downloaded 6291456 of 21196887 bytes (29.7%%,    2.4s
-remaining)
-[fetch_single_file]  ...done. (3 seconds, 0 min)
-
-[uncompress_file] Extracting data from
-/home/runner/nilearn_data/ibc/331a0a579c6e46c0911502a96215b358/download...
-[uncompress_file] .. done.
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[get_dataset_dir] Dataset found in /home/runner/nilearn_data/ibc
 </pre></div>
 </div>
 </section>
@@ -937,7 +904,7 @@ to see if alignment was able to predict a signal more alike the ground truth.</p
 </ul>
 <p>We can see on the plot that after alignment the prediction made for one
 subject data, informed by another subject are greatly improved.</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 40.148 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 28.635 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-pairwise-alignment-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/nilearn/nilearn/main?urlpath=lab/tree/notebooks/auto_examples/plot_pairwise_alignment.ipynb"><img alt="Launch binder" src="../_images/binder_badge_logo.svg" style="width: 150px;" />
@@ -962,23 +929,23 @@ subject data, informed by another subject are greatly improved.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="plot_template_alignment.html">
+          <a class="next-page" href="plot_pairwise_roi_alignment.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Template-based prediction.</div>
+                <div class="title">Pairwise functional alignment on a ROI.</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="index.html">
+          <a class="prev-page" href="plot_template_alignment.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Examples</div>
+                <div class="title">Template-based prediction.</div>
                 
               </div>
             </a>

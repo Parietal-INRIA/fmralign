@@ -221,8 +221,8 @@
   <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../auto_examples/index.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_pairwise_alignment.html">Pairwise functional alignment.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_template_alignment.html">Template-based prediction.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_pairwise_alignment.html">Pairwise functional alignment.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_pairwise_roi_alignment.html">Pairwise functional alignment on a ROI.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_alignment_methods_benchmark.html">Alignment methods benchmark (pairwise ROI case).</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_int_alignment.html">Co-smoothing prediction using the Individual Neural Tuning Model</a></li>
@@ -538,12 +538,12 @@
 
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Predict data from X.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        X: Niimg-like object</span>
+<span class="sd">        img: Niimg-like object</span>
 <span class="sd">            Source data</span>
 
 <span class="sd">        Returns</span>
@@ -556,7 +556,7 @@
                 <span class="s2">&quot;This instance has not been fitted yet. &quot;</span>
                 <span class="s2">&quot;Please call &#39;fit&#39; before &#39;transform&#39;.&quot;</span>
             <span class="p">)</span>
-        <span class="n">parceled_data_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parcel_masker</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">parceled_data_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parcel_masker</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
         <span class="n">transformed_img</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="s2">&quot;threads&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span>
         <span class="p">)(</span>
@@ -567,7 +567,6 @@
             <span class="k">return</span> <span class="n">transformed_img</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">transformed_img</span>
-        <span class="k">return</span> <span class="n">transformed_img</span>
 
     <span class="c1"># Make inherited function harmless</span>
     <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -592,7 +591,7 @@
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;parcel_masker&quot;</span><span class="p">):</span>
             <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
             <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parcel_masker</span><span class="o">.</span><span class="n">get_labels</span><span class="p">()</span>
-            <span class="n">parcellation_img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parcel_masker</span><span class="o">.</span><span class="n">get_parcellation</span><span class="p">()</span>
+            <span class="n">parcellation_img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parcel_masker</span><span class="o">.</span><span class="n">get_parcellation_img</span><span class="p">()</span>
             <span class="k">return</span> <span class="n">labels</span><span class="p">,</span> <span class="n">parcellation_img</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>

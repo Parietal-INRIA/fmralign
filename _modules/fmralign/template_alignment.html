@@ -221,8 +221,8 @@
   <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../auto_examples/index.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_pairwise_alignment.html">Pairwise functional alignment.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_template_alignment.html">Template-based prediction.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_pairwise_alignment.html">Pairwise functional alignment.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_pairwise_roi_alignment.html">Pairwise functional alignment on a ROI.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_alignment_methods_benchmark.html">Alignment methods benchmark (pairwise ROI case).</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_int_alignment.html">Co-smoothing prediction using the Individual Neural Tuning Model</a></li>
@@ -304,221 +304,196 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Memory</span><span class="p">,</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
-<span class="kn">from</span> <span class="nn">nilearn._utils.masker_validation</span> <span class="kn">import</span> <span class="n">check_embedded_masker</span>
-<span class="kn">from</span> <span class="nn">nilearn.image</span> <span class="kn">import</span> <span class="n">concat_imgs</span><span class="p">,</span> <span class="n">index_img</span><span class="p">,</span> <span class="n">load_img</span>
 <span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span>
+<span class="kn">from</span> <span class="nn">sklearn.utils.validation</span> <span class="kn">import</span> <span class="n">check_is_fitted</span>
 
-<span class="kn">from</span> <span class="nn">fmralign.pairwise_alignment</span> <span class="kn">import</span> <span class="n">PairwiseAlignment</span>
+<span class="kn">from</span> <span class="nn">fmralign._utils</span> <span class="kn">import</span> <span class="n">_parcels_to_array</span><span class="p">,</span> <span class="n">_transform_one_img</span>
+<span class="kn">from</span> <span class="nn">fmralign.pairwise_alignment</span> <span class="kn">import</span> <span class="n">PairwiseAlignment</span><span class="p">,</span> <span class="n">fit_one_piece</span>
+<span class="kn">from</span> <span class="nn">fmralign.preprocessing</span> <span class="kn">import</span> <span class="n">ParcellationMasker</span>
 
 
-<span class="k">def</span> <span class="nf">_rescaled_euclidean_mean</span><span class="p">(</span><span class="n">imgs</span><span class="p">,</span> <span class="n">masker</span><span class="p">,</span> <span class="n">scale_average</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_rescaled_euclidean_mean</span><span class="p">(</span><span class="n">subjects_data</span><span class="p">,</span> <span class="n">scale_average</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Make the Euclidian average of images.</span>
+<span class="sd">    Make the Euclidian average of `numpy.ndarray`.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    imgs: list of Niimgs</span>
-<span class="sd">        Each img is 3D by default, but can also be 4D.</span>
-<span class="sd">    masker: instance of NiftiMasker or MultiNiftiMasker</span>
-<span class="sd">        Masker to be used on the data.</span>
+<span class="sd">    subjects_data: `list` of `numpy.ndarray`</span>
+<span class="sd">        Each element of the list is the data for one subject.</span>
 <span class="sd">    scale_average: boolean</span>
-<span class="sd">        If true, the returned average is scaled to have the average norm of imgs</span>
-<span class="sd">        If false, it will usually have a smaller norm than initial average</span>
-<span class="sd">        because noise will cancel across images</span>
+<span class="sd">        If true, average is rescaled so that it keeps the same norm as the</span>
+<span class="sd">        average of training images.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    average_img: Niimg</span>
+<span class="sd">    average_data: ndarray</span>
 <span class="sd">        Average of imgs, with same shape as one img</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">masked_imgs</span> <span class="o">=</span> <span class="p">[</span><span class="n">masker</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">img</span><span class="p">)</span> <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">imgs</span><span class="p">]</span>
-    <span class="n">average_img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">masked_imgs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">average_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">subjects_data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">scale</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">if</span> <span class="n">scale_average</span><span class="p">:</span>
         <span class="n">X_norm</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">masked_imgs</span><span class="p">:</span>
-            <span class="n">X_norm</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
-        <span class="n">X_norm</span> <span class="o">/=</span> <span class="nb">len</span><span class="p">(</span><span class="n">masked_imgs</span><span class="p">)</span>
-        <span class="n">scale</span> <span class="o">=</span> <span class="n">X_norm</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">average_img</span><span class="p">)</span>
-    <span class="n">average_img</span> <span class="o">*=</span> <span class="n">scale</span>
+        <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">subjects_data</span><span class="p">:</span>
+            <span class="n">X_norm</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">X_norm</span> <span class="o">/=</span> <span class="nb">len</span><span class="p">(</span><span class="n">subjects_data</span><span class="p">)</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="n">X_norm</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">average_data</span><span class="p">)</span>
+    <span class="n">average_data</span> <span class="o">*=</span> <span class="n">scale</span>
 
-    <span class="k">return</span> <span class="n">masker</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">average_img</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">average_data</span>
+
+
+<span class="k">def</span> <span class="nf">_reconstruct_template</span><span class="p">(</span><span class="n">fit</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">masker</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reconstruct template from fit output.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fit: list of list of numpy.ndarray</span>
+<span class="sd">        Each element of the list is the list of parcels data for one subject.</span>
+<span class="sd">    labels: numpy.ndarray</span>
+<span class="sd">        Labels of the parcels.</span>
+<span class="sd">    masker: instance of NiftiMasker or MultiNiftiMasker</span>
+<span class="sd">        Masker to be used on the data.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    template_img: 4D Niimg object</span>
+<span class="sd">        Models the barycenter of input imgs</span>
+<span class="sd">    template_history: list of 4D Niimgs</span>
+<span class="sd">        List of the intermediate templates computed at the end of each iteration</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">template_parcels</span> <span class="o">=</span> <span class="p">[</span><span class="n">fit_i</span><span class="p">[</span><span class="s2">&quot;template_data&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">fit_i</span> <span class="ow">in</span> <span class="n">fit</span><span class="p">]</span>
+    <span class="n">template_data</span> <span class="o">=</span> <span class="n">_parcels_to_array</span><span class="p">(</span><span class="n">template_parcels</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+    <span class="n">template_img</span> <span class="o">=</span> <span class="n">masker</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">template_data</span><span class="p">)</span>
+
+    <span class="n">n_iter</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fit</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;template_history&quot;</span><span class="p">])</span>
+    <span class="n">template_history</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_iter</span><span class="p">):</span>
+        <span class="n">template_parcels</span> <span class="o">=</span> <span class="p">[</span><span class="n">fit_j</span><span class="p">[</span><span class="s2">&quot;template_history&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">fit_j</span> <span class="ow">in</span> <span class="n">fit</span><span class="p">]</span>
+        <span class="n">template_data</span> <span class="o">=</span> <span class="n">_parcels_to_array</span><span class="p">(</span><span class="n">template_parcels</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+        <span class="n">template_history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">masker</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">template_data</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">template_img</span><span class="p">,</span> <span class="n">template_history</span>
 
 
 <span class="k">def</span> <span class="nf">_align_images_to_template</span><span class="p">(</span>
-    <span class="n">imgs</span><span class="p">,</span>
+    <span class="n">subjects_data</span><span class="p">,</span>
     <span class="n">template</span><span class="p">,</span>
     <span class="n">alignment_method</span><span class="p">,</span>
-    <span class="n">n_pieces</span><span class="p">,</span>
-    <span class="n">clustering</span><span class="p">,</span>
-    <span class="n">masker</span><span class="p">,</span>
-    <span class="n">memory</span><span class="p">,</span>
-    <span class="n">memory_level</span><span class="p">,</span>
-    <span class="n">n_jobs</span><span class="p">,</span>
-    <span class="n">verbose</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convenience function.</span>
-<span class="sd">    For a list of images, return the list of estimators (PairwiseAlignment instances)</span>
+<span class="sd">    For a list of ndarrays, return the list of alignment estimators</span>
 <span class="sd">    aligning each of them to a common target, the template.</span>
-<span class="sd">    All arguments are used in PairwiseAlignment.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    subjects_data: `list` of `numpy.ndarray`</span>
+<span class="sd">        Each element of the list is the data for one subject.</span>
+<span class="sd">    template: `numpy.ndarray`</span>
+<span class="sd">        The target data.</span>
+<span class="sd">    alignment_method: string</span>
+<span class="sd">        Algorithm used to perform alignment between sources and template.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    aligned_data: `list` of `numpy.ndarray`</span>
+<span class="sd">        List of aligned data.</span>
+<span class="sd">    piecewise_estimators: `list` of `PairwiseAlignment`</span>
+<span class="sd">        List of `Alignment` estimators.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">aligned_imgs</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">imgs</span><span class="p">:</span>
-        <span class="n">piecewise_estimator</span> <span class="o">=</span> <span class="n">PairwiseAlignment</span><span class="p">(</span>
-            <span class="n">n_pieces</span><span class="o">=</span><span class="n">n_pieces</span><span class="p">,</span>
-            <span class="n">alignment_method</span><span class="o">=</span><span class="n">alignment_method</span><span class="p">,</span>
-            <span class="n">clustering</span><span class="o">=</span><span class="n">clustering</span><span class="p">,</span>
-            <span class="n">mask</span><span class="o">=</span><span class="n">masker</span><span class="p">,</span>
-            <span class="n">memory</span><span class="o">=</span><span class="n">memory</span><span class="p">,</span>
-            <span class="n">memory_level</span><span class="o">=</span><span class="n">memory_level</span><span class="p">,</span>
-            <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
-            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+    <span class="n">aligned_data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">piecewise_estimators</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">subject_data</span> <span class="ow">in</span> <span class="n">subjects_data</span><span class="p">:</span>
+        <span class="n">piecewise_estimator</span> <span class="o">=</span> <span class="n">fit_one_piece</span><span class="p">(</span>
+            <span class="n">subject_data</span><span class="p">,</span>
+            <span class="n">template</span><span class="p">,</span>
+            <span class="n">alignment_method</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">piecewise_estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">template</span><span class="p">)</span>
-        <span class="n">aligned_imgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">piecewise_estimator</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">img</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">aligned_imgs</span>
+        <span class="n">piecewise_estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">subject_data</span><span class="p">,</span> <span class="n">template</span><span class="p">)</span>
+        <span class="n">piecewise_estimators</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">piecewise_estimator</span><span class="p">)</span>
+        <span class="n">aligned_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">piecewise_estimator</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">subject_data</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">aligned_data</span><span class="p">,</span> <span class="n">piecewise_estimators</span>
 
 
-<span class="k">def</span> <span class="nf">_create_template</span><span class="p">(</span>
-    <span class="n">imgs</span><span class="p">,</span>
-    <span class="n">n_iter</span><span class="p">,</span>
-    <span class="n">scale_template</span><span class="p">,</span>
-    <span class="n">alignment_method</span><span class="p">,</span>
-    <span class="n">n_pieces</span><span class="p">,</span>
-    <span class="n">clustering</span><span class="p">,</span>
-    <span class="n">masker</span><span class="p">,</span>
-    <span class="n">memory</span><span class="p">,</span>
-    <span class="n">memory_level</span><span class="p">,</span>
-    <span class="n">n_jobs</span><span class="p">,</span>
-    <span class="n">verbose</span><span class="p">,</span>
+<span class="k">def</span> <span class="nf">_fit_local_template</span><span class="p">(</span>
+    <span class="n">subjects_data</span><span class="p">,</span>
+    <span class="n">n_iter</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">scale_template</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">alignment_method</span><span class="o">=</span><span class="s2">&quot;identity&quot;</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create template through alternate minimization.</span>
 <span class="sd">    Compute iteratively :</span>
-<span class="sd">    * T minimizing sum(||R_i X_i-T||) which is the mean of aligned images (RX_i)</span>
+<span class="sd">    * T minimizing sum(||R X-T||) which is the mean of aligned images (RX)</span>
 <span class="sd">    * align initial images to new template T</span>
-<span class="sd">        (find transform R_i minimizing ||R_i X_i-T|| for each img X_i)</span>
+<span class="sd">        (find transform R minimizing ||R X-T|| for each img X)</span>
 
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    imgs: List of Niimg-like objects</span>
-<span class="sd">       See http://nilearn.github.io/manipulating_images/input_output.html</span>
-<span class="sd">       source data. Every img must have the same length (n_sample)</span>
-<span class="sd">    scale_template: boolean</span>
-<span class="sd">        If true, template is rescaled after each inference so that it keeps</span>
-<span class="sd">        the same norm as the average of training images.</span>
+<span class="sd">    imgs: `list` of `numpy.ndarray`</span>
+<span class="sd">        Each element of the list is the data for one subject.</span>
 <span class="sd">    n_iter: int</span>
 <span class="sd">       Number of iterations in the alternate minimization. Each image is</span>
 <span class="sd">       aligned n_iter times to the evolving template. If n_iter = 0,</span>
 <span class="sd">       the template is simply the mean of the input images.</span>
-<span class="sd">    All other arguments are the same are passed to PairwiseAlignment</span>
+<span class="sd">    scale_template: boolean</span>
+<span class="sd">        If true, template is rescaled after each inference so that it keeps</span>
+<span class="sd">        the same norm as the average of training images.</span>
+<span class="sd">    alignment_method: string</span>
+<span class="sd">        Algorithm used to perform alignment between sources and template.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    template: list of 3D Niimgs of length (n_sample)</span>
-<span class="sd">        Models the barycenter of input imgs</span>
-<span class="sd">    template_history: list of list of 3D Niimgs</span>
-<span class="sd">        List of the intermediate templates computed at the end of each iteration</span>
+<span class="sd">    template_data: `numpy.ndarray`</span>
+<span class="sd">        Template data.</span>
+<span class="sd">    template_history: `list` of `numpy.ndarray`</span>
+<span class="sd">        List of the intermediate templates computed at the end of each iteration.</span>
+<span class="sd">    piecewise_estimators: `list` of `PairwiseAlignment`</span>
+<span class="sd">        List of `Alignment` estimators.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">aligned_imgs</span> <span class="o">=</span> <span class="n">imgs</span>
+    <span class="n">aligned_data</span> <span class="o">=</span> <span class="n">subjects_data</span>
     <span class="n">template_history</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="nb">iter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_iter</span><span class="p">):</span>
-        <span class="n">template</span> <span class="o">=</span> <span class="n">_rescaled_euclidean_mean</span><span class="p">(</span>
-            <span class="n">aligned_imgs</span><span class="p">,</span> <span class="n">masker</span><span class="p">,</span> <span class="n">scale_template</span>
-        <span class="p">)</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">_rescaled_euclidean_mean</span><span class="p">(</span><span class="n">aligned_data</span><span class="p">,</span> <span class="n">scale_template</span><span class="p">)</span>
         <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="nb">iter</span> <span class="o">&lt;</span> <span class="n">n_iter</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">template_history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
-        <span class="n">aligned_imgs</span> <span class="o">=</span> <span class="n">_align_images_to_template</span><span class="p">(</span>
-            <span class="n">imgs</span><span class="p">,</span>
+        <span class="n">aligned_data</span><span class="p">,</span> <span class="n">subjects_estimators</span> <span class="o">=</span> <span class="n">_align_images_to_template</span><span class="p">(</span>
+            <span class="n">subjects_data</span><span class="p">,</span>
             <span class="n">template</span><span class="p">,</span>
             <span class="n">alignment_method</span><span class="p">,</span>
-            <span class="n">n_pieces</span><span class="p">,</span>
-            <span class="n">clustering</span><span class="p">,</span>
-            <span class="n">masker</span><span class="p">,</span>
-            <span class="n">memory</span><span class="p">,</span>
-            <span class="n">memory_level</span><span class="p">,</span>
-            <span class="n">n_jobs</span><span class="p">,</span>
-            <span class="n">verbose</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">template</span><span class="p">,</span> <span class="n">template_history</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;template_data&quot;</span><span class="p">:</span> <span class="n">template</span><span class="p">,</span>
+        <span class="s2">&quot;template_history&quot;</span><span class="p">:</span> <span class="n">template_history</span><span class="p">,</span>
+        <span class="s2">&quot;estimators&quot;</span><span class="p">:</span> <span class="n">subjects_estimators</span><span class="p">,</span>
+    <span class="p">}</span>
 
 
-<span class="k">def</span> <span class="nf">_map_template_to_image</span><span class="p">(</span>
-    <span class="n">imgs</span><span class="p">,</span>
-    <span class="n">train_index</span><span class="p">,</span>
-    <span class="n">template</span><span class="p">,</span>
-    <span class="n">alignment_method</span><span class="p">,</span>
-    <span class="n">n_pieces</span><span class="p">,</span>
-    <span class="n">clustering</span><span class="p">,</span>
-    <span class="n">masker</span><span class="p">,</span>
-    <span class="n">memory</span><span class="p">,</span>
-    <span class="n">memory_level</span><span class="p">,</span>
-    <span class="n">n_jobs</span><span class="p">,</span>
-    <span class="n">verbose</span><span class="p">,</span>
-<span class="p">):</span>
+<span class="k">def</span> <span class="nf">_index_by_parcel</span><span class="p">(</span><span class="n">subjects_parcels</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Learn alignment operator from the template toward new images.</span>
+<span class="sd">    Index data by parcel.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    imgs: list of 3D Niimgs</span>
-<span class="sd">        Target images to learn mapping from the template to a new subject</span>
-<span class="sd">    train_index: list of int</span>
-<span class="sd">        Matching index between imgs and the corresponding template images to use</span>
-<span class="sd">        to learn alignment. len(train_index) must be equal to len(imgs)</span>
-<span class="sd">    template: list of 3D Niimgs</span>
-<span class="sd">        Learnt in a first step now used as source image</span>
-<span class="sd">    All other arguments are the same are passed to PairwiseAlignment</span>
-
+<span class="sd">    subjects_parcels: list of list of numpy.ndarray</span>
+<span class="sd">        Each element of the list is the list of parcels</span>
+<span class="sd">        data for one subject.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    mapping: instance of PairwiseAlignment class</span>
-<span class="sd">        Alignment estimator fitted to align the template with the input images</span>
+<span class="sd">    list of list of numpy.ndarray</span>
+<span class="sd">        Each element of the list is the list of subjects</span>
+<span class="sd">        data for one parcel.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">mapping_image</span> <span class="o">=</span> <span class="n">index_img</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">train_index</span><span class="p">)</span>
-    <span class="n">mapping</span> <span class="o">=</span> <span class="n">PairwiseAlignment</span><span class="p">(</span>
-        <span class="n">n_pieces</span><span class="o">=</span><span class="n">n_pieces</span><span class="p">,</span>
-        <span class="n">alignment_method</span><span class="o">=</span><span class="n">alignment_method</span><span class="p">,</span>
-        <span class="n">clustering</span><span class="o">=</span><span class="n">clustering</span><span class="p">,</span>
-        <span class="n">mask</span><span class="o">=</span><span class="n">masker</span><span class="p">,</span>
-        <span class="n">memory</span><span class="o">=</span><span class="n">memory</span><span class="p">,</span>
-        <span class="n">memory_level</span><span class="o">=</span><span class="n">memory_level</span><span class="p">,</span>
-        <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
-        <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">mapping</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">mapping_image</span><span class="p">,</span> <span class="n">imgs</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">mapping</span>
-
-
-<span class="k">def</span> <span class="nf">_predict_from_template_and_mapping</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">test_index</span><span class="p">,</span> <span class="n">mapping</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    From a template and an alignment estimator, predict new contrasts.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    template: list of 3D Niimgs</span>
-<span class="sd">        Learnt in a first step now used to predict some new data</span>
-<span class="sd">    test_index:</span>
-<span class="sd">        Index of the images not used to learn the alignment mapping and so</span>
-<span class="sd">        predictable without overfitting</span>
-<span class="sd">    mapping: instance of PairwiseAlignment class</span>
-<span class="sd">        Alignment estimator that must have been fitted already</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    transformed_image: list of Niimgs</span>
-<span class="sd">        Prediction corresponding to each template image with index in test_index</span>
-<span class="sd">        once realigned to the new subjects</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">image_to_transform</span> <span class="o">=</span> <span class="n">index_img</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">test_index</span><span class="p">)</span>
-    <span class="n">transformed_image</span> <span class="o">=</span> <span class="n">mapping</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">image_to_transform</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">transformed_image</span>
+    <span class="n">n_pieces</span> <span class="o">=</span> <span class="n">subjects_parcels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">n_pieces</span>
+    <span class="k">return</span> <span class="p">[</span>
+        <span class="p">[</span><span class="n">subject_parcels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">subject_parcels</span> <span class="ow">in</span> <span class="n">subjects_parcels</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_pieces</span><span class="p">)</span>
+    <span class="p">]</span>
 
 
 <div class="viewcode-block" id="TemplateAlignment">
@@ -670,137 +645,143 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># Check if the input is a list, if list of lists, concatenate each subjects</span>
-        <span class="c1"># data into one unique image.</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">imgs</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">))</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">imgs</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;The method TemplateAlignment.fit() need a list input. &quot;</span>
-                <span class="s2">&quot;Each element of the list (Niimg-like or list of Niimgs) &quot;</span>
-                <span class="s2">&quot;is the data for one subject.&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parcel_masker</span> <span class="o">=</span> <span class="n">ParcellationMasker</span><span class="p">(</span>
+            <span class="n">n_pieces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_pieces</span><span class="p">,</span>
+            <span class="n">clustering</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="p">,</span>
+            <span class="n">mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">,</span>
+            <span class="n">smoothing_fwhm</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">smoothing_fwhm</span><span class="p">,</span>
+            <span class="n">standardize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">standardize</span><span class="p">,</span>
+            <span class="n">detrend</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">detrend</span><span class="p">,</span>
+            <span class="n">low_pass</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">low_pass</span><span class="p">,</span>
+            <span class="n">high_pass</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">high_pass</span><span class="p">,</span>
+            <span class="n">t_r</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">t_r</span><span class="p">,</span>
+            <span class="n">target_affine</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target_affine</span><span class="p">,</span>
+            <span class="n">target_shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target_shape</span><span class="p">,</span>
+            <span class="n">memory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">memory</span><span class="p">,</span>
+            <span class="n">memory_level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">memory_level</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">subjects_parcels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parcel_masker</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">imgs</span><span class="p">)</span>
+        <span class="n">parcels_data</span> <span class="o">=</span> <span class="n">_index_by_parcel</span><span class="p">(</span><span class="n">subjects_parcels</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">masker</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parcel_masker</span><span class="o">.</span><span class="n">masker_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parcel_masker</span><span class="o">.</span><span class="n">masker_</span><span class="o">.</span><span class="n">mask_img_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parcel_masker</span><span class="o">.</span><span class="n">labels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_pieces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parcel_masker</span><span class="o">.</span><span class="n">n_pieces</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit_</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="s2">&quot;threads&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span>
+        <span class="p">)(</span>
+            <span class="n">delayed</span><span class="p">(</span><span class="n">_fit_local_template</span><span class="p">)(</span>
+                <span class="n">parcel_i</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">n_iter</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">scale_template</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">alignment_method</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">imgs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
-                <span class="n">imgs</span> <span class="o">=</span> <span class="p">[</span><span class="n">concat_imgs</span><span class="p">(</span><span class="n">img</span><span class="p">)</span> <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">imgs</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">parcel_i</span> <span class="ow">in</span> <span class="n">parcels_data</span>
+        <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">masker_</span> <span class="o">=</span> <span class="n">check_embedded_masker</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">masker_</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span>  <span class="c1"># self.n_jobs</span>
-
-        <span class="c1"># if masker_ has been provided a mask_img</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">masker_</span><span class="o">.</span><span class="n">mask_img</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">masker_</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">imgs</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">masker_</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_history</span> <span class="o">=</span> <span class="n">_create_template</span><span class="p">(</span>
-            <span class="n">imgs</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">n_iter</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">scale_template</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">alignment_method</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">n_pieces</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">masker_</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">memory</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">memory_level</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_history</span> <span class="o">=</span> <span class="n">_reconstruct_template</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fit_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">masker</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_template</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">save_template</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">imgs</span><span class="p">,</span> <span class="n">train_index</span><span class="p">,</span> <span class="n">test_index</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">subject_index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Learn alignment between new subject and template calculated during fit,</span>
-<span class="sd">        then predict other conditions for this new subject.</span>
-<span class="sd">        Alignment is learnt between imgs and conditions in the template indexed by train_index.</span>
-<span class="sd">        Prediction correspond to conditions in the template index by test_index.</span>
+<span class="sd">        Transform a (new) subject image into the template space.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        imgs: List of 3D Niimg-like objects</span>
-<span class="sd">            Target subjects known data.</span>
-<span class="sd">            Every img must have length (number of sample) train_index.</span>
-<span class="sd">        train_index: list of ints</span>
-<span class="sd">            Indexes of the 3D samples used to map each img to the template.</span>
-<span class="sd">            Every index should be smaller than the number of images in the template.</span>
-<span class="sd">        test_index: list of ints</span>
-<span class="sd">            Indexes of the 3D samples to predict from the template and the mapping.</span>
-<span class="sd">            Every index should be smaller than the number of images in the template.</span>
+<span class="sd">        img: 4D Niimg-like object</span>
+<span class="sd">            Subject image.</span>
+<span class="sd">        subject_index: int, optional (default = None)</span>
+<span class="sd">            Index of the subject to be transformed. It should</span>
+<span class="sd">            correspond to the index of the subject in the list of</span>
+<span class="sd">            subjects used to fit the template. If None, a new</span>
+<span class="sd">            `PairwiseAlignment` object is fitted between the new</span>
+<span class="sd">            subject and the template before transforming.</span>
 
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        predicted_imgs: List of 3D Niimg-like objects</span>
-<span class="sd">            Target subjects predicted data.</span>
-<span class="sd">            Each Niimg has the same length as the list test_index</span>
+<span class="sd">        predicted_imgs: 4D Niimg object</span>
+<span class="sd">            Transformed data.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">imgs</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;fit_&quot;</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;The method TemplateAlignment.transform() need a list input. &quot;</span>
-                <span class="s2">&quot;Each element of the list (Niimg-like or list of Niimgs) &quot;</span>
-                <span class="s2">&quot;is the data used to align one new subject with images &quot;</span>
-                <span class="s2">&quot;indexed by train_index.&quot;</span>
+                <span class="s2">&quot;This instance has not been fitted yet. &quot;</span>
+                <span class="s2">&quot;Please call &#39;fit&#39; before &#39;transform&#39;.&quot;</span>
             <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">subject_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">alignment_estimator</span> <span class="o">=</span> <span class="n">PairwiseAlignment</span><span class="p">(</span>
+                <span class="n">n_pieces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_pieces</span><span class="p">,</span>
+                <span class="n">alignment_method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">alignment_method</span><span class="p">,</span>
+                <span class="n">clustering</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parcel_masker</span><span class="o">.</span><span class="n">get_parcellation_img</span><span class="p">(),</span>
+                <span class="n">mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">masker</span><span class="p">,</span>
+                <span class="n">smoothing_fwhm</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">smoothing_fwhm</span><span class="p">,</span>
+                <span class="n">standardize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">standardize</span><span class="p">,</span>
+                <span class="n">detrend</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">detrend</span><span class="p">,</span>
+                <span class="n">target_affine</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target_affine</span><span class="p">,</span>
+                <span class="n">target_shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target_shape</span><span class="p">,</span>
+                <span class="n">low_pass</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">low_pass</span><span class="p">,</span>
+                <span class="n">high_pass</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">high_pass</span><span class="p">,</span>
+                <span class="n">t_r</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">t_r</span><span class="p">,</span>
+                <span class="n">memory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">memory</span><span class="p">,</span>
+                <span class="n">memory_level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">memory_level</span><span class="p">,</span>
+                <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span>
+                <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">alignment_estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">alignment_estimator</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">imgs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">imgs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span>
-                <span class="n">train_index</span>
-            <span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;Each element of imgs (Niimg-like or list of Niimgs) &quot;</span>
-                    <span class="s2">&quot;should have the same length as the length of train_index.&quot;</span>
-                <span class="p">)</span>
-            <span class="k">elif</span> <span class="n">load_img</span><span class="p">(</span><span class="n">imgs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_index</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;Each element of imgs (Niimg-like or list of Niimgs) &quot;</span>
-                    <span class="s2">&quot;should have the same length as the length of train_index.&quot;</span>
-                <span class="p">)</span>
-
-        <span class="n">template_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
-            <span class="nb">all</span><span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">template_length</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">test_index</span><span class="p">)</span>
-            <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">template_length</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">train_index</span><span class="p">)</span>
-        <span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Template has </span><span class="si">{</span><span class="n">template_length</span><span class="si">}</span><span class="s2"> images but you provided a &quot;</span>
-                <span class="s2">&quot;greater index in train_index or test_index.&quot;</span>
+            <span class="n">parceled_data_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parcel_masker</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+            <span class="n">subject_estimators</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">fit_i</span><span class="p">[</span><span class="s2">&quot;estimators&quot;</span><span class="p">][</span><span class="n">subject_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">fit_i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_</span>
+            <span class="p">]</span>
+            <span class="n">transformed_img</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="s2">&quot;threads&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span>
+            <span class="p">)(</span>
+                <span class="n">delayed</span><span class="p">(</span><span class="n">_transform_one_img</span><span class="p">)(</span><span class="n">parceled_data</span><span class="p">,</span> <span class="n">subject_estimators</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">parceled_data</span> <span class="ow">in</span> <span class="n">parceled_data_list</span>
             <span class="p">)</span>
-
-        <span class="n">fitted_mappings</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="s2">&quot;threads&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span>
-        <span class="p">)(</span>
-            <span class="n">delayed</span><span class="p">(</span><span class="n">_map_template_to_image</span><span class="p">)(</span>
-                <span class="n">img</span><span class="p">,</span>
-                <span class="n">train_index</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">alignment_method</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">n_pieces</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">masker_</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">memory</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">memory_level</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">imgs</span>
-        <span class="p">)</span>
-
-        <span class="n">predicted_imgs</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="s2">&quot;threads&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span>
-        <span class="p">)(</span>
-            <span class="n">delayed</span><span class="p">(</span><span class="n">_predict_from_template_and_mapping</span><span class="p">)(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">,</span> <span class="n">test_index</span><span class="p">,</span> <span class="n">mapping</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">mapping</span> <span class="ow">in</span> <span class="n">fitted_mappings</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="n">predicted_imgs</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">transformed_img</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">transformed_img</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">transformed_img</span>
 
     <span class="c1"># Make inherited function harmless</span>
     <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Parent method not applicable here. Will raise AttributeError if called.&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
             <span class="s2">&quot;type object &#39;PairwiseAlignment&#39; has no attribute &#39;fit_transform&#39;&quot;</span>
-        <span class="p">)</span></div>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_parcellation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the parcellation masker used for alignment.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        labels: `list` of `int`</span>
+<span class="sd">            Labels of the parcellation masker.</span>
+<span class="sd">        parcellation_img: Niimg-like object</span>
+<span class="sd">            Parcellation image.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;parcel_masker&quot;</span><span class="p">):</span>
+            <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parcel_masker</span><span class="o">.</span><span class="n">get_labels</span><span class="p">()</span>
+            <span class="n">parcellation_img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parcel_masker</span><span class="o">.</span><span class="n">get_parcellation_img</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">labels</span><span class="p">,</span> <span class="n">parcellation_img</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="s2">&quot;Parcellation has not been computed yet,&quot;</span>
+                    <span class="s2">&quot;please fit the alignment estimator first.&quot;</span>
+                <span class="p">)</span>
+            <span class="p">)</span></div>
 
 </pre></div>
         </article>

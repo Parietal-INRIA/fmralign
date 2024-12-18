@@ -230,8 +230,8 @@
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="plot_pairwise_alignment.html">Pairwise functional alignment.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_template_alignment.html">Template-based prediction.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_pairwise_alignment.html">Pairwise functional alignment.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_pairwise_roi_alignment.html">Pairwise functional alignment on a ROI.</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Alignment methods benchmark (pairwise ROI case).</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_int_alignment.html">Co-smoothing prediction using the Individual Neural Tuning Model</a></li>
@@ -381,10 +381,10 @@ df is a dataframe with metadata about each of them.</p>
 /home/runner/work/fmralign/fmralign/examples/plot_alignment_methods_benchmark.py:47: FutureWarning: &#39;force_resample&#39; will be set to &#39;True&#39; by default in Nilearn 0.13.0.
 Use &#39;force_resample=True&#39; to suppress this warning.
   resampled_mask_visual = resample_to_img(
-/opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/image/resampling.py:807: FutureWarning: From release 0.13.0 onwards, this function will, by default, copy the header of the input image to the output. Currently, the header is reset to the default Nifti1Header. To suppress this warning and use the new behavior, set `copy_header=True`.
+/opt/hostedtoolcache/Python/3.11.11/x64/lib/python3.11/site-packages/nilearn/image/resampling.py:807: FutureWarning: From release 0.13.0 onwards, this function will, by default, copy the header of the input image to the output. Currently, the header is reset to the default Nifti1Header. To suppress this warning and use the new behavior, set `copy_header=True`.
   return resample_img(
 
-&lt;nilearn.plotting.displays._slicers.OrthoSlicer object at 0x7f568bed9150&gt;
+&lt;nilearn.plotting.displays._slicers.OrthoSlicer object at 0x7fadd0806e10&gt;
 </pre></div>
 </div>
 </section>
@@ -537,7 +537,7 @@ Parameter smoothing_fwhm :
   warnings.warn(warning)
 /home/runner/work/fmralign/fmralign/fmralign/metrics.py:62: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
   pearsonr(X_gt[:, vox], X_pred[:, vox])[
-/opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1416: UserWarning: Non-finite values detected. These values will be replaced with zeros.
+/opt/hostedtoolcache/Python/3.11.11/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1416: UserWarning: Non-finite values detected. These values will be replaced with zeros.
   safe_get_data(stat_map_img, ensure_finite=True),
 [PairwiseAlignment.fit] Resampling mask
 /home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
@@ -557,7 +557,7 @@ Parameter smoothing_fwhm :
   warnings.warn(warning)
 /home/runner/work/fmralign/fmralign/fmralign/metrics.py:62: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
   pearsonr(X_gt[:, vox], X_pred[:, vox])[
-/opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1416: UserWarning: Non-finite values detected. These values will be replaced with zeros.
+/opt/hostedtoolcache/Python/3.11.11/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1416: UserWarning: Non-finite values detected. These values will be replaced with zeros.
   safe_get_data(stat_map_img, ensure_finite=True),
 [PairwiseAlignment.fit] Resampling mask
 /home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
@@ -577,7 +577,7 @@ Parameter smoothing_fwhm :
   warnings.warn(warning)
 /home/runner/work/fmralign/fmralign/fmralign/metrics.py:62: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
   pearsonr(X_gt[:, vox], X_pred[:, vox])[
-/opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1416: UserWarning: Non-finite values detected. These values will be replaced with zeros.
+/opt/hostedtoolcache/Python/3.11.11/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1416: UserWarning: Non-finite values detected. These values will be replaced with zeros.
   safe_get_data(stat_map_img, ensure_finite=True),
 [PairwiseAlignment.fit] Resampling mask
 /home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
@@ -597,7 +597,7 @@ Parameter smoothing_fwhm :
   warnings.warn(warning)
 /home/runner/work/fmralign/fmralign/fmralign/metrics.py:62: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
   pearsonr(X_gt[:, vox], X_pred[:, vox])[
-/opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1416: UserWarning: Non-finite values detected. These values will be replaced with zeros.
+/opt/hostedtoolcache/Python/3.11.11/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1416: UserWarning: Non-finite values detected. These values will be replaced with zeros.
   safe_get_data(stat_map_img, ensure_finite=True),
 </pre></div>
 </div>
@@ -605,7 +605,7 @@ Parameter smoothing_fwhm :
 (no alignment). Ridge is the best performing method, followed by Optimal
 Transport. If you use Ridge though, be careful about the smooth predictions
 it yields.</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 4.556 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 2.879 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-alignment-methods-benchmark-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/nilearn/nilearn/main?urlpath=lab/tree/notebooks/auto_examples/plot_alignment_methods_benchmark.ipynb"><img alt="Launch binder" src="../_images/binder_badge_logo.svg" style="width: 150px;" />

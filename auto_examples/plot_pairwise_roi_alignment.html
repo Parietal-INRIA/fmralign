@@ -11,7 +11,7 @@
 <meta property="og:image" content="https://nilearn.github.io/_static/nilearn-logo.png" />
 <meta property="og:image:alt" content="Nilearn" />
 <meta name="description" content="In this tutorial, we focus here on a single Region of Interest (ROI). On this ROI, we try to find a transformation from source to target subject that captures the variability between their signal o..." />
-<link rel="search" title="Search" href="../search.html" /><link rel="next" title="Alignment methods benchmark (pairwise ROI case)." href="plot_alignment_methods_benchmark.html" /><link rel="prev" title="Template-based prediction." href="plot_template_alignment.html" />
+<link rel="search" title="Search" href="../search.html" /><link rel="next" title="Alignment methods benchmark (pairwise ROI case)." href="plot_alignment_methods_benchmark.html" /><link rel="prev" title="Pairwise functional alignment." href="plot_pairwise_alignment.html" />
 
     <link rel="shortcut icon" href="../_static/favicon.ico"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
         <title>Pairwise functional alignment on a ROI. - fmralign</title>
@@ -230,8 +230,8 @@
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="plot_pairwise_alignment.html">Pairwise functional alignment.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_template_alignment.html">Template-based prediction.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_pairwise_alignment.html">Pairwise functional alignment.</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Pairwise functional alignment on a ROI.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_alignment_methods_benchmark.html">Alignment methods benchmark (pairwise ROI case).</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_int_alignment.html">Co-smoothing prediction using the Individual Neural Tuning Model</a></li>
@@ -394,10 +394,10 @@ ysiol11_MNI152.zip...
 /home/runner/work/fmralign/fmralign/examples/plot_pairwise_roi_alignment.py:52: FutureWarning: &#39;force_resample&#39; will be set to &#39;True&#39; by default in Nilearn 0.13.0.
 Use &#39;force_resample=True&#39; to suppress this warning.
   resampled_mask_visual = resample_to_img(
-/opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/image/resampling.py:807: FutureWarning: From release 0.13.0 onwards, this function will, by default, copy the header of the input image to the output. Currently, the header is reset to the default Nifti1Header. To suppress this warning and use the new behavior, set `copy_header=True`.
+/opt/hostedtoolcache/Python/3.11.11/x64/lib/python3.11/site-packages/nilearn/image/resampling.py:807: FutureWarning: From release 0.13.0 onwards, this function will, by default, copy the header of the input image to the output. Currently, the header is reset to the default Nifti1Header. To suppress this warning and use the new behavior, set `copy_header=True`.
   return resample_img(
 
-&lt;nilearn.plotting.displays._slicers.OrthoSlicer object at 0x7f563ec61690&gt;
+&lt;nilearn.plotting.displays._slicers.OrthoSlicer object at 0x7fadbaa54350&gt;
 </pre></div>
 </div>
 </section>
@@ -523,13 +523,13 @@ alike the ground truth.</p>
 <li><img src="../_images/sphx_glr_plot_pairwise_roi_alignment_002.png" srcset="../_images/sphx_glr_plot_pairwise_roi_alignment_002.png" alt="plot pairwise roi alignment" class = "sphx-glr-multi-img"/></li>
 <li><img src="../_images/sphx_glr_plot_pairwise_roi_alignment_003.png" srcset="../_images/sphx_glr_plot_pairwise_roi_alignment_003.png" alt="plot pairwise roi alignment" class = "sphx-glr-multi-img"/></li>
 </ul>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.11.10/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1416: UserWarning: Non-finite values detected. These values will be replaced with zeros.
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.11.11/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1416: UserWarning: Non-finite values detected. These values will be replaced with zeros.
   safe_get_data(stat_map_img, ensure_finite=True),
 </pre></div>
 </div>
 <p>We can see on the plot that after alignment, the prediction made for one
 subject data, informed by another subject are greatly improved.</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 20.985 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 20.669 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-pairwise-roi-alignment-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/nilearn/nilearn/main?urlpath=lab/tree/notebooks/auto_examples/plot_pairwise_roi_alignment.ipynb"><img alt="Launch binder" src="../_images/binder_badge_logo.svg" style="width: 150px;" />
@@ -563,14 +563,14 @@ subject data, informed by another subject are greatly improved.</p>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="plot_template_alignment.html">
+          <a class="prev-page" href="plot_pairwise_alignment.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Template-based prediction.</div>
+                <div class="title">Pairwise functional alignment.</div>
                 
               </div>
             </a>

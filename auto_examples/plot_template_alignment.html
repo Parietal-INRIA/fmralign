@@ -7,11 +7,11 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://nilearn.github.io/auto_examples/plot_template_alignment.html" />
 <meta property="og:site_name" content="Nilearn" />
-<meta property="og:description" content="In this tutorial, we show how to better predict new contrasts for a target subject using many source subjects corresponding contrasts. For this purpose, we create a template to which we align the t..." />
+<meta property="og:description" content="In this tutorial, we show how to improve inter-subject similarity using a template computed across multiple source subjects. For this purpose, we create a template using Procrustes alignment (hyper..." />
 <meta property="og:image" content="https://nilearn.github.io/_static/nilearn-logo.png" />
 <meta property="og:image:alt" content="Nilearn" />
-<meta name="description" content="In this tutorial, we show how to better predict new contrasts for a target subject using many source subjects corresponding contrasts. For this purpose, we create a template to which we align the t..." />
-<link rel="search" title="Search" href="../search.html" /><link rel="next" title="Pairwise functional alignment on a ROI." href="plot_pairwise_roi_alignment.html" /><link rel="prev" title="Pairwise functional alignment." href="plot_pairwise_alignment.html" />
+<meta name="description" content="In this tutorial, we show how to improve inter-subject similarity using a template computed across multiple source subjects. For this purpose, we create a template using Procrustes alignment (hyper..." />
+<link rel="search" title="Search" href="../search.html" /><link rel="next" title="Pairwise functional alignment." href="plot_pairwise_alignment.html" /><link rel="prev" title="Examples" href="index.html" />
 
     <link rel="shortcut icon" href="../_static/favicon.ico"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
         <title>Template-based prediction. - fmralign</title>
@@ -230,8 +230,8 @@
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="plot_pairwise_alignment.html">Pairwise functional alignment.</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Template-based prediction.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_pairwise_alignment.html">Pairwise functional alignment.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_pairwise_roi_alignment.html">Pairwise functional alignment on a ROI.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_alignment_methods_benchmark.html">Alignment methods benchmark (pairwise ROI case).</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot_int_alignment.html">Co-smoothing prediction using the Individual Neural Tuning Model</a></li>
@@ -327,10 +327,12 @@ to download the full example code. or to run this example in your browser via Bi
 </div>
 <section class="sphx-glr-example-title" id="template-based-prediction">
 <span id="sphx-glr-auto-examples-plot-template-alignment-py"></span><h1>Template-based prediction.<a class="headerlink" href="#template-based-prediction" title="Link to this heading">¶</a></h1>
-<p>In this tutorial, we show how to better predict new contrasts for a target
-subject using many source subjects corresponding contrasts. For this purpose,
-we create a template to which we align the target subject, using shared information.
-We then predict new images for the target and compare them to a baseline.</p>
+<p>In this tutorial, we show how to improve inter-subject similarity using a template
+computed across multiple source subjects. For this purpose, we create a template
+using Procrustes alignment (hyperalignment) to which we align the target subject,
+using shared information. We then compare the voxelwise similarity between the
+target subject and the template to the similarity between the target subject and
+the anatomical Euclidean average of the source subjects.</p>
 <p>We mostly rely on Python common packages and on nilearn to handle
 functional data in a clean fashion.</p>
 <p>To run this example, you must launch IPython via <code class="docutils literal notranslate"><span class="pre">ipython</span>
@@ -351,9 +353,43 @@ mask is a binary image used to extract grey matter regions.</p>
 <span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[get_dataset_dir] Dataset found in /home/runner/nilearn_data/ibc
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[_add_readme_to_default_data_locations] Added README.md to
+/home/runner/nilearn_data
+[get_dataset_dir] Dataset created in /home/runner/nilearn_data/ibc
+[fetch_single_file] Downloading data from https://osf.io/pcvje/download ...
+[fetch_single_file]  ...done. (2 seconds, 0 min)
+
+[uncompress_file] Extracting data from
+/home/runner/nilearn_data/ibc/8e275a34345802c5c273312d85957d6c/download...
+[uncompress_file] .. done.
+
+[fetch_single_file] Downloading data from https://osf.io/yvju3/download ...
+[fetch_single_file]  ...done. (2 seconds, 0 min)
+
+[uncompress_file] Extracting data from
+/home/runner/nilearn_data/ibc/fe06df963fcb3fd454f63a33f0864e8d/download...
+[uncompress_file] .. done.
+
+[fetch_single_file] Downloading data from https://osf.io/8z23h/download ...
+[_chunk_report_] Downloaded 9609216 of 21185337 bytes (45.4%%,    1.2s
+remaining)
+[fetch_single_file]  ...done. (4 seconds, 0 min)
+
+[uncompress_file] Extracting data from
+/home/runner/nilearn_data/ibc/100352739b7501f0ed04920933b4be36/download...
+[uncompress_file] .. done.
+
+[fetch_single_file] Downloading data from https://osf.io/e9kbm/download ...
+[_chunk_report_] Downloaded 6070272 of 21196887 bytes (28.6%%,    2.5s
+remaining)
+[fetch_single_file]  ...done. (3 seconds, 0 min)
+
+[uncompress_file] Extracting data from
+/home/runner/nilearn_data/ibc/331a0a579c6e46c0911502a96215b358/download...
+[uncompress_file] .. done.
+
 [fetch_single_file] Downloading data from https://osf.io/qn5b6/download ...
-[_chunk_report_] Downloaded 5939200 of 21197218 bytes (28.0%%,    2.6s
+[_chunk_report_] Downloaded 9691136 of 21197218 bytes (45.7%%,    1.2s
 remaining)
 [fetch_single_file]  ...done. (3 seconds, 0 min)
 
@@ -362,7 +398,7 @@ remaining)
 [uncompress_file] .. done.
 
 [fetch_single_file] Downloading data from https://osf.io/u74a3/download ...
-[_chunk_report_] Downloaded 8396800 of 21185350 bytes (39.6%%,    1.5s
+[_chunk_report_] Downloaded 9650176 of 21185350 bytes (45.6%%,    1.2s
 remaining)
 [fetch_single_file]  ...done. (3 seconds, 0 min)
 
@@ -371,7 +407,7 @@ remaining)
 [uncompress_file] .. done.
 
 [fetch_single_file] Downloading data from https://osf.io/83bje/download ...
-[_chunk_report_] Downloaded 12632064 of 21188335 bytes (59.6%%,    0.7s
+[_chunk_report_] Downloaded 6168576 of 21188335 bytes (29.1%%,    2.4s
 remaining)
 [fetch_single_file]  ...done. (3 seconds, 0 min)
 
@@ -380,7 +416,7 @@ remaining)
 [uncompress_file] .. done.
 
 [fetch_single_file] Downloading data from https://osf.io/43j69/download ...
-[_chunk_report_] Downloaded 6381568 of 21187400 bytes (30.1%%,    2.3s
+[_chunk_report_] Downloaded 12820480 of 21187400 bytes (60.5%%,    0.7s
 remaining)
 [fetch_single_file]  ...done. (4 seconds, 0 min)
 
@@ -390,8 +426,8 @@ remaining)
 </pre></div>
 </div>
 </section>
-<section id="definine-a-masker">
-<h2>Definine a masker<a class="headerlink" href="#definine-a-masker" title="Link to this heading">¶</a></h2>
+<section id="define-a-masker">
+<h2>Define a masker<a class="headerlink" href="#define-a-masker" title="Link to this heading">¶</a></h2>
 <dl class="simple">
 <dt>We define a nilearn masker that will be used to handle relevant data.</dt><dd><p>For more information, visit :
 ‘<a class="reference external" href="http://nilearn.github.io/manipulating_images/masker_objects.html">http://nilearn.github.io/manipulating_images/masker_objects.html</a>’</p>
@@ -416,21 +452,11 @@ Antero-posterior(AP) or Postero-anterior(PA).</p>
 <a href="https://docs.python.org/3.9/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">template_train</span></a> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">for</span> <a href="https://docs.python.org/3.9/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
     <a href="https://docs.python.org/3.9/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">template_train</span></a><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">concat_imgs</span><span class="p">(</span><a href="https://docs.python.org/3.9/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">imgs</span></a><span class="p">[</span><a href="https://docs.python.org/3.9/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a><span class="p">]))</span>
-<a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">target_train</span></a> <span class="o">=</span> <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.core.frame.DataFrame" class="sphx-glr-backref-module-pandas-core-frame sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">df</span></a><span class="p">[</span><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="pandas.core.series.Series" class="sphx-glr-backref-module-pandas-core-series sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">df</span><span class="o">.</span><span class="n">subject</span></a> <span class="o">==</span> <span class="s2">&quot;sub-07&quot;</span><span class="p">][</span><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="pandas.core.series.Series" class="sphx-glr-backref-module-pandas-core-series sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">df</span><span class="o">.</span><span class="n">acquisition</span></a> <span class="o">==</span> <span class="s2">&quot;ap&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">values</span>
 
-<span class="c1"># For subject sub-07, we split it in two folds:</span>
-<span class="c1">#   - target train: sub-07 AP contrasts, used to learn alignment to template</span>
-<span class="c1">#   - target test: sub-07 PA contrasts, used as a ground truth to score predictions</span>
-<span class="c1"># We make a single 4D Niimg from our list of 3D filenames</span>
+<span class="c1"># sub-07 (that is 5th in the list) will be our left-out subject.</span>
+<span class="c1"># We make a single 4D Niimg from our list of 3D filenames.</span>
 
-<a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">target_train</span></a> <span class="o">=</span> <span class="n">concat_imgs</span><span class="p">(</span><a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">target_train</span></a><span class="p">)</span>
-<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">target_test</span></a> <span class="o">=</span> <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.core.frame.DataFrame" class="sphx-glr-backref-module-pandas-core-frame sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">df</span></a><span class="p">[</span><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="pandas.core.series.Series" class="sphx-glr-backref-module-pandas-core-series sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">df</span><span class="o">.</span><span class="n">subject</span></a> <span class="o">==</span> <span class="s2">&quot;sub-07&quot;</span><span class="p">][</span><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="pandas.core.series.Series" class="sphx-glr-backref-module-pandas-core-series sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">df</span><span class="o">.</span><span class="n">acquisition</span></a> <span class="o">==</span> <span class="s2">&quot;pa&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">values</span>
-</pre></div>
-</div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/fmralign/fmralign/examples/plot_template_alignment.py:67: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
-  target_train = df[df.subject == &quot;sub-07&quot;][df.acquisition == &quot;ap&quot;].path.values
-/home/runner/work/fmralign/fmralign/examples/plot_template_alignment.py:75: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
-  target_test = df[df.subject == &quot;sub-07&quot;][df.acquisition == &quot;pa&quot;].path.values
+<a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">left_out_subject</span></a> <span class="o">=</span> <span class="n">concat_imgs</span><span class="p">(</span><a href="https://docs.python.org/3.9/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">imgs</span></a><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
 </pre></div>
 </div>
 </section>
@@ -451,7 +477,7 @@ each contrast the average of all train subjects maps.</p>
 <dl class="simple">
 <dt>We define an estimator using the class TemplateAlignment:</dt><dd><ul class="simple">
 <li><p>We align the whole brain through ‘multiple’ local alignments.</p></li>
-<li><p>These alignments are calculated on a parcellation of the brain in 150 pieces,
+<li><p>These alignments are calculated on a parcellation of the brain in 50 pieces,
 this parcellation creates group of functionnally similar voxels.</p></li>
 <li><p>The template is created iteratively, aligning all subjects data into a
 common space, from which the template is inferred and aligning again to this
@@ -459,44 +485,23 @@ new template space.</p></li>
 </ul>
 </dd>
 </dl>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">nilearn.image</span> <span class="kn">import</span> <span class="n">index_img</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">fmralign.template_alignment</span> <span class="kn">import</span> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.base.BaseEstimator.html#sklearn.base.BaseEstimator" title="sklearn.base.BaseEstimator" class="sphx-glr-backref-module-sklearn-base sphx-glr-backref-type-py-class"><span class="n">TemplateAlignment</span></a>
 
-<span class="kn">from</span> <span class="nn">fmralign.template_alignment</span> <span class="kn">import</span> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.base.BaseEstimator.html#sklearn.base.BaseEstimator" title="sklearn.base.BaseEstimator" class="sphx-glr-backref-module-sklearn-base sphx-glr-backref-type-py-class"><span class="n">TemplateAlignment</span></a>
-
+<span class="c1"># We use Procrustes/scaled orthogonal alignment method</span>
 <span class="n">template_estim</span> <span class="o">=</span> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.base.BaseEstimator.html#sklearn.base.BaseEstimator" title="sklearn.base.BaseEstimator" class="sphx-glr-backref-module-sklearn-base sphx-glr-backref-type-py-class"><span class="n">TemplateAlignment</span></a><span class="p">(</span>
-    <span class="n">n_pieces</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">alignment_method</span><span class="o">=</span><span class="s2">&quot;ridge_cv&quot;</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">masker</span>
+    <span class="n">n_pieces</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+    <span class="n">alignment_method</span><span class="o">=</span><span class="s2">&quot;scaled_orthogonal&quot;</span><span class="p">,</span>
+    <span class="n">mask</span><span class="o">=</span><span class="n">masker</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">template_estim</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><a href="https://docs.python.org/3.9/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">template_train</span></a><span class="p">)</span>
+<a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">procrustes_template</span></a> <span class="o">=</span> <a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">template_estim</span><span class="o">.</span><span class="n">template</span></a>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/fmralign/fmralign/examples/plot_template_alignment.py:109: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/fmralign/fmralign/fmralign/preprocessing.py:219: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
 Parameter detrend :
     Masker parameter False - overriding estimator parameter None
 
-  template_estim.fit(template_train)
-[TemplateAlignment.fit] Resampling mask
-[TemplateAlignment.fit] Resampling mask
-/home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
-Parameter mask_strategy :
-    Masker parameter background - overriding estimator parameter epi
-Parameter smoothing_fwhm :
-    Masker parameter None - overriding estimator parameter 4.0
-
-  parcellation.fit(images_to_parcel)
-[TemplateAlignment.fit] Resampling mask
-/home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning:
- Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
- parcel 8 : 1178 voxels
- parcel 9 : 1095 voxels
- parcel 16 : 1209 voxels
- parcel 20 : 1084 voxels
- parcel 23 : 1067 voxels
- parcel 46 : 1164 voxels
- parcel 47 : 1045 voxels
- parcel 111 : 1182 voxels
- parcel 113 : 1206 voxels
- parcel 149 : 1229 voxels
-  warnings.warn(warning)
+  self._fit_masker(imgs)
 [TemplateAlignment.fit] Resampling mask
 /home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
 Parameter mask_strategy :
@@ -508,234 +513,42 @@ Parameter smoothing_fwhm :
 [TemplateAlignment.fit] Resampling mask
 /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning:
  Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
- parcel 15 : 1272 voxels
- parcel 24 : 1098 voxels
- parcel 28 : 1552 voxels
- parcel 31 : 1307 voxels
- parcel 45 : 1318 voxels
- parcel 66 : 1336 voxels
- parcel 82 : 1399 voxels
- parcel 90 : 1232 voxels
- parcel 92 : 1099 voxels
- parcel 95 : 1369 voxels
- parcel 100 : 1305 voxels
- parcel 113 : 1431 voxels
- parcel 114 : 1003 voxels
-  warnings.warn(warning)
-[TemplateAlignment.fit] Resampling mask
-/home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
-Parameter mask_strategy :
-    Masker parameter background - overriding estimator parameter epi
-Parameter smoothing_fwhm :
-    Masker parameter None - overriding estimator parameter 4.0
-
-  parcellation.fit(images_to_parcel)
-[TemplateAlignment.fit] Resampling mask
-/home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning:
- Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
- parcel 9 : 1268 voxels
- parcel 24 : 1835 voxels
- parcel 51 : 1141 voxels
- parcel 57 : 1216 voxels
- parcel 67 : 1884 voxels
- parcel 70 : 1045 voxels
- parcel 76 : 1421 voxels
- parcel 85 : 1242 voxels
- parcel 87 : 1362 voxels
- parcel 95 : 1458 voxels
- parcel 96 : 1352 voxels
- parcel 118 : 1674 voxels
- parcel 133 : 1661 voxels
- parcel 141 : 1292 voxels
-  warnings.warn(warning)
-[TemplateAlignment.fit] Resampling mask
-/home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
-Parameter mask_strategy :
-    Masker parameter background - overriding estimator parameter epi
-Parameter smoothing_fwhm :
-    Masker parameter None - overriding estimator parameter 4.0
-
-  parcellation.fit(images_to_parcel)
-[TemplateAlignment.fit] Resampling mask
-/home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning:
- Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
- parcel 2 : 1161 voxels
- parcel 9 : 1158 voxels
- parcel 13 : 1264 voxels
- parcel 36 : 1062 voxels
- parcel 39 : 1231 voxels
- parcel 79 : 1111 voxels
- parcel 97 : 1051 voxels
- parcel 123 : 1243 voxels
- parcel 130 : 1388 voxels
- parcel 138 : 1143 voxels
- parcel 147 : 1218 voxels
-  warnings.warn(warning)
-[TemplateAlignment.fit] Resampling mask
-/home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
-Parameter mask_strategy :
-    Masker parameter background - overriding estimator parameter epi
-Parameter smoothing_fwhm :
-    Masker parameter None - overriding estimator parameter 4.0
-
-  parcellation.fit(images_to_parcel)
-[TemplateAlignment.fit] Resampling mask
-/home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning:
- Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
- parcel 2 : 1296 voxels
- parcel 12 : 1001 voxels
- parcel 28 : 1024 voxels
- parcel 33 : 1119 voxels
- parcel 59 : 1206 voxels
- parcel 72 : 1098 voxels
- parcel 87 : 1194 voxels
- parcel 88 : 1038 voxels
- parcel 96 : 1071 voxels
- parcel 108 : 1097 voxels
- parcel 147 : 1247 voxels
-  warnings.warn(warning)
-[TemplateAlignment.fit] Resampling mask
-/home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
-Parameter mask_strategy :
-    Masker parameter background - overriding estimator parameter epi
-Parameter smoothing_fwhm :
-    Masker parameter None - overriding estimator parameter 4.0
-
-  parcellation.fit(images_to_parcel)
-[TemplateAlignment.fit] Resampling mask
-/home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning:
- Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
- parcel 9 : 1198 voxels
- parcel 17 : 1057 voxels
- parcel 28 : 1161 voxels
- parcel 32 : 1133 voxels
- parcel 48 : 1080 voxels
- parcel 61 : 1046 voxels
- parcel 101 : 1021 voxels
- parcel 107 : 1122 voxels
- parcel 120 : 1315 voxels
- parcel 134 : 1286 voxels
- parcel 136 : 1089 voxels
-  warnings.warn(warning)
-[TemplateAlignment.fit] Resampling mask
-/home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
-Parameter mask_strategy :
-    Masker parameter background - overriding estimator parameter epi
-Parameter smoothing_fwhm :
-    Masker parameter None - overriding estimator parameter 4.0
-
-  parcellation.fit(images_to_parcel)
-[TemplateAlignment.fit] Resampling mask
-/home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning:
- Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
- parcel 44 : 1034 voxels
- parcel 45 : 1001 voxels
- parcel 77 : 1371 voxels
- parcel 80 : 1110 voxels
- parcel 83 : 1071 voxels
- parcel 87 : 1495 voxels
- parcel 91 : 1126 voxels
- parcel 119 : 1066 voxels
- parcel 131 : 1143 voxels
- parcel 138 : 1233 voxels
- parcel 142 : 1268 voxels
-  warnings.warn(warning)
-[TemplateAlignment.fit] Resampling mask
-/home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
-Parameter mask_strategy :
-    Masker parameter background - overriding estimator parameter epi
-Parameter smoothing_fwhm :
-    Masker parameter None - overriding estimator parameter 4.0
-
-  parcellation.fit(images_to_parcel)
-[TemplateAlignment.fit] Resampling mask
-/home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning:
- Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
- parcel 49 : 1018 voxels
- parcel 74 : 1011 voxels
- parcel 132 : 1119 voxels
-  warnings.warn(warning)
-[TemplateAlignment.fit] Resampling mask
-/home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
-Parameter mask_strategy :
-    Masker parameter background - overriding estimator parameter epi
-Parameter smoothing_fwhm :
-    Masker parameter None - overriding estimator parameter 4.0
-
-  parcellation.fit(images_to_parcel)
-[TemplateAlignment.fit] Resampling mask
-/home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning:
- Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
- parcel 2 : 1454 voxels
- parcel 17 : 1247 voxels
- parcel 26 : 1361 voxels
- parcel 39 : 1017 voxels
- parcel 40 : 1541 voxels
- parcel 65 : 1148 voxels
- parcel 68 : 1312 voxels
- parcel 79 : 1274 voxels
- parcel 93 : 1521 voxels
- parcel 102 : 1371 voxels
- parcel 136 : 1553 voxels
- parcel 149 : 1039 voxels
-  warnings.warn(warning)
-[TemplateAlignment.fit] Resampling mask
-/home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
-Parameter mask_strategy :
-    Masker parameter background - overriding estimator parameter epi
-Parameter smoothing_fwhm :
-    Masker parameter None - overriding estimator parameter 4.0
-
-  parcellation.fit(images_to_parcel)
-[TemplateAlignment.fit] Resampling mask
-/home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning:
- Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
- parcel 4 : 1223 voxels
- parcel 8 : 1439 voxels
- parcel 9 : 1031 voxels
- parcel 11 : 1316 voxels
- parcel 16 : 1173 voxels
- parcel 18 : 1270 voxels
- parcel 37 : 1616 voxels
- parcel 53 : 1212 voxels
- parcel 101 : 1042 voxels
- parcel 128 : 1180 voxels
- parcel 132 : 1021 voxels
- parcel 141 : 1437 voxels
+ parcel 4 : 1988 voxels
+ parcel 11 : 1402 voxels
+ parcel 13 : 1028 voxels
+ parcel 14 : 1353 voxels
+ parcel 16 : 1890 voxels
+ parcel 17 : 2191 voxels
+ parcel 21 : 2491 voxels
+ parcel 22 : 1588 voxels
+ parcel 28 : 2337 voxels
+ parcel 31 : 1809 voxels
+ parcel 34 : 1904 voxels
+ parcel 37 : 1485 voxels
+ parcel 39 : 1741 voxels
+ parcel 46 : 2855 voxels
+ parcel 49 : 2602 voxels
+ parcel 50 : 2311 voxels
   warnings.warn(warning)
 </pre></div>
 </div>
 </section>
 <section id="predict-new-data-for-left-out-subject">
 <h2>Predict new data for left-out subject<a class="headerlink" href="#predict-new-data-for-left-out-subject" title="Link to this heading">¶</a></h2>
-<p>We use target_train data to fit the transform, indicating it corresponds to
-the contrasts indexed by train_index and predict from this learnt alignment
-contrasts corresponding to template test_index numbers.
-For each train subject and for the template, the AP contrasts are sorted from
-0, to 53, and then the PA contrasts from 53 to 106.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3.9/library/stdtypes.html#range" title="builtins.range" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">train_index</span></a> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">53</span><span class="p">)</span>
-<a href="https://docs.python.org/3.9/library/stdtypes.html#range" title="builtins.range" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">test_index</span></a> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">53</span><span class="p">,</span> <span class="mi">106</span><span class="p">)</span>
-
-<span class="c1"># We input the mapping image target_train in a list, we could have input more</span>
-<span class="c1"># than one subject for which we&#39;d want to predict : [train_1, train_2 ...]</span>
-
-<a href="https://docs.python.org/3.9/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">prediction_from_template</span></a> <span class="o">=</span> <span class="n">template_estim</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
-    <span class="p">[</span><a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">target_train</span></a><span class="p">],</span> <a href="https://docs.python.org/3.9/library/stdtypes.html#range" title="builtins.range" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">train_index</span></a><span class="p">,</span> <a href="https://docs.python.org/3.9/library/stdtypes.html#range" title="builtins.range" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">test_index</span></a>
-<span class="p">)</span>
-
-<span class="c1"># As a baseline prediction, let&#39;s just take the average of activations across subjects.</span>
-
-<a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">prediction_from_average</span></a> <span class="o">=</span> <span class="n">index_img</span><span class="p">(</span><a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">average_subject</span></a><span class="p">,</span> <a href="https://docs.python.org/3.9/library/stdtypes.html#range" title="builtins.range" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">test_index</span></a><span class="p">)</span>
+<p>We predict the contrasts of the left-out subject using the template we just
+created. We use the transform method of the estimator. This method takes the
+left-out subject as input, computes a pairwise alignment with the template
+and returns the aligned data.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">predictions_from_template</span></a> <span class="o">=</span> <span class="n">template_estim</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">left_out_subject</span></a><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[TemplateAlignment.wrapped] Resampling mask
-/home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
-Parameter mask_strategy :
-    Masker parameter background - overriding estimator parameter epi
-Parameter smoothing_fwhm :
-    Masker parameter None - overriding estimator parameter 4.0
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.11.11/x64/lib/python3.11/site-packages/nilearn/masking.py:981: UserWarning: Data array used to create a new image contains 64-bit ints. This is likely due to creating the array with numpy and passing `int` as the `dtype`. Many tools such as FSL and SPM cannot deal with int64 in Nifti images, so for compatibility the data has been converted to int32.
+  return new_img_like(mask_img, unmasked, affine)
+/home/runner/work/fmralign/fmralign/fmralign/preprocessing.py:219: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+Parameter detrend :
+    Masker parameter False - overriding estimator parameter None
 
-  parcellation.fit(images_to_parcel)
+  self._fit_masker(imgs)
 [TemplateAlignment.wrapped] Resampling mask
 </pre></div>
 </div>
@@ -743,20 +556,17 @@ Parameter smoothing_fwhm :
 <section id="score-the-baseline-and-the-prediction">
 <h2>Score the baseline and the prediction<a class="headerlink" href="#score-the-baseline-and-the-prediction" title="Link to this heading">¶</a></h2>
 <p>We use a utility scoring function to measure the voxelwise correlation
-between the prediction and the ground truth. That is, for each voxel, we
-measure the correlation between its profile of activation without and with
-alignment, to see if alignment was able to predict a signal more alike the ground truth.</p>
+between the images. That is, for each voxel, we measure the correlation between
+its profile of activation without and with alignment, to see if template-based
+alignment was able to improve inter-subject similarity.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">fmralign.metrics</span> <span class="kn">import</span> <span class="n">score_voxelwise</span>
 
-<span class="c1"># Now we use this scoring function to compare the correlation of predictions</span>
-<span class="c1"># made from group average and from template with the real PA contrasts of sub-07</span>
-
 <a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">average_score</span></a> <span class="o">=</span> <span class="n">masker</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span>
-    <span class="n">score_voxelwise</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">target_test</span></a><span class="p">,</span> <a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">prediction_from_average</span></a><span class="p">,</span> <span class="n">masker</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="s2">&quot;corr&quot;</span><span class="p">)</span>
+    <span class="n">score_voxelwise</span><span class="p">(</span><a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">left_out_subject</span></a><span class="p">,</span> <a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">average_subject</span></a><span class="p">,</span> <span class="n">masker</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="s2">&quot;corr&quot;</span><span class="p">)</span>
 <span class="p">)</span>
 <a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">template_score</span></a> <span class="o">=</span> <span class="n">masker</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span>
     <span class="n">score_voxelwise</span><span class="p">(</span>
-        <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">target_test</span></a><span class="p">,</span> <a href="https://docs.python.org/3.9/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">prediction_from_template</span></a><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">masker</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="s2">&quot;corr&quot;</span>
+        <a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">predictions_from_template</span></a><span class="p">,</span> <a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">procrustes_template</span></a><span class="p">,</span> <span class="n">masker</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="s2">&quot;corr&quot;</span>
     <span class="p">)</span>
 <span class="p">)</span>
 </pre></div>
@@ -770,11 +580,11 @@ alignment, to see if alignment was able to predict a signal more alike the groun
 <span class="n">baseline_display</span> <span class="o">=</span> <span class="n">plotting</span><span class="o">.</span><span class="n">plot_stat_map</span><span class="p">(</span>
     <a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">average_score</span></a><span class="p">,</span> <span class="n">display_mode</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cut_coords</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">15</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">]</span>
 <span class="p">)</span>
-<span class="n">baseline_display</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Group average correlation wt ground truth&quot;</span><span class="p">)</span>
+<span class="n">baseline_display</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Left-out subject correlation with group average&quot;</span><span class="p">)</span>
 <span class="n">display</span> <span class="o">=</span> <span class="n">plotting</span><span class="o">.</span><span class="n">plot_stat_map</span><span class="p">(</span>
     <a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">template_score</span></a><span class="p">,</span> <span class="n">display_mode</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">cut_coords</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">15</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">],</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span>
 <span class="p">)</span>
-<span class="n">display</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Template-based prediction correlation wt ground truth&quot;</span><span class="p">)</span>
+<span class="n">display</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Aligned subject correlation with Procrustes template&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <ul class="sphx-glr-horizontal">
@@ -782,9 +592,8 @@ alignment, to see if alignment was able to predict a signal more alike the groun
 <li><img src="../_images/sphx_glr_plot_template_alignment_002.png" srcset="../_images/sphx_glr_plot_template_alignment_002.png" alt="plot template alignment" class = "sphx-glr-multi-img"/></li>
 </ul>
 <p>We observe that creating a template and aligning a new subject to it yields
-a prediction that is better correlated with the ground truth than just using
-the average activations of subjects.</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (18 minutes 23.069 seconds)</p>
+better inter-subject similarity than regular euclidean averaging.</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (4 minutes 27.343 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-template-alignment-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/nilearn/nilearn/main?urlpath=lab/tree/notebooks/auto_examples/plot_template_alignment.ipynb"><img alt="Launch binder" src="../_images/binder_badge_logo.svg" style="width: 150px;" />
@@ -809,23 +618,23 @@ the average activations of subjects.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="plot_pairwise_roi_alignment.html">
+          <a class="next-page" href="plot_pairwise_alignment.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Pairwise functional alignment on a ROI.</div>
+                <div class="title">Pairwise functional alignment.</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="plot_pairwise_alignment.html">
+          <a class="prev-page" href="index.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Pairwise functional alignment.</div>
+                <div class="title">Examples</div>
                 
               </div>
             </a>
@@ -861,7 +670,7 @@ the average activations of subjects.</p>
             <ul>
 <li><a class="reference internal" href="#">Template-based prediction.</a><ul>
 <li><a class="reference internal" href="#retrieve-the-data">Retrieve the data</a></li>
-<li><a class="reference internal" href="#definine-a-masker">Definine a masker</a></li>
+<li><a class="reference internal" href="#define-a-masker">Define a masker</a></li>
 <li><a class="reference internal" href="#prepare-the-data">Prepare the data</a></li>
 <li><a class="reference internal" href="#compute-a-baseline-average-of-subjects">Compute a baseline (average of subjects)</a></li>
 <li><a class="reference internal" href="#create-a-template-from-the-training-subjects">Create a template from the training subjects.</a></li>

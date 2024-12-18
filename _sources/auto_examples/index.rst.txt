@@ -21,6 +21,23 @@ Examples
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="In this tutorial, we show how to improve inter-subject similarity using a template computed across multiple source subjects. For this purpose, we create a template using Procrustes alignment (hyperalignment) to which we align the target subject, using shared information. We then compare the voxelwise similarity between the target subject and the template to the similarity between the target subject and the anatomical Euclidean average of the source subjects.">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_plot_template_alignment_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_plot_template_alignment.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Template-based prediction.</div>
+    </div>
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="In this tutorial, we show how to better predict new contrasts for a target subject using source subject corresponding contrasts and data in common.">
 
 .. only:: html
@@ -33,23 +50,6 @@ Examples
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Pairwise functional alignment.</div>
-    </div>
-
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="In this tutorial, we show how to better predict new contrasts for a target subject using many source subjects corresponding contrasts. For this purpose, we create a template to which we align the target subject, using shared information. We then predict new images for the target and compare them to a baseline.">
-
-.. only:: html
-
-  .. image:: /auto_examples/images/thumb/sphx_glr_plot_template_alignment_thumb.png
-    :alt:
-
-  :ref:`sphx_glr_auto_examples_plot_template_alignment.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Template-based prediction.</div>
     </div>
 
 
@@ -148,8 +148,8 @@ Examples
 .. toctree::
    :hidden:
 
-   /auto_examples/plot_pairwise_alignment
    /auto_examples/plot_template_alignment
+   /auto_examples/plot_pairwise_alignment
    /auto_examples/plot_pairwise_roi_alignment
    /auto_examples/plot_alignment_methods_benchmark
    /auto_examples/plot_int_alignment

@@ -21,10 +21,12 @@
 Template-based prediction.
 ==========================
 
-In this tutorial, we show how to better predict new contrasts for a target
-subject using many source subjects corresponding contrasts. For this purpose,
-we create a template to which we align the target subject, using shared information.
-We then predict new images for the target and compare them to a baseline.
+In this tutorial, we show how to improve inter-subject similarity using a template
+computed across multiple source subjects. For this purpose, we create a template
+using Procrustes alignment (hyperalignment) to which we align the target subject,
+using shared information. We then compare the voxelwise similarity between the
+target subject and the template to the similarity between the target subject and
+the anatomical Euclidean average of the source subjects.
 
 We mostly rely on Python common packages and on nilearn to handle
 functional data in a clean fashion.
@@ -33,7 +35,7 @@ functional data in a clean fashion.
 To run this example, you must launch IPython via ``ipython
 --matplotlib`` in a terminal, or use ``jupyter-notebook``.
 
-.. GENERATED FROM PYTHON SOURCE LINES 21-31
+.. GENERATED FROM PYTHON SOURCE LINES 22-32
 
 Retrieve the data
 -----------------
@@ -46,7 +48,7 @@ df is a dataframe with metadata about each of them.
 mask is a binary image used to extract grey matter regions.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 31-38
+.. GENERATED FROM PYTHON SOURCE LINES 32-39
 
 .. code-block:: Python
 
@@ -65,9 +67,43 @@ mask is a binary image used to extract grey matter regions.
 
  .. code-block:: none
 
-    [get_dataset_dir] Dataset found in /home/runner/nilearn_data/ibc
+    [_add_readme_to_default_data_locations] Added README.md to 
+    /home/runner/nilearn_data
+    [get_dataset_dir] Dataset created in /home/runner/nilearn_data/ibc
+    [fetch_single_file] Downloading data from https://osf.io/pcvje/download ...
+    [fetch_single_file]  ...done. (2 seconds, 0 min)
+
+    [uncompress_file] Extracting data from 
+    /home/runner/nilearn_data/ibc/8e275a34345802c5c273312d85957d6c/download...
+    [uncompress_file] .. done.
+
+    [fetch_single_file] Downloading data from https://osf.io/yvju3/download ...
+    [fetch_single_file]  ...done. (2 seconds, 0 min)
+
+    [uncompress_file] Extracting data from 
+    /home/runner/nilearn_data/ibc/fe06df963fcb3fd454f63a33f0864e8d/download...
+    [uncompress_file] .. done.
+
+    [fetch_single_file] Downloading data from https://osf.io/8z23h/download ...
+    [_chunk_report_] Downloaded 9609216 of 21185337 bytes (45.4%%,    1.2s 
+    remaining)
+    [fetch_single_file]  ...done. (4 seconds, 0 min)
+
+    [uncompress_file] Extracting data from 
+    /home/runner/nilearn_data/ibc/100352739b7501f0ed04920933b4be36/download...
+    [uncompress_file] .. done.
+
+    [fetch_single_file] Downloading data from https://osf.io/e9kbm/download ...
+    [_chunk_report_] Downloaded 6070272 of 21196887 bytes (28.6%%,    2.5s 
+    remaining)
+    [fetch_single_file]  ...done. (3 seconds, 0 min)
+
+    [uncompress_file] Extracting data from 
+    /home/runner/nilearn_data/ibc/331a0a579c6e46c0911502a96215b358/download...
+    [uncompress_file] .. done.
+
     [fetch_single_file] Downloading data from https://osf.io/qn5b6/download ...
-    [_chunk_report_] Downloaded 5939200 of 21197218 bytes (28.0%%,    2.6s 
+    [_chunk_report_] Downloaded 9691136 of 21197218 bytes (45.7%%,    1.2s 
     remaining)
     [fetch_single_file]  ...done. (3 seconds, 0 min)
 
@@ -76,7 +112,7 @@ mask is a binary image used to extract grey matter regions.
     [uncompress_file] .. done.
 
     [fetch_single_file] Downloading data from https://osf.io/u74a3/download ...
-    [_chunk_report_] Downloaded 8396800 of 21185350 bytes (39.6%%,    1.5s 
+    [_chunk_report_] Downloaded 9650176 of 21185350 bytes (45.6%%,    1.2s 
     remaining)
     [fetch_single_file]  ...done. (3 seconds, 0 min)
 
@@ -85,7 +121,7 @@ mask is a binary image used to extract grey matter regions.
     [uncompress_file] .. done.
 
     [fetch_single_file] Downloading data from https://osf.io/83bje/download ...
-    [_chunk_report_] Downloaded 12632064 of 21188335 bytes (59.6%%,    0.7s 
+    [_chunk_report_] Downloaded 6168576 of 21188335 bytes (29.1%%,    2.4s 
     remaining)
     [fetch_single_file]  ...done. (3 seconds, 0 min)
 
@@ -94,7 +130,7 @@ mask is a binary image used to extract grey matter regions.
     [uncompress_file] .. done.
 
     [fetch_single_file] Downloading data from https://osf.io/43j69/download ...
-    [_chunk_report_] Downloaded 6381568 of 21187400 bytes (30.1%%,    2.3s 
+    [_chunk_report_] Downloaded 12820480 of 21187400 bytes (60.5%%,    0.7s 
     remaining)
     [fetch_single_file]  ...done. (4 seconds, 0 min)
 
@@ -106,16 +142,16 @@ mask is a binary image used to extract grey matter regions.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 39-45
+.. GENERATED FROM PYTHON SOURCE LINES 40-46
 
-Definine a masker
+Define a masker
 -----------------
 We define a nilearn masker that will be used to handle relevant data.
   For more information, visit :
   'http://nilearn.github.io/manipulating_images/masker_objects.html'
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 45-50
+.. GENERATED FROM PYTHON SOURCE LINES 46-51
 
 .. code-block:: Python
 
@@ -131,7 +167,7 @@ We define a nilearn masker that will be used to handle relevant data.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 51-57
+.. GENERATED FROM PYTHON SOURCE LINES 52-58
 
 Prepare the data
 ----------------
@@ -140,7 +176,7 @@ two independent sessions with a different phase encoding:
 Antero-posterior(AP) or Postero-anterior(PA).
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 57-77
+.. GENERATED FROM PYTHON SOURCE LINES 58-74
 
 .. code-block:: Python
 
@@ -154,41 +190,27 @@ Antero-posterior(AP) or Postero-anterior(PA).
     template_train = []
     for i in range(5):
         template_train.append(concat_imgs(imgs[i]))
-    target_train = df[df.subject == "sub-07"][df.acquisition == "ap"].path.values
 
-    # For subject sub-07, we split it in two folds:
-    #   - target train: sub-07 AP contrasts, used to learn alignment to template
-    #   - target test: sub-07 PA contrasts, used as a ground truth to score predictions
-    # We make a single 4D Niimg from our list of 3D filenames
+    # sub-07 (that is 5th in the list) will be our left-out subject.
+    # We make a single 4D Niimg from our list of 3D filenames.
 
-    target_train = concat_imgs(target_train)
-    target_test = df[df.subject == "sub-07"][df.acquisition == "pa"].path.values
+    left_out_subject = concat_imgs(imgs[5])
 
 
 
 
 
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-    /home/runner/work/fmralign/fmralign/examples/plot_template_alignment.py:67: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
-      target_train = df[df.subject == "sub-07"][df.acquisition == "ap"].path.values
-    /home/runner/work/fmralign/fmralign/examples/plot_template_alignment.py:75: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
-      target_test = df[df.subject == "sub-07"][df.acquisition == "pa"].path.values
 
 
 
-
-.. GENERATED FROM PYTHON SOURCE LINES 78-83
+.. GENERATED FROM PYTHON SOURCE LINES 75-79
 
 Compute a baseline (average of subjects)
 ----------------------------------------
 We create an image with as many contrasts as any subject representing for
 each contrast the average of all train subjects maps.
 
-
-.. GENERATED FROM PYTHON SOURCE LINES 83-90
+.. GENERATED FROM PYTHON SOURCE LINES 79-86
 
 .. code-block:: Python
 
@@ -206,32 +228,34 @@ each contrast the average of all train subjects maps.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 91-101
+.. GENERATED FROM PYTHON SOURCE LINES 87-97
 
 Create a template from the training subjects.
 ---------------------------------------------
 We define an estimator using the class TemplateAlignment:
   * We align the whole brain through 'multiple' local alignments.
-  * These alignments are calculated on a parcellation of the brain in 150 pieces,
+  * These alignments are calculated on a parcellation of the brain in 50 pieces,
     this parcellation creates group of functionnally similar voxels.
   * The template is created iteratively, aligning all subjects data into a
     common space, from which the template is inferred and aligning again to this
     new template space.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 101-111
+.. GENERATED FROM PYTHON SOURCE LINES 97-109
 
 .. code-block:: Python
 
-
-    from nilearn.image import index_img
 
     from fmralign.template_alignment import TemplateAlignment
 
+    # We use Procrustes/scaled orthogonal alignment method
     template_estim = TemplateAlignment(
-        n_pieces=150, alignment_method="ridge_cv", mask=masker
+        n_pieces=50,
+        alignment_method="scaled_orthogonal",
+        mask=masker,
     )
     template_estim.fit(template_train)
+    procrustes_template = template_estim.template
 
 
 
@@ -241,34 +265,11 @@ We define an estimator using the class TemplateAlignment:
 
  .. code-block:: none
 
-    /home/runner/work/fmralign/fmralign/examples/plot_template_alignment.py:109: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+    /home/runner/work/fmralign/fmralign/fmralign/preprocessing.py:219: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
     Parameter detrend :
         Masker parameter False - overriding estimator parameter None
 
-      template_estim.fit(template_train)
-    [TemplateAlignment.fit] Resampling mask
-    [TemplateAlignment.fit] Resampling mask
-    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
-    Parameter mask_strategy :
-        Masker parameter background - overriding estimator parameter epi
-    Parameter smoothing_fwhm :
-        Masker parameter None - overriding estimator parameter 4.0
-
-      parcellation.fit(images_to_parcel)
-    [TemplateAlignment.fit] Resampling mask
-    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning: 
-     Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
-     parcel 8 : 1178 voxels
-     parcel 9 : 1095 voxels
-     parcel 16 : 1209 voxels
-     parcel 20 : 1084 voxels
-     parcel 23 : 1067 voxels
-     parcel 46 : 1164 voxels
-     parcel 47 : 1045 voxels
-     parcel 111 : 1182 voxels
-     parcel 113 : 1206 voxels
-     parcel 149 : 1229 voxels
-      warnings.warn(warning)
+      self._fit_masker(imgs)
     [TemplateAlignment.fit] Resampling mask
     /home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
     Parameter mask_strategy :
@@ -280,234 +281,42 @@ We define an estimator using the class TemplateAlignment:
     [TemplateAlignment.fit] Resampling mask
     /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning: 
      Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
-     parcel 15 : 1272 voxels
-     parcel 24 : 1098 voxels
-     parcel 28 : 1552 voxels
-     parcel 31 : 1307 voxels
-     parcel 45 : 1318 voxels
-     parcel 66 : 1336 voxels
-     parcel 82 : 1399 voxels
-     parcel 90 : 1232 voxels
-     parcel 92 : 1099 voxels
-     parcel 95 : 1369 voxels
-     parcel 100 : 1305 voxels
-     parcel 113 : 1431 voxels
-     parcel 114 : 1003 voxels
-      warnings.warn(warning)
-    [TemplateAlignment.fit] Resampling mask
-    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
-    Parameter mask_strategy :
-        Masker parameter background - overriding estimator parameter epi
-    Parameter smoothing_fwhm :
-        Masker parameter None - overriding estimator parameter 4.0
-
-      parcellation.fit(images_to_parcel)
-    [TemplateAlignment.fit] Resampling mask
-    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning: 
-     Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
-     parcel 9 : 1268 voxels
-     parcel 24 : 1835 voxels
-     parcel 51 : 1141 voxels
-     parcel 57 : 1216 voxels
-     parcel 67 : 1884 voxels
-     parcel 70 : 1045 voxels
-     parcel 76 : 1421 voxels
-     parcel 85 : 1242 voxels
-     parcel 87 : 1362 voxels
-     parcel 95 : 1458 voxels
-     parcel 96 : 1352 voxels
-     parcel 118 : 1674 voxels
-     parcel 133 : 1661 voxels
-     parcel 141 : 1292 voxels
-      warnings.warn(warning)
-    [TemplateAlignment.fit] Resampling mask
-    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
-    Parameter mask_strategy :
-        Masker parameter background - overriding estimator parameter epi
-    Parameter smoothing_fwhm :
-        Masker parameter None - overriding estimator parameter 4.0
-
-      parcellation.fit(images_to_parcel)
-    [TemplateAlignment.fit] Resampling mask
-    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning: 
-     Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
-     parcel 2 : 1161 voxels
-     parcel 9 : 1158 voxels
-     parcel 13 : 1264 voxels
-     parcel 36 : 1062 voxels
-     parcel 39 : 1231 voxels
-     parcel 79 : 1111 voxels
-     parcel 97 : 1051 voxels
-     parcel 123 : 1243 voxels
-     parcel 130 : 1388 voxels
-     parcel 138 : 1143 voxels
-     parcel 147 : 1218 voxels
-      warnings.warn(warning)
-    [TemplateAlignment.fit] Resampling mask
-    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
-    Parameter mask_strategy :
-        Masker parameter background - overriding estimator parameter epi
-    Parameter smoothing_fwhm :
-        Masker parameter None - overriding estimator parameter 4.0
-
-      parcellation.fit(images_to_parcel)
-    [TemplateAlignment.fit] Resampling mask
-    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning: 
-     Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
-     parcel 2 : 1296 voxels
-     parcel 12 : 1001 voxels
-     parcel 28 : 1024 voxels
-     parcel 33 : 1119 voxels
-     parcel 59 : 1206 voxels
-     parcel 72 : 1098 voxels
-     parcel 87 : 1194 voxels
-     parcel 88 : 1038 voxels
-     parcel 96 : 1071 voxels
-     parcel 108 : 1097 voxels
-     parcel 147 : 1247 voxels
-      warnings.warn(warning)
-    [TemplateAlignment.fit] Resampling mask
-    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
-    Parameter mask_strategy :
-        Masker parameter background - overriding estimator parameter epi
-    Parameter smoothing_fwhm :
-        Masker parameter None - overriding estimator parameter 4.0
-
-      parcellation.fit(images_to_parcel)
-    [TemplateAlignment.fit] Resampling mask
-    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning: 
-     Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
-     parcel 9 : 1198 voxels
-     parcel 17 : 1057 voxels
-     parcel 28 : 1161 voxels
-     parcel 32 : 1133 voxels
-     parcel 48 : 1080 voxels
-     parcel 61 : 1046 voxels
-     parcel 101 : 1021 voxels
-     parcel 107 : 1122 voxels
-     parcel 120 : 1315 voxels
-     parcel 134 : 1286 voxels
-     parcel 136 : 1089 voxels
-      warnings.warn(warning)
-    [TemplateAlignment.fit] Resampling mask
-    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
-    Parameter mask_strategy :
-        Masker parameter background - overriding estimator parameter epi
-    Parameter smoothing_fwhm :
-        Masker parameter None - overriding estimator parameter 4.0
-
-      parcellation.fit(images_to_parcel)
-    [TemplateAlignment.fit] Resampling mask
-    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning: 
-     Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
-     parcel 44 : 1034 voxels
-     parcel 45 : 1001 voxels
-     parcel 77 : 1371 voxels
-     parcel 80 : 1110 voxels
-     parcel 83 : 1071 voxels
-     parcel 87 : 1495 voxels
-     parcel 91 : 1126 voxels
-     parcel 119 : 1066 voxels
-     parcel 131 : 1143 voxels
-     parcel 138 : 1233 voxels
-     parcel 142 : 1268 voxels
-      warnings.warn(warning)
-    [TemplateAlignment.fit] Resampling mask
-    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
-    Parameter mask_strategy :
-        Masker parameter background - overriding estimator parameter epi
-    Parameter smoothing_fwhm :
-        Masker parameter None - overriding estimator parameter 4.0
-
-      parcellation.fit(images_to_parcel)
-    [TemplateAlignment.fit] Resampling mask
-    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning: 
-     Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
-     parcel 49 : 1018 voxels
-     parcel 74 : 1011 voxels
-     parcel 132 : 1119 voxels
-      warnings.warn(warning)
-    [TemplateAlignment.fit] Resampling mask
-    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
-    Parameter mask_strategy :
-        Masker parameter background - overriding estimator parameter epi
-    Parameter smoothing_fwhm :
-        Masker parameter None - overriding estimator parameter 4.0
-
-      parcellation.fit(images_to_parcel)
-    [TemplateAlignment.fit] Resampling mask
-    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning: 
-     Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
-     parcel 2 : 1454 voxels
-     parcel 17 : 1247 voxels
-     parcel 26 : 1361 voxels
-     parcel 39 : 1017 voxels
-     parcel 40 : 1541 voxels
-     parcel 65 : 1148 voxels
-     parcel 68 : 1312 voxels
-     parcel 79 : 1274 voxels
-     parcel 93 : 1521 voxels
-     parcel 102 : 1371 voxels
-     parcel 136 : 1553 voxels
-     parcel 149 : 1039 voxels
-      warnings.warn(warning)
-    [TemplateAlignment.fit] Resampling mask
-    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
-    Parameter mask_strategy :
-        Masker parameter background - overriding estimator parameter epi
-    Parameter smoothing_fwhm :
-        Masker parameter None - overriding estimator parameter 4.0
-
-      parcellation.fit(images_to_parcel)
-    [TemplateAlignment.fit] Resampling mask
-    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning: 
-     Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
-     parcel 4 : 1223 voxels
-     parcel 8 : 1439 voxels
-     parcel 9 : 1031 voxels
-     parcel 11 : 1316 voxels
-     parcel 16 : 1173 voxels
-     parcel 18 : 1270 voxels
-     parcel 37 : 1616 voxels
-     parcel 53 : 1212 voxels
-     parcel 101 : 1042 voxels
-     parcel 128 : 1180 voxels
-     parcel 132 : 1021 voxels
-     parcel 141 : 1437 voxels
+     parcel 4 : 1988 voxels
+     parcel 11 : 1402 voxels
+     parcel 13 : 1028 voxels
+     parcel 14 : 1353 voxels
+     parcel 16 : 1890 voxels
+     parcel 17 : 2191 voxels
+     parcel 21 : 2491 voxels
+     parcel 22 : 1588 voxels
+     parcel 28 : 2337 voxels
+     parcel 31 : 1809 voxels
+     parcel 34 : 1904 voxels
+     parcel 37 : 1485 voxels
+     parcel 39 : 1741 voxels
+     parcel 46 : 2855 voxels
+     parcel 49 : 2602 voxels
+     parcel 50 : 2311 voxels
       warnings.warn(warning)
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 112-120
+.. GENERATED FROM PYTHON SOURCE LINES 110-116
 
 Predict new data for left-out subject
 -------------------------------------
-We use target_train data to fit the transform, indicating it corresponds to
-the contrasts indexed by train_index and predict from this learnt alignment
-contrasts corresponding to template test_index numbers.
-For each train subject and for the template, the AP contrasts are sorted from
-0, to 53, and then the PA contrasts from 53 to 106.
+We predict the contrasts of the left-out subject using the template we just
+created. We use the transform method of the estimator. This method takes the
+left-out subject as input, computes a pairwise alignment with the template
+and returns the aligned data.
 
-
-.. GENERATED FROM PYTHON SOURCE LINES 120-135
+.. GENERATED FROM PYTHON SOURCE LINES 116-119
 
 .. code-block:: Python
 
 
-    train_index = range(53)
-    test_index = range(53, 106)
-
-    # We input the mapping image target_train in a list, we could have input more
-    # than one subject for which we'd want to predict : [train_1, train_2 ...]
-
-    prediction_from_template = template_estim.transform(
-        [target_train], train_index, test_index
-    )
-
-    # As a baseline prediction, let's just take the average of activations across subjects.
-
-    prediction_from_average = index_img(average_subject, test_index)
+    predictions_from_template = template_estim.transform(left_out_subject)
 
 
 
@@ -517,45 +326,40 @@ For each train subject and for the template, the AP contrasts are sorted from
 
  .. code-block:: none
 
+    /opt/hostedtoolcache/Python/3.11.11/x64/lib/python3.11/site-packages/nilearn/masking.py:981: UserWarning: Data array used to create a new image contains 64-bit ints. This is likely due to creating the array with numpy and passing `int` as the `dtype`. Many tools such as FSL and SPM cannot deal with int64 in Nifti images, so for compatibility the data has been converted to int32.
+      return new_img_like(mask_img, unmasked, affine)
+    /home/runner/work/fmralign/fmralign/fmralign/preprocessing.py:219: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+    Parameter detrend :
+        Masker parameter False - overriding estimator parameter None
+
+      self._fit_masker(imgs)
     [TemplateAlignment.wrapped] Resampling mask
-    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
-    Parameter mask_strategy :
-        Masker parameter background - overriding estimator parameter epi
-    Parameter smoothing_fwhm :
-        Masker parameter None - overriding estimator parameter 4.0
-
-      parcellation.fit(images_to_parcel)
-    [TemplateAlignment.wrapped] Resampling mask
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 136-143
+.. GENERATED FROM PYTHON SOURCE LINES 120-126
 
 Score the baseline and the prediction
 -------------------------------------
 We use a utility scoring function to measure the voxelwise correlation
-between the prediction and the ground truth. That is, for each voxel, we
-measure the correlation between its profile of activation without and with
-alignment, to see if alignment was able to predict a signal more alike the ground truth.
+between the images. That is, for each voxel, we measure the correlation between
+its profile of activation without and with alignment, to see if template-based
+alignment was able to improve inter-subject similarity.
 
-
-.. GENERATED FROM PYTHON SOURCE LINES 143-159
+.. GENERATED FROM PYTHON SOURCE LINES 126-138
 
 .. code-block:: Python
 
 
     from fmralign.metrics import score_voxelwise
 
-    # Now we use this scoring function to compare the correlation of predictions
-    # made from group average and from template with the real PA contrasts of sub-07
-
     average_score = masker.inverse_transform(
-        score_voxelwise(target_test, prediction_from_average, masker, loss="corr")
+        score_voxelwise(left_out_subject, average_subject, masker, loss="corr")
     )
     template_score = masker.inverse_transform(
         score_voxelwise(
-            target_test, prediction_from_template[0], masker, loss="corr"
+            predictions_from_template, procrustes_template, masker, loss="corr"
         )
     )
 
@@ -566,15 +370,14 @@ alignment, to see if alignment was able to predict a signal more alike the groun
 
 
 
-
-.. GENERATED FROM PYTHON SOURCE LINES 160-164
+.. GENERATED FROM PYTHON SOURCE LINES 139-143
 
 Plotting the measures
 ---------------------
 Finally we plot both scores
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 164-176
+.. GENERATED FROM PYTHON SOURCE LINES 143-155
 
 .. code-block:: Python
 
@@ -584,11 +387,11 @@ Finally we plot both scores
     baseline_display = plotting.plot_stat_map(
         average_score, display_mode="z", vmax=1, cut_coords=[-15, -5]
     )
-    baseline_display.title("Group average correlation wt ground truth")
+    baseline_display.title("Left-out subject correlation with group average")
     display = plotting.plot_stat_map(
         template_score, display_mode="z", cut_coords=[-15, -5], vmax=1
     )
-    display.title("Template-based prediction correlation wt ground truth")
+    display.title("Aligned subject correlation with Procrustes template")
 
 
 
@@ -614,16 +417,15 @@ Finally we plot both scores
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 177-180
+.. GENERATED FROM PYTHON SOURCE LINES 156-158
 
 We observe that creating a template and aligning a new subject to it yields
-a prediction that is better correlated with the ground truth than just using
-the average activations of subjects.
+better inter-subject similarity than regular euclidean averaging.
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (18 minutes 23.069 seconds)
+   **Total running time of the script:** (4 minutes 27.343 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_template_alignment.py:
