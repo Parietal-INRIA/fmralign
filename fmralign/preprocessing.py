@@ -247,7 +247,7 @@ class ParcellationMasker(BaseEstimator, TransformerMixin):
             List of ParceledData objects containing the data and parcelation
             information for each image.
         """
-        if isinstance(imgs, Nifti1Image):
+        if isinstance(imgs, (Nifti1Image, SurfaceImage)):
             imgs = [imgs]
 
         parceled_data = Parallel(n_jobs=self.n_jobs)(
