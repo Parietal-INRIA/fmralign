@@ -11,6 +11,7 @@ from fmralign.pairwise_alignment import PairwiseAlignment
 from fmralign.tests.utils import (
     assert_algo_transform_almost_exactly,
     random_niimg,
+    surf_img,
     zero_mean_coefficient_determination,
 )
 
@@ -130,3 +131,13 @@ def test_parcellation_before_fit():
         AttributeError, match="Parcellation has not been computed yet"
     ):
         alignment.get_parcellation()
+
+
+def test_surface_alignment():
+    """Test compatibility with `SurfaceImage`"""
+    alignment = PairwiseAlignment()
+    n_pieces = 3
+    img1 = surf_img(20)
+    img2 = surf_img(20)
+    alignment = PairwiseAlignment(n_pieces=n_pieces)
+    alignment.fit(img1, img2)
