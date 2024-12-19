@@ -176,3 +176,10 @@ def surf_img(n_samples=1):
         ) * 10**i
         data[key] = data_part.T
     return SurfaceImage(mesh, data)
+
+
+def sample_subjects_data(n_subjects=3):
+    """Sample data in one parcel for n_subjects"""
+    subjects_data = [np.random.rand(10, 20) for _ in range(n_subjects)]
+    return subjects_data
+

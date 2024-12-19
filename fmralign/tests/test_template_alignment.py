@@ -1,17 +1,105 @@
-# -*- coding: utf-8 -*-
+import numpy as np
 import pytest
-from nilearn.image import concat_imgs, index_img, math_img
+from nibabel import Nifti1Image
+from nilearn.image import concat_imgs, math_img
 from nilearn.maskers import NiftiMasker
 from numpy.testing import assert_array_almost_equal
 
+from fmralign._utils import ParceledData
+from fmralign.preprocessing import ParcellationMasker
 from fmralign.template_alignment import (
     TemplateAlignment,
+    _align_images_to_template,
+    _fit_local_template,
+    _index_by_parcel,
+    _reconstruct_template,
     _rescaled_euclidean_mean,
 )
 from fmralign.tests.utils import (
     random_niimg,
+    sample_parceled_data,
+    sample_subjects_data,
     zero_mean_coefficient_determination,
 )
+
+
+@pytest.mark.parametrize("scale_average", [True, False])
+def test_rescaled_euclidean_mean(scale_average):
+    subjects_data = sample_subjects_data()
+    average_data = _rescaled_euclidean_mean(subjects_data)
+    assert average_data.shape == subjects_data[0].shape
+    assert average_data.dtype == subjects_data[0].dtype
+
+    if scale_average is False:
+        assert np.allclose(average_data, np.mean(subjects_data, axis=0))
+
+
+def test_reconstruct_template():
+    n_subjects = 3
+    n_iter = 3
+    n_pieces = 2
+    imgs = [random_niimg((8, 7, 6, 20))[0]] * n_subjects
+    parcel_masker = ParcellationMasker(n_pieces=n_pieces)
+    subjects_parcels = parcel_masker.fit_transform(imgs)
+    parcels_subjects = _index_by_parcel(subjects_parcels)
+    masker = parcel_masker.masker_
+    labels = parcel_masker.labels
+
+    fit = [
+        _fit_local_template(parcel_i, n_iter=n_iter)
+        for parcel_i in parcels_subjects
+    ]
+    template, template_history = _reconstruct_template(fit, labels, masker)
+
+    assert template.shape == imgs[0].shape
+    assert len(template_history) == n_iter - 2
+    for template_i in template_history:
+        assert template_i.shape == imgs[0].shape
+
+
+def test_align_images_to_template():
+    subjects_data = sample_subjects_data()
+    template = _rescaled_euclidean_mean(subjects_data)
+    aligned_data, subjects_estimators = _align_images_to_template(
+        subjects_data,
+        template,
+        alignment_method="identity",
+    )
+    assert len(aligned_data) == len(subjects_data)
+    assert len(subjects_estimators) == len(subjects_data)
+    assert aligned_data[0].shape == subjects_data[0].shape
+
+
+def test_fit_local_template():
+    n_subjects = 3
+    n_iter = 3
+    subjects_data = sample_subjects_data(n_subjects=n_subjects)
+    fit = _fit_local_template(
+        subjects_data,
+        n_iter=n_iter,
+        alignment_method="identity",
+        scale_template=False,
+    )
+    template_data = fit["template_data"]
+    template_history = fit["template_history"]
+    estimators = fit["estimators"]
+
+    assert template_data.shape == subjects_data[0].shape
+    assert len(template_history) == n_iter - 2
+    assert len(estimators) == n_subjects
+
+
+def test_index_by_parcel():
+    n_subjects = 3
+    n_pieces = 2
+    subjects_parcels = [
+        ParceledData(*sample_parceled_data(n_pieces))
+        for _ in range(n_subjects)
+    ]
+    parcels_subjects = _index_by_parcel(subjects_parcels)
+    assert len(parcels_subjects) == n_pieces
+    assert len(parcels_subjects[0]) == n_subjects
+    assert parcels_subjects[0][0].shape == subjects_parcels[0][0].shape
 
 
 def test_template_identity():
@@ -28,15 +116,9 @@ def test_template_identity():
 
     subs = [sub_1, sub_2, sub_3]
 
-    # test euclidian mean function
-    euclidian_template = _rescaled_euclidean_mean(subs, masker)
-    assert_array_almost_equal(
-        ref_template.get_fdata(), euclidian_template.get_fdata()
-    )
-
     # test different fit() accept list of list of 3D Niimgs as input.
     algo = TemplateAlignment(alignment_method="identity", mask=masker)
-    algo.fit([n * [im]] * 3)
+    algo.fit([concat_imgs(n * [im])] * 3)
     # test template
     assert_array_almost_equal(sub_1.get_fdata(), algo.template.get_fdata())
 
@@ -54,51 +136,53 @@ def test_template_identity():
 
     for args in args_list:
         algo = TemplateAlignment(**args)
-        # Learning a template which is
         algo.fit(subs)
         # test template
         assert_array_almost_equal(
-            ref_template.get_fdata(), algo.template.get_fdata()
+            ref_template.get_fdata(),
+            algo.template.get_fdata(),
         )
-        predicted_imgs = algo.transform(
-            [index_img(sub_1, range(8))],
-            train_index=range(8),
-            test_index=range(8, 10),
-        )
-        ground_truth = index_img(ref_template, range(8, 10))
+        predicted_imgs = algo.transform(ref_template)
         assert_array_almost_equal(
-            ground_truth.get_fdata(), predicted_imgs[0].get_fdata()
+            predicted_imgs.get_fdata(),
+            ref_template.get_fdata(),
+        )
+        predicted_imgs = algo.transform(ref_template, subject_index=1)
+        assert_array_almost_equal(
+            predicted_imgs.get_fdata(),
+            ref_template.get_fdata(),
         )
 
-    # test transform() with wrong indexes length or content (on previous fitted algo)
-    train_inds, test_inds = (
-        [[0, 1], [1, 10], [4, 11], [0, 1, 2]],
-        [
-            [6, 8, 29],
-            [4, 6],
-            [4, 11],
-            [4, 5],
-        ],
+
+def test_template_diagonal():
+    n = 10
+    im, mask_img = random_niimg((6, 5, 3))
+
+    sub_1 = concat_imgs(n * [im])
+    sub_2 = math_img("2 * img", img=sub_1)
+    sub_3 = math_img("3 * img", img=sub_1)
+
+    ref_template = sub_2
+    masker = NiftiMasker(mask_img=mask_img)
+    masker.fit()
+
+    subs = [sub_1, sub_2, sub_3]
+
+    # Test without subject_index
+    algo = TemplateAlignment(alignment_method="diagonal", mask=masker)
+    algo.fit(subs)
+    predicted_imgs = algo.transform(sub_1, subject_index=None)
+    assert_array_almost_equal(
+        ref_template.get_fdata(),
+        predicted_imgs.get_fdata(),
     )
 
-    for train_ind, test_ind in zip(train_inds, test_inds):
-        with pytest.raises(Exception):
-            assert algo.transform(
-                [index_img(sub_1, range(2))],
-                train_index=train_ind,
-                test_index=test_ind,
-            )
-
-    # test wrong images input in fit() and transform method
-    with pytest.raises(Exception):
-        assert algo.transform(
-            [n * [im]] * 2,
-            train_index=train_inds[-1],
-            test_index=test_inds[-1],
-        )
-        assert algo.fit([im])
-        assert algo.transform(
-            [im], train_index=train_inds[-1], test_index=test_inds[-1]
+    # Test with subject_index
+    for i, sub in enumerate(subs):
+        predicted_imgs = algo.transform(sub, subject_index=i)
+        assert_array_almost_equal(
+            predicted_imgs.get_fdata(),
+            ref_template.get_fdata(),
         )
 
 
@@ -116,8 +200,7 @@ def test_template_closer_to_target():
     sub_1 = masker.transform(subject_1)
     sub_2 = masker.transform(subject_2)
     subs = [subject_1, subject_2]
-    average_img = _rescaled_euclidean_mean(subs, masker)
-    avg_data = masker.transform(average_img)
+    avg_data = np.mean([sub_1, sub_2], axis=0)
     mean_distance_1 = zero_mean_coefficient_determination(sub_1, avg_data)
     mean_distance_2 = zero_mean_coefficient_determination(sub_2, avg_data)
 
@@ -129,16 +212,51 @@ def test_template_closer_to_target():
         "diagonal",
     ]:
         algo = TemplateAlignment(
-            alignment_method=alignment_method, n_pieces=3, mask=masker
+            alignment_method=alignment_method,
+            n_pieces=3,
+            mask=masker,
         )
         # Learn template
         algo.fit(subs)
         # Assess template is closer to mean than both images
         template_data = masker.transform(algo.template)
         template_mean_distance = zero_mean_coefficient_determination(
-            avg_data, template_data
+            avg_data,
+            template_data,
         )
         assert template_mean_distance >= mean_distance_1
         assert (
             template_mean_distance >= mean_distance_2 - 1.0e-2
         )  # for robustness
+
+
+def test_parcellation_retrieval():
+    """Test that TemplateAlignment returns both the\n
+    labels and the parcellation image
+    """
+    n_pieces = 3
+    imgs = [random_niimg((8, 7, 6))[0]] * 3
+    alignment = TemplateAlignment(n_pieces=n_pieces)
+    alignment.fit(imgs)
+
+    labels, parcellation_image = alignment.get_parcellation()
+    assert isinstance(labels, np.ndarray)
+    assert len(np.unique(labels)) == n_pieces
+    assert isinstance(parcellation_image, Nifti1Image)
+    assert parcellation_image.shape == imgs[0].shape[:-1]
+
+
+def test_parcellation_before_fit():
+    """Test that TemplateAlignment raises an error if\n
+    the parcellation is retrieved before fitting
+    """
+    alignment = TemplateAlignment()
+    with pytest.raises(
+        AttributeError,
+        match="Parcellation has not been computed yet",
+    ):
+        alignment.get_parcellation()
+
+
+if __name__ == "__main__":
+    test_parcellation_retrieval()

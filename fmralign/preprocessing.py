@@ -122,6 +122,14 @@ class ParcellationMasker(BaseEstimator, TransformerMixin):
         """Fit the masker on a single or multiple images."""
         if isinstance(imgs, (Nifti1Image, SurfaceImage)):
             imgs = [imgs]
+        # If images are 3D, add a fourth dimension
+        for i, img in enumerate(imgs):
+            if len(img.shape) == 3:
+                imgs[i] = Nifti1Image(
+                    np.expand_dims(img.get_fdata(), axis=-1),
+                    img.affine,
+                    img.header,
+                )
         # Assert that all images have the same shape
         if len(set([img.shape for img in imgs])) > 1:
             raise NotImplementedError(
@@ -196,6 +204,16 @@ class ParcellationMasker(BaseEstimator, TransformerMixin):
                 "call fit before get_labels."
             )
         return self.labels
+
+    def get_parcellation_img(self):
+        """Return the parcellation image.
+
+        Returns
+        -------
+        parcellation : `nibabel.Nifti1Image`
+            Parcellation image.
+        """
+        return self.masker_.inverse_transform(self.get_labels())
 
     def fit(self, imgs, y=None):
         """Fit the masker and compute the parcellation.
