@@ -184,13 +184,31 @@ def test_standardization():
 def test_one_surface_image():
     """Test that ParcellationMasker can handle surface images"""
     img = surf_img(20)
-    pmasker = ParcellationMasker(n_pieces=2)
-    fitted_pmasker = pmasker.fit([img, img])
+    n_pieces = 2
+    n_vertices_total = img.shape[0]
+    parcel_masker = ParcellationMasker(n_pieces=n_pieces)
+    fitted_parcel_masker = parcel_masker.fit(img)
 
-    assert hasattr(fitted_pmasker, "masker_")
-    assert fitted_pmasker.labels is not None
-    assert isinstance(fitted_pmasker.labels, np.ndarray)
-    assert len(np.unique(fitted_pmasker.labels)) == 2  # n_pieces=2
+    assert hasattr(fitted_parcel_masker, "masker_")
+    assert fitted_parcel_masker.labels is not None
+    assert isinstance(fitted_parcel_masker.labels, np.ndarray)
+    assert len(np.unique(fitted_parcel_masker.labels)) == n_pieces
+    assert len(fitted_parcel_masker.labels) == n_vertices_total
+
+
+def test_multiple_surface_images():
+    """Test that ParcellationMasker can handle multiple surface images"""
+    imgs = [surf_img(20)] * 3
+    n_pieces = 2
+    n_vertices_total = imgs[0].shape[0]
+    parcel_masker = ParcellationMasker(n_pieces=n_pieces)
+    fitted_parcel_masker = parcel_masker.fit(imgs)
+
+    assert hasattr(fitted_parcel_masker, "masker_")
+    assert fitted_parcel_masker.labels is not None
+    assert isinstance(fitted_parcel_masker.labels, np.ndarray)
+    assert len(np.unique(fitted_parcel_masker.labels)) == n_pieces
+    assert len(fitted_parcel_masker.labels) == n_vertices_total
 
 
 def test_one_contrast():
@@ -198,8 +216,8 @@ def test_one_contrast():
     4D images in the case of one contrast"""
     img1, _ = random_niimg((8, 7, 6))
     img2, _ = random_niimg((8, 7, 6, 1))
-    pmasker = ParcellationMasker()
-    pmasker.fit([img1, img2])
+    parcel_masker = ParcellationMasker()
+    parcel_masker.fit([img1, img2])
 
 
 def test_get_parcellation_img():
@@ -219,4 +237,3 @@ def test_get_parcellation_img():
 
     assert np.allclose(data, labels)
     assert len(np.unique(data)) == n_pieces
-
