@@ -6,11 +6,13 @@ import pytest
 from nibabel import Nifti1Image
 from nilearn.image import new_img_like
 from nilearn.maskers import NiftiMasker
+from nilearn.surface import SurfaceImage
 
 from fmralign.pairwise_alignment import PairwiseAlignment
 from fmralign.tests.utils import (
     assert_algo_transform_almost_exactly,
     random_niimg,
+    surf_img,
     zero_mean_coefficient_determination,
 )
 
@@ -130,3 +132,26 @@ def test_parcellation_before_fit():
         AttributeError, match="Parcellation has not been computed yet"
     ):
         alignment.get_parcellation()
+
+
+def test_surface_alignment():
+    """Test compatibility with `SurfaceImage`"""
+    alignment = PairwiseAlignment()
+    n_pieces = 3
+    img1 = surf_img(20)
+    img2 = surf_img(20)
+    alignment = PairwiseAlignment(n_pieces=n_pieces)
+
+    # Test fitting
+    alignment.fit(img1, img2)
+
+    # Test transformation
+    img_transformed = alignment.transform(img1)
+    assert img_transformed.shape == img1.shape
+    assert isinstance(img_transformed, SurfaceImage)
+
+    # Test parcellation retrieval
+    labels, parcellation_image = alignment.get_parcellation()
+    assert isinstance(labels, np.ndarray)
+    assert len(np.unique(labels)) == n_pieces
+    assert isinstance(parcellation_image, SurfaceImage)
