@@ -136,7 +136,9 @@ class ParcellationMasker(BaseEstimator, TransformerMixin):
                 "fmralign does not support images of different shapes."
             )
 
-        masker_type = "surface" if isinstance(imgs[0], SurfaceImage) else "multi_nii"
+        masker_type = (
+            "surface" if isinstance(imgs[0], SurfaceImage) else "multi_nii"
+        )
         self.masker_ = check_embedded_masker(self, masker_type=masker_type)
         self.masker_.n_jobs = self.n_jobs
 
