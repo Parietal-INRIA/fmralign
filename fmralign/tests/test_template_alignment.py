@@ -280,9 +280,11 @@ def test_surface_template():
     # Test transformation on real subject
     img_transformed = alignment.transform(img1, subject_index=0)
     assert isinstance(img_transformed, SurfaceImage)
-    assert np.allclose(
-        surface.get_data(img_transformed), surface.get_data(img1)
-    )
+    for hemi in ["left", "right"]:
+        assert np.allclose(
+            img_transformed.data.parts[hemi],
+            img1.data.parts[hemi],
+        )
 
     # Test parcellation retrieval
     labels, parcellation_image = alignment.get_parcellation()
