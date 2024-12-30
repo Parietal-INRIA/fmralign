@@ -3,6 +3,7 @@ import pytest
 from nibabel import Nifti1Image
 from nilearn.image import concat_imgs, math_img
 from nilearn.maskers import NiftiMasker
+from nilearn.surface import SurfaceImage, surface
 from numpy.testing import assert_array_almost_equal
 
 from fmralign._utils import ParceledData
@@ -19,6 +20,7 @@ from fmralign.tests.utils import (
     random_niimg,
     sample_parceled_data,
     sample_subjects_data,
+    surf_img,
     zero_mean_coefficient_determination,
 )
 
@@ -258,5 +260,32 @@ def test_parcellation_before_fit():
         alignment.get_parcellation()
 
 
-if __name__ == "__main__":
-    test_parcellation_retrieval()
+def test_surface_template():
+    """Test compatibility with `SurfaceImage`"""
+    n_pieces = 3
+    img1 = surf_img(20)
+    img2 = surf_img(20)
+    img3 = surf_img(20)
+    alignment = TemplateAlignment(n_pieces=n_pieces)
+
+    # Test fitting
+    alignment.fit([img1, img2, img3])
+    assert isinstance(alignment.template, SurfaceImage)
+
+    # Test transformation from new subject
+    img_transformed = alignment.transform(surf_img(20))
+    assert isinstance(img_transformed, SurfaceImage)
+    assert img_transformed.shape == surf_img(20).shape
+
+    # Test transformation on real subject
+    img_transformed = alignment.transform(img1, subject_index=0)
+    assert isinstance(img_transformed, SurfaceImage)
+    assert np.allclose(
+        surface.get_data(img_transformed), surface.get_data(img1)
+    )
+
+    # Test parcellation retrieval
+    labels, parcellation_image = alignment.get_parcellation()
+    assert isinstance(labels, np.ndarray)
+    assert len(np.unique(labels)) == n_pieces
+    assert isinstance(parcellation_image, SurfaceImage)
