@@ -8,7 +8,8 @@ from joblib import Memory, Parallel, delayed
 from nibabel.nifti1 import Nifti1Image
 from nilearn._utils.masker_validation import check_embedded_masker
 from nilearn.image import concat_imgs
-from nilearn.surface import SurfaceImage, surface
+from nilearn.maskers._utils import concatenate_surface_images
+from nilearn.surface import SurfaceImage
 from sklearn.base import BaseEstimator, TransformerMixin
 
 from fmralign._utils import (
@@ -173,7 +174,7 @@ class ParcellationMasker(BaseEstimator, TransformerMixin):
             if isinstance(imgs[0], (Nifti1Image)):
                 imgs = concat_imgs(imgs)
             else:
-                imgs = surface.concat_imgs(imgs)
+                imgs = concatenate_surface_images(imgs)
         self.labels = _make_parcellation(
             imgs,
             self.clustering,
