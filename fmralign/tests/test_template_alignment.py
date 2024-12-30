@@ -3,7 +3,7 @@ import pytest
 from nibabel import Nifti1Image
 from nilearn.image import concat_imgs, math_img
 from nilearn.maskers import NiftiMasker
-from nilearn.surface import SurfaceImage, surface
+from nilearn.surface import SurfaceImage
 from numpy.testing import assert_array_almost_equal
 
 from fmralign._utils import ParceledData
