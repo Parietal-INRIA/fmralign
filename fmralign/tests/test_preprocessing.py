@@ -187,7 +187,7 @@ def test_one_surface_image():
     n_pieces = 2
     n_vertices_total = img.shape[0]
     parcel_masker = ParcellationMasker(n_pieces=n_pieces)
-    fitted_parcel_masker = parcel_masker.fit(img)
+    parcel_masker = parcel_masker.fit(img)
 
     assert hasattr(fitted_parcel_masker, "masker_")
     assert fitted_parcel_masker.labels is not None
