@@ -36,22 +36,22 @@ def test_fit_single_image():
     """Test that ParcellationMasker fits a single image"""
     img, _ = random_niimg((8, 7, 6))
     parcel_masker = ParcellationMasker(n_pieces=2)
-    fitted_parcel_masker = parcel_masker.fit(img)
+    parcel_masker.fit(img)
 
-    assert hasattr(fitted_parcel_masker, "masker_")
-    assert fitted_parcel_masker.labels is not None
-    assert isinstance(fitted_parcel_masker.labels, np.ndarray)
-    assert len(np.unique(fitted_parcel_masker.labels)) == 2  # n_pieces=2
+    assert hasattr(parcel_masker, "masker_")
+    assert parcel_masker.labels is not None
+    assert isinstance(parcel_masker.labels, np.ndarray)
+    assert len(np.unique(parcel_masker.labels)) == 2  # n_pieces=2
 
 
 def test_fit_multiple_images():
     """Test that ParcellationMasker fits multiple images"""
     imgs = [random_niimg((8, 7, 6))[0]] * 3
     parcel_masker = ParcellationMasker(n_pieces=2)
-    fitted_parcel_masker = parcel_masker.fit(imgs)
+    parcel_masker = parcel_masker.fit(imgs)
 
-    assert hasattr(fitted_parcel_masker, "masker_")
-    assert fitted_parcel_masker.labels is not None
+    assert hasattr(parcel_masker, "masker_")
+    assert parcel_masker.labels is not None
 
 
 def test_transform_single_image():
@@ -187,13 +187,13 @@ def test_one_surface_image():
     n_pieces = 2
     n_vertices_total = img.shape[0]
     parcel_masker = ParcellationMasker(n_pieces=n_pieces)
-    parcel_masker = parcel_masker.fit(img)
+    parcel_masker.fit(img)
 
-    assert hasattr(fitted_parcel_masker, "masker_")
-    assert fitted_parcel_masker.labels is not None
-    assert isinstance(fitted_parcel_masker.labels, np.ndarray)
-    assert len(np.unique(fitted_parcel_masker.labels)) == n_pieces
-    assert len(fitted_parcel_masker.labels) == n_vertices_total
+    assert hasattr(parcel_masker, "masker_")
+    assert parcel_masker.labels is not None
+    assert isinstance(parcel_masker.labels, np.ndarray)
+    assert len(np.unique(parcel_masker.labels)) == n_pieces
+    assert len(parcel_masker.labels) == n_vertices_total
 
 
 def test_multiple_surface_images():
@@ -202,13 +202,13 @@ def test_multiple_surface_images():
     n_pieces = 2
     n_vertices_total = imgs[0].shape[0]
     parcel_masker = ParcellationMasker(n_pieces=n_pieces)
-    fitted_parcel_masker = parcel_masker.fit(imgs)
+    parcel_masker = parcel_masker.fit(imgs)
 
-    assert hasattr(fitted_parcel_masker, "masker_")
-    assert fitted_parcel_masker.labels is not None
-    assert isinstance(fitted_parcel_masker.labels, np.ndarray)
-    assert len(np.unique(fitted_parcel_masker.labels)) == n_pieces
-    assert len(fitted_parcel_masker.labels) == n_vertices_total
+    assert hasattr(parcel_masker, "masker_")
+    assert parcel_masker.labels is not None
+    assert isinstance(parcel_masker.labels, np.ndarray)
+    assert len(np.unique(parcel_masker.labels)) == n_pieces
+    assert len(parcel_masker.labels) == n_vertices_total
 
 
 def test_one_contrast():
