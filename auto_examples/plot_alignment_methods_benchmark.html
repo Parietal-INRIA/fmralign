@@ -15,7 +15,7 @@
 
     <link rel="shortcut icon" href="../_static/favicon.ico"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
         <title>Alignment methods benchmark (pairwise ROI case). - fmralign</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=045299b1" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=2da93098" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
@@ -342,7 +342,7 @@ different contrasts maps for 12 subjects.
 We download the images for subjects sub-01 and sub-02.
 Files is the list of paths for each subjects.
 df is a dataframe with metadata about each of them.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">fmralign.fetch_example_data</span> <span class="kn">import</span> <span class="n">fetch_ibc_subjects_contrasts</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fmralign.fetch_example_data</span><span class="w"> </span><span class="kn">import</span> <span class="n">fetch_ibc_subjects_contrasts</span>
 
 <a href="https://docs.python.org/3.9/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">files</span></a><span class="p">,</span> <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.core.frame.DataFrame" class="sphx-glr-backref-module-pandas-core-frame sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">df</span></a><span class="p">,</span> <a href="https://docs.python.org/3.9/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mask</span></a> <span class="o">=</span> <span class="n">fetch_ibc_subjects_contrasts</span><span class="p">([</span><span class="s2">&quot;sub-01&quot;</span><span class="p">,</span> <span class="s2">&quot;sub-02&quot;</span><span class="p">])</span>
 </pre></div>
@@ -354,8 +354,8 @@ df is a dataframe with metadata about each of them.</p>
 <section id="extract-a-mask-for-the-visual-cortex-from-yeo-atlas">
 <h2>Extract a mask for the visual cortex from Yeo Atlas<a class="headerlink" href="#extract-a-mask-for-the-visual-cortex-from-yeo-atlas" title="Link to this heading">¶</a></h2>
 <p>First, we fetch and plot the complete atlas</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">nilearn</span> <span class="kn">import</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">plotting</span>
-<span class="kn">from</span> <span class="nn">nilearn.image</span> <span class="kn">import</span> <span class="n">concat_imgs</span><span class="p">,</span> <span class="n">load_img</span><span class="p">,</span> <span class="n">new_img_like</span><span class="p">,</span> <span class="n">resample_to_img</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nilearn</span><span class="w"> </span><span class="kn">import</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">plotting</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">nilearn.image</span><span class="w"> </span><span class="kn">import</span> <span class="n">concat_imgs</span><span class="p">,</span> <span class="n">load_img</span><span class="p">,</span> <span class="n">new_img_like</span><span class="p">,</span> <span class="n">resample_to_img</span>
 
 <a href="https://scikit-learn.org/stable/modules/generated/sklearn.utils.Bunch.html#sklearn.utils.Bunch" title="sklearn.utils.Bunch" class="sphx-glr-backref-module-sklearn-utils sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">atlas_yeo_2011</span></a> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">fetch_atlas_yeo_2011</span><span class="p">()</span>
 <a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">atlas</span></a> <span class="o">=</span> <span class="n">load_img</span><span class="p">(</span><a href="https://docs.python.org/3.9/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">atlas_yeo_2011</span><span class="o">.</span><span class="n">thick_7</span></a><span class="p">)</span>
@@ -381,10 +381,10 @@ df is a dataframe with metadata about each of them.</p>
 /home/runner/work/fmralign/fmralign/examples/plot_alignment_methods_benchmark.py:47: FutureWarning: &#39;force_resample&#39; will be set to &#39;True&#39; by default in Nilearn 0.13.0.
 Use &#39;force_resample=True&#39; to suppress this warning.
   resampled_mask_visual = resample_to_img(
-/opt/hostedtoolcache/Python/3.11.11/x64/lib/python3.11/site-packages/nilearn/image/resampling.py:807: FutureWarning: From release 0.13.0 onwards, this function will, by default, copy the header of the input image to the output. Currently, the header is reset to the default Nifti1Header. To suppress this warning and use the new behavior, set `copy_header=True`.
+/opt/hostedtoolcache/Python/3.11.11/x64/lib/python3.11/site-packages/nilearn/image/resampling.py:805: FutureWarning: From release 0.13.0 onwards, this function will, by default, copy the header of the input image to the output. Currently, the header is reset to the default Nifti1Header. To suppress this warning and use the new behavior, set `copy_header=True`.
   return resample_img(
 
-&lt;nilearn.plotting.displays._slicers.OrthoSlicer object at 0x7fadd0806e10&gt;
+&lt;nilearn.plotting.displays._slicers.OrthoSlicer object at 0x7fe531127410&gt;
 </pre></div>
 </div>
 </section>
@@ -393,7 +393,7 @@ Use &#39;force_resample=True&#39; to suppress this warning.
 <p>We define a nilearn masker that will be used to handle relevant data.
 For more information, visit :
 ‘<a class="reference external" href="http://nilearn.github.io/manipulating_images/masker_objects.html">http://nilearn.github.io/manipulating_images/masker_objects.html</a>’</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">nilearn.maskers</span> <span class="kn">import</span> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.base.TransformerMixin.html#sklearn.base.TransformerMixin" title="sklearn.base.TransformerMixin" class="sphx-glr-backref-module-sklearn-base sphx-glr-backref-type-py-class"><span class="n">NiftiMasker</span></a>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nilearn.maskers</span><span class="w"> </span><span class="kn">import</span> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.base.TransformerMixin.html#sklearn.base.TransformerMixin" title="sklearn.base.TransformerMixin" class="sphx-glr-backref-module-sklearn-base sphx-glr-backref-type-py-class"><span class="n">NiftiMasker</span></a>
 
 <span class="n">roi_masker</span> <span class="o">=</span> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.base.TransformerMixin.html#sklearn.base.TransformerMixin" title="sklearn.base.TransformerMixin" class="sphx-glr-backref-module-sklearn-base sphx-glr-backref-type-py-class"><span class="n">NiftiMasker</span></a><span class="p">(</span><span class="n">mask_img</span><span class="o">=</span><a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">resampled_mask_visual</span></a><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
 </pre></div>
@@ -452,7 +452,7 @@ but acquired independently.</p>
 regions so that each of them is approximately 200 voxels wide. Then our
 estimator will first make a functional clustering of voxels based on train
 data to divide them into meaningful regions.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <a href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">n_voxels</span></a> <span class="o">=</span> <a href="https://nipy.org/nibabel/reference/nibabel.dataobj_images.html#nibabel.dataobj_images.DataobjImage.get_fdata" title="nibabel.dataobj_images.DataobjImage.get_fdata" class="sphx-glr-backref-module-nibabel-dataobj_images sphx-glr-backref-type-py-method"><span class="n">roi_masker</span><span class="o">.</span><span class="n">mask_img_</span><span class="o">.</span><span class="n">get_fdata</span></a><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The chosen region of interest contains </span><span class="si">{</span><a href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">n_voxels</span></a><span class="si">}</span><span class="s2"> voxels&quot;</span><span class="p">)</span>
@@ -484,8 +484,8 @@ entropic regularization.</p>
 </dl>
 <p>Then for each method we define the estimator fit it, predict the new image and plot
 its correlation with the real signal.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">fmralign.metrics</span> <span class="kn">import</span> <span class="n">score_voxelwise</span>
-<span class="kn">from</span> <span class="nn">fmralign.pairwise_alignment</span> <span class="kn">import</span> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.base.BaseEstimator.html#sklearn.base.BaseEstimator" title="sklearn.base.BaseEstimator" class="sphx-glr-backref-module-sklearn-base sphx-glr-backref-type-py-class"><span class="n">PairwiseAlignment</span></a>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fmralign.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">score_voxelwise</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fmralign.pairwise_alignment</span><span class="w"> </span><span class="kn">import</span> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.base.BaseEstimator.html#sklearn.base.BaseEstimator" title="sklearn.base.BaseEstimator" class="sphx-glr-backref-module-sklearn-base sphx-glr-backref-type-py-class"><span class="n">PairwiseAlignment</span></a>
 
 <a href="https://docs.python.org/3.9/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">methods</span></a> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;identity&quot;</span><span class="p">,</span> <span class="s2">&quot;scaled_orthogonal&quot;</span><span class="p">,</span> <span class="s2">&quot;ridge_cv&quot;</span><span class="p">,</span> <span class="s2">&quot;optimal_transport&quot;</span><span class="p">]</span>
 
@@ -527,7 +527,8 @@ Parameter smoothing_fwhm :
     Masker parameter None - overriding estimator parameter 4.0
 
   parcellation.fit(images_to_parcel)
-[PairwiseAlignment.fit] Resampling mask
+/home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: FutureWarning: The nifti_maps_masker_ attribute is deprecated andwill be removed in Nilearn 0.11.3. Please use maps_masker_ instead.
+  parcellation.fit(images_to_parcel)
 /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning:
  Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
  parcel 1 : 1725 voxels
@@ -547,7 +548,8 @@ Parameter smoothing_fwhm :
     Masker parameter None - overriding estimator parameter 4.0
 
   parcellation.fit(images_to_parcel)
-[PairwiseAlignment.fit] Resampling mask
+/home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: FutureWarning: The nifti_maps_masker_ attribute is deprecated andwill be removed in Nilearn 0.11.3. Please use maps_masker_ instead.
+  parcellation.fit(images_to_parcel)
 /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning:
  Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
  parcel 1 : 1725 voxels
@@ -567,7 +569,8 @@ Parameter smoothing_fwhm :
     Masker parameter None - overriding estimator parameter 4.0
 
   parcellation.fit(images_to_parcel)
-[PairwiseAlignment.fit] Resampling mask
+/home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: FutureWarning: The nifti_maps_masker_ attribute is deprecated andwill be removed in Nilearn 0.11.3. Please use maps_masker_ instead.
+  parcellation.fit(images_to_parcel)
 /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning:
  Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
  parcel 1 : 1725 voxels
@@ -587,7 +590,8 @@ Parameter smoothing_fwhm :
     Masker parameter None - overriding estimator parameter 4.0
 
   parcellation.fit(images_to_parcel)
-[PairwiseAlignment.fit] Resampling mask
+/home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: FutureWarning: The nifti_maps_masker_ attribute is deprecated andwill be removed in Nilearn 0.11.3. Please use maps_masker_ instead.
+  parcellation.fit(images_to_parcel)
 /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning:
  Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
  parcel 1 : 1725 voxels
@@ -605,7 +609,7 @@ Parameter smoothing_fwhm :
 (no alignment). Ridge is the best performing method, followed by Optimal
 Transport. If you use Ridge though, be careful about the smooth predictions
 it yields.</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 2.879 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 44.319 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-alignment-methods-benchmark-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/nilearn/nilearn/main?urlpath=lab/tree/notebooks/auto_examples/plot_alignment_methods_benchmark.ipynb"><img alt="Launch binder" src="../_images/binder_badge_logo.svg" style="width: 150px;" />

@@ -6,7 +6,7 @@
 
     <link rel="shortcut icon" href="../../_static/favicon.ico"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
         <title>fmralign.pairwise_alignment - fmralign</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=045299b1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=2da93098" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
@@ -297,19 +297,19 @@
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;Module for pairwise functional alignment.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Memory</span><span class="p">,</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
-<span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">,</span> <span class="n">clone</span>
-<span class="kn">from</span> <span class="nn">sklearn.utils.validation</span> <span class="kn">import</span> <span class="n">check_is_fitted</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">joblib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Memory</span><span class="p">,</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">,</span> <span class="n">clone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.utils.validation</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_is_fitted</span>
 
-<span class="kn">from</span> <span class="nn">fmralign</span> <span class="kn">import</span> <span class="n">alignment_methods</span>
-<span class="kn">from</span> <span class="nn">fmralign._utils</span> <span class="kn">import</span> <span class="n">_transform_one_img</span>
-<span class="kn">from</span> <span class="nn">fmralign.preprocessing</span> <span class="kn">import</span> <span class="n">ParcellationMasker</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fmralign</span><span class="w"> </span><span class="kn">import</span> <span class="n">alignment_methods</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fmralign._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_transform_one_img</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fmralign.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParcellationMasker</span>
 
 
-<span class="k">def</span> <span class="nf">fit_one_piece</span><span class="p">(</span><span class="n">X_i</span><span class="p">,</span> <span class="n">Y_i</span><span class="p">,</span> <span class="n">alignment_method</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fit_one_piece</span><span class="p">(</span><span class="n">X_i</span><span class="p">,</span> <span class="n">Y_i</span><span class="p">,</span> <span class="n">alignment_method</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Align source and target data in one piece i, X_i and Y_i, using</span>
 <span class="sd">    alignment method and learn transformation to map X to Y.</span>
 
@@ -378,13 +378,13 @@
 
 <div class="viewcode-block" id="PairwiseAlignment">
 <a class="viewcode-back" href="../../modules/generated/fmralign.pairwise_alignment.PairwiseAlignment.html#fmralign.pairwise_alignment.PairwiseAlignment">[docs]</a>
-<span class="k">class</span> <span class="nc">PairwiseAlignment</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PairwiseAlignment</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Decompose the source and target images into regions and align</span>
 <span class="sd">    corresponding regions independently.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="PairwiseAlignment.__init__">
 <a class="viewcode-back" href="../../modules/generated/fmralign.pairwise_alignment.PairwiseAlignment.html#fmralign.pairwise_alignment.PairwiseAlignment.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">alignment_method</span><span class="o">=</span><span class="s2">&quot;identity&quot;</span><span class="p">,</span>
         <span class="n">n_pieces</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
@@ -486,7 +486,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span></div>
 
 
-    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit data X and Y and learn transformation to map X to Y.</span>
 
 <span class="sd">        Parameters</span>
@@ -538,7 +538,7 @@
 
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Predict data from X.</span>
 
 <span class="sd">        Parameters</span>
@@ -569,7 +569,7 @@
             <span class="k">return</span> <span class="n">transformed_img</span>
 
     <span class="c1"># Make inherited function harmless</span>
-    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Parent method not applicable here.</span>
 
 <span class="sd">        Will raise AttributeError if called.</span>
@@ -578,7 +578,7 @@
             <span class="s2">&quot;type object &#39;PairwiseAlignment&#39; has no attribute &#39;fit_transform&#39;&quot;</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">get_parcellation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_parcellation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the parcellation masker used for alignment.</span>
 
 <span class="sd">        Returns</span>

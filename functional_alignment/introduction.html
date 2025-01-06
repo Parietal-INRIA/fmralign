@@ -15,7 +15,7 @@
 
     <link rel="shortcut icon" href="../_static/favicon.ico"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
         <title>2.1. An introduction to functional alignment - fmralign</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=045299b1" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=2da93098" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
@@ -344,7 +344,7 @@ let’s illustrate this variability on an example.</p>
 <section id="loading-and-preparing-the-data">
 <h3><span class="section-number">2.1.1.1. </span>Loading and preparing the data<a class="headerlink" href="#loading-and-preparing-the-data" title="Link to this heading">¶</a></h3>
 <p>We begin with the retrieval of images from two <a class="reference external" href="https://project.inria.fr/IBC/">Individual Brain Charting</a> subjects :</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">fmralign.fetch_example_data</span> <span class="kn">import</span> <span class="n">fetch_ibc_subjects_contrasts</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fmralign.fetch_example_data</span><span class="w"> </span><span class="kn">import</span> <span class="n">fetch_ibc_subjects_contrasts</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">files</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="n">fetch_ibc_subjects_contrasts</span><span class="p">([</span><span class="s1">&#39;sub-01&#39;</span><span class="p">,</span> <span class="s1">&#39;sub-02&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
@@ -352,7 +352,7 @@ let’s illustrate this variability on an example.</p>
 with metadata about each of them. We use the mask provided to define a
 <a class="reference external" href="http://nilearn.github.io/manipulating_images/masker_objects.html">Nilearn masker</a>
 that will keep only relevant data.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nilearn.maskers</span> <span class="kn">import</span> <span class="n">NiftiMasker</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">nilearn.maskers</span><span class="w"> </span><span class="kn">import</span> <span class="n">NiftiMasker</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">masker</span> <span class="o">=</span> <span class="n">NiftiMasker</span><span class="p">(</span><span class="n">mask_img</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -370,12 +370,12 @@ In this part we focus only on the ‘PA’ images that we put apart.</p>
 <p>To evaluate the similarity between subject, let’s use a simple metric: the voxelwise
 correlation. That is, for each voxel we compute the correlation between its
 activation profile for subject 1 and for subject 2.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">fmralign._utils</span> <span class="kn">import</span> <span class="n">voxelwise_correlation</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fmralign._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">voxelwise_correlation</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">inter</span><span class="o">-</span><span class="n">subject_correlation</span> <span class="o">=</span> <span class="n">voxelwise_correlation</span><span class="p">(</span><span class="n">sub</span><span class="o">-</span><span class="mi">02</span><span class="n">_pa</span><span class="p">,</span> <span class="n">sub</span><span class="o">-</span><span class="mi">01</span><span class="n">_pa</span><span class="p">,</span> <span class="n">masker</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>We then plot this correlation for two specific cuts.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nilearn</span> <span class="kn">import</span> <span class="n">plotting</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">nilearn</span><span class="w"> </span><span class="kn">import</span> <span class="n">plotting</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">corr_display</span> <span class="o">=</span> <span class="n">plotting</span><span class="o">.</span><span class="n">plot_stat_map</span><span class="p">(</span><span class="n">average_score</span><span class="p">,</span> <span class="n">display_mode</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span>
 <span class="gp">&gt;&gt;&gt; </span>                                      <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cut_coords</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">15</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">corr_display</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Initial correlation between subjects 1 and 2 images&quot;</span><span class="p">)</span>
@@ -409,7 +409,7 @@ and we want to predict it for sub-02.</p>
 </pre></div>
 </div>
 <p>We align the whole brain through multiple local alignment, each applied on a piece of the brain, isolated through a functional clustering. We define the estimator used and fit it.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">fmralign.pairwise_alignment</span> <span class="kn">import</span> <span class="n">PairwiseAlignment</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fmralign.pairwise_alignment</span><span class="w"> </span><span class="kn">import</span> <span class="n">PairwiseAlignment</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">alignement_estimator</span> <span class="o">=</span> <span class="n">PairwiseAlignment</span><span class="p">(</span><span class="n">alignment_method</span><span class="o">=</span><span class="s1">&#39;scaled_orthogonal&#39;</span><span class="p">,</span>
 <span class="gp">&gt;&gt;&gt; </span>                                                  <span class="n">n_pieces</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">masker</span><span class="p">)</span>
 </pre></div>

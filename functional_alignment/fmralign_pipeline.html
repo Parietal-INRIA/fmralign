@@ -15,7 +15,7 @@
 
     <link rel="shortcut icon" href="../_static/favicon.ico"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
         <title>2.2. Functional alignment pipeline - fmralign</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=045299b1" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=2da93098" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
@@ -410,7 +410,7 @@ the prediction of left-out data for a new subject from another subjects data.</p
 <section id="loading-the-data">
 <h3><span class="section-number">2.2.3.1. </span>Loading the data<a class="headerlink" href="#loading-the-data" title="Link to this heading">¶</a></h3>
 <p>We begin with the retrieval of images from two <a class="reference external" href="https://project.inria.fr/IBC/">Individual Brain Charting</a> subjects :</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">fmralign.fetch_example_data</span> <span class="kn">import</span> <span class="n">fetch_ibc_subjects_contrasts</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fmralign.fetch_example_data</span><span class="w"> </span><span class="kn">import</span> <span class="n">fetch_ibc_subjects_contrasts</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">files</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="n">fetch_ibc_subjects_contrasts</span><span class="p">([</span><span class="s1">&#39;sub-01&#39;</span><span class="p">,</span> <span class="s1">&#39;sub-02&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
@@ -419,8 +419,8 @@ with metadata about each of them.</p>
 </section>
 <section id="extract-a-mask-for-the-visual-cortex-from-yeo-atlas">
 <h3><span class="section-number">2.2.3.2. </span>Extract a mask for the visual cortex from Yeo Atlas<a class="headerlink" href="#extract-a-mask-for-the-visual-cortex-from-yeo-atlas" title="Link to this heading">¶</a></h3>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nilearn</span> <span class="kn">import</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">plotting</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nilearn.image</span> <span class="kn">import</span> <span class="n">resample_to_img</span><span class="p">,</span> <span class="n">load_img</span><span class="p">,</span> <span class="n">new_img_like</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">nilearn</span><span class="w"> </span><span class="kn">import</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">plotting</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">nilearn.image</span><span class="w"> </span><span class="kn">import</span> <span class="n">resample_to_img</span><span class="p">,</span> <span class="n">load_img</span><span class="p">,</span> <span class="n">new_img_like</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">atlas_yeo_2011</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">fetch_atlas_yeo_2011</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">atlas</span> <span class="o">=</span> <span class="n">load_img</span><span class="p">(</span><span class="n">atlas_yeo_2011</span><span class="o">.</span><span class="n">thick_7</span><span class="p">)</span>
 </pre></div>
@@ -443,7 +443,7 @@ with metadata about each of them.</p>
 </section>
 <section id="define-a-masker">
 <h3><span class="section-number">2.2.3.3. </span>Define a masker<a class="headerlink" href="#define-a-masker" title="Link to this heading">¶</a></h3>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nilearn.maskers</span> <span class="kn">import</span> <span class="n">NiftiMasker</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">nilearn.maskers</span><span class="w"> </span><span class="kn">import</span> <span class="n">NiftiMasker</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">roi_masker</span> <span class="o">=</span> <span class="n">NiftiMasker</span><span class="p">(</span><span class="n">mask_img</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -491,8 +491,8 @@ to score our predictions</p></li>
 </div>
 <p>Then for each method we define the estimator, fit it, and predict new image. We then plot
 the correlation of this prediction with the real signal. We also include identity (no alignment) as a baseline.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">fmralign.pairwise_alignment</span> <span class="kn">import</span> <span class="n">PairwiseAlignment</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">fmralign._utils</span> <span class="kn">import</span> <span class="n">voxelwise_correlation</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fmralign.pairwise_alignment</span><span class="w"> </span><span class="kn">import</span> <span class="n">PairwiseAlignment</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fmralign._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">voxelwise_correlation</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">methods</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;identity&#39;</span><span class="p">,</span><span class="s1">&#39;scaled_orthogonal&#39;</span><span class="p">,</span> <span class="s1">&#39;ridge_cv&#39;</span><span class="p">,</span> <span class="s1">&#39;optimal_transport&#39;</span><span class="p">]</span>
 </pre></div>
 </div>

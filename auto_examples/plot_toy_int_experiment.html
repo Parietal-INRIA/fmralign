@@ -15,7 +15,7 @@
 
     <link rel="shortcut icon" href="../_static/favicon.ico"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
         <title>Individual Neural Tuning Model on simulated data - fmralign</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=045299b1" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=2da93098" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
@@ -333,12 +333,12 @@ no intention to be an explanatory example, but rather a test to check the validi
 the INT model.</p>
 <p>To run this example, you must launch IPython via <code class="docutils literal notranslate"><span class="pre">ipython</span>
 <span class="pre">--matplotlib</span></code> in a terminal, or use <code class="docutils literal notranslate"><span class="pre">jupyter-notebook</span></code>.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">fmralign.alignment_methods</span> <span class="kn">import</span> <span class="n">IndividualizedNeuralTuning</span> <span class="k">as</span> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.base.BaseEstimator.html#sklearn.base.BaseEstimator" title="sklearn.base.BaseEstimator" class="sphx-glr-backref-module-sklearn-base sphx-glr-backref-type-py-class"><span class="n">INT</span></a>
-<span class="kn">from</span> <span class="nn">fmralign.fetch_example_data</span> <span class="kn">import</span> <span class="n">generate_dummy_signal</span>
-<span class="kn">from</span> <span class="nn">fmralign.hyperalignment.correlation</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fmralign.alignment_methods</span><span class="w"> </span><span class="kn">import</span> <span class="n">IndividualizedNeuralTuning</span> <span class="k">as</span> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.base.BaseEstimator.html#sklearn.base.BaseEstimator" title="sklearn.base.BaseEstimator" class="sphx-glr-backref-module-sklearn-base sphx-glr-backref-type-py-class"><span class="n">INT</span></a>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fmralign.fetch_example_data</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_dummy_signal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fmralign.hyperalignment.correlation</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">compute_pearson_corr</span><span class="p">,</span>
     <span class="n">matrix_MDS</span><span class="p">,</span>
     <span class="n">stimulus_correlation</span><span class="p">,</span>
@@ -535,7 +535,7 @@ the same timepoint of the two runs).</p>
 <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.show.html#matplotlib.pyplot.show" title="matplotlib.pyplot.show" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../_images/sphx_glr_plot_toy_int_experiment_001.png" srcset="../_images/sphx_glr_plot_toy_int_experiment_001.png" alt="Correlation metrics for the Individual Tuning Model 10 subjects, 200 timepoints, 500 voxels, 15 latent components SNR=100, Pearson correlation of tuning matrices (Run 1 vs Run 2), MDS of predicted images, dim=2, MDS of tunning matrices, dim=2, Correlation of estimated stimulus vs ground truth (Run 1), Correlation of estimated stimulus vs ground truth (Run 2)), Correlation of brain response (Run 2 vs Ground truth)" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 6.474 seconds)</p>
+<img src="../_images/sphx_glr_plot_toy_int_experiment_001.png" srcset="../_images/sphx_glr_plot_toy_int_experiment_001.png" alt="Correlation metrics for the Individual Tuning Model 10 subjects, 200 timepoints, 500 voxels, 15 latent components SNR=100, Pearson correlation of tuning matrices (Run 1 vs Run 2), MDS of predicted images, dim=2, MDS of tunning matrices, dim=2, Correlation of estimated stimulus vs ground truth (Run 1), Correlation of estimated stimulus vs ground truth (Run 2)), Correlation of brain response (Run 2 vs Ground truth)" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 5.366 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-toy-int-experiment-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/nilearn/nilearn/main?urlpath=lab/tree/notebooks/auto_examples/plot_toy_int_experiment.ipynb"><img alt="Launch binder" src="../_images/binder_badge_logo.svg" style="width: 150px;" />

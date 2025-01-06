@@ -15,7 +15,7 @@
 
     <link rel="shortcut icon" href="../_static/favicon.ico"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
         <title>Template-based prediction. - fmralign</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=045299b1" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=2da93098" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
@@ -346,7 +346,7 @@ and sub-07 (or retrieve them if they were already downloaded).
 imgs is the list of paths to available statistical images for each subjects.
 df is a dataframe with metadata about each of them.
 mask is a binary image used to extract grey matter regions.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">fmralign.fetch_example_data</span> <span class="kn">import</span> <span class="n">fetch_ibc_subjects_contrasts</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fmralign.fetch_example_data</span><span class="w"> </span><span class="kn">import</span> <span class="n">fetch_ibc_subjects_contrasts</span>
 
 <a href="https://docs.python.org/3.9/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">imgs</span></a><span class="p">,</span> <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.core.frame.DataFrame" class="sphx-glr-backref-module-pandas-core-frame sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">df</span></a><span class="p">,</span> <a href="https://docs.python.org/3.9/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mask_img</span></a> <span class="o">=</span> <span class="n">fetch_ibc_subjects_contrasts</span><span class="p">(</span>
     <span class="p">[</span><span class="s2">&quot;sub-01&quot;</span><span class="p">,</span> <span class="s2">&quot;sub-02&quot;</span><span class="p">,</span> <span class="s2">&quot;sub-04&quot;</span><span class="p">,</span> <span class="s2">&quot;sub-05&quot;</span><span class="p">,</span> <span class="s2">&quot;sub-06&quot;</span><span class="p">,</span> <span class="s2">&quot;sub-07&quot;</span><span class="p">]</span>
@@ -371,7 +371,9 @@ mask is a binary image used to extract grey matter regions.</p>
 [uncompress_file] .. done.
 
 [fetch_single_file] Downloading data from https://osf.io/8z23h/download ...
-[_chunk_report_] Downloaded 9609216 of 21185337 bytes (45.4%%,    1.2s
+[_chunk_report_] Downloaded 3350528 of 21185337 bytes (15.8%%,    5.3s
+remaining)
+[_chunk_report_] Downloaded 20176896 of 21185337 bytes (95.2%%,    0.1s
 remaining)
 [fetch_single_file]  ...done. (4 seconds, 0 min)
 
@@ -380,16 +382,18 @@ remaining)
 [uncompress_file] .. done.
 
 [fetch_single_file] Downloading data from https://osf.io/e9kbm/download ...
-[_chunk_report_] Downloaded 6070272 of 21196887 bytes (28.6%%,    2.5s
+[_chunk_report_] Downloaded 8421376 of 21196887 bytes (39.7%%,    1.6s
 remaining)
-[fetch_single_file]  ...done. (3 seconds, 0 min)
+[_chunk_report_] Downloaded 17563648 of 21196887 bytes (82.9%%,    0.4s
+remaining)
+[fetch_single_file]  ...done. (5 seconds, 0 min)
 
 [uncompress_file] Extracting data from
 /home/runner/nilearn_data/ibc/331a0a579c6e46c0911502a96215b358/download...
 [uncompress_file] .. done.
 
 [fetch_single_file] Downloading data from https://osf.io/qn5b6/download ...
-[_chunk_report_] Downloaded 9691136 of 21197218 bytes (45.7%%,    1.2s
+[_chunk_report_] Downloaded 19668992 of 21197218 bytes (92.8%%,    0.1s
 remaining)
 [fetch_single_file]  ...done. (3 seconds, 0 min)
 
@@ -398,7 +402,7 @@ remaining)
 [uncompress_file] .. done.
 
 [fetch_single_file] Downloading data from https://osf.io/u74a3/download ...
-[_chunk_report_] Downloaded 9650176 of 21185350 bytes (45.6%%,    1.2s
+[_chunk_report_] Downloaded 7725056 of 21185350 bytes (36.5%%,    1.7s
 remaining)
 [fetch_single_file]  ...done. (3 seconds, 0 min)
 
@@ -407,18 +411,20 @@ remaining)
 [uncompress_file] .. done.
 
 [fetch_single_file] Downloading data from https://osf.io/83bje/download ...
-[_chunk_report_] Downloaded 6168576 of 21188335 bytes (29.1%%,    2.4s
+[_chunk_report_] Downloaded 3031040 of 21188335 bytes (14.3%%,    6.0s
 remaining)
-[fetch_single_file]  ...done. (3 seconds, 0 min)
+[_chunk_report_] Downloaded 16859136 of 21188335 bytes (79.6%%,    0.5s
+remaining)
+[fetch_single_file]  ...done. (5 seconds, 0 min)
 
 [uncompress_file] Extracting data from
 /home/runner/nilearn_data/ibc/1beaa1b5a1734a1afbf1c844e1f7a60e/download...
 [uncompress_file] .. done.
 
 [fetch_single_file] Downloading data from https://osf.io/43j69/download ...
-[_chunk_report_] Downloaded 12820480 of 21187400 bytes (60.5%%,    0.7s
+[_chunk_report_] Downloaded 3325952 of 21187400 bytes (15.7%%,    5.4s
 remaining)
-[fetch_single_file]  ...done. (4 seconds, 0 min)
+[fetch_single_file]  ...done. (3 seconds, 0 min)
 
 [uncompress_file] Extracting data from
 /home/runner/nilearn_data/ibc/75e62c44985852e000c2b2865badf72d/download...
@@ -433,7 +439,7 @@ remaining)
 ‘<a class="reference external" href="http://nilearn.github.io/manipulating_images/masker_objects.html">http://nilearn.github.io/manipulating_images/masker_objects.html</a>’</p>
 </dd>
 </dl>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">nilearn.maskers</span> <span class="kn">import</span> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.base.TransformerMixin.html#sklearn.base.TransformerMixin" title="sklearn.base.TransformerMixin" class="sphx-glr-backref-module-sklearn-base sphx-glr-backref-type-py-class"><span class="n">NiftiMasker</span></a>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nilearn.maskers</span><span class="w"> </span><span class="kn">import</span> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.base.TransformerMixin.html#sklearn.base.TransformerMixin" title="sklearn.base.TransformerMixin" class="sphx-glr-backref-module-sklearn-base sphx-glr-backref-type-py-class"><span class="n">NiftiMasker</span></a>
 
 <span class="n">masker</span> <span class="o">=</span> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.base.TransformerMixin.html#sklearn.base.TransformerMixin" title="sklearn.base.TransformerMixin" class="sphx-glr-backref-module-sklearn-base sphx-glr-backref-type-py-class"><span class="n">NiftiMasker</span></a><span class="p">(</span><a href="https://docs.python.org/3.9/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mask_img</span></a><span class="o">=</span><a href="https://docs.python.org/3.9/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mask_img</span></a><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
 </pre></div>
@@ -447,7 +453,7 @@ Antero-posterior(AP) or Postero-anterior(PA).</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># To infer a template for subjects sub-01 to sub-06 for both AP and PA data,</span>
 <span class="c1"># we make a list of 4D niimgs from our list of list of files containing 3D images</span>
 
-<span class="kn">from</span> <span class="nn">nilearn.image</span> <span class="kn">import</span> <span class="n">concat_imgs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">nilearn.image</span><span class="w"> </span><span class="kn">import</span> <span class="n">concat_imgs</span>
 
 <a href="https://docs.python.org/3.9/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">template_train</span></a> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">for</span> <a href="https://docs.python.org/3.9/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
@@ -464,7 +470,7 @@ Antero-posterior(AP) or Postero-anterior(PA).</p>
 <h2>Compute a baseline (average of subjects)<a class="headerlink" href="#compute-a-baseline-average-of-subjects" title="Link to this heading">¶</a></h2>
 <p>We create an image with as many contrasts as any subject representing for
 each contrast the average of all train subjects maps.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <a href="https://docs.python.org/3.9/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">masked_imgs</span></a> <span class="o">=</span> <span class="p">[</span><span class="n">masker</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">img</span><span class="p">)</span> <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <a href="https://docs.python.org/3.9/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">template_train</span></a><span class="p">]</span>
 <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">average_img</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.mean.html#numpy.mean" title="numpy.mean" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">mean</span></a><span class="p">(</span><a href="https://docs.python.org/3.9/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">masked_imgs</span></a><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -485,7 +491,7 @@ new template space.</p></li>
 </ul>
 </dd>
 </dl>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">fmralign.template_alignment</span> <span class="kn">import</span> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.base.BaseEstimator.html#sklearn.base.BaseEstimator" title="sklearn.base.BaseEstimator" class="sphx-glr-backref-module-sklearn-base sphx-glr-backref-type-py-class"><span class="n">TemplateAlignment</span></a>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fmralign.template_alignment</span><span class="w"> </span><span class="kn">import</span> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.base.BaseEstimator.html#sklearn.base.BaseEstimator" title="sklearn.base.BaseEstimator" class="sphx-glr-backref-module-sklearn-base sphx-glr-backref-type-py-class"><span class="n">TemplateAlignment</span></a>
 
 <span class="c1"># We use Procrustes/scaled orthogonal alignment method</span>
 <span class="n">template_estim</span> <span class="o">=</span> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.base.BaseEstimator.html#sklearn.base.BaseEstimator" title="sklearn.base.BaseEstimator" class="sphx-glr-backref-module-sklearn-base sphx-glr-backref-type-py-class"><span class="n">TemplateAlignment</span></a><span class="p">(</span>
@@ -510,7 +516,8 @@ Parameter smoothing_fwhm :
     Masker parameter None - overriding estimator parameter 4.0
 
   parcellation.fit(images_to_parcel)
-[TemplateAlignment.fit] Resampling mask
+/home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: FutureWarning: The nifti_maps_masker_ attribute is deprecated andwill be removed in Nilearn 0.11.3. Please use maps_masker_ instead.
+  parcellation.fit(images_to_parcel)
 /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning:
  Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
  parcel 4 : 1988 voxels
@@ -542,7 +549,7 @@ and returns the aligned data.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">predictions_from_template</span></a> <span class="o">=</span> <span class="n">template_estim</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">left_out_subject</span></a><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.11.11/x64/lib/python3.11/site-packages/nilearn/masking.py:981: UserWarning: Data array used to create a new image contains 64-bit ints. This is likely due to creating the array with numpy and passing `int` as the `dtype`. Many tools such as FSL and SPM cannot deal with int64 in Nifti images, so for compatibility the data has been converted to int32.
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.11.11/x64/lib/python3.11/site-packages/nilearn/masking.py:979: UserWarning: Data array used to create a new image contains 64-bit ints. This is likely due to creating the array with numpy and passing `int` as the `dtype`. Many tools such as FSL and SPM cannot deal with int64 in Nifti images, so for compatibility the data has been converted to int32.
   return new_img_like(mask_img, unmasked, affine)
 /home/runner/work/fmralign/fmralign/fmralign/preprocessing.py:219: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
 Parameter detrend :
@@ -559,7 +566,7 @@ Parameter detrend :
 between the images. That is, for each voxel, we measure the correlation between
 its profile of activation without and with alignment, to see if template-based
 alignment was able to improve inter-subject similarity.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">fmralign.metrics</span> <span class="kn">import</span> <span class="n">score_voxelwise</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fmralign.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">score_voxelwise</span>
 
 <a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">average_score</span></a> <span class="o">=</span> <span class="n">masker</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span>
     <span class="n">score_voxelwise</span><span class="p">(</span><a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">left_out_subject</span></a><span class="p">,</span> <a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">average_subject</span></a><span class="p">,</span> <span class="n">masker</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="s2">&quot;corr&quot;</span><span class="p">)</span>
@@ -575,7 +582,7 @@ alignment was able to improve inter-subject similarity.</p>
 <section id="plotting-the-measures">
 <h2>Plotting the measures<a class="headerlink" href="#plotting-the-measures" title="Link to this heading">¶</a></h2>
 <p>Finally we plot both scores</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">nilearn</span> <span class="kn">import</span> <span class="n">plotting</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nilearn</span><span class="w"> </span><span class="kn">import</span> <span class="n">plotting</span>
 
 <span class="n">baseline_display</span> <span class="o">=</span> <span class="n">plotting</span><span class="o">.</span><span class="n">plot_stat_map</span><span class="p">(</span>
     <a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">average_score</span></a><span class="p">,</span> <span class="n">display_mode</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cut_coords</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">15</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">]</span>
@@ -593,7 +600,7 @@ alignment was able to improve inter-subject similarity.</p>
 </ul>
 <p>We observe that creating a template and aligning a new subject to it yields
 better inter-subject similarity than regular euclidean averaging.</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (4 minutes 27.343 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (3 minutes 40.370 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-template-alignment-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/nilearn/nilearn/main?urlpath=lab/tree/notebooks/auto_examples/plot_template_alignment.ipynb"><img alt="Launch binder" src="../_images/binder_badge_logo.svg" style="width: 150px;" />

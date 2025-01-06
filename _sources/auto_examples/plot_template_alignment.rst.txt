@@ -85,7 +85,9 @@ mask is a binary image used to extract grey matter regions.
     [uncompress_file] .. done.
 
     [fetch_single_file] Downloading data from https://osf.io/8z23h/download ...
-    [_chunk_report_] Downloaded 9609216 of 21185337 bytes (45.4%%,    1.2s 
+    [_chunk_report_] Downloaded 3350528 of 21185337 bytes (15.8%%,    5.3s 
+    remaining)
+    [_chunk_report_] Downloaded 20176896 of 21185337 bytes (95.2%%,    0.1s 
     remaining)
     [fetch_single_file]  ...done. (4 seconds, 0 min)
 
@@ -94,16 +96,18 @@ mask is a binary image used to extract grey matter regions.
     [uncompress_file] .. done.
 
     [fetch_single_file] Downloading data from https://osf.io/e9kbm/download ...
-    [_chunk_report_] Downloaded 6070272 of 21196887 bytes (28.6%%,    2.5s 
+    [_chunk_report_] Downloaded 8421376 of 21196887 bytes (39.7%%,    1.6s 
     remaining)
-    [fetch_single_file]  ...done. (3 seconds, 0 min)
+    [_chunk_report_] Downloaded 17563648 of 21196887 bytes (82.9%%,    0.4s 
+    remaining)
+    [fetch_single_file]  ...done. (5 seconds, 0 min)
 
     [uncompress_file] Extracting data from 
     /home/runner/nilearn_data/ibc/331a0a579c6e46c0911502a96215b358/download...
     [uncompress_file] .. done.
 
     [fetch_single_file] Downloading data from https://osf.io/qn5b6/download ...
-    [_chunk_report_] Downloaded 9691136 of 21197218 bytes (45.7%%,    1.2s 
+    [_chunk_report_] Downloaded 19668992 of 21197218 bytes (92.8%%,    0.1s 
     remaining)
     [fetch_single_file]  ...done. (3 seconds, 0 min)
 
@@ -112,7 +116,7 @@ mask is a binary image used to extract grey matter regions.
     [uncompress_file] .. done.
 
     [fetch_single_file] Downloading data from https://osf.io/u74a3/download ...
-    [_chunk_report_] Downloaded 9650176 of 21185350 bytes (45.6%%,    1.2s 
+    [_chunk_report_] Downloaded 7725056 of 21185350 bytes (36.5%%,    1.7s 
     remaining)
     [fetch_single_file]  ...done. (3 seconds, 0 min)
 
@@ -121,18 +125,20 @@ mask is a binary image used to extract grey matter regions.
     [uncompress_file] .. done.
 
     [fetch_single_file] Downloading data from https://osf.io/83bje/download ...
-    [_chunk_report_] Downloaded 6168576 of 21188335 bytes (29.1%%,    2.4s 
+    [_chunk_report_] Downloaded 3031040 of 21188335 bytes (14.3%%,    6.0s 
     remaining)
-    [fetch_single_file]  ...done. (3 seconds, 0 min)
+    [_chunk_report_] Downloaded 16859136 of 21188335 bytes (79.6%%,    0.5s 
+    remaining)
+    [fetch_single_file]  ...done. (5 seconds, 0 min)
 
     [uncompress_file] Extracting data from 
     /home/runner/nilearn_data/ibc/1beaa1b5a1734a1afbf1c844e1f7a60e/download...
     [uncompress_file] .. done.
 
     [fetch_single_file] Downloading data from https://osf.io/43j69/download ...
-    [_chunk_report_] Downloaded 12820480 of 21187400 bytes (60.5%%,    0.7s 
+    [_chunk_report_] Downloaded 3325952 of 21187400 bytes (15.7%%,    5.4s 
     remaining)
-    [fetch_single_file]  ...done. (4 seconds, 0 min)
+    [fetch_single_file]  ...done. (3 seconds, 0 min)
 
     [uncompress_file] Extracting data from 
     /home/runner/nilearn_data/ibc/75e62c44985852e000c2b2865badf72d/download...
@@ -278,7 +284,8 @@ We define an estimator using the class TemplateAlignment:
         Masker parameter None - overriding estimator parameter 4.0
 
       parcellation.fit(images_to_parcel)
-    [TemplateAlignment.fit] Resampling mask
+    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:251: FutureWarning: The nifti_maps_masker_ attribute is deprecated andwill be removed in Nilearn 0.11.3. Please use maps_masker_ instead.
+      parcellation.fit(images_to_parcel)
     /home/runner/work/fmralign/fmralign/fmralign/_utils.py:183: UserWarning: 
      Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
      parcel 4 : 1988 voxels
@@ -326,7 +333,7 @@ and returns the aligned data.
 
  .. code-block:: none
 
-    /opt/hostedtoolcache/Python/3.11.11/x64/lib/python3.11/site-packages/nilearn/masking.py:981: UserWarning: Data array used to create a new image contains 64-bit ints. This is likely due to creating the array with numpy and passing `int` as the `dtype`. Many tools such as FSL and SPM cannot deal with int64 in Nifti images, so for compatibility the data has been converted to int32.
+    /opt/hostedtoolcache/Python/3.11.11/x64/lib/python3.11/site-packages/nilearn/masking.py:979: UserWarning: Data array used to create a new image contains 64-bit ints. This is likely due to creating the array with numpy and passing `int` as the `dtype`. Many tools such as FSL and SPM cannot deal with int64 in Nifti images, so for compatibility the data has been converted to int32.
       return new_img_like(mask_img, unmasked, affine)
     /home/runner/work/fmralign/fmralign/fmralign/preprocessing.py:219: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
     Parameter detrend :
@@ -425,7 +432,7 @@ better inter-subject similarity than regular euclidean averaging.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (4 minutes 27.343 seconds)
+   **Total running time of the script:** (3 minutes 40.370 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_template_alignment.py:
