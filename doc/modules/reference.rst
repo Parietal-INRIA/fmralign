@@ -71,4 +71,3 @@ uses.
   RidgeAlignment
   Hungarian
   OptimalTransportAlignment
-  UnbalancedWasserstein
