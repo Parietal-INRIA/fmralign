@@ -196,6 +196,7 @@ def test_all_classes_R_and_pred_shape_and_better_than_identity():
             assert algo_score >= identity_baseline_score
 
 
+@pytest.mark.skip_if_no_mkl
 @pytest.mark.parametrize("method", ["dense", "coarse-to-fine"])
 def test_fugw_alignment(method):
     # Create a fake segmentation
