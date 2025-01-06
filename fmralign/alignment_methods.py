@@ -419,8 +419,9 @@ class POTAlignment(Alignment):
 
 class OptimalTransportAlignment(Alignment):
     """
-    Compute the optimal coupling between X and Y with entropic regularization
-    using a OTT-JAX as a backend for acceleration.
+    Compute the (unbalanced) optimal coupling between X and Y
+    with entropic regularization using
+    OTT-JAX as a backend for acceleration.
 
     Parameters
     ----------
@@ -429,6 +430,9 @@ class OptimalTransportAlignment(Alignment):
         see full list in scipy.spatial.distance.cdist doc
     reg : int (optional)
         level of entropic regularization
+    tau : float (optional)
+        level of unbalancing, 1.0 corresponds to balanced transport,
+        lower values will favor lower mass transport
 
     Attributes
     ----------
@@ -436,9 +440,12 @@ class OptimalTransportAlignment(Alignment):
         Mixing matrix containing the optimal permutation
     """
 
-    def __init__(self, metric="euclidean", reg=1, max_iter=1000, tol=1e-3):
+    def __init__(
+        self, metric="euclidean", reg=1, tau=1.0, max_iter=1000, tol=1e-3
+    ):
         self.metric = metric
         self.reg = reg
+        self.tau = tau
         self.tol = tol
         self.max_iter = max_iter
 
@@ -463,18 +470,20 @@ class OptimalTransportAlignment(Alignment):
             cost_matrix = cdist(X.T, Y.T, metric=self.metric)
 
         geom = geometry.Geometry(cost_matrix=cost_matrix, epsilon=self.reg)
-        problem = linear_problem.LinearProblem(geom)
+        problem = linear_problem.LinearProblem(
+            geom, tau_a=self.tau, tau_b=self.tau
+        )
         solver = sinkhorn.Sinkhorn(
             geom, max_iterations=self.max_iter, threshold=self.tol
         )
         P = jax.jit(solver)(problem)
-        self.R = np.asarray(P.matrix * len(X.T))
+        self.R = np.asarray(P.matrix) * len(X.T)
 
         return self
 
     def transform(self, X):
         """Transform X using optimal coupling computed during fit."""
-        return X.dot(self.R)
+        return X @ self.R
 
 
 class IndividualizedNeuralTuning(Alignment):
