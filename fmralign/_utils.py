@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import os
 import warnings
 
 import nibabel as nib
@@ -8,6 +7,7 @@ from nilearn._utils.niimg_conversions import check_same_fov
 from nilearn.image import new_img_like, smooth_img
 from nilearn.masking import apply_mask_fmri, intersect_masks
 from nilearn.regions.parcellations import Parcellations
+from nilearn.surface import SurfaceImage
 
 
 class ParceledData:
@@ -219,11 +219,12 @@ def _make_parcellation(
         Parcellation of features in clusters
     """
     # check if clustering is provided
-    if isinstance(clustering, nib.nifti1.Nifti1Image) or os.path.isfile(
-        clustering
-    ):
+    if isinstance(clustering, nib.nifti1.Nifti1Image):
         check_same_fov(masker.mask_img_, clustering)
         labels = apply_mask_fmri(clustering, masker.mask_img_).astype(int)
+
+    elif isinstance(clustering, SurfaceImage):
+        labels = masker.transform(clustering)[0].astype(int)
 
     # otherwise check it's needed, if not return 1 everywhere
     elif n_pieces == 1:
@@ -256,9 +257,7 @@ def _make_parcellation(
             )
             err.args += (errmsg,)
             raise err
-        labels = apply_mask_fmri(
-            parcellation.labels_img_, masker.mask_img_
-        ).astype(int)
+        labels = masker.transform(parcellation.labels_img_)[0].astype(int)
 
     if verbose > 0:
         unique_labels, counts = np.unique(labels, return_counts=True)

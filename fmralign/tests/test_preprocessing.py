@@ -5,7 +5,7 @@ from nibabel.nifti1 import Nifti1Image
 
 from fmralign._utils import ParceledData
 from fmralign.preprocessing import ParcellationMasker
-from fmralign.tests.utils import random_niimg
+from fmralign.tests.utils import random_niimg, surf_img
 
 
 def test_init_default_params():
@@ -36,22 +36,22 @@ def test_fit_single_image():
     """Test that ParcellationMasker fits a single image"""
     img, _ = random_niimg((8, 7, 6))
     parcel_masker = ParcellationMasker(n_pieces=2)
-    fitted_parcel_masker = parcel_masker.fit(img)
+    parcel_masker.fit(img)
 
-    assert hasattr(fitted_parcel_masker, "masker_")
-    assert fitted_parcel_masker.labels is not None
-    assert isinstance(fitted_parcel_masker.labels, np.ndarray)
-    assert len(np.unique(fitted_parcel_masker.labels)) == 2  # n_pieces=2
+    assert hasattr(parcel_masker, "masker_")
+    assert parcel_masker.labels is not None
+    assert isinstance(parcel_masker.labels, np.ndarray)
+    assert len(np.unique(parcel_masker.labels)) == 2  # n_pieces=2
 
 
 def test_fit_multiple_images():
     """Test that ParcellationMasker fits multiple images"""
     imgs = [random_niimg((8, 7, 6))[0]] * 3
     parcel_masker = ParcellationMasker(n_pieces=2)
-    fitted_parcel_masker = parcel_masker.fit(imgs)
+    parcel_masker = parcel_masker.fit(imgs)
 
-    assert hasattr(fitted_parcel_masker, "masker_")
-    assert fitted_parcel_masker.labels is not None
+    assert hasattr(parcel_masker, "masker_")
+    assert parcel_masker.labels is not None
 
 
 def test_transform_single_image():
@@ -181,13 +181,43 @@ def test_standardization():
     assert np.abs(np.std(data_array) - 1.0) < 1e-5
 
 
+def test_one_surface_image():
+    """Test that ParcellationMasker can handle surface images"""
+    img = surf_img(20)
+    n_pieces = 2
+    n_vertices_total = img.shape[0]
+    parcel_masker = ParcellationMasker(n_pieces=n_pieces)
+    parcel_masker.fit(img)
+
+    assert hasattr(parcel_masker, "masker_")
+    assert parcel_masker.labels is not None
+    assert isinstance(parcel_masker.labels, np.ndarray)
+    assert len(np.unique(parcel_masker.labels)) == n_pieces
+    assert len(parcel_masker.labels) == n_vertices_total
+
+
+def test_multiple_surface_images():
+    """Test that ParcellationMasker can handle multiple surface images"""
+    imgs = [surf_img(20)] * 3
+    n_pieces = 2
+    n_vertices_total = imgs[0].shape[0]
+    parcel_masker = ParcellationMasker(n_pieces=n_pieces)
+    parcel_masker = parcel_masker.fit(imgs)
+
+    assert hasattr(parcel_masker, "masker_")
+    assert parcel_masker.labels is not None
+    assert isinstance(parcel_masker.labels, np.ndarray)
+    assert len(np.unique(parcel_masker.labels)) == n_pieces
+    assert len(parcel_masker.labels) == n_vertices_total
+
+
 def test_one_contrast():
     """Test that ParcellationMasker handles both 3D and\n
     4D images in the case of one contrast"""
     img1, _ = random_niimg((8, 7, 6))
     img2, _ = random_niimg((8, 7, 6, 1))
-    pmasker = ParcellationMasker()
-    pmasker.fit([img1, img2])
+    parcel_masker = ParcellationMasker()
+    parcel_masker.fit([img1, img2])
 
 
 def test_get_parcellation_img():
