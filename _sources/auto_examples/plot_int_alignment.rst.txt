@@ -279,7 +279,7 @@ For each train subject and for the template, the AP contrasts are sorted from
     [Parallel(n_jobs=5)]: Using backend LokyBackend with 5 concurrent workers.
     [Parallel(n_jobs=5)]: Done  40 tasks      | elapsed:    1.8s
     [Parallel(n_jobs=5)]: Done 100 out of 100 | elapsed:    2.1s finished
-    [Parallel(n_jobs=1)]: Done  49 tasks      | elapsed:    6.5s
+    [Parallel(n_jobs=1)]: Done  49 tasks      | elapsed:    5.6s
 
 
 
@@ -391,7 +391,7 @@ the average activations of subjects.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 18.374 seconds)
+   **Total running time of the script:** (1 minutes 16.758 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_int_alignment.py:
