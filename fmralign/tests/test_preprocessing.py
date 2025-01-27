@@ -237,3 +237,17 @@ def test_get_parcellation_img():
 
     assert np.allclose(data, labels)
     assert len(np.unique(data)) == n_pieces
+
+
+def test_clustering_surf():
+    """Test that ParcellationMasker can use surface images as clustering"""
+    img = surf_img(20)
+    clustering_surf_img = surf_img(20)
+    clustering_surf_img.data.parts["left"] = np.zeros((4, 20))
+    clustering_surf_img.data.parts["right"] = np.ones((5, 20))
+
+    parcel_masker = ParcellationMasker(clustering=clustering_surf_img)
+    parcel_masker.fit(img)
+    labels = parcel_masker.get_labels()
+
+    assert np.allclose(labels, np.array(4 * [0] + 5 * [1]))
