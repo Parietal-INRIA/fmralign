@@ -33,6 +33,7 @@ class SparsePairwiseAlignment(BaseEstimator, TransformerMixin):
         device="cpu",
         n_jobs=1,
         verbose=0,
+        **kwargs,
     ):
         """If n_pieces > 1, decomposes the images into regions and align each
         source/target region independantly.
@@ -116,6 +117,7 @@ class SparsePairwiseAlignment(BaseEstimator, TransformerMixin):
         self.n_jobs = n_jobs
         self.device = device
         self.verbose = verbose
+        self.kwargs = kwargs
 
     def fit(self, X, Y):
         """Fit data X and Y and learn transformation to map X to Y.
@@ -165,6 +167,7 @@ class SparsePairwiseAlignment(BaseEstimator, TransformerMixin):
                 sparsity_mask=sparsity_mask,
                 device=self.device,
                 verbose=self.verbose,
+                **self.kwargs,
             ).fit(X, Y)
         else:
             raise ValueError(
