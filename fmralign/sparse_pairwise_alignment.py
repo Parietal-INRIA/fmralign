@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-"""Module for pairwise functional alignment."""
+"""Module for sparse pairwise functional alignment."""
 
 import torch
 from joblib import Memory
