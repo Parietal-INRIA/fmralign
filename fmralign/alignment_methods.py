@@ -891,18 +891,14 @@ class SparseUOT(Alignment):
     def transform(self, X):
         """Transform X using optimal coupling computed during fit."""
         transformed_data = (
-            (
-                torch.sparse.mm(
-                    self.pi.transpose(0, 1),
-                    X.T,
-                ).to_dense()
-                / (
-                    torch.sparse.sum(self.pi, dim=0).to_dense().reshape(-1, 1)
-                    # Add very small value to handle null rows
-                    + 1e-16
-                )
+            torch.sparse.mm(
+                self.pi.transpose(0, 1),
+                X.T,
+            ).to_dense()
+            / (
+                torch.sparse.sum(self.pi, dim=0).to_dense().reshape(-1, 1)
+                # Add very small value to handle null rows
+                + 1e-16
             )
-            .T.detach()
-            .cpu()
-        )
+        ).T
         return transformed_data
