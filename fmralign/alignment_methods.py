@@ -10,9 +10,6 @@ import torch
 from fugw.solvers.utils import (
     batch_elementwise_prod_and_sum,
     crow_indices_to_row_indices,
-    solver_ibpp_sparse,
-    solver_mm_l2_sparse,
-    solver_mm_sparse,
     solver_sinkhorn_sparse,
 )
 from fugw.utils import _low_rank_squared_l2, _make_csr_matrix
@@ -783,7 +780,6 @@ class SparseUOT(Alignment):
     def __init__(
         self,
         sparsity_mask,
-        solver="sinkhorn",
         rho=float("inf"),
         reg=0.1,
         max_iter=1000,
@@ -795,7 +791,6 @@ class SparseUOT(Alignment):
         self.rho = rho
         self.reg = reg
         self.sparsity_mask = sparsity_mask
-        self.solver = solver
         self.max_iter = max_iter
         self.tol = tol
         self.eval_freq = eval_freq
@@ -858,7 +853,6 @@ class SparseUOT(Alignment):
         Y: (n_samples, n_features) torch.Tensor
             target data
         """
-        solver = self.solver
         n_features = X.shape[1]
         F = _low_rank_squared_l2(X.T, Y.T)
         F_norm = (F[0] @ F[1].T).max()
@@ -867,81 +861,27 @@ class SparseUOT(Alignment):
         init_plan = self._initialize_plan(n_features)
         cost = self._uot_cost(init_plan, F_normalized, n_features)
         weights, ws_dot_wt = self._initialize_weights(n_features, cost)
+
         uot_params = (
             torch.tensor([self.rho], device=self.device),
             torch.tensor([self.rho], device=self.device),
             torch.tensor([self.reg], device=self.device),
         )
+        init_duals = (
+            torch.zeros(n_features, device=self.device),
+            torch.zeros(n_features, device=self.device),
+        )
+        tuple_weights = (weights, weights, ws_dot_wt)
+        train_params = (self.max_iter, self.tol, self.eval_freq)
 
-        if solver in ["mm", "mm_l2"] and self.rho == float("inf"):
-            warnings.warn(
-                "Using MM solver with rho=inf is equivalent to using Sinkhorn solver,"
-                "falling back to Sinkhorn solver."
-            )
-            solver = "sinkhorn"
-
-        match solver:
-            case "mm":
-                tuple_weights = (weights, weights)
-                train_params = (self.max_iter, self.tol, self.eval_freq)
-                pi = solver_mm_sparse(
-                    cost=cost,
-                    init_pi=init_plan,
-                    uot_params=uot_params,
-                    tuple_weights=tuple_weights,
-                    train_params=train_params,
-                    verbose=self.verbose,
-                )
-            case "mm_l2":
-                tuple_weights = (weights, weights, ws_dot_wt)
-                train_params = (self.max_iter, self.tol, self.eval_freq)
-                pi = solver_mm_l2_sparse(
-                    cost=cost,
-                    init_pi=init_plan,
-                    uot_params=uot_params,
-                    tuple_weights=tuple_weights,
-                    train_params=train_params,
-                    verbose=self.verbose,
-                )
-            case "ibpp":
-                init_duals = (
-                    torch.ones(n_features, device=self.device),
-                    torch.ones(n_features, device=self.device),
-                )
-                tuple_weights = (weights, weights, ws_dot_wt)
-                train_params = (
-                    self.max_iter,
-                    1,  # Number of sinkhorn iterations
-                    1e8,  # IBPP_eps_base should be high
-                    self.tol,
-                    self.eval_freq,
-                )
-                _, pi = solver_ibpp_sparse(
-                    cost=cost,
-                    init_pi=init_plan,
-                    init_duals=init_duals,
-                    uot_params=uot_params,
-                    tuple_weights=tuple_weights,
-                    train_params=train_params,
-                    verbose=self.verbose,
-                )
-            case "sinkhorn":
-                init_duals = (
-                    torch.zeros(n_features, device=self.device),
-                    torch.zeros(n_features, device=self.device),
-                )
-                tuple_weights = (weights, weights, ws_dot_wt)
-                train_params = (self.max_iter, self.tol, self.eval_freq)
-                _, pi = solver_sinkhorn_sparse(
-                    cost=cost,
-                    init_duals=init_duals,
-                    uot_params=uot_params,
-                    tuple_weights=tuple_weights,
-                    train_params=train_params,
-                    verbose=self.verbose,
-                )
-            case _:
-                raise ValueError(f"Unknown solver {self.solver}")
+        _, pi = solver_sinkhorn_sparse(
+            cost=cost,
+            init_duals=init_duals,
+            uot_params=uot_params,
+            tuple_weights=tuple_weights,
+            train_params=train_params,
+            verbose=self.verbose,
+        )
 
         # Convert pi to coo format
         self.pi = pi.to_sparse_coo().detach()
