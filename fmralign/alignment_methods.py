@@ -805,7 +805,7 @@ class SparseUOT(Alignment):
     def _initialize_weights(self, n, cost):
         crow_indices, col_indices = cost.crow_indices(), cost.col_indices()
         row_indices = crow_indices_to_row_indices(crow_indices)
-        weights = torch.ones(n) / n
+        weights = torch.ones(n, device=self.device) / n
         ws_dot_wt_values = weights[row_indices] * weights[col_indices]
         ws_dot_wt = _make_csr_matrix(
             crow_indices,
@@ -826,6 +826,7 @@ class SparseUOT(Alignment):
             )
             .coalesce()
             .to_sparse_csr()
+            .to(self.device)
         )
 
     def _uot_cost(self, init_plan, F, n):
@@ -837,6 +838,8 @@ class SparseUOT(Alignment):
         cost_values = batch_elementwise_prod_and_sum(
             F[0], F[1], row_indices, col_indices, 1
         )
+        # Normalize cost values
+        cost_values = cost_values / cost_values.sum()
         return _make_csr_matrix(
             crow_indices,
             col_indices,
@@ -855,6 +858,7 @@ class SparseUOT(Alignment):
         Y: (n_samples, n_features) torch.Tensor
             target data
         """
+        solver = self.solver
         n_features = X.shape[1]
         F = _low_rank_squared_l2(X.T, Y.T)
         F_norm = (F[0] @ F[1].T).max()
@@ -863,19 +867,24 @@ class SparseUOT(Alignment):
         init_plan = self._initialize_plan(n_features)
         cost = self._uot_cost(init_plan, F_normalized, n_features)
         weights, ws_dot_wt = self._initialize_weights(n_features, cost)
-
-        init_duals = (torch.zeros(n_features), torch.zeros(n_features))
         uot_params = (
-            torch.Tensor([self.rho], device=self.device),
-            torch.Tensor([self.rho], device=self.device),
-            torch.Tensor([self.reg], device=self.device),
+            torch.tensor([self.rho], device=self.device),
+            torch.tensor([self.rho], device=self.device),
+            torch.tensor([self.reg], device=self.device),
         )
-        train_params = (self.max_iter, self.tol, self.eval_freq)
 
-        match self.solver:
+        if solver in ["mm", "mm_l2"] and self.rho == float("inf"):
+            warnings.warn(
+                "Using MM solver with rho=inf is equivalent to using Sinkhorn solver,"
+                "falling back to Sinkhorn solver."
+            )
+            solver = "sinkhorn"
+
+        match solver:
             case "mm":
                 tuple_weights = (weights, weights)
-                self.pi = solver_mm_sparse(
+                train_params = (self.max_iter, self.tol, self.eval_freq)
+                pi = solver_mm_sparse(
                     cost=cost,
                     init_pi=init_plan,
                     uot_params=uot_params,
@@ -885,7 +894,8 @@ class SparseUOT(Alignment):
                 )
             case "mm_l2":
                 tuple_weights = (weights, weights, ws_dot_wt)
-                self.pi = solver_mm_l2_sparse(
+                train_params = (self.max_iter, self.tol, self.eval_freq)
+                pi = solver_mm_l2_sparse(
                     cost=cost,
                     init_pi=init_plan,
                     uot_params=uot_params,
@@ -894,8 +904,19 @@ class SparseUOT(Alignment):
                     verbose=self.verbose,
                 )
             case "ibpp":
+                init_duals = (
+                    torch.ones(n_features, device=self.device),
+                    torch.ones(n_features, device=self.device),
+                )
                 tuple_weights = (weights, weights, ws_dot_wt)
-                _, self.pi = solver_ibpp_sparse(
+                train_params = (
+                    self.max_iter,
+                    1,  # Number of sinkhorn iterations
+                    1e8,  # IBPP_eps_base should be high
+                    self.tol,
+                    self.eval_freq,
+                )
+                _, pi = solver_ibpp_sparse(
                     cost=cost,
                     init_pi=init_plan,
                     init_duals=init_duals,
@@ -905,8 +926,13 @@ class SparseUOT(Alignment):
                     verbose=self.verbose,
                 )
             case "sinkhorn":
+                init_duals = (
+                    torch.zeros(n_features, device=self.device),
+                    torch.zeros(n_features, device=self.device),
+                )
                 tuple_weights = (weights, weights, ws_dot_wt)
-                _, self.pi = solver_sinkhorn_sparse(
+                train_params = (self.max_iter, self.tol, self.eval_freq)
+                _, pi = solver_sinkhorn_sparse(
                     cost=cost,
                     init_duals=init_duals,
                     uot_params=uot_params,
@@ -917,11 +943,14 @@ class SparseUOT(Alignment):
             case _:
                 raise ValueError(f"Unknown solver {self.solver}")
 
+        # Convert pi to coo format
+        self.pi = pi.to_sparse_coo().detach()
+
         return self
 
     def transform(self, X):
         """Transform X using optimal coupling computed during fit."""
-        X_ = torch.Tensor(X, device=self.device)
+        X_ = torch.tensor(X, device=self.device)
         transformed_data = (
             (
                 torch.sparse.mm(
