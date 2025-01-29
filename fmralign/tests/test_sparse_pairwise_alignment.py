@@ -7,9 +7,58 @@ from fmralign.tests.utils import (
     random_niimg,
     surf_img,
 )
+import torch
+import pytest
+from itertools import product
+
+devices = [torch.device("cpu")]
+if torch.cuda.is_available():
+    devices.append(torch.device("cuda:0"))
 
 
-def test_surface_alignment():
+@pytest.mark.skip_if_no_mkl
+@pytest.mark.parametrize(
+    "solver,device",
+    product(["sinkhorn", "mm", "mm_l2", "ibpp"], devices),
+)
+def test_sparse_solvers(solver, device):
+    """Test various solvers for SparsePairwiseAlignment"""
+    alignment = SparsePairwiseAlignment(
+        n_pieces=3, solver=solver, device=device
+    )
+    img1, _ = random_niimg((8, 7, 6, 10))
+    img2, _ = random_niimg((8, 7, 6, 10))
+    alignment.fit(img1, img2)
+    assert alignment.device == device
+
+
+@pytest.mark.skip_if_no_mkl
+@pytest.mark.parametrize(
+    "solver,device",
+    product(["sinkhorn", "mm", "mm_l2", "ibpp"], devices),
+)
+def test_identity_alignment(solver, device):
+    """Test the identity alignment for SparsePairwiseAlignment"""
+    alignment = SparsePairwiseAlignment(
+        solver=solver, device=device, reg=1e-6, tol=1e-10
+    )
+    img, _ = random_niimg((8, 7, 6, 100))
+    alignment.fit(img, img)
+    img_transformed = alignment.transform(img)
+    assert img_transformed.shape == img.shape
+    assert isinstance(img_transformed, Nifti1Image)
+    masker = alignment.masker
+    assert np.allclose(
+        masker.transform(img), masker.transform(img_transformed)
+    )
+
+
+@pytest.mark.skip_if_no_mkl
+@pytest.mark.parametrize(
+    "device",
+    devices,
+)
+def test_surface_alignment(device):
     """Test compatibility with `SurfaceImage`"""
     n_pieces = 3
     img1 = surf_img(20)
@@ -32,7 +81,7 @@ def test_surface_alignment():
 
 
 def test_parcellation_retrieval():
-    """Test that PairwiseAlignment returns both the\n
+    """Test that SparsePairwiseAlignment returns both the\n
     labels and the parcellation image"""
     n_pieces = 3
     img1, _ = random_niimg((8, 7, 6))
@@ -45,3 +94,17 @@ def test_parcellation_retrieval():
     assert len(np.unique(labels)) == n_pieces
     assert isinstance(parcellation_image, Nifti1Image)
     assert parcellation_image.shape == img1.shape
+
+
+def test_parcellation_before_fit():
+    """Test that SparsePairwiseAlignment raises an error if\n
+    the parcellation is retrieved before fitting"""
+    alignment = SparsePairwiseAlignment()
+    with pytest.raises(
+        AttributeError, match="Parcellation has not been computed yet"
+    ):
+        alignment.get_parcellation()
+
+
+if __name__ == "__main__":
+    test_identity_alignment("ibpp", torch.device("cpu"))
