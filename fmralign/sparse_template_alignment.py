@@ -15,7 +15,7 @@ from fmralign.sparse_pairwise_alignment import SparsePairwiseAlignment
 
 
 def _rescaled_euclidean_mean_torch(subjects_data, scale_average=False):
-    average_data = torch.mean(subjects_data, dim=0)
+    average_data = torch.mean(torch.stack(subjects_data), dim=0)
     scale = 1
     if scale_average:
         X_norm = 0
@@ -28,53 +28,19 @@ def _rescaled_euclidean_mean_torch(subjects_data, scale_average=False):
     return average_data
 
 
-def _reconstruct_template(fit, labels, masker):
-    """
-    Reconstruct template from fit output.
-
-    Parameters
-    ----------
-    fit: list of list of numpy.ndarray
-        Each element of the list is the list of parcels data for one subject.
-    labels: numpy.ndarray
-        Labels of the parcels.
-    masker: instance of NiftiMasker or MultiNiftiMasker
-        Masker to be used on the data.
-
-    Returns
-    -------
-    template_img: 4D Niimg object
-        Models the barycenter of input imgs
-    template_history: list of 4D Niimgs
-        List of the intermediate templates computed at the end of each iteration
-    """
-    template_parcels = [fit_i["template_data"] for fit_i in fit]
-    template_data = _parcels_to_array(template_parcels, labels)
-    template_img = masker.inverse_transform(template_data)
-
-    n_iter = len(fit[0]["template_history"])
-    template_history = []
-    for i in range(n_iter):
-        template_parcels = [fit_j["template_history"][i] for fit_j in fit]
-        template_data = _parcels_to_array(template_parcels, labels)
-        template_history.append(masker.inverse_transform(template_data))
-
-    return template_img, template_history
-
-
 def _align_images_to_template(
     subjects_data,
     template,
     subjects_estimators,
 ):
-    aligned_data = []
-    for i, subject_data in enumerate(subjects_data):
+    n_subjects = len(subjects_data)
+    for i in range(n_subjects):
         sparse_estimator = subjects_estimators[i]
-        sparse_estimator.fit(template, subject_data)
-        aligned_data.append(sparse_estimator.transform(subject_data))
+        sparse_estimator.fit(template, subjects_data[i])
+        subjects_data[i] = sparse_estimator.transform(subjects_data[i])
         # Update the estimator in the list
         subjects_estimators[i] = sparse_estimator
-    return aligned_data, subjects_estimators
+    return subjects_data, subjects_estimators
 
 
 def _fit_sparse_template(
@@ -85,7 +51,6 @@ def _fit_sparse_template(
     scale_template=False,
     **kwargs,
 ):
-    aligned_data = subjects_data
     n_subjects = len(subjects_data)
     if alignment_method != "sparse_uot":
         raise ValueError(f"Unknown alignment method: {alignment_method}")
@@ -93,8 +58,10 @@ def _fit_sparse_template(
         SparseUOT(sparsity_mask, **kwargs) for _ in range(n_subjects)
     ]
     for _ in range(n_iter):
-        template = _rescaled_euclidean_mean_torch(aligned_data, scale_template)
-        aligned_data, subjects_estimators = _align_images_to_template(
+        template = _rescaled_euclidean_mean_torch(
+            subjects_data, scale_template
+        )
+        subjects_data, subjects_estimators = _align_images_to_template(
             subjects_data,
             template,
             subjects_estimators,
