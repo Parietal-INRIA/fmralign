@@ -2,7 +2,6 @@
 """Module implementing alignment estimators on ndarrays."""
 
 import warnings
-from collections import defaultdict
 
 import numpy as np
 import ot
