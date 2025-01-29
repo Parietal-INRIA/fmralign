@@ -241,7 +241,7 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
         self.n_pieces = self.parcel_masker.n_pieces
 
         subjects_data = [
-            torch.Tensor(
+            torch.tensor(
                 self.masker.transform(img),
                 device=self.device,
                 dtype=torch.float32,
