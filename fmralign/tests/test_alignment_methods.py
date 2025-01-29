@@ -8,7 +8,6 @@ from scipy.sparse import csc_matrix
 
 from fmralign.alignment_methods import (
     DiagonalAlignment,
-    FugwAlignment,
     Hungarian,
     Identity,
     OptimalTransportAlignment,
@@ -195,22 +194,6 @@ def test_all_classes_R_and_pred_shape_and_better_than_identity():
             assert X_pred.shape == X.shape
             algo_score = zero_mean_coefficient_determination(Y, X_pred)
             assert algo_score >= identity_baseline_score
-
-
-@pytest.mark.skip_if_no_mkl
-@pytest.mark.parametrize("method", ["dense", "coarse-to-fine"])
-def test_fugw_alignment(method):
-    # Create a fake segmentation
-    segmentation = np.ones((10, 10, 10))
-    n_features = 3
-    n_samples = int(segmentation.sum())
-    X = np.random.randn(n_samples, n_features).T
-    Y = np.random.randn(n_samples, n_features).T
-
-    fugw_alignment = FugwAlignment(segmentation, method=method)
-    fugw_alignment.fit(X, Y)
-    assert fugw_alignment.transform(X).shape == X.shape
-    assert fugw_alignment.transform(X).shape == Y.shape
 
 
 def test_ott_backend():
