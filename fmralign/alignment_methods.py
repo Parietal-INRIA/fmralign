@@ -783,7 +783,7 @@ class SparseUOT(Alignment):
     def __init__(
         self,
         sparsity_mask,
-        solver="mm",
+        solver="sinkhorn",
         rho=float("inf"),
         reg=0.1,
         max_iter=1000,
