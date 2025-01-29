@@ -80,6 +80,7 @@ def test_surface_alignment(device):
     assert isinstance(parcellation_image, SurfaceImage)
 
 
+@pytest.mark.skip_if_no_mkl
 def test_parcellation_retrieval():
     """Test that SparsePairwiseAlignment returns both the\n
     labels and the parcellation image"""
@@ -96,6 +97,7 @@ def test_parcellation_retrieval():
     assert parcellation_image.shape == img1.shape
 
 
+@pytest.mark.skip_if_no_mkl
 def test_parcellation_before_fit():
     """Test that SparsePairwiseAlignment raises an error if\n
     the parcellation is retrieved before fitting"""
@@ -104,7 +106,3 @@ def test_parcellation_before_fit():
         AttributeError, match="Parcellation has not been computed yet"
     ):
         alignment.get_parcellation()
-
-
-if __name__ == "__main__":
-    test_identity_alignment("ibpp", torch.device("cpu"))
