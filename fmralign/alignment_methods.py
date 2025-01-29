@@ -2,13 +2,21 @@
 """Module implementing alignment estimators on ndarrays."""
 
 import warnings
+from collections import defaultdict
 
 import numpy as np
 import ot
 import scipy
 import torch
-from fugw.mappings import FUGW, FUGWSparse
-from fugw.scripts import coarse_to_fine, lmds
+from fugw.solvers.utils import (
+    batch_elementwise_prod_and_sum,
+    crow_indices_to_row_indices,
+    solver_ibpp_sparse,
+    solver_mm_l2_sparse,
+    solver_mm_sparse,
+    solver_sinkhorn_sparse,
+)
+from fugw.utils import _low_rank_squared_l2, _make_csr_matrix
 from joblib import Parallel, delayed
 from scipy import linalg
 from scipy.optimize import linear_sum_assignment
@@ -750,262 +758,184 @@ class IndividualizedNeuralTuning(Alignment):
         return np.array(reconstructed_signal, dtype=np.float32)
 
 
-class FugwAlignment:
-    """Wrapper for FUGW alignment"""
+class SparseUOT(Alignment):
+    """
+    Compute the unbalanced regularized optimal coupling between X and Y,
+    with sparsity constraints inspired by the FUGW package.
+
+    Parameters
+    ----------
+    sparsity_mask : sparse torch.Tensor of shape (n_features, n_features)
+    solver : str (optional)
+    rho : float (optional)
+    reg : float (optional)
+    max_iter : int (optional)
+    tol : float (optional)
+    eval_freq : int (optional)
+    device : str (optional)
+    verbose : bool (optional)
+
+    Attributes
+    ----------
+    pi : sparse torch.Tensor of shape (n_features, n_features)
+        Sparse coupling matrix
+    """
 
     def __init__(
         self,
-        segmentation,
-        alpha_coarse=0.5,
-        alpha_fine=0.5,
-        rho_coarse=1.0,
-        rho_fine=1.0,
-        eps_coarse=1.0,
-        eps_fine=1.0,
-        anisotropy=(3, 3, 3),
-        reg_mode="independent",
-        divergence="kl",
-        method="coarse-to-fine",
-        n_landmarks=1000,
-        n_samples=100,
-        radius=5,
-        id_reg=0.0,
-        device="auto",
+        sparsity_mask,
+        solver="mm",
+        rho=float("inf"),
+        reg=0.1,
+        max_iter=1000,
+        tol=1e-7,
+        eval_freq=10,
+        device="cpu",
         verbose=False,
-        **kwargs,
-    ) -> None:
-        """Initialize FUGW alignment
-
-        Parameters
-        ----------
-        segmentation : ndarray,
-            Segmentation of the mask
-        alpha_coarse : float, optional, by default 0.5.
-        rho_coarse : float, optional, by default 1.
-        eps_coarse : float, optional, by default 1.
-        alpha_fine : float, optional, by default 0.5.
-        rho_fine : float, optional, by default 1.
-        eps_fine : float, optional, by default 1e-6.
-        anisotropy : tuple, optional.
-            Anisotropy of the fmri mask, by default (3, 3, 3)
-        reg_mode : str, optional
-            Regularization mode, by default "independent"
-        divergence : str, optional
-            Divergence used in the FUGW alignment, by default "kl".
-        method : str, optional
-            Method used to compute FUGW alignments, by default "coarse-to-fine".
-        n_landmarks : int, optional
-            Number of landmarks used in the embedding, by default 1000.
-        n_samples : int, optional
-            Number of samples points passed to
-            sklearn.cluster.AgglomerativeClustering, by default 100.
-        radius : int, optional
-            Radius around the sampled points in mm, by default 5.
-        id_reg: float, in the [0, 1] interval, defaults to 0
-            If source/target share the same geometry,
-            interpolate the transport plan with the identity
-            using the provided coefficient.
-            A value of 1 (resp. 0) will rely solely on the identity
-            (resp. the transport plan).
-        device : torch.device, optional, by default "auto"
-            Device on which to perform the computation.
-        verbose : bool, optional, by default True
-        **kwargs : dict
-            Additional parameters passed to the FUGW mapping.fit method.
-        """
-        self.segmentation = segmentation
-        self.alpha_coarse = alpha_coarse
-        self.rho_coarse = rho_coarse
-        self.eps_coarse = eps_coarse
-        self.alpha_fine = alpha_fine
-        self.rho_fine = rho_fine
-        self.eps_fine = eps_fine
-        self.anisotropy = anisotropy
-        self.reg_mode = reg_mode
-        self.divergence = divergence
-        self.method = method
-        self.n_landmarks = n_landmarks
-        self.n_samples = n_samples
-        self.radius = radius
-        self.id_reg = id_reg
+    ):
+        self.rho = rho
+        self.reg = reg
+        self.sparsity_mask = sparsity_mask
+        self.solver = solver
+        self.max_iter = max_iter
+        self.tol = tol
+        self.eval_freq = eval_freq
+        self.device = device
         self.verbose = verbose
-        self.kwargs = kwargs
 
-        self.device = self._get_device(device)
-        if self.verbose:
-            print("Computing geometry embedding...")
-        (
-            self.geometry_embedding,
-            self.geometry_embedding_normalized,
-            self.max_distance,
-        ) = self._prepare_geometry_embedding(
-            self.segmentation,
-            self.n_landmarks,
-            self.anisotropy,
-            self.verbose,
+    def _initialize_weights(self, n, cost):
+        crow_indices, col_indices = cost.crow_indices(), cost.col_indices()
+        row_indices = crow_indices_to_row_indices(crow_indices)
+        weights = torch.ones(n) / n
+        ws_dot_wt_values = weights[row_indices] * weights[col_indices]
+        ws_dot_wt = _make_csr_matrix(
+            crow_indices,
+            col_indices,
+            ws_dot_wt_values,
+            cost.size(),
+            self.device,
         )
-        if self.verbose:
-            print("Geometry embedding computed")
+        return weights, ws_dot_wt
 
-    def _get_device(self, device):
-        """Set the device on which to perform the computation"""
-        if device == "auto":
-            device = torch.device(
-                "cuda:0" if torch.cuda.is_available() else "cpu"
-            )
-        return device
-
-    def _normalize(self, X):
-        """Normalize the input data"""
-        return np.nan_to_num((X / np.linalg.norm(X, axis=1).reshape(-1, 1)).T)
-
-    def _prepare_geometry_embedding(
-        self, segmentation, n_landmarks, anisotropy, verbose
-    ):
-        """Compute the normalized geometry embedding"""
-        geometry_embedding = lmds.compute_lmds_volume(
-            segmentation,
-            k=12,
-            n_landmarks=n_landmarks,
-            anisotropy=anisotropy,
-            verbose=verbose,
-        ).nan_to_num()
-
-        (
-            geometry_embedding_normalized,
-            max_distance,
-        ) = coarse_to_fine.random_normalizing(geometry_embedding)
-
+    def _initialize_plan(self, n):
         return (
-            geometry_embedding,
-            geometry_embedding_normalized,
-            max_distance,
+            torch.sparse_coo_tensor(
+                self.sparsity_mask.indices(),
+                torch.ones_like(self.sparsity_mask.values())
+                / self.sparsity_mask.values().shape[0],
+                (n, n),
+            )
+            .coalesce()
+            .to_sparse_csr()
         )
 
-    def _sample_geometry(self, segmentation, geometry_embedding, n_samples):
-        """Sample the geometry of the mask"""
-        return coarse_to_fine.sample_volume_uniformly(
-            segmentation,
-            embeddings=geometry_embedding,
-            n_samples=n_samples,
+    def _uot_cost(self, init_plan, F, n):
+        crow_indices, col_indices = (
+            init_plan.crow_indices(),
+            init_plan.col_indices(),
+        )
+        row_indices = crow_indices_to_row_indices(crow_indices)
+        cost_values = batch_elementwise_prod_and_sum(
+            F[0], F[1], row_indices, col_indices, 1
+        )
+        return _make_csr_matrix(
+            crow_indices,
+            col_indices,
+            cost_values,
+            (n, n),
+            self.device,
         )
 
-    def fit(
-        self,
-        X,
-        Y,
-    ):
-        """Fit FUGW alignment
+    def fit(self, X, Y):
+        """
 
         Parameters
         ----------
-        X : ndarray of shape (n_samples, n_features)
-            Source features
-        Y : ndarray of shape (n_samples, n_features)
-            Target features
-
-        Returns
-        -------
-        self : FugwAlignment
-            Fitted FUGW alignment
+        X: (n_samples, n_features) torch.Tensor
+            source data
+        Y: (n_samples, n_features) torch.Tensor
+            target data
         """
-        source_features_normalized = self._normalize(X.T)
-        target_features_normalized = self._normalize(Y.T)
-        if self.verbose:
-            print("Features normalized")
+        n_features = X.shape[1]
+        F = _low_rank_squared_l2(X.T, Y.T)
+        F_norm = (F[0] @ F[1].T).max()
+        F_normalized = (F[0] / F_norm, F[1] / F_norm)
 
-        if self.method == "dense":
-            mapping = FUGW(
-                alpha=self.alpha_coarse,
-                rho=self.rho_coarse,
-                eps=self.eps_coarse,
-                reg_mode=self.reg_mode,
-                divergence=self.divergence,
-            )
+        init_plan = self._initialize_plan(n_features)
+        cost = self._uot_cost(init_plan, F_normalized, n_features)
+        weights, ws_dot_wt = self._initialize_weights(n_features, cost)
 
-            mapping.fit(
-                source_features=source_features_normalized,
-                target_features=target_features_normalized,
-                source_geometry=self.geometry_embedding_normalized
-                @ self.geometry_embedding_normalized.T,
-                target_geometry=self.geometry_embedding_normalized
-                @ self.geometry_embedding_normalized.T,
-                verbose=self.verbose,
-                **self.kwargs,
-            )
+        init_duals = (torch.zeros(n_features), torch.zeros(n_features))
+        uot_params = (
+            torch.Tensor([self.rho], device=self.device),
+            torch.Tensor([self.rho], device=self.device),
+            torch.Tensor([self.reg], device=self.device),
+        )
+        train_params = (self.max_iter, self.tol, self.eval_freq)
 
-            self.mapping = mapping
-
-        elif self.method == "coarse-to-fine":
-            # Subsample vertices as uniformly as possible on the surface
-            sampled_geometry = self._sample_geometry(
-                self.segmentation, self.geometry_embedding, self.n_samples
-            )
-
-            if self.verbose:
-                print("Samples computed")
-
-            coarse_mapping = FUGW(
-                alpha=self.alpha_coarse,
-                rho=self.rho_coarse,
-                eps=self.eps_coarse,
-                reg_mode=self.reg_mode,
-                divergence=self.divergence,
-            )
-
-            fine_mapping = FUGWSparse(
-                alpha=self.alpha_fine,
-                rho=self.rho_fine,
-                eps=self.eps_fine,
-                reg_mode=self.reg_mode,
-                divergence=self.divergence,
-            )
-
-            coarse_to_fine.fit(
-                source_features=source_features_normalized,
-                target_features=target_features_normalized,
-                source_geometry_embeddings=self.geometry_embedding_normalized,
-                target_geometry_embeddings=self.geometry_embedding_normalized,
-                source_sample=sampled_geometry,
-                target_sample=sampled_geometry,
-                coarse_mapping=coarse_mapping,
-                source_selection_radius=(self.radius / self.max_distance),
-                target_selection_radius=(self.radius / self.max_distance),
-                fine_mapping=fine_mapping,
-                device=self.device,
-                verbose=self.verbose,
-                **self.kwargs,
-            )
-
-            self.mapping = fine_mapping
+        match self.solver:
+            case "mm":
+                tuple_weights = (weights, weights)
+                self.pi = solver_mm_sparse(
+                    cost=cost,
+                    init_pi=init_plan,
+                    uot_params=uot_params,
+                    tuple_weights=tuple_weights,
+                    train_params=train_params,
+                    verbose=self.verbose,
+                )
+            case "mm_l2":
+                tuple_weights = (weights, weights, ws_dot_wt)
+                self.pi = solver_mm_l2_sparse(
+                    cost=cost,
+                    init_pi=init_plan,
+                    uot_params=uot_params,
+                    tuple_weights=tuple_weights,
+                    train_params=train_params,
+                    verbose=self.verbose,
+                )
+            case "ibpp":
+                tuple_weights = (weights, weights, ws_dot_wt)
+                _, self.pi = solver_ibpp_sparse(
+                    cost=cost,
+                    init_pi=init_plan,
+                    init_duals=init_duals,
+                    uot_params=uot_params,
+                    tuple_weights=tuple_weights,
+                    train_params=train_params,
+                    verbose=self.verbose,
+                )
+            case "sinkhorn":
+                tuple_weights = (weights, weights, ws_dot_wt)
+                _, self.pi = solver_sinkhorn_sparse(
+                    cost=cost,
+                    init_duals=init_duals,
+                    uot_params=uot_params,
+                    tuple_weights=tuple_weights,
+                    train_params=train_params,
+                    verbose=self.verbose,
+                )
+            case _:
+                raise ValueError(f"Unknown solver {self.solver}")
 
         return self
 
-    def transform(
-        self,
-        X,
-    ):
-        """Project features using the fitted FUGW alignment
-
-        Parameters
-        ----------
-        X : ndarray of shape (n_samples, n_features)
-            Source features
-
-        Returns
-        -------
-        ndarray
-            Projected features
-        """
-
-        if self.mapping is None:
-            raise ValueError(
-                "FUGW alignment must be fitted before transforming data"
+    def transform(self, X):
+        """Transform X using optimal coupling computed during fit."""
+        X_ = torch.Tensor(X, device=self.device)
+        transformed_data = (
+            (
+                torch.sparse.mm(
+                    self.pi.transpose(0, 1),
+                    X_.T,
+                ).to_dense()
+                / (
+                    torch.sparse.sum(self.pi, dim=0).to_dense().reshape(-1, 1)
+                    # Add very small value to handle null rows
+                    + 1e-16
+                )
             )
-
-        # If id_reg is True, interpolate the resulting
-        # mapping with the identity matrix
-        transformed_features = self.mapping.transform(
-            X, id_reg=self.id_reg, device=self.device
+            .T.detach()
+            .cpu()
         )
-        return transformed_features
+        return transformed_data
