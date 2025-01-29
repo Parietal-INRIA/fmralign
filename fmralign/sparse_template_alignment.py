@@ -99,6 +99,7 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
         device="cpu",
         n_jobs=1,
         verbose=0,
+        **kwargs,
     ):
         """
         Parameters
@@ -194,6 +195,7 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
         self.memory_level = memory_level
         self.n_jobs = n_jobs
         self.verbose = verbose
+        self.kwargs = kwargs
 
     def fit(self, imgs):
         """
@@ -248,13 +250,17 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
             )
             for img in imgs
         ]
-        sparsity_mask = _create_sparse_cluster_matrix(self.labels_)
+        sparsity_mask = _create_sparse_cluster_matrix(self.labels_).to(
+            self.device
+        )
         template_data, self.fit_ = _fit_sparse_template(
             subjects_data=subjects_data,
             sparsity_mask=sparsity_mask,
             n_iter=self.n_iter,
             scale_template=self.scale_template,
             alignment_method=self.alignment_method,
+            device=self.device,
+            **self.kwargs,
         )
 
         self.template_img = self.masker.inverse_transform(
