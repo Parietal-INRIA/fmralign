@@ -9,7 +9,6 @@ from fmralign.tests.utils import (
 )
 import torch
 import pytest
-from itertools import product
 
 devices = [torch.device("cpu")]
 if torch.cuda.is_available():
@@ -17,15 +16,10 @@ if torch.cuda.is_available():
 
 
 @pytest.mark.skip_if_no_mkl
-@pytest.mark.parametrize(
-    "solver,device",
-    product(["sinkhorn", "mm", "mm_l2", "ibpp"], devices),
-)
-def test_sparse_solvers(solver, device):
+@pytest.mark.parametrize("device", devices)
+def test_fit_method(device):
     """Test various solvers for SparsePairwiseAlignment"""
-    alignment = SparsePairwiseAlignment(
-        n_pieces=3, solver=solver, device=device
-    )
+    alignment = SparsePairwiseAlignment(n_pieces=3, device=device)
     img1, _ = random_niimg((8, 7, 6, 10))
     img2, _ = random_niimg((8, 7, 6, 10))
     alignment.fit(img1, img2)
@@ -33,15 +27,10 @@ def test_sparse_solvers(solver, device):
 
 
 @pytest.mark.skip_if_no_mkl
-@pytest.mark.parametrize(
-    "solver,device",
-    product(["sinkhorn", "mm", "mm_l2", "ibpp"], devices),
-)
-def test_identity_alignment(solver, device):
+@pytest.mark.parametrize("device", devices)
+def test_identity_alignment(device):
     """Test the identity alignment for SparsePairwiseAlignment"""
-    alignment = SparsePairwiseAlignment(
-        solver=solver, device=device, reg=1e-6, tol=1e-10
-    )
+    alignment = SparsePairwiseAlignment(device=device, reg=1e-6, tol=1e-10)
     img, _ = random_niimg((8, 7, 6, 100))
     alignment.fit(img, img)
     img_transformed = alignment.transform(img)
