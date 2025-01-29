@@ -168,7 +168,7 @@ class SparsePairwiseAlignment(BaseEstimator, TransformerMixin):
             ).fit(X, Y)
         else:
             raise ValueError(
-                "Unknown alignment method: {}".format(self.alignment_method)
+                f"Unknown alignment method: {self.alignment_method}"
             )
 
         return self
