@@ -1,15 +1,13 @@
 """Module for sparse template alignment."""
 
-import numpy as np
 import torch
-from joblib import Memory, Parallel, delayed
-from sklearn.base import BaseEstimator, TransformerMixin, clone
+from joblib import Memory
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
 from fmralign._utils import (
     _create_sparse_cluster_matrix,
     _parcels_to_array,
-    _transform_one_img,
 )
 from fmralign.alignment_methods import SparseUOT
 from fmralign.preprocessing import ParcellationMasker
