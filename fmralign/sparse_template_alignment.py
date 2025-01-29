@@ -274,7 +274,11 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
         self.n_pieces = self.parcel_masker.n_pieces
 
         subjects_data = [
-            torch.Tensor(self.masker.transform(img), device=self.device)
+            torch.Tensor(
+                self.masker.transform(img),
+                device=self.device,
+                dtype=torch.float32,
+            )
             for img in imgs
         ]
         sparsity_mask = _create_sparse_cluster_matrix(self.labels_)
@@ -342,7 +346,11 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
             alignment_estimator.fit(img, self.template)
             return alignment_estimator.transform(img)
         else:
-            X = torch.tensor(self.masker.transform(img), device=self.device)
+            X = torch.tensor(
+                self.masker.transform(img),
+                device=self.device,
+                dtype=torch.float32,
+            )
             sparse_estimator = self.fit_[subject_index]
             X_transformed = sparse_estimator.transform(X).cpu().numpy()
             return self.masker.inverse_transform(X_transformed)
