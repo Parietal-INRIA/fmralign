@@ -855,11 +855,9 @@ class SparseUOT(Alignment):
         """
         n_features = X.shape[1]
         F = _low_rank_squared_l2(X.T, Y.T)
-        F_norm = (F[0] @ F[1].T).max()
-        F_normalized = (F[0] / F_norm, F[1] / F_norm)
 
         init_plan = self._initialize_plan(n_features)
-        cost = self._uot_cost(init_plan, F_normalized, n_features)
+        cost = self._uot_cost(init_plan, F, n_features)
         weights, ws_dot_wt = self._initialize_weights(n_features, cost)
 
         uot_params = (
