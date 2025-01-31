@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+import torch
 from numpy.testing import assert_array_almost_equal
 from scipy.linalg import orthogonal_procrustes
 from scipy.sparse import csc_matrix
@@ -13,6 +14,7 @@ from fmralign.alignment_methods import (
     POTAlignment,
     RidgeAlignment,
     ScaledOrthogonalAlignment,
+    SparseUOT,
     _voxelwise_signal_projection,
     optimal_permutation,
     scaled_procrustes,
@@ -255,3 +257,38 @@ def test_tau_effect():
     # Lower tau should result in less mass conservation
     assert np.sum(algo1.R.sum(axis=0)) > np.sum(algo2.R.sum(axis=0))
     assert np.sum(algo1.R.sum(axis=1)) > np.sum(algo2.R.sum(axis=1))
+
+
+def test_sparseuot():
+    """Test the sparse version of optimal transport."""
+    n_samples, n_features = 10, 5
+    X = torch.randn(n_samples, n_features)
+    sparsity_mask = torch.ones(n_features, n_features).to_sparse_coo()
+    algo = SparseUOT(reg=1e-3, sparsity_mask=sparsity_mask)
+
+    # Check if we recover the identity matrix
+    algo.fit(X, X)
+    assert torch.allclose(
+        algo.pi.to_dense(), torch.eye(n_features) / n_features
+    )
+
+    # Check if transformation preserves input
+    assert torch.allclose(X, algo.transform(X))
+
+    # Check the unbalanced case
+    Y = torch.randn(n_samples, n_features)
+    algo = SparseUOT(reg=1e-3, sparsity_mask=sparsity_mask)
+    algo.fit(X, Y)
+    mass1 = algo.pi.sum()
+
+    algo = SparseUOT(reg=1e-3, sparsity_mask=sparsity_mask, rho=0.1)
+    algo.fit(X, Y)
+    mass2 = algo.pi.sum()
+
+    algo = SparseUOT(reg=1e-3, sparsity_mask=sparsity_mask, rho=0.0)
+    algo.fit(X, Y)
+    mass3 = algo.pi.sum()
+
+    assert torch.allclose(mass1, torch.tensor(1.0))
+    assert torch.allclose(mass3, torch.tensor(0.0))
+    assert mass1 > mass2 > mass3
