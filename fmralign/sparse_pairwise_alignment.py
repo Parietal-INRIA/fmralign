@@ -41,11 +41,8 @@ class SparsePairwiseAlignment(BaseEstimator, TransformerMixin):
         Parameters
         ----------
         alignment_method: string
-            Algorithm used to perform alignment between X_i and Y_i :
-            * either 'identity', 'scaled_orthogonal', 'optimal_transport',
-            'ridge_cv', 'permutation', 'diagonal'
-            * or an instance of one of alignment classes
-            (imported from fmralign.alignment_methods)
+            Algorithm used to perform alignment between X and Y.
+            Currently, only 'sparse_uot' is available.
         n_pieces: int, optional (default = 1)
             Number of regions in which the data is parcellated for alignment.
             If 1 the alignment is done on full scale data.
@@ -94,6 +91,9 @@ class SparsePairwiseAlignment(BaseEstimator, TransformerMixin):
         memory_level: integer, optional (default = None)
             Rough estimator of the amount of memory used by caching.
             Higher value means more memory for caching.
+        device: string, optional (default = 'cpu')
+            Device on which the computation will be done. If 'cuda', the
+            computation will be done on the GPU if available.
         n_jobs: integer, optional (default = 1)
             The number of CPUs to use to do the computation. -1 means
             'all CPUs', -2 'all CPUs but one', and so on.
