@@ -170,7 +170,7 @@ class SparsePairwiseAlignment(BaseEstimator, TransformerMixin):
             self.fit_ = SparseUOT(
                 sparsity_mask=sparsity_mask,
                 device=self.device,
-                verbose=self.verbose,
+                verbose=True if self.verbose > 0 else False,
                 **self.kwargs,
             ).fit(X, Y)
         else:

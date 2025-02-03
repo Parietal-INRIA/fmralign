@@ -48,13 +48,15 @@ def _fit_sparse_template(
     alignment_method="sparse_uot",
     n_iter=2,
     scale_template=False,
+    verbose=False,
     **kwargs,
 ):
     n_subjects = len(subjects_data)
     if alignment_method != "sparse_uot":
         raise ValueError(f"Unknown alignment method: {alignment_method}")
     subjects_estimators = [
-        SparseUOT(sparsity_mask, **kwargs) for _ in range(n_subjects)
+        SparseUOT(sparsity_mask, verbose=verbose, **kwargs)
+        for _ in range(n_subjects)
     ]
     for _ in range(n_iter):
         template = _rescaled_euclidean_mean_torch(
@@ -249,9 +251,7 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
             )
             for img in imgs
         ]
-        sparsity_mask = _sparse_cluster_matrix(self.labels_).to(
-            self.device
-        )
+        sparsity_mask = _sparse_cluster_matrix(self.labels_).to(self.device)
         template_data, self.fit_ = _fit_sparse_template(
             subjects_data=subjects_data,
             sparsity_mask=sparsity_mask,
@@ -259,6 +259,7 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
             scale_template=self.scale_template,
             alignment_method=self.alignment_method,
             device=self.device,
+            verbose=True if self.verbose > 0 else False,
             **self.kwargs,
         )
 
