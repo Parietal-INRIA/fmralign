@@ -1,16 +1,18 @@
-import torch
+from itertools import product
+
 import numpy as np
 import pytest
+import torch
+from nibabel.nifti1 import Nifti1Image
+
+from fmralign.alignment_methods import SparseUOT
 from fmralign.sparse_template_alignment import (
-    _rescaled_euclidean_mean_torch,
+    SparseTemplateAlignment,
     _align_images_to_template,
     _fit_sparse_template,
+    _rescaled_euclidean_mean_torch,
 )
-from nibabel.nifti1 import Nifti1Image
-from fmralign.tests.utils import sample_subjects_data, random_niimg
-from itertools import product
-from fmralign.alignment_methods import SparseUOT
-from fmralign.sparse_template_alignment import SparseTemplateAlignment
+from fmralign.tests.utils import random_niimg, sample_subjects_data
 
 devices = [torch.device("cpu")]
 if torch.cuda.is_available():

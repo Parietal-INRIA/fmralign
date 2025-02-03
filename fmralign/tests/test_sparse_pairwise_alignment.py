@@ -1,4 +1,6 @@
 import numpy as np
+import pytest
+import torch
 from nibabel.nifti1 import Nifti1Image
 from nilearn.surface import SurfaceImage
 
@@ -7,8 +9,6 @@ from fmralign.tests.utils import (
     random_niimg,
     surf_img,
 )
-import torch
-import pytest
 
 devices = [torch.device("cpu")]
 if torch.cuda.is_available():
