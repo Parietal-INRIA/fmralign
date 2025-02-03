@@ -4,8 +4,12 @@ import numpy as np
 import pytest
 from nilearn.maskers import NiftiMasker
 from numpy.testing import assert_array_almost_equal, assert_array_equal
-
-from fmralign._utils import ParceledData, _make_parcellation
+import torch
+from fmralign._utils import (
+    ParceledData,
+    _make_parcellation,
+    _sparse_cluster_matrix,
+)
 from fmralign.tests.utils import random_niimg, sample_parceled_data
 
 
@@ -189,3 +193,26 @@ def test_non_contiguous_labels():
     # Test accessing by label
     same_parcel = parceled.get_parcel(1)
     assert_array_equal(same_parcel, expected)
+
+
+def test_sparse_cluster_matrix():
+    labels = torch.tensor([1, 1, 2, 2, 2])
+    sparse_matrix = _sparse_cluster_matrix(labels)
+
+    expected = torch.tensor(
+        [
+            [1, 1, 0, 0, 0],
+            [1, 1, 0, 0, 0],
+            [0, 0, 1, 1, 1],
+            [0, 0, 1, 1, 1],
+            [0, 0, 1, 1, 1],
+        ],
+        dtype=torch.bool,
+    )
+
+    assert sparse_matrix.shape == (5, 5)
+    assert sparse_matrix.dtype == torch.bool
+    assert torch.allclose(sparse_matrix.to_dense(), expected)
+
+
+test_sparse_cluster_matrix()
