@@ -202,15 +202,26 @@ def test_ott_backend():
     epsilon = 0.1
     X = np.random.randn(n_samples, n_features)
     Y = np.random.randn(n_samples, n_features)
-    algo = OptimalTransportAlignment(
+    ott_algo = OptimalTransportAlignment(
         reg=epsilon, metric="euclidean", tol=1e-5, max_iter=10000
     )
-    old_implem = POTAlignment(
+    pot_algo = POTAlignment(
         reg=epsilon, metric="euclidean", tol=1e-5, max_iter=10000
     )
-    algo.fit(X, Y)
-    old_implem.fit(X, Y)
-    assert_array_almost_equal(algo.R, old_implem.R, decimal=3)
+    sparsity_mask = torch.ones(n_features, n_features).to_sparse_coo()
+    torch_algo = SparseUOT(
+        sparsity_mask=sparsity_mask, reg=epsilon, tol=1e-5, max_iter=10000
+    )
+    ott_algo.fit(X, Y)
+    pot_algo.fit(X, Y)
+    torch_algo.fit(
+        torch.tensor(X, dtype=torch.float32),
+        torch.tensor(Y, dtype=torch.float32),
+    )
+    assert_array_almost_equal(ott_algo.R, pot_algo.R, decimal=3)
+    assert_array_almost_equal(
+        ott_algo.R, torch_algo.pi.to_dense().numpy() * n_features, decimal=3
+    )
 
 
 def test_identity_balanced_wasserstein():
