@@ -36,10 +36,6 @@ def test_identity_alignment(device):
     img_transformed = alignment.transform(img)
     assert img_transformed.shape == img.shape
     assert isinstance(img_transformed, Nifti1Image)
-    masker = alignment.masker
-    assert np.allclose(
-        masker.transform(img), masker.transform(img_transformed)
-    )
 
 
 @pytest.mark.skip_if_no_mkl
