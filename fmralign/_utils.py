@@ -271,7 +271,7 @@ def _make_parcellation(
     return labels
 
 
-def _create_sparse_cluster_matrix(arr):
+def _sparse_cluster_matrix(arr):
     """
     Creates a sparse matrix where element (i,j) is 1 if arr[i] == arr[j], 0 otherwise.
 
@@ -306,11 +306,13 @@ def _create_sparse_cluster_matrix(arr):
     # Convert to tensors
     rows = torch.tensor(rows)
     cols = torch.tensor(cols)
-    values = torch.ones(len(rows), dtype=torch.float)
+    values = torch.ones(len(rows), dtype=torch.bool)
 
     # Create sparse tensor
     sparse_matrix = torch.sparse_coo_tensor(
-        indices=torch.stack([rows, cols]), values=values, size=(n, n)
+        indices=torch.stack([rows, cols]),
+        values=values,
+        size=(n, n),
     ).coalesce()
 
     return sparse_matrix
