@@ -213,6 +213,3 @@ def test_sparse_cluster_matrix():
     assert sparse_matrix.shape == (5, 5)
     assert sparse_matrix.dtype == torch.bool
     assert torch.allclose(sparse_matrix.to_dense(), expected)
-
-
-test_sparse_cluster_matrix()
