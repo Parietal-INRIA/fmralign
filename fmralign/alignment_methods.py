@@ -833,8 +833,8 @@ class SparseUOT(Alignment):
         cost_values = batch_elementwise_prod_and_sum(
             F[0], F[1], row_indices, col_indices, 1
         )
-        # Normalize cost values
-        cost_values = cost_values / cost_values.sum()
+        # Take the square root to match torch.cdist
+        cost_values = torch.sqrt(cost_values)
         return _make_csr_matrix(
             crow_indices,
             col_indices,
@@ -858,6 +858,7 @@ class SparseUOT(Alignment):
 
         init_plan = self._initialize_plan(n_features)
         cost = self._uot_cost(init_plan, F, n_features)
+
         weights, ws_dot_wt = self._initialize_weights(n_features, cost)
 
         uot_params = (
