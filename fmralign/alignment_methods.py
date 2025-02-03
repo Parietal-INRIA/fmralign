@@ -762,7 +762,6 @@ class SparseUOT(Alignment):
     Parameters
     ----------
     sparsity_mask : sparse torch.Tensor of shape (n_features, n_features)
-    solver : str (optional)
     rho : float (optional)
     reg : float (optional)
     max_iter : int (optional)
@@ -835,6 +834,8 @@ class SparseUOT(Alignment):
         )
         # Take the square root to match torch.cdist
         cost_values = torch.sqrt(cost_values)
+        # Normalize the cost matrix to avoid numerical instability
+        cost_values = cost_values / cost_values.sum()
         return _make_csr_matrix(
             crow_indices,
             col_indices,
