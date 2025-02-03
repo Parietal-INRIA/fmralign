@@ -6,7 +6,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
 from fmralign._utils import (
-    _create_sparse_cluster_matrix,
+    _sparse_cluster_matrix,
 )
 from fmralign.alignment_methods import SparseUOT
 from fmralign.preprocessing import ParcellationMasker
@@ -249,7 +249,7 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
             )
             for img in imgs
         ]
-        sparsity_mask = _create_sparse_cluster_matrix(self.labels_).to(
+        sparsity_mask = _sparse_cluster_matrix(self.labels_).to(
             self.device
         )
         template_data, self.fit_ = _fit_sparse_template(

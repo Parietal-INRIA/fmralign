@@ -5,7 +5,7 @@ from joblib import Memory
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
-from fmralign._utils import _create_sparse_cluster_matrix
+from fmralign._utils import _sparse_cluster_matrix
 from fmralign.alignment_methods import SparseUOT
 from fmralign.preprocessing import ParcellationMasker
 
@@ -165,7 +165,7 @@ class SparsePairwiseAlignment(BaseEstimator, TransformerMixin):
             self.masker.transform(Y), device=self.device, dtype=torch.float32
         )
 
-        sparsity_mask = _create_sparse_cluster_matrix(self.labels_)
+        sparsity_mask = _sparse_cluster_matrix(self.labels_)
         if self.alignment_method == "sparse_uot":
             self.fit_ = SparseUOT(
                 sparsity_mask=sparsity_mask,
