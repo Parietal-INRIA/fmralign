@@ -14,6 +14,20 @@ from fmralign.sparse_pairwise_alignment import SparsePairwiseAlignment
 
 
 def _rescaled_euclidean_mean_torch(subjects_data, scale_average=False):
+    """Compute the rescaled euclidean mean of the subjects data.
+
+    Parameters
+    ----------
+    subjects_data : list of torch.Tensor of shape (n_samples, n_features)
+        List of subjects data.
+    scale_average : bool, optional
+        Scale the euclidean template, by default False
+
+    Returns
+    -------
+    average_data : torch.Tensor of shape (n_samples, n_features)
+        Rescaled euclidean mean of the subjects data.
+    """
     average_data = torch.mean(torch.stack(subjects_data), dim=0)
     scale = 1
     if scale_average:
@@ -32,6 +46,23 @@ def _align_images_to_template(
     template,
     subjects_estimators,
 ):
+    """Align the subjects data to the template using sparse alignment.
+
+    Parameters
+    ----------
+    subjects_data : List of torch.Tensor of shape (n_samples, n_features)
+        List of subjects data.
+    template : torch.Tensor of shape (n_samples, n_features)
+        Template data.
+    subjects_estimators : List of alignment_methods.Alignment
+        List of sparse alignment estimators.
+
+    Returns
+    -------
+    Tuple of List of torch.Tensor of shape (n_samples, n_features)
+        and List of alignment_methods.Alignment
+        Updated subjects data and alignment estimators.
+    """
     n_subjects = len(subjects_data)
     for i in range(n_subjects):
         sparse_estimator = subjects_estimators[i]
@@ -51,6 +82,33 @@ def _fit_sparse_template(
     verbose=False,
     **kwargs,
 ):
+    """Fit a the template to the subjects data using sparse alignment.
+
+    Parameters
+    ----------
+    subjects_data : list of torch.Tensor of shape (n_samples, n_features)
+        List of subjects data.
+    sparsity_mask : torch sparse COO tensor
+        Sparsity mask for the alignment matrix.
+    alignment_method : str, optional
+        Sparse alignment method, by default "sparse_uot"
+    n_iter : int, optional
+        Number of template updates, by default 2
+    scale_template : bool, optional
+        Scale the template data at each iteration, by default False
+    verbose : bool, optional
+        Verbosity level, by default False
+
+    Returns
+    -------
+    _type_
+        _description_
+
+    Raises
+    ------
+    ValueError
+        _description_
+    """
     n_subjects = len(subjects_data)
     if alignment_method != "sparse_uot":
         raise ValueError(f"Unknown alignment method: {alignment_method}")
@@ -106,11 +164,8 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
         Parameters
         ----------
         alignment_method: string
-            Algorithm used to perform alignment between X_i and Y_i :
-            * either 'identity', 'scaled_orthogonal', 'optimal_transport',
-            'ridge_cv', 'permutation', 'diagonal',
-            * or an instance of one of alignment classes (imported from
-            fmralign.alignment_methods)
+            Algorithm used to perform alignment between source images
+            and template, currently only 'sparse_uot' is supported.
         n_pieces: int, optional (default = 1)
             Number of regions in which the data is parcellated for alignment.
             If 1 the alignment is done on full scale data.
@@ -167,6 +222,9 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
         memory_level: integer, optional (default = None)
             Rough estimator of the amount of memory used by caching.
             Higher value means more memory for caching.
+        device: string, optional (default = 'cpu')
+            Device on which the computation will be done. If 'cuda', the
+            computation will be done on the GPU if available.
         n_jobs: integer, optional (default = 1)
             The number of CPUs to use to do the computation. -1 means
             'all CPUs', -2 'all CPUs but one', and so on.
