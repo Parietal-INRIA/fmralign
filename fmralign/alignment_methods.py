@@ -757,18 +757,29 @@ class IndividualizedNeuralTuning(Alignment):
 class SparseUOT(Alignment):
     """
     Compute the unbalanced regularized optimal coupling between X and Y,
-    with sparsity constraints inspired by the FUGW package.
+    with sparsity constraints inspired by the FUGW package sparse
+    sinkhorn solver.
+    (https://github.com/alexisthual/fugw/blob/main/src/fugw/solvers/sparse.py)
 
     Parameters
     ----------
     sparsity_mask : sparse torch.Tensor of shape (n_features, n_features)
+        Sparse mask that defines the sparsity pattern of the coupling matrix.
     rho : float (optional)
+        Strength of the unbalancing constraint. Lower values will favor lower
+        mass transport. Defaults to infinity.
     reg : float (optional)
+        Strength of the entropic regularization. Defaults to 0.1.
     max_iter : int (optional)
+        Maximum number of iterations. Defaults to 1000.
     tol : float (optional)
+        Tolerance for stopping criterion. Defaults to 1e-7.
     eval_freq : int (optional)
+        Frequency of evaluation of the stopping criterion. Defaults to 10.
     device : str (optional)
+        Device on which to perform computations. Defaults to 'cpu'.
     verbose : bool (optional)
+        Whether to print progress information. Defaults to False.
 
     Attributes
     ----------
@@ -887,7 +898,18 @@ class SparseUOT(Alignment):
         return self
 
     def transform(self, X):
-        """Transform X using optimal coupling computed during fit."""
+        """Transform X using optimal coupling computed during fit.
+
+        Parameters
+        ----------
+        X : torch.Tensor of shape (n_samples, n_features)
+            Input data to be transformed
+
+        Returns
+        -------
+        torch.Tensor of shape (n_samples, n_features)
+            Transformed data
+        """
         transformed_data = (
             torch.sparse.mm(
                 self.pi.transpose(0, 1),
