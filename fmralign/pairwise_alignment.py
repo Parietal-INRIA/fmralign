@@ -41,8 +41,6 @@ def fit_one_piece(X_i, Y_i, alignment_method):
         alignment_algo = alignment_methods.ScaledOrthogonalAlignment()
     elif alignment_method == "ridge_cv":
         alignment_algo = alignment_methods.RidgeAlignment()
-    elif alignment_method == "permutation":
-        alignment_algo = alignment_methods.Hungarian()
     elif alignment_method == "optimal_transport":
         alignment_algo = alignment_methods.OptimalTransportAlignment()
     elif alignment_method == "diagonal":
@@ -53,7 +51,6 @@ def fit_one_piece(X_i, Y_i, alignment_method):
             alignment_methods.Identity,
             alignment_methods.ScaledOrthogonalAlignment,
             alignment_methods.RidgeAlignment,
-            alignment_methods.Hungarian,
             alignment_methods.OptimalTransportAlignment,
             alignment_methods.DiagonalAlignment,
             alignment_methods.POTAlignment,
