@@ -77,31 +77,6 @@ def scaled_procrustes(X, Y, scaling=False, primal=None):
     return R.T, sc
 
 
-def optimal_permutation(X, Y):
-    """
-    Compute the optmal permutation matrix of X toward Y.
-
-    Parameters
-    ----------
-    X: (n_samples, n_features) nd array
-        source data
-    Y: (n_samples, n_features) nd array
-        target data
-
-    Returns
-    ----------
-    permutation : (n_features, n_features) nd array
-        transformation matrix
-    """
-    dist = pairwise_distances(X.T, Y.T)
-    u = linear_sum_assignment(dist)
-    u = np.array(list(zip(*u)))
-    permutation = scipy.sparse.csr_matrix(
-        (np.ones(X.shape[1]), (u[:, 0], u[:, 1]))
-    ).T
-    return permutation
-
-
 def _projection(x, y):
     """
     Compute scalar d minimizing ||dx-y||.
