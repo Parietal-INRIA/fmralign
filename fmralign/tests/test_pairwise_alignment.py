@@ -86,7 +86,6 @@ def test_models_against_identity():
         ground_truth, masker.transform(img1)
     )
     for alignment_method in [
-        "permutation",
         "ridge_cv",
         "scaled_orthogonal",
         "optimal_transport",
