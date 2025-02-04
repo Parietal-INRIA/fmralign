@@ -5,18 +5,15 @@ import warnings
 
 import numpy as np
 import ot
-import scipy
 import torch
 from fugw.mappings import FUGW, FUGWSparse
 from fugw.scripts import coarse_to_fine, lmds
 from joblib import Parallel, delayed
 from scipy import linalg
-from scipy.optimize import linear_sum_assignment
 from scipy.sparse import diags
 from scipy.spatial.distance import cdist
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.linear_model import RidgeCV
-from sklearn.metrics.pairwise import pairwise_distances
 
 # Fast implementation for parallelized computing
 from fmralign.hyperalignment.linalg import safe_svd, svd_pca
