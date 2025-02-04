@@ -26,7 +26,7 @@ def fit_one_piece(X_i, Y_i, alignment_method):
     alignment_method: string
         Algorithm used to perform alignment between X_i and Y_i :
         - either 'identity', 'scaled_orthogonal', 'optimal_transport',
-        'ridge_cv', 'permutation', 'diagonal'
+        'ridge_cv', 'diagonal'
         - or an instance of one of alignment classes
             (imported from fmralign.alignment_methods)
     Returns
@@ -109,7 +109,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         alignment_method: string
             Algorithm used to perform alignment between X_i and Y_i :
             * either 'identity', 'scaled_orthogonal', 'optimal_transport',
-            'ridge_cv', 'permutation', 'diagonal'
+            'ridge_cv', 'diagonal'
             * or an instance of one of alignment classes
             (imported from fmralign.alignment_methods)
         n_pieces: int, optional (default = 1)
