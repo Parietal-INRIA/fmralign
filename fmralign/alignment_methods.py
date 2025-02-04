@@ -305,33 +305,6 @@ class RidgeAlignment(Alignment):
         return self.R.predict(X)
 
 
-class Hungarian(Alignment):
-    """
-    Compute the optimal permutation matrix of X toward Y
-
-    Attributes
-    ----------
-    R : scipy.sparse.csr_matrix
-        Mixing matrix containing the optimal permutation
-    """
-
-    def fit(self, X, Y):
-        """
-
-        Parameters
-        -----------
-        X: (n_samples, n_features) nd array
-            source data
-        Y: (n_samples, n_features) nd array
-            target data"""
-        self.R = optimal_permutation(X, Y).T
-        return self
-
-    def transform(self, X):
-        """Transform X using optimal permutation computed during fit."""
-        return X.dot(self.R.toarray())
-
-
 class POTAlignment(Alignment):
     """
     Compute the optimal coupling between X and Y with entropic regularization,
