@@ -9,7 +9,6 @@ from scipy.sparse import csc_matrix
 from fmralign.alignment_methods import (
     DiagonalAlignment,
     FugwAlignment,
-    Hungarian,
     Identity,
     OptimalTransportAlignment,
     POTAlignment,
@@ -159,7 +158,6 @@ def test_all_classes_R_and_pred_shape_and_better_than_identity():
         RidgeAlignment(),
         ScaledOrthogonalAlignment(),
         OptimalTransportAlignment(),
-        Hungarian(),
         DiagonalAlignment(),
     ]:
         algo.fit(X, X)
@@ -179,7 +177,6 @@ def test_all_classes_R_and_pred_shape_and_better_than_identity():
             ScaledOrthogonalAlignment(scaling=False),
             OptimalTransportAlignment(),
             OptimalTransportAlignment(tau=0.995),
-            Hungarian(),
             DiagonalAlignment(),
         ]:
             algo.fit(X, Y)
