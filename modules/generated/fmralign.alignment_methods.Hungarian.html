@@ -3,16 +3,16 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta property="og:title" content="3.3.5. fmralign.alignment_methods.Hungarian" />
+<meta property="og:title" content="fmralign.alignment_methods.Hungarian" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://nilearn.github.io/modules/generated/fmralign.alignment_methods.Hungarian.html" />
 <meta property="og:site_name" content="Nilearn" />
 <meta property="og:image" content="https://nilearn.github.io/_static/nilearn-logo.png" />
 <meta property="og:image:alt" content="Nilearn" />
-<link rel="search" title="Search" href="../../search.html" /><link rel="next" title="3.3.6. fmralign.alignment_methods.OptimalTransportAlignment" href="fmralign.alignment_methods.OptimalTransportAlignment.html" /><link rel="prev" title="3.3.4. fmralign.alignment_methods.RidgeAlignment" href="fmralign.alignment_methods.RidgeAlignment.html" />
+<link rel="search" title="Search" href="../../search.html" />
 
     <link rel="shortcut icon" href="../../_static/favicon.ico"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>3.3.5. fmralign.alignment_methods.Hungarian - fmralign</title>
+        <title>fmralign.alignment_methods.Hungarian - fmralign</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=2da93098" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -205,7 +205,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -225,7 +225,7 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <ul class="current">
+  <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../auto_examples/index.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_template_alignment.html">Template-based prediction.</a></li>
@@ -237,22 +237,21 @@
 <li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_alignment_simulated_2D_data.html">Alignment on simulated 2D data.</a></li>
 </ul>
 </li>
-<li class="toctree-l1 current has-children"><a class="reference internal" href="../../user_guide.html">User guide</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of User guide</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../user_guide.html">User guide</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of User guide</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../overview.html">1. Introduction: fmralign in a nutshell</a></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../functional_alignment/index.html">2. Functional alignment: handling functional variability</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of 2. Functional alignment: handling functional variability</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../functional_alignment/introduction.html">2.1. An introduction to functional alignment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../functional_alignment/fmralign_pipeline.html">2.2. Functional alignment pipeline</a></li>
 </ul>
 </li>
-<li class="toctree-l2 current has-children"><a class="reference internal" href="../reference.html">3. Reference documentation: all fmralign functions</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of 3. Reference documentation: all fmralign functions</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference.html">3. Reference documentation: all fmralign functions</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of 3. Reference documentation: all fmralign functions</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="fmralign.pairwise_alignment.PairwiseAlignment.html">3.1.1. fmralign.pairwise_alignment.PairwiseAlignment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="fmralign.template_alignment.TemplateAlignment.html">3.2.1. fmralign.template_alignment.TemplateAlignment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="fmralign.alignment_methods.Identity.html">3.3.1. fmralign.alignment_methods.Identity</a></li>
 <li class="toctree-l3"><a class="reference internal" href="fmralign.alignment_methods.DiagonalAlignment.html">3.3.2. fmralign.alignment_methods.DiagonalAlignment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="fmralign.alignment_methods.ScaledOrthogonalAlignment.html">3.3.3. fmralign.alignment_methods.ScaledOrthogonalAlignment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="fmralign.alignment_methods.RidgeAlignment.html">3.3.4. fmralign.alignment_methods.RidgeAlignment</a></li>
-<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">3.3.5. fmralign.alignment_methods.Hungarian</a></li>
-<li class="toctree-l3"><a class="reference internal" href="fmralign.alignment_methods.OptimalTransportAlignment.html">3.3.6. fmralign.alignment_methods.OptimalTransportAlignment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fmralign.alignment_methods.OptimalTransportAlignment.html">3.3.5. fmralign.alignment_methods.OptimalTransportAlignment</a></li>
 </ul>
 </li>
 </ul>
@@ -312,7 +311,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
@@ -325,26 +324,7 @@ signature, and not how to use it. Please refer to the
 <a class="reference internal" href="../../user_guide.html#user-guide"><span class="std std-ref">user guide</span></a> for the big picture.</p>
 </div>
 <section id="fmralign-alignment-methods-hungarian">
-<h1><span class="section-number">3.3.5. </span>fmralign.alignment_methods.Hungarian<a class="headerlink" href="#fmralign-alignment-methods-hungarian" title="Link to this heading">¶</a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="fmralign.alignment_methods.Hungarian">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fmralign.alignment_methods.</span></span><span class="sig-name descname"><span class="pre">Hungarian</span></span><a class="reference external" href="https://github.com/nilearn/nilearn/blob/f55ba37/nilearn/../../../../../../../../../home/runner/work/fmralign/fmralign/fmralign/alignment_methods.py#L308"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="reference internal" href="../../_modules/fmralign/alignment_methods.html#Hungarian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fmralign.alignment_methods.Hungarian" title="Link to this definition">¶</a></dt>
-<dd><p>Compute the optimal permutation matrix of X toward Y</p>
-<dl class="field-list simple">
-<dt class="field-odd">Attributes<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>R</strong><span class="classifier">scipy.sparse.csr_matrix</span></dt><dd><p>Mixing matrix containing the optimal permutation</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="fmralign.alignment_methods.Hungarian.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nilearn/nilearn/blob/f55ba37/nilearn/../../../../../../../../../home/runner/work/fmralign/fmralign/fmralign/alignment_methods.py#L151"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fmralign.alignment_methods.Hungarian.__init__" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
+<h1>fmralign.alignment_methods.Hungarian<a class="headerlink" href="#fmralign-alignment-methods-hungarian" title="Link to this heading">¶</a></h1>
 <div style='clear:both'></div></section>
 
         </article>
@@ -352,26 +332,8 @@ signature, and not how to use it. Please refer to the
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="fmralign.alignment_methods.OptimalTransportAlignment.html">
-              <div class="page-info">
-                <div class="context">
-                  <span>Next</span>
-                </div>
-                <div class="title"><span class="section-number">3.3.6. </span>fmralign.alignment_methods.OptimalTransportAlignment</div>
-              </div>
-              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
-            </a>
-          <a class="prev-page" href="fmralign.alignment_methods.RidgeAlignment.html">
-              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
-              <div class="page-info">
-                <div class="context">
-                  <span>Previous</span>
-                </div>
-                
-                <div class="title"><span class="section-number">3.3.4. </span>fmralign.alignment_methods.RidgeAlignment</div>
-                
-              </div>
-            </a>
+          
+          
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
@@ -390,30 +352,8 @@ signature, and not how to use it. Please refer to the
         
       </footer>
     </div>
-    <aside class="toc-drawer">
+    <aside class="toc-drawer no-toc">
       
-      
-      <div class="toc-sticky toc-scroll">
-        <div class="toc-title-container">
-          <span class="toc-title">
-            On this page
-          </span>
-        </div>
-        <div class="toc-tree-container">
-          <div class="toc-tree">
-            <ul>
-<li><a class="reference internal" href="#">3.3.5. fmralign.alignment_methods.Hungarian</a><ul>
-<li><a class="reference internal" href="#fmralign.alignment_methods.Hungarian"><code class="docutils literal notranslate"><span class="pre">Hungarian</span></code></a><ul>
-<li><a class="reference internal" href="#fmralign.alignment_methods.Hungarian.__init__"><code class="docutils literal notranslate"><span class="pre">Hungarian.__init__</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-          </div>
-        </div>
-      </div>
       
       
     </aside>

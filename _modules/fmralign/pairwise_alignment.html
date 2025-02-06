@@ -244,8 +244,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../modules/generated/fmralign.alignment_methods.DiagonalAlignment.html">3.3.2. fmralign.alignment_methods.DiagonalAlignment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/generated/fmralign.alignment_methods.ScaledOrthogonalAlignment.html">3.3.3. fmralign.alignment_methods.ScaledOrthogonalAlignment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../modules/generated/fmralign.alignment_methods.RidgeAlignment.html">3.3.4. fmralign.alignment_methods.RidgeAlignment</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/generated/fmralign.alignment_methods.Hungarian.html">3.3.5. fmralign.alignment_methods.Hungarian</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../modules/generated/fmralign.alignment_methods.OptimalTransportAlignment.html">3.3.6. fmralign.alignment_methods.OptimalTransportAlignment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modules/generated/fmralign.alignment_methods.OptimalTransportAlignment.html">3.3.5. fmralign.alignment_methods.OptimalTransportAlignment</a></li>
 </ul>
 </li>
 </ul>
@@ -322,7 +321,7 @@
 <span class="sd">    alignment_method: string</span>
 <span class="sd">        Algorithm used to perform alignment between X_i and Y_i :</span>
 <span class="sd">        - either &#39;identity&#39;, &#39;scaled_orthogonal&#39;, &#39;optimal_transport&#39;,</span>
-<span class="sd">        &#39;ridge_cv&#39;, &#39;permutation&#39;, &#39;diagonal&#39;</span>
+<span class="sd">        &#39;ridge_cv&#39;, &#39;diagonal&#39;</span>
 <span class="sd">        - or an instance of one of alignment classes</span>
 <span class="sd">            (imported from fmralign.alignment_methods)</span>
 <span class="sd">    Returns</span>
@@ -337,8 +336,6 @@
         <span class="n">alignment_algo</span> <span class="o">=</span> <span class="n">alignment_methods</span><span class="o">.</span><span class="n">ScaledOrthogonalAlignment</span><span class="p">()</span>
     <span class="k">elif</span> <span class="n">alignment_method</span> <span class="o">==</span> <span class="s2">&quot;ridge_cv&quot;</span><span class="p">:</span>
         <span class="n">alignment_algo</span> <span class="o">=</span> <span class="n">alignment_methods</span><span class="o">.</span><span class="n">RidgeAlignment</span><span class="p">()</span>
-    <span class="k">elif</span> <span class="n">alignment_method</span> <span class="o">==</span> <span class="s2">&quot;permutation&quot;</span><span class="p">:</span>
-        <span class="n">alignment_algo</span> <span class="o">=</span> <span class="n">alignment_methods</span><span class="o">.</span><span class="n">Hungarian</span><span class="p">()</span>
     <span class="k">elif</span> <span class="n">alignment_method</span> <span class="o">==</span> <span class="s2">&quot;optimal_transport&quot;</span><span class="p">:</span>
         <span class="n">alignment_algo</span> <span class="o">=</span> <span class="n">alignment_methods</span><span class="o">.</span><span class="n">OptimalTransportAlignment</span><span class="p">()</span>
     <span class="k">elif</span> <span class="n">alignment_method</span> <span class="o">==</span> <span class="s2">&quot;diagonal&quot;</span><span class="p">:</span>
@@ -349,7 +346,6 @@
             <span class="n">alignment_methods</span><span class="o">.</span><span class="n">Identity</span><span class="p">,</span>
             <span class="n">alignment_methods</span><span class="o">.</span><span class="n">ScaledOrthogonalAlignment</span><span class="p">,</span>
             <span class="n">alignment_methods</span><span class="o">.</span><span class="n">RidgeAlignment</span><span class="p">,</span>
-            <span class="n">alignment_methods</span><span class="o">.</span><span class="n">Hungarian</span><span class="p">,</span>
             <span class="n">alignment_methods</span><span class="o">.</span><span class="n">OptimalTransportAlignment</span><span class="p">,</span>
             <span class="n">alignment_methods</span><span class="o">.</span><span class="n">DiagonalAlignment</span><span class="p">,</span>
             <span class="n">alignment_methods</span><span class="o">.</span><span class="n">POTAlignment</span><span class="p">,</span>
@@ -412,7 +408,7 @@
 <span class="sd">        alignment_method: string</span>
 <span class="sd">            Algorithm used to perform alignment between X_i and Y_i :</span>
 <span class="sd">            * either &#39;identity&#39;, &#39;scaled_orthogonal&#39;, &#39;optimal_transport&#39;,</span>
-<span class="sd">            &#39;ridge_cv&#39;, &#39;permutation&#39;, &#39;diagonal&#39;</span>
+<span class="sd">            &#39;ridge_cv&#39;, &#39;diagonal&#39;</span>
 <span class="sd">            * or an instance of one of alignment classes</span>
 <span class="sd">            (imported from fmralign.alignment_methods)</span>
 <span class="sd">        n_pieces: int, optional (default = 1)</span>

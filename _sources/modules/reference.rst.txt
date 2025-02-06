@@ -69,5 +69,4 @@ uses.
   DiagonalAlignment
   ScaledOrthogonalAlignment
   RidgeAlignment
-  Hungarian
   OptimalTransportAlignment
