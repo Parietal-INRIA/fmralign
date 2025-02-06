@@ -845,6 +845,8 @@ class SparseUOT(Alignment):
         )
         # Take the square root to match torch.cdist
         cost_values = torch.sqrt(cost_values)
+        # Normalize the cost values
+        cost_values = cost_values / cost_values.sum()
         return _make_csr_matrix(
             crow_indices,
             col_indices,
