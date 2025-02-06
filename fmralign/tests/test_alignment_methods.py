@@ -9,14 +9,12 @@ from scipy.sparse import csc_matrix
 from fmralign.alignment_methods import (
     DiagonalAlignment,
     FugwAlignment,
-    Hungarian,
     Identity,
     OptimalTransportAlignment,
     POTAlignment,
     RidgeAlignment,
     ScaledOrthogonalAlignment,
     _voxelwise_signal_projection,
-    optimal_permutation,
     scaled_procrustes,
 )
 from fmralign.tests.utils import zero_mean_coefficient_determination
@@ -123,22 +121,6 @@ def test_scaled_procrustes_on_simple_exact_cases():
     assert_array_almost_equal(ortho_al.transform(X.T), Y.T)
 
 
-def test_optimal_permutation_on_translation_case():
-    """Test optimal permutation method"""
-    X = np.array([[1.0, 4.0, 10], [1.5, 5, 10], [1, 5, 11], [1, 5.5, 8]]).T
-    # translate the data matrix along features axis (voxels are permutated)
-    Y = np.roll(X, 2, axis=1)
-
-    opt = optimal_permutation(X, Y).toarray()
-    assert_array_almost_equal(opt.dot(X.T).T, Y)
-
-    U = np.vstack([X.T, 2 * X.T])
-    V = np.roll(U, 4, axis=1)
-
-    opt = optimal_permutation(U, V).toarray()
-    assert_array_almost_equal(opt.dot(U.T).T, V)
-
-
 def test_projection_coefficients():
     n_samples = 4
     n_features = 6
@@ -159,7 +141,6 @@ def test_all_classes_R_and_pred_shape_and_better_than_identity():
         RidgeAlignment(),
         ScaledOrthogonalAlignment(),
         OptimalTransportAlignment(),
-        Hungarian(),
         DiagonalAlignment(),
     ]:
         algo.fit(X, X)
@@ -179,7 +160,6 @@ def test_all_classes_R_and_pred_shape_and_better_than_identity():
             ScaledOrthogonalAlignment(scaling=False),
             OptimalTransportAlignment(),
             OptimalTransportAlignment(tau=0.995),
-            Hungarian(),
             DiagonalAlignment(),
         ]:
             algo.fit(X, Y)
