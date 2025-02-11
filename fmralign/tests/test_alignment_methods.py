@@ -199,23 +199,24 @@ def test_all_classes_R_and_pred_shape_and_better_than_identity():
 
 def test_ot_backend():
     n_samples, n_features = 100, 20
+    epsilon = 1e-2
     X = np.random.randn(n_samples, n_features)
     Y = np.random.randn(n_samples, n_features)
     X /= np.linalg.norm(X)
     Y /= np.linalg.norm(Y)
-    ott_algo = OptimalTransportAlignment()
-    pot_algo = POTAlignment()
+    ott_algo = OptimalTransportAlignment(reg=epsilon)
+    pot_algo = POTAlignment(reg=epsilon)
     sparsity_mask = torch.ones(n_features, n_features).to_sparse_coo()
-    torch_algo = SparseUOT(sparsity_mask=sparsity_mask)
+    torch_algo = SparseUOT(sparsity_mask=sparsity_mask, reg=epsilon)
     ott_algo.fit(X, Y)
     pot_algo.fit(X, Y)
     torch_algo.fit(
         torch.tensor(X, dtype=torch.float32),
         torch.tensor(Y, dtype=torch.float32),
     )
-    assert_array_almost_equal(pot_algo.R, ott_algo.R, decimal=2)
+    assert_array_almost_equal(pot_algo.R, ott_algo.R, decimal=3)
     assert_array_almost_equal(
-        ott_algo.R, torch_algo.R.to_dense().numpy(), decimal=2
+        pot_algo.R, torch_algo.R.to_dense().numpy(), decimal=3
     )
 
 
@@ -237,8 +238,8 @@ def test_regularization_effect():
     Y = np.random.randn(n_samples, n_features)
 
     # Compare results with different regularization values
-    algo1 = OptimalTransportAlignment(reg=1e-1, tau=1.0, metric="euclidean")
-    algo2 = OptimalTransportAlignment(reg=1e-3, tau=1.0, metric="euclidean")
+    algo1 = OptimalTransportAlignment(reg=1e-1, tau=1.0)
+    algo2 = OptimalTransportAlignment(reg=1e-3, tau=1.0)
 
     algo1.fit(X, Y)
     algo2.fit(X, Y)
