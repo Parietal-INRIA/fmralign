@@ -242,8 +242,8 @@ def test_regularization_effect():
     Y = np.random.randn(n_samples, n_features)
 
     # Compare results with different regularization values
-    algo1 = OptimalTransportAlignment(reg=1e-1, tau=1.0)
-    algo2 = OptimalTransportAlignment(reg=1e-3, tau=1.0)
+    algo1 = OptimalTransportAlignment(reg=1e-1, tau=1.0, metric="euclidean")
+    algo2 = OptimalTransportAlignment(reg=1e-3, tau=1.0, metric="euclidean")
 
     algo1.fit(X, Y)
     algo2.fit(X, Y)
