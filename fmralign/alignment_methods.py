@@ -912,15 +912,4 @@ class SparseUOT(Alignment):
         torch.Tensor of shape (n_samples, n_features)
             Transformed data
         """
-        transformed_data = (
-            torch.sparse.mm(
-                self.pi.transpose(0, 1),
-                X.T,
-            ).to_dense()
-            / (
-                torch.sparse.sum(self.pi, dim=0).to_dense().reshape(-1, 1)
-                # Add very small value to handle null rows
-                + 1e-16
-            )
-        ).T
-        return transformed_data
+        return (X @ self.R).to_dense()
