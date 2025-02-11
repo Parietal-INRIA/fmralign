@@ -362,7 +362,7 @@ class POTAlignment(Alignment):
     def __init__(
         self,
         solver="sinkhorn_epsilon_scaling",
-        metric="euclidean",
+        metric="sqeuclidean",
         reg=1,
         max_iter=1000,
         tol=1e-3,
@@ -445,7 +445,7 @@ class OptimalTransportAlignment(Alignment):
     """
 
     def __init__(
-        self, metric="euclidean", reg=1, tau=1.0, max_iter=1000, tol=1e-3
+        self, metric="sqeuclidean", reg=1, tau=1.0, max_iter=1000, tol=1e-3
     ):
         self.metric = metric
         self.reg = reg
