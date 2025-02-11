@@ -30,12 +30,14 @@ def test_fit_method(device):
 @pytest.mark.parametrize("device", devices)
 def test_identity_alignment(device):
     """Test the identity alignment for SparsePairwiseAlignment"""
-    alignment = SparsePairwiseAlignment(device=device, reg=1e-6, tol=1e-10)
+    alignment = SparsePairwiseAlignment(device=device, reg=1e-4)
     img, _ = random_niimg((8, 7, 6, 100))
     alignment.fit(img, img)
+    masker = alignment.masker
     img_transformed = alignment.transform(img)
-    assert img_transformed.shape == img.shape
-    assert isinstance(img_transformed, Nifti1Image)
+    data = masker.transform(img)
+    data_transformed = masker.transform(img_transformed)
+    assert np.allclose(data, data_transformed, atol=1e-5)
 
 
 @pytest.mark.skip_if_no_mkl
