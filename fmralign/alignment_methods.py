@@ -791,7 +791,7 @@ class SparseUOT(Alignment):
         self,
         sparsity_mask,
         rho=float("inf"),
-        reg=0.1,
+        reg=1,
         max_iter=1000,
         tol=1e-3,
         eval_freq=10,
