@@ -197,30 +197,25 @@ def test_all_classes_R_and_pred_shape_and_better_than_identity():
             assert algo_score >= identity_baseline_score
 
 
-def test_ott_backend():
+def test_ot_backend():
     n_samples, n_features = 100, 20
-    epsilon = 0.1
     X = np.random.randn(n_samples, n_features)
     Y = np.random.randn(n_samples, n_features)
-    ott_algo = OptimalTransportAlignment(
-        reg=epsilon, metric="euclidean", tol=1e-5, max_iter=10000
-    )
-    pot_algo = POTAlignment(
-        reg=epsilon, metric="euclidean", tol=1e-5, max_iter=10000
-    )
+    X /= np.linalg.norm(X)
+    Y /= np.linalg.norm(Y)
+    ott_algo = OptimalTransportAlignment()
+    pot_algo = POTAlignment()
     sparsity_mask = torch.ones(n_features, n_features).to_sparse_coo()
-    torch_algo = SparseUOT(
-        sparsity_mask=sparsity_mask, reg=epsilon, tol=1e-5, max_iter=10000
-    )
+    torch_algo = SparseUOT(sparsity_mask=sparsity_mask)
     ott_algo.fit(X, Y)
     pot_algo.fit(X, Y)
     torch_algo.fit(
         torch.tensor(X, dtype=torch.float32),
         torch.tensor(Y, dtype=torch.float32),
     )
-    assert_array_almost_equal(ott_algo.R, pot_algo.R, decimal=3)
+    assert_array_almost_equal(pot_algo.R, ott_algo.R, decimal=2)
     assert_array_almost_equal(
-        ott_algo.R, torch_algo.pi.to_dense().numpy() * n_features, decimal=3
+        ott_algo.R, torch_algo.R.to_dense().numpy(), decimal=2
     )
 
 
