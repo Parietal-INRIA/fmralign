@@ -843,6 +843,8 @@ class SparseUOT(Alignment):
         cost_values = batch_elementwise_prod_and_sum(
             F[0], F[1], row_indices, col_indices, 1
         )
+        # Clamp negative values to avoid numerical errors
+        cost_values = torch.clamp(cost_values, min=0.0)
         cost_values = torch.sqrt(cost_values)
         return _make_csr_matrix(
             crow_indices,
