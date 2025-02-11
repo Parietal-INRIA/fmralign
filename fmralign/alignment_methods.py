@@ -362,7 +362,7 @@ class POTAlignment(Alignment):
     def __init__(
         self,
         solver="sinkhorn_epsilon_scaling",
-        metric="sqeuclidean",
+        metric="euclidean",
         reg=1,
         max_iter=1000,
         tol=1e-3,
@@ -445,7 +445,7 @@ class OptimalTransportAlignment(Alignment):
     """
 
     def __init__(
-        self, metric="sqeuclidean", reg=1, tau=1.0, max_iter=1000, tol=1e-3
+        self, metric="euclidean", reg=1, tau=1.0, max_iter=1000, tol=1e-3
     ):
         self.metric = metric
         self.reg = reg
@@ -843,6 +843,7 @@ class SparseUOT(Alignment):
         cost_values = batch_elementwise_prod_and_sum(
             F[0], F[1], row_indices, col_indices, 1
         )
+        cost_values = torch.sqrt(cost_values)
         return _make_csr_matrix(
             crow_indices,
             col_indices,
