@@ -895,7 +895,7 @@ class SparseUOT(Alignment):
         )
 
         # Convert pi to coo format
-        self.pi = pi.to_sparse_coo().detach()
+        self.R = pi.to_sparse_coo().detach() * n_features
 
         return self
 
