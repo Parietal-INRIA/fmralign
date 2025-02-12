@@ -896,6 +896,12 @@ class SparseUOT(Alignment):
         # Convert pi to coo format
         self.R = pi.to_sparse_coo().detach() * n_features
 
+        if self.R.values().isnan().any():
+            raise ValueError(
+                "Coupling matrix contains NaN values,"
+                "try increasing the regularization parameter."
+            )
+
         return self
 
     def transform(self, X):
