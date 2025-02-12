@@ -5,7 +5,6 @@ import warnings
 
 import numpy as np
 import ot
-import scipy
 import torch
 from fugw.solvers.utils import (
     batch_elementwise_prod_and_sum,
@@ -15,12 +14,10 @@ from fugw.solvers.utils import (
 from fugw.utils import _low_rank_squared_l2, _make_csr_matrix
 from joblib import Parallel, delayed
 from scipy import linalg
-from scipy.optimize import linear_sum_assignment
 from scipy.sparse import diags
 from scipy.spatial.distance import cdist
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.linear_model import RidgeCV
-from sklearn.metrics.pairwise import pairwise_distances
 
 # Fast implementation for parallelized computing
 from fmralign.hyperalignment.linalg import safe_svd, svd_pca
@@ -79,31 +76,6 @@ def scaled_procrustes(X, Y, scaling=False, primal=None):
     else:
         sc = 1
     return R.T, sc
-
-
-def optimal_permutation(X, Y):
-    """
-    Compute the optmal permutation matrix of X toward Y.
-
-    Parameters
-    ----------
-    X: (n_samples, n_features) nd array
-        source data
-    Y: (n_samples, n_features) nd array
-        target data
-
-    Returns
-    ----------
-    permutation : (n_features, n_features) nd array
-        transformation matrix
-    """
-    dist = pairwise_distances(X.T, Y.T)
-    u = linear_sum_assignment(dist)
-    u = np.array(list(zip(*u)))
-    permutation = scipy.sparse.csr_matrix(
-        (np.ones(X.shape[1]), (u[:, 0], u[:, 1]))
-    ).T
-    return permutation
 
 
 def _projection(x, y):
@@ -307,33 +279,6 @@ class RidgeAlignment(Alignment):
     def transform(self, X):
         """Transform X using optimal transform computed during fit."""
         return self.R.predict(X)
-
-
-class Hungarian(Alignment):
-    """
-    Compute the optimal permutation matrix of X toward Y
-
-    Attributes
-    ----------
-    R : scipy.sparse.csr_matrix
-        Mixing matrix containing the optimal permutation
-    """
-
-    def fit(self, X, Y):
-        """
-
-        Parameters
-        -----------
-        X: (n_samples, n_features) nd array
-            source data
-        Y: (n_samples, n_features) nd array
-            target data"""
-        self.R = optimal_permutation(X, Y).T
-        return self
-
-    def transform(self, X):
-        """Transform X using optimal permutation computed during fit."""
-        return X.dot(self.R.toarray())
 
 
 class POTAlignment(Alignment):

@@ -207,7 +207,6 @@ def test_template_closer_to_target():
     mean_distance_2 = zero_mean_coefficient_determination(sub_2, avg_data)
 
     for alignment_method in [
-        "permutation",
         "ridge_cv",
         "scaled_orthogonal",
         "optimal_transport",
