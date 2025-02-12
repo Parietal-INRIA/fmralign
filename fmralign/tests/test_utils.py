@@ -197,7 +197,7 @@ def test_non_contiguous_labels():
 
 
 def test_sparse_cluster_matrix():
-    # Test with 2 clusters
+    """Test _sparse_cluster_matrix on 2 clusters."""
     labels = torch.tensor([1, 1, 2, 2, 2])
     sparse_matrix = _sparse_cluster_matrix(labels)
 
