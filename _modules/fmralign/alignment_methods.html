@@ -301,8 +301,12 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ot</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fugw.mappings</span><span class="w"> </span><span class="kn">import</span> <span class="n">FUGW</span><span class="p">,</span> <span class="n">FUGWSparse</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fugw.scripts</span><span class="w"> </span><span class="kn">import</span> <span class="n">coarse_to_fine</span><span class="p">,</span> <span class="n">lmds</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fugw.solvers.utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">batch_elementwise_prod_and_sum</span><span class="p">,</span>
+    <span class="n">crow_indices_to_row_indices</span><span class="p">,</span>
+    <span class="n">solver_sinkhorn_sparse</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fugw.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_low_rank_squared_l2</span><span class="p">,</span> <span class="n">_make_csr_matrix</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">joblib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">linalg</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.sparse</span><span class="w"> </span><span class="kn">import</span> <span class="n">diags</span>
@@ -1017,265 +1021,170 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">reconstructed_signal</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
 
-<span class="k">class</span><span class="w"> </span><span class="nc">FugwAlignment</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wrapper for FUGW alignment&quot;&quot;&quot;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SparseUOT</span><span class="p">(</span><span class="n">Alignment</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the unbalanced regularized optimal coupling between X and Y,</span>
+<span class="sd">    with sparsity constraints inspired by the FUGW package sparse</span>
+<span class="sd">    sinkhorn solver.</span>
+<span class="sd">    (https://github.com/alexisthual/fugw/blob/main/src/fugw/solvers/sparse.py)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sparsity_mask : sparse torch.Tensor of shape (n_features, n_features)</span>
+<span class="sd">        Sparse mask that defines the sparsity pattern of the coupling matrix.</span>
+<span class="sd">    rho : float (optional)</span>
+<span class="sd">        Strength of the unbalancing constraint. Lower values will favor lower</span>
+<span class="sd">        mass transport. Defaults to infinity.</span>
+<span class="sd">    reg : float (optional)</span>
+<span class="sd">        Strength of the entropic regularization. Defaults to 0.1.</span>
+<span class="sd">    max_iter : int (optional)</span>
+<span class="sd">        Maximum number of iterations. Defaults to 1000.</span>
+<span class="sd">    tol : float (optional)</span>
+<span class="sd">        Tolerance for stopping criterion. Defaults to 1e-7.</span>
+<span class="sd">    eval_freq : int (optional)</span>
+<span class="sd">        Frequency of evaluation of the stopping criterion. Defaults to 10.</span>
+<span class="sd">    device : str (optional)</span>
+<span class="sd">        Device on which to perform computations. Defaults to &#39;cpu&#39;.</span>
+<span class="sd">    verbose : bool (optional)</span>
+<span class="sd">        Whether to print progress information. Defaults to False.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pi : sparse torch.Tensor of shape (n_features, n_features)</span>
+<span class="sd">        Sparse coupling matrix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">segmentation</span><span class="p">,</span>
-        <span class="n">alpha_coarse</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
-        <span class="n">alpha_fine</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
-        <span class="n">rho_coarse</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">rho_fine</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">eps_coarse</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">eps_fine</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">anisotropy</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
-        <span class="n">reg_mode</span><span class="o">=</span><span class="s2">&quot;independent&quot;</span><span class="p">,</span>
-        <span class="n">divergence</span><span class="o">=</span><span class="s2">&quot;kl&quot;</span><span class="p">,</span>
-        <span class="n">method</span><span class="o">=</span><span class="s2">&quot;coarse-to-fine&quot;</span><span class="p">,</span>
-        <span class="n">n_landmarks</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
-        <span class="n">n_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-        <span class="n">radius</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-        <span class="n">id_reg</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-        <span class="n">device</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+        <span class="n">sparsity_mask</span><span class="p">,</span>
+        <span class="n">rho</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">),</span>
+        <span class="n">reg</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+        <span class="n">tol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span>
+        <span class="n">eval_freq</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
         <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize FUGW alignment</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        segmentation : ndarray,</span>
-<span class="sd">            Segmentation of the mask</span>
-<span class="sd">        alpha_coarse : float, optional, by default 0.5.</span>
-<span class="sd">        rho_coarse : float, optional, by default 1.</span>
-<span class="sd">        eps_coarse : float, optional, by default 1.</span>
-<span class="sd">        alpha_fine : float, optional, by default 0.5.</span>
-<span class="sd">        rho_fine : float, optional, by default 1.</span>
-<span class="sd">        eps_fine : float, optional, by default 1e-6.</span>
-<span class="sd">        anisotropy : tuple, optional.</span>
-<span class="sd">            Anisotropy of the fmri mask, by default (3, 3, 3)</span>
-<span class="sd">        reg_mode : str, optional</span>
-<span class="sd">            Regularization mode, by default &quot;independent&quot;</span>
-<span class="sd">        divergence : str, optional</span>
-<span class="sd">            Divergence used in the FUGW alignment, by default &quot;kl&quot;.</span>
-<span class="sd">        method : str, optional</span>
-<span class="sd">            Method used to compute FUGW alignments, by default &quot;coarse-to-fine&quot;.</span>
-<span class="sd">        n_landmarks : int, optional</span>
-<span class="sd">            Number of landmarks used in the embedding, by default 1000.</span>
-<span class="sd">        n_samples : int, optional</span>
-<span class="sd">            Number of samples points passed to</span>
-<span class="sd">            sklearn.cluster.AgglomerativeClustering, by default 100.</span>
-<span class="sd">        radius : int, optional</span>
-<span class="sd">            Radius around the sampled points in mm, by default 5.</span>
-<span class="sd">        id_reg: float, in the [0, 1] interval, defaults to 0</span>
-<span class="sd">            If source/target share the same geometry,</span>
-<span class="sd">            interpolate the transport plan with the identity</span>
-<span class="sd">            using the provided coefficient.</span>
-<span class="sd">            A value of 1 (resp. 0) will rely solely on the identity</span>
-<span class="sd">            (resp. the transport plan).</span>
-<span class="sd">        device : torch.device, optional, by default &quot;auto&quot;</span>
-<span class="sd">            Device on which to perform the computation.</span>
-<span class="sd">        verbose : bool, optional, by default True</span>
-<span class="sd">        **kwargs : dict</span>
-<span class="sd">            Additional parameters passed to the FUGW mapping.fit method.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">segmentation</span> <span class="o">=</span> <span class="n">segmentation</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">alpha_coarse</span> <span class="o">=</span> <span class="n">alpha_coarse</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rho_coarse</span> <span class="o">=</span> <span class="n">rho_coarse</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">eps_coarse</span> <span class="o">=</span> <span class="n">eps_coarse</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">alpha_fine</span> <span class="o">=</span> <span class="n">alpha_fine</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rho_fine</span> <span class="o">=</span> <span class="n">rho_fine</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">eps_fine</span> <span class="o">=</span> <span class="n">eps_fine</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">anisotropy</span> <span class="o">=</span> <span class="n">anisotropy</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">reg_mode</span> <span class="o">=</span> <span class="n">reg_mode</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">divergence</span> <span class="o">=</span> <span class="n">divergence</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">method</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_landmarks</span> <span class="o">=</span> <span class="n">n_landmarks</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">=</span> <span class="n">n_samples</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="n">radius</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">id_reg</span> <span class="o">=</span> <span class="n">id_reg</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rho</span> <span class="o">=</span> <span class="n">rho</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reg</span> <span class="o">=</span> <span class="n">reg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sparsity_mask</span> <span class="o">=</span> <span class="n">sparsity_mask</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_iter</span> <span class="o">=</span> <span class="n">max_iter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tol</span> <span class="o">=</span> <span class="n">tol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eval_freq</span> <span class="o">=</span> <span class="n">eval_freq</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Computing geometry embedding...&quot;</span><span class="p">)</span>
-        <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">geometry_embedding</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">geometry_embedding_normalized</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">max_distance</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_geometry_embedding</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">segmentation</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">n_landmarks</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">anisotropy</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_initialize_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">cost</span><span class="p">):</span>
+        <span class="n">crow_indices</span><span class="p">,</span> <span class="n">col_indices</span> <span class="o">=</span> <span class="n">cost</span><span class="o">.</span><span class="n">crow_indices</span><span class="p">(),</span> <span class="n">cost</span><span class="o">.</span><span class="n">col_indices</span><span class="p">()</span>
+        <span class="n">row_indices</span> <span class="o">=</span> <span class="n">crow_indices_to_row_indices</span><span class="p">(</span><span class="n">crow_indices</span><span class="p">)</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span>
+        <span class="n">ws_dot_wt_values</span> <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">row_indices</span><span class="p">]</span> <span class="o">*</span> <span class="n">weights</span><span class="p">[</span><span class="n">col_indices</span><span class="p">]</span>
+        <span class="n">ws_dot_wt</span> <span class="o">=</span> <span class="n">_make_csr_matrix</span><span class="p">(</span>
+            <span class="n">crow_indices</span><span class="p">,</span>
+            <span class="n">col_indices</span><span class="p">,</span>
+            <span class="n">ws_dot_wt_values</span><span class="p">,</span>
+            <span class="n">cost</span><span class="o">.</span><span class="n">size</span><span class="p">(),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Geometry embedding computed&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">weights</span><span class="p">,</span> <span class="n">ws_dot_wt</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_get_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the device on which to perform the computation&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">device</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
-            <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span>
-                <span class="s2">&quot;cuda:0&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span>
-            <span class="p">)</span>
-        <span class="k">return</span> <span class="n">device</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Normalize the input data&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">((</span><span class="n">X</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_prepare_geometry_embedding</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">segmentation</span><span class="p">,</span> <span class="n">n_landmarks</span><span class="p">,</span> <span class="n">anisotropy</span><span class="p">,</span> <span class="n">verbose</span>
-    <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the normalized geometry embedding&quot;&quot;&quot;</span>
-        <span class="n">geometry_embedding</span> <span class="o">=</span> <span class="n">lmds</span><span class="o">.</span><span class="n">compute_lmds_volume</span><span class="p">(</span>
-            <span class="n">segmentation</span><span class="p">,</span>
-            <span class="n">k</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
-            <span class="n">n_landmarks</span><span class="o">=</span><span class="n">n_landmarks</span><span class="p">,</span>
-            <span class="n">anisotropy</span><span class="o">=</span><span class="n">anisotropy</span><span class="p">,</span>
-            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">()</span>
-
-        <span class="p">(</span>
-            <span class="n">geometry_embedding_normalized</span><span class="p">,</span>
-            <span class="n">max_distance</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="n">coarse_to_fine</span><span class="o">.</span><span class="n">random_normalizing</span><span class="p">(</span><span class="n">geometry_embedding</span><span class="p">)</span>
-
+    <span class="k">def</span><span class="w"> </span><span class="nf">_initialize_plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">(</span>
-            <span class="n">geometry_embedding</span><span class="p">,</span>
-            <span class="n">geometry_embedding_normalized</span><span class="p">,</span>
-            <span class="n">max_distance</span><span class="p">,</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">sparse_coo_tensor</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sparsity_mask</span><span class="o">.</span><span class="n">indices</span><span class="p">(),</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sparsity_mask</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+                <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">sparsity_mask</span><span class="o">.</span><span class="n">values</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="o">.</span><span class="n">coalesce</span><span class="p">()</span>
+            <span class="o">.</span><span class="n">to_sparse_csr</span><span class="p">()</span>
+            <span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
         <span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_sample_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">segmentation</span><span class="p">,</span> <span class="n">geometry_embedding</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sample the geometry of the mask&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">coarse_to_fine</span><span class="o">.</span><span class="n">sample_volume_uniformly</span><span class="p">(</span>
-            <span class="n">segmentation</span><span class="p">,</span>
-            <span class="n">embeddings</span><span class="o">=</span><span class="n">geometry_embedding</span><span class="p">,</span>
-            <span class="n">n_samples</span><span class="o">=</span><span class="n">n_samples</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_uot_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_plan</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="n">crow_indices</span><span class="p">,</span> <span class="n">col_indices</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">init_plan</span><span class="o">.</span><span class="n">crow_indices</span><span class="p">(),</span>
+            <span class="n">init_plan</span><span class="o">.</span><span class="n">col_indices</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="n">row_indices</span> <span class="o">=</span> <span class="n">crow_indices_to_row_indices</span><span class="p">(</span><span class="n">crow_indices</span><span class="p">)</span>
+        <span class="n">cost_values</span> <span class="o">=</span> <span class="n">batch_elementwise_prod_and_sum</span><span class="p">(</span>
+            <span class="n">F</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">F</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">row_indices</span><span class="p">,</span> <span class="n">col_indices</span><span class="p">,</span> <span class="mi">1</span>
+        <span class="p">)</span>
+        <span class="c1"># Clamp negative values to avoid numerical errors</span>
+        <span class="n">cost_values</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="n">cost_values</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">cost_values</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">cost_values</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_make_csr_matrix</span><span class="p">(</span>
+            <span class="n">crow_indices</span><span class="p">,</span>
+            <span class="n">col_indices</span><span class="p">,</span>
+            <span class="n">cost_values</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">X</span><span class="p">,</span>
-        <span class="n">Y</span><span class="p">,</span>
-    <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit FUGW alignment</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        X : ndarray of shape (n_samples, n_features)</span>
-<span class="sd">            Source features</span>
-<span class="sd">        Y : ndarray of shape (n_samples, n_features)</span>
-<span class="sd">            Target features</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        self : FugwAlignment</span>
-<span class="sd">            Fitted FUGW alignment</span>
+<span class="sd">        X: (n_samples, n_features) torch.Tensor</span>
+<span class="sd">            source data</span>
+<span class="sd">        Y: (n_samples, n_features) torch.Tensor</span>
+<span class="sd">            target data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">source_features_normalized</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
-        <span class="n">target_features_normalized</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize</span><span class="p">(</span><span class="n">Y</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Features normalized&quot;</span><span class="p">)</span>
+        <span class="n">n_features</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="n">_low_rank_squared_l2</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">Y</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;dense&quot;</span><span class="p">:</span>
-            <span class="n">mapping</span> <span class="o">=</span> <span class="n">FUGW</span><span class="p">(</span>
-                <span class="n">alpha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha_coarse</span><span class="p">,</span>
-                <span class="n">rho</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rho_coarse</span><span class="p">,</span>
-                <span class="n">eps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">eps_coarse</span><span class="p">,</span>
-                <span class="n">reg_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reg_mode</span><span class="p">,</span>
-                <span class="n">divergence</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">divergence</span><span class="p">,</span>
+        <span class="n">init_plan</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_plan</span><span class="p">(</span><span class="n">n_features</span><span class="p">)</span>
+        <span class="n">cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uot_cost</span><span class="p">(</span><span class="n">init_plan</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">n_features</span><span class="p">)</span>
+
+        <span class="n">weights</span><span class="p">,</span> <span class="n">ws_dot_wt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_weights</span><span class="p">(</span><span class="n">n_features</span><span class="p">,</span> <span class="n">cost</span><span class="p">)</span>
+
+        <span class="n">uot_params</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">rho</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">),</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">rho</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">),</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">reg</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">init_duals</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_features</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">),</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_features</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">tuple_weights</span> <span class="o">=</span> <span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">ws_dot_wt</span><span class="p">)</span>
+        <span class="n">train_params</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_iter</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_freq</span><span class="p">)</span>
+
+        <span class="n">_</span><span class="p">,</span> <span class="n">pi</span> <span class="o">=</span> <span class="n">solver_sinkhorn_sparse</span><span class="p">(</span>
+            <span class="n">cost</span><span class="o">=</span><span class="n">cost</span><span class="p">,</span>
+            <span class="n">init_duals</span><span class="o">=</span><span class="n">init_duals</span><span class="p">,</span>
+            <span class="n">uot_params</span><span class="o">=</span><span class="n">uot_params</span><span class="p">,</span>
+            <span class="n">tuple_weights</span><span class="o">=</span><span class="n">tuple_weights</span><span class="p">,</span>
+            <span class="n">train_params</span><span class="o">=</span><span class="n">train_params</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Convert pi to coo format</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="n">pi</span><span class="o">.</span><span class="n">to_sparse_coo</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span> <span class="o">*</span> <span class="n">n_features</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">values</span><span class="p">()</span><span class="o">.</span><span class="n">isnan</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Coupling matrix contains NaN values,&quot;</span>
+                <span class="s2">&quot;try increasing the regularization parameter.&quot;</span>
             <span class="p">)</span>
-
-            <span class="n">mapping</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
-                <span class="n">source_features</span><span class="o">=</span><span class="n">source_features_normalized</span><span class="p">,</span>
-                <span class="n">target_features</span><span class="o">=</span><span class="n">target_features_normalized</span><span class="p">,</span>
-                <span class="n">source_geometry</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry_embedding_normalized</span>
-                <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry_embedding_normalized</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
-                <span class="n">target_geometry</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry_embedding_normalized</span>
-                <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry_embedding_normalized</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
-                <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
-                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">,</span>
-            <span class="p">)</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">mapping</span> <span class="o">=</span> <span class="n">mapping</span>
-
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;coarse-to-fine&quot;</span><span class="p">:</span>
-            <span class="c1"># Subsample vertices as uniformly as possible on the surface</span>
-            <span class="n">sampled_geometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_geometry</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">segmentation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry_embedding</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span>
-            <span class="p">)</span>
-
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Samples computed&quot;</span><span class="p">)</span>
-
-            <span class="n">coarse_mapping</span> <span class="o">=</span> <span class="n">FUGW</span><span class="p">(</span>
-                <span class="n">alpha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha_coarse</span><span class="p">,</span>
-                <span class="n">rho</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rho_coarse</span><span class="p">,</span>
-                <span class="n">eps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">eps_coarse</span><span class="p">,</span>
-                <span class="n">reg_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reg_mode</span><span class="p">,</span>
-                <span class="n">divergence</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">divergence</span><span class="p">,</span>
-            <span class="p">)</span>
-
-            <span class="n">fine_mapping</span> <span class="o">=</span> <span class="n">FUGWSparse</span><span class="p">(</span>
-                <span class="n">alpha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha_fine</span><span class="p">,</span>
-                <span class="n">rho</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rho_fine</span><span class="p">,</span>
-                <span class="n">eps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">eps_fine</span><span class="p">,</span>
-                <span class="n">reg_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reg_mode</span><span class="p">,</span>
-                <span class="n">divergence</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">divergence</span><span class="p">,</span>
-            <span class="p">)</span>
-
-            <span class="n">coarse_to_fine</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
-                <span class="n">source_features</span><span class="o">=</span><span class="n">source_features_normalized</span><span class="p">,</span>
-                <span class="n">target_features</span><span class="o">=</span><span class="n">target_features_normalized</span><span class="p">,</span>
-                <span class="n">source_geometry_embeddings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry_embedding_normalized</span><span class="p">,</span>
-                <span class="n">target_geometry_embeddings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry_embedding_normalized</span><span class="p">,</span>
-                <span class="n">source_sample</span><span class="o">=</span><span class="n">sampled_geometry</span><span class="p">,</span>
-                <span class="n">target_sample</span><span class="o">=</span><span class="n">sampled_geometry</span><span class="p">,</span>
-                <span class="n">coarse_mapping</span><span class="o">=</span><span class="n">coarse_mapping</span><span class="p">,</span>
-                <span class="n">source_selection_radius</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_distance</span><span class="p">),</span>
-                <span class="n">target_selection_radius</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_distance</span><span class="p">),</span>
-                <span class="n">fine_mapping</span><span class="o">=</span><span class="n">fine_mapping</span><span class="p">,</span>
-                <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
-                <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
-                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">,</span>
-            <span class="p">)</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">mapping</span> <span class="o">=</span> <span class="n">fine_mapping</span>
 
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">X</span><span class="p">,</span>
-    <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Project features using the fitted FUGW alignment</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform X using optimal coupling computed during fit.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        X : ndarray of shape (n_samples, n_features)</span>
-<span class="sd">            Source features</span>
+<span class="sd">        X : torch.Tensor of shape (n_samples, n_features)</span>
+<span class="sd">            Input data to be transformed</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        ndarray</span>
-<span class="sd">            Projected features</span>
+<span class="sd">        torch.Tensor of shape (n_samples, n_features)</span>
+<span class="sd">            Transformed data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapping</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;FUGW alignment must be fitted before transforming data&quot;</span>
-            <span class="p">)</span>
-
-        <span class="c1"># If id_reg is True, interpolate the resulting</span>
-        <span class="c1"># mapping with the identity matrix</span>
-        <span class="n">transformed_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapping</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
-            <span class="n">X</span><span class="p">,</span> <span class="n">id_reg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">id_reg</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="n">transformed_features</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">X</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">)</span><span class="o">.</span><span class="n">to_dense</span><span class="p">()</span>
 </pre></div>
         </article>
       </div>
