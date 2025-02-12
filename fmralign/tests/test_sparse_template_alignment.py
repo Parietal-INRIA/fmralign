@@ -25,6 +25,8 @@ if torch.cuda.is_available():
     "scale_average, device", product([True, False], devices)
 )
 def test_rescaled_euclidean_mean_torch(scale_average, device):
+    """Test that _rescaled_euclidean_mean_torch returns a tensor\n
+    with the same shape and dtype as the input tensors"""
     subjects_data_np = sample_subjects_data()
     subjects_data = [
         torch.tensor(data, device=device, dtype=torch.float32)
@@ -42,6 +44,8 @@ def test_rescaled_euclidean_mean_torch(scale_average, device):
 @pytest.mark.skip_if_no_mkl
 @pytest.mark.parametrize("device", devices)
 def test_align_images_to_template(device):
+    """Test that _align_images_to_template returns a list of\n
+    aligned data and a list of estimators"""
     subjects_data_np = sample_subjects_data()
     subjects_data = [
         torch.tensor(data, device=device, dtype=torch.float32)
@@ -68,6 +72,8 @@ def test_align_images_to_template(device):
 @pytest.mark.skip_if_no_mkl
 @pytest.mark.parametrize("device", devices)
 def test_fit_sparse_template(device):
+    """Test that _fit_sparse_template returns a template and\n
+    a list of AlignmentEstimator objects"""
     subjects_data_np = sample_subjects_data()
     subjects_data = [
         torch.tensor(data, device=device, dtype=torch.float32)
