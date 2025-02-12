@@ -66,7 +66,7 @@ def _align_images_to_template(
     n_subjects = len(subjects_data)
     for i in range(n_subjects):
         sparse_estimator = subjects_estimators[i]
-        sparse_estimator.fit(template, subjects_data[i])
+        sparse_estimator.fit(subjects_data[i], template)
         subjects_data[i] = sparse_estimator.transform(subjects_data[i])
         # Update the estimator in the list
         subjects_estimators[i] = sparse_estimator
