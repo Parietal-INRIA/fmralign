@@ -53,7 +53,6 @@ def fit_one_piece(X_i, Y_i, alignment_method):
             alignment_methods.RidgeAlignment,
             alignment_methods.OptimalTransportAlignment,
             alignment_methods.DiagonalAlignment,
-            alignment_methods.POTAlignment,
         ),
     ):
         alignment_algo = clone(alignment_method)
