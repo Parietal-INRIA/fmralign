@@ -10,7 +10,6 @@ from fmralign.alignment_methods import (
     DiagonalAlignment,
     Identity,
     OptimalTransportAlignment,
-    POTAlignment,
     RidgeAlignment,
     ScaledOrthogonalAlignment,
     SparseUOT,
@@ -159,7 +158,6 @@ def test_all_classes_R_and_pred_shape_and_better_than_identity():
             ScaledOrthogonalAlignment(),
             ScaledOrthogonalAlignment(scaling=False),
             OptimalTransportAlignment(),
-            OptimalTransportAlignment(tau=0.995),
             DiagonalAlignment(),
         ]:
             algo.fit(X, Y)
@@ -184,26 +182,25 @@ def test_ot_backend():
     Y = np.random.randn(n_samples, n_features)
     X /= np.linalg.norm(X)
     Y /= np.linalg.norm(Y)
-    ott_algo = OptimalTransportAlignment(reg=epsilon)
-    pot_algo = POTAlignment(reg=epsilon)
+    pot_algo = OptimalTransportAlignment(reg=epsilon)
     sparsity_mask = torch.ones(n_features, n_features).to_sparse_coo()
     torch_algo = SparseUOT(sparsity_mask=sparsity_mask, reg=epsilon)
-    ott_algo.fit(X, Y)
     pot_algo.fit(X, Y)
     torch_algo.fit(
         torch.tensor(X, dtype=torch.float32),
         torch.tensor(Y, dtype=torch.float32),
     )
-    assert_array_almost_equal(pot_algo.R, ott_algo.R, decimal=3)
     assert_array_almost_equal(
         pot_algo.R, torch_algo.R.to_dense().numpy(), decimal=3
     )
 
 
-def test_identity_balanced_wasserstein():
+def test_identity_wasserstein():
+    """Test that the optimal coupling matrix is the\n
+    identity matrix when using the identity alignment."""
     n_samples, n_features = 10, 5
     X = np.random.randn(n_samples, n_features)
-    algo = OptimalTransportAlignment(reg=1e-12, tau=1.0)
+    algo = OptimalTransportAlignment(reg=1e-12)
     algo.fit(X, X)
     # Check if transport matrix P is uniform diagonal
     assert_array_almost_equal(algo.R, np.eye(n_features))
@@ -218,32 +215,14 @@ def test_regularization_effect():
     Y = np.random.randn(n_samples, n_features)
 
     # Compare results with different regularization values
-    algo1 = OptimalTransportAlignment(reg=1e-1, tau=1.0)
-    algo2 = OptimalTransportAlignment(reg=1e-3, tau=1.0)
+    algo1 = OptimalTransportAlignment(reg=1e-1)
+    algo2 = OptimalTransportAlignment(reg=1e-3)
 
     algo1.fit(X, Y)
     algo2.fit(X, Y)
 
     # Higher regularization should lead to more uniform transport matrix
     assert np.std(algo1.R) < np.std(algo2.R)
-
-
-def test_tau_effect():
-    """Test the effect of tau parameter on mass conservation."""
-    n_samples, n_features = 10, 5
-    X = np.random.randn(n_samples, n_features)
-    Y = np.random.randn(n_samples, n_features)
-
-    # Compare results with different tau values
-    algo1 = OptimalTransportAlignment(reg=1e-3, tau=0.995)
-    algo2 = OptimalTransportAlignment(reg=1e-3, tau=0.990)
-
-    algo1.fit(X, Y)
-    algo2.fit(X, Y)
-
-    # Lower tau should result in less mass conservation
-    assert np.sum(algo1.R.sum(axis=0)) > np.sum(algo2.R.sum(axis=0))
-    assert np.sum(algo1.R.sum(axis=1)) > np.sum(algo2.R.sum(axis=1))
 
 
 def test_sparseuot():
