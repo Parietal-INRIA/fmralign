@@ -44,7 +44,9 @@ def zero_mean_coefficient_determination(
     nonzero_numerator = numerator != 0
     valid_score = nonzero_denominator & nonzero_numerator
     output_scores = np.ones([y_true.shape[1]])
-    output_scores[valid_score] = 1 - (numerator[valid_score] / denominator[valid_score])
+    output_scores[valid_score] = 1 - (
+        numerator[valid_score] / denominator[valid_score]
+    )
     output_scores[nonzero_numerator & ~nonzero_denominator] = 0
 
     if multioutput == "raw_values":
@@ -55,7 +57,8 @@ def zero_mean_coefficient_determination(
         avg_weights = None
     elif multioutput == "variance_weighted":
         avg_weights = (
-            weight * (y_true - np.average(y_true, axis=0, weights=sample_weight)) ** 2
+            weight
+            * (y_true - np.average(y_true, axis=0, weights=sample_weight)) ** 2
         ).sum(axis=0, dtype=np.float64)
         # avoid fail on constant y or one-element arrays
         if not np.any(nonzero_denominator):
@@ -142,7 +145,8 @@ def _make_mesh():
     left_coords = np.asarray([[0.0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1]])
     left_faces = np.asarray([[1, 0, 2], [0, 1, 3], [0, 3, 2], [1, 2, 3]])
     right_coords = (
-        np.asarray([[0.0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0], [0, 0, 1]]) + 2.0
+        np.asarray([[0.0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0], [0, 0, 1]])
+        + 2.0
     )
     right_faces = np.asarray(
         [
@@ -182,4 +186,3 @@ def sample_subjects_data(n_subjects=3):
     """Sample data in one parcel for n_subjects"""
     subjects_data = [np.random.rand(10, 20) for _ in range(n_subjects)]
     return subjects_data
-

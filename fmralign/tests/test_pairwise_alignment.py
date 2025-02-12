@@ -135,7 +135,6 @@ def test_parcellation_before_fit():
 
 def test_surface_alignment():
     """Test compatibility with `SurfaceImage`"""
-    alignment = PairwiseAlignment()
     n_pieces = 3
     img1 = surf_img(20)
     img2 = surf_img(20)

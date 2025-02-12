@@ -12,7 +12,6 @@ import os
 import sys
 from pathlib import Path
 
-
 import fmralign
 
 # If extensions (or modules to document with autodoc) are in another

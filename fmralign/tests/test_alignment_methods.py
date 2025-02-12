@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-import pytest
+import torch
 from numpy.testing import assert_array_almost_equal
 from scipy.linalg import orthogonal_procrustes
 from scipy.sparse import csc_matrix
 
 from fmralign.alignment_methods import (
     DiagonalAlignment,
-    FugwAlignment,
     Identity,
     OptimalTransportAlignment,
     POTAlignment,
     RidgeAlignment,
     ScaledOrthogonalAlignment,
+    SparseUOT,
     _voxelwise_signal_projection,
     scaled_procrustes,
 )
@@ -177,36 +177,27 @@ def test_all_classes_R_and_pred_shape_and_better_than_identity():
             assert algo_score >= identity_baseline_score
 
 
-@pytest.mark.skip_if_no_mkl
-@pytest.mark.parametrize("method", ["dense", "coarse-to-fine"])
-def test_fugw_alignment(method):
-    # Create a fake segmentation
-    segmentation = np.ones((10, 10, 10))
-    n_features = 3
-    n_samples = int(segmentation.sum())
-    X = np.random.randn(n_samples, n_features).T
-    Y = np.random.randn(n_samples, n_features).T
-
-    fugw_alignment = FugwAlignment(segmentation, method=method)
-    fugw_alignment.fit(X, Y)
-    assert fugw_alignment.transform(X).shape == X.shape
-    assert fugw_alignment.transform(X).shape == Y.shape
-
-
-def test_ott_backend():
+def test_ot_backend():
     n_samples, n_features = 100, 20
-    epsilon = 0.1
+    epsilon = 1e-2
     X = np.random.randn(n_samples, n_features)
     Y = np.random.randn(n_samples, n_features)
-    algo = OptimalTransportAlignment(
-        reg=epsilon, metric="euclidean", tol=1e-5, max_iter=10000
+    X /= np.linalg.norm(X)
+    Y /= np.linalg.norm(Y)
+    ott_algo = OptimalTransportAlignment(reg=epsilon)
+    pot_algo = POTAlignment(reg=epsilon)
+    sparsity_mask = torch.ones(n_features, n_features).to_sparse_coo()
+    torch_algo = SparseUOT(sparsity_mask=sparsity_mask, reg=epsilon)
+    ott_algo.fit(X, Y)
+    pot_algo.fit(X, Y)
+    torch_algo.fit(
+        torch.tensor(X, dtype=torch.float32),
+        torch.tensor(Y, dtype=torch.float32),
     )
-    old_implem = POTAlignment(
-        reg=epsilon, metric="euclidean", tol=1e-5, max_iter=10000
+    assert_array_almost_equal(pot_algo.R, ott_algo.R, decimal=3)
+    assert_array_almost_equal(
+        pot_algo.R, torch_algo.R.to_dense().numpy(), decimal=3
     )
-    algo.fit(X, Y)
-    old_implem.fit(X, Y)
-    assert_array_almost_equal(algo.R, old_implem.R, decimal=3)
 
 
 def test_identity_balanced_wasserstein():
@@ -253,3 +244,42 @@ def test_tau_effect():
     # Lower tau should result in less mass conservation
     assert np.sum(algo1.R.sum(axis=0)) > np.sum(algo2.R.sum(axis=0))
     assert np.sum(algo1.R.sum(axis=1)) > np.sum(algo2.R.sum(axis=1))
+
+
+def test_sparseuot():
+    """Test the sparse version of optimal transport."""
+    n_samples, n_features = 100, 20
+    X = torch.randn(n_samples, n_features)
+    Y = torch.randn(n_samples, n_features)
+    X /= torch.norm(X)
+    Y /= torch.norm(Y)
+    sparsity_mask = torch.ones(n_features, n_features).to_sparse_coo()
+    algo = SparseUOT(sparsity_mask=sparsity_mask)
+    algo.fit(X, Y)
+    X_transformed = algo.transform(X)
+
+    assert algo.R.shape == (n_features, n_features)
+    assert algo.R.dtype == torch.float32
+    assert isinstance(X_transformed, torch.Tensor)
+    assert X_transformed.shape == X.shape
+
+    # Test identity transformation
+    algo.R = (torch.eye(n_features)).to_sparse_coo()
+    X_transformed = algo.transform(X)
+    assert torch.allclose(X_transformed, X)
+
+    # Check the unbalanced case
+    algo = SparseUOT(sparsity_mask=sparsity_mask)
+    algo.fit(X, Y)
+    mass1 = algo.R.sum() / n_features
+
+    algo = SparseUOT(sparsity_mask=sparsity_mask, rho=0.1)
+    algo.fit(X, Y)
+    mass2 = algo.R.sum() / n_features
+
+    algo = SparseUOT(sparsity_mask=sparsity_mask, rho=0.0)
+    algo.fit(X, Y)
+    mass3 = algo.R.sum() / n_features
+
+    assert torch.allclose(mass1, torch.tensor(1.0))
+    assert mass1 > mass2 > mass3

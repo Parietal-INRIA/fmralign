@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import warnings
+from collections import defaultdict
 
 import nibabel as nib
 import numpy as np
+import torch
 from nilearn._utils.niimg_conversions import check_same_fov
 from nilearn.image import new_img_like, smooth_img
 from nilearn.masking import apply_mask_fmri, intersect_masks
@@ -267,3 +269,49 @@ def _make_parcellation(
     _check_labels(labels)
 
     return labels
+
+
+def _sparse_cluster_matrix(arr):
+    """
+    Creates a sparse matrix where element (i,j) is 1 if arr[i] == arr[j], 0 otherwise.
+
+    Parameters
+    ----------
+    arr: torch.Tensor of shape (n,)
+        1D array of integers
+
+    Returns
+    -------
+    sparse_matrix: sparse torch.Tensor of shape (len(arr), len(arr))
+    """
+
+    n = len(arr)
+
+    # Create a dictionary mapping each value to its indices
+    value_to_indices = defaultdict(list)
+    for i, val in enumerate(arr.tolist()):
+        value_to_indices[val].append(i)
+
+    # Create lists to store indices and values for the sparse matrix
+    rows = []
+    cols = []
+
+    # For each value, add all pairs of indices where that value appears
+    for indices in value_to_indices.values():
+        for i in indices:
+            rows += [i] * len(indices)
+            cols += indices
+
+    # Convert to tensors
+    rows = torch.tensor(rows)
+    cols = torch.tensor(cols)
+    values = torch.ones(len(rows), dtype=torch.bool)
+
+    # Create sparse tensor
+    sparse_matrix = torch.sparse_coo_tensor(
+        indices=torch.stack([rows, cols]),
+        values=values,
+        size=(n, n),
+    ).coalesce()
+
+    return sparse_matrix
