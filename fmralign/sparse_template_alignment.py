@@ -101,13 +101,14 @@ def _fit_sparse_template(
 
     Returns
     -------
-    _type_
-        _description_
+    Tuple[torch.Tensor, List[alignment_methods.Alignment]]
+        Template data and list of alignment estimators
+        from the subjects data to the template.
 
     Raises
     ------
     ValueError
-        _description_
+        Unknown alignment method.
     """
     n_subjects = len(subjects_data)
     if alignment_method != "sparse_uot":
