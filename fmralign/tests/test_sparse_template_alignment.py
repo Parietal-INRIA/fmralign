@@ -5,16 +5,15 @@ import pytest
 import torch
 from nibabel.nifti1 import Nifti1Image
 
-from fmralign.alignment_methods import SparseUOT
+from fmralign.alignment_methods import POTAlignment, SparseUOT
 from fmralign.sparse_template_alignment import (
     SparseTemplateAlignment,
     _align_images_to_template,
     _fit_sparse_template,
     _rescaled_euclidean_mean_torch,
 )
-from fmralign.tests.utils import random_niimg, sample_subjects_data
 from fmralign.template_alignment import TemplateAlignment
-from fmralign.alignment_methods import POTAlignment
+from fmralign.tests.utils import random_niimg, sample_subjects_data
 
 devices = [torch.device("cpu")]
 if torch.cuda.is_available():
