@@ -299,9 +299,8 @@ def _sparse_cluster_matrix(arr):
     # For each value, add all pairs of indices where that value appears
     for indices in value_to_indices.values():
         for i in indices:
-            for j in indices:
-                rows.append(i)
-                cols.append(j)
+            rows += [i] * len(indices)
+            cols += indices
 
     # Convert to tensors
     rows = torch.tensor(rows)
