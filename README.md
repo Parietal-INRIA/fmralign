@@ -28,12 +28,6 @@ cd fmralign
 pip install -e .
 ```
 
-Note that if you want to use the JAX-accelerated optimal transport methods, you should also run:
-
-```
-pip install fmralign .[jax]
-```
-
 ### Documentation
 
 You can found an introduction to functional alignment, a user guide and some examples

@@ -35,7 +35,7 @@ requires-python = ">=3.9"
 [project.optional-dependencies]
 # Useful for development
 dev = [
-    "fmralign[jax,doc,test]",
+    "fmralign[doc,test]",
     "ruff"
 ]
 # For building the documentation
@@ -52,8 +52,6 @@ doc = [
     "sphinxext-opengraph",
     "furo"
 ]
-# To use JAX-accelerated Optimal Transport
-jax = ["jax", "ott-jax > 0.3.0"]
 # For running unit and docstring tests
 test = [
     "coverage",
