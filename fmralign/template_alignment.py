@@ -7,7 +7,7 @@ Uses functional alignment on Niimgs and predicts new subjects' unseen images.
 # License: simplified BSD
 
 import numpy as np
-from joblib import Memory, Parallel, delayed
+from joblib import Parallel, delayed
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 

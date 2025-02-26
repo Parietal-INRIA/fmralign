@@ -1,6 +1,5 @@
 """Module for preprocessing data before alignment."""
 
-import os
 import warnings
 
 import numpy as np

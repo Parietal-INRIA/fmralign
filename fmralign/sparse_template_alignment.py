@@ -1,7 +1,6 @@
 """Module for sparse template alignment."""
 
 import torch
-from joblib import Memory
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
