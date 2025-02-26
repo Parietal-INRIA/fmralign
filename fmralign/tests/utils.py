@@ -106,24 +106,6 @@ def random_niimg(shape):
     return im, mask_img
 
 
-def assert_model_align_better_than_identity(algo, img1, img2, mask=None):
-    """
-    Tests that the given algorithm aligns better than identity.
-    Proficiency is measured through r2 score.
-    """
-    algo.fit(img1, img2)
-    im_test = algo.transform(img1)
-    masker = NiftiMasker(mask)
-    masker.fit()
-    identity_baseline_score = zero_mean_coefficient_determination(
-        masker.transform(img2), masker.transform(img1)
-    )
-    algo_score = zero_mean_coefficient_determination(
-        masker.transform(img2), masker.transform(im_test)
-    )
-    assert algo_score >= identity_baseline_score
-
-
 def sample_parceled_data(n_pieces=1):
     """Create sample data for testing"""
     img, mask_img = random_niimg((8, 7, 6, 20))
