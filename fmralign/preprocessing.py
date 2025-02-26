@@ -19,6 +19,32 @@ from fmralign._utils import (
 )
 
 
+def _check_imgs(imgs):
+    """Check if the input images are valid and convert them to a list."""
+    if isinstance(imgs, (Nifti1Image, SurfaceImage)):
+        imgs = [imgs]
+    # If images are 3D, add a fourth dimension
+    for i, img in enumerate(imgs):
+        if len(img.shape) == 3:
+            imgs[i] = Nifti1Image(
+                np.expand_dims(img.get_fdata(), axis=-1),
+                img.affine,
+                img.header,
+            )
+    # Assert that all images have the same shape
+    if len(set([img.shape for img in imgs])) > 1:
+        raise NotImplementedError(
+            "fmralign does not support images of different shapes."
+        )
+    return imgs
+
+
+def _fit_new_masker(imgs, masker, n_jobs=1):
+    """Fit a new masker on a single or multiple images."""
+    masker.n_jobs = n_jobs
+    return masker.fit(imgs)
+
+
 class ParcellationMasker(BaseEstimator, TransformerMixin):
     """Class for masking Niimg-like objects and computing \
         a parcellation in a parallel fashion.
@@ -36,12 +62,14 @@ class ParcellationMasker(BaseEstimator, TransformerMixin):
         nilearn.regions.parcellations
         If 3D Niimg, image used as predefined clustering,
         n_pieces is then ignored.
-    mask: Niimg-like object, instance of NiftiMasker or
-                            MultiNiftiMasker, optional (default = None)
-        Mask to be used on data. If an instance of masker is passed,
-        then its mask will be used. If no mask is given,
-        it will be computed automatically by a MultiNiftiMasker
-        with default parameters.
+    masker : None or :class:`~nilearn.maskers.NiftiMasker` or \
+            :class:`~nilearn.maskers.MultiNiftiMasker`, or \
+            :class:`~nilearn.maskers.SurfaceMasker` , optional
+        A mask to be used on the data. If provided, the mask
+        will be used to extract the data. If None, a mask will
+        be computed automatically with default parameters.
+    mask: Niimg-like object, optional (default = None)
+        Mask to be used on data.
     smoothing_fwhm: float, optional (default = None)
         If smoothing_fwhm is not None, it gives the size in millimeters
         of the spatial smoothing to apply to the signal.
@@ -86,6 +114,7 @@ class ParcellationMasker(BaseEstimator, TransformerMixin):
         self,
         n_pieces=1,
         clustering="kmeans",
+        masker=None,
         mask=None,
         smoothing_fwhm=None,
         standardize=False,
@@ -103,6 +132,7 @@ class ParcellationMasker(BaseEstimator, TransformerMixin):
     ):
         self.n_pieces = n_pieces
         self.clustering = clustering
+        self.masker = masker
         self.mask = mask
         self.smoothing_fwhm = smoothing_fwhm
         self.standardize = standardize
@@ -120,53 +150,33 @@ class ParcellationMasker(BaseEstimator, TransformerMixin):
 
     def _fit_masker(self, imgs):
         """Fit the masker on a single or multiple images."""
-        if isinstance(imgs, (Nifti1Image, SurfaceImage)):
-            imgs = [imgs]
-        # If images are 3D, add a fourth dimension
-        for i, img in enumerate(imgs):
-            if len(img.shape) == 3:
-                imgs[i] = Nifti1Image(
-                    np.expand_dims(img.get_fdata(), axis=-1),
-                    img.affine,
-                    img.header,
-                )
-        # Assert that all images have the same shape
-        if len(set([img.shape for img in imgs])) > 1:
-            raise NotImplementedError(
-                "fmralign does not support images of different shapes."
+        if self.masker is None:
+            masker_type = (
+                "surface" if isinstance(imgs[0], SurfaceImage) else "multi_nii"
+            )
+            self.masker = check_embedded_masker(self, masker_type=masker_type)
+
+        # Check if the masker has been fitted
+        if not hasattr(self.masker, "mask_img_"):
+            self.masker = _fit_new_masker(
+                imgs, self.masker, n_jobs=self.n_jobs
             )
 
-        masker_type = (
-            "surface" if isinstance(imgs[0], SurfaceImage) else "multi_nii"
-        )
-        self.masker_ = check_embedded_masker(self, masker_type=masker_type)
-        self.masker_.n_jobs = self.n_jobs
-
-        # Fit the masker for volume data
-        if masker_type == "multi_nii":
-            if self.masker_.mask_img is None:
-                self.masker_.fit(imgs)
-            else:
-                self.masker_.fit()
-
-            if isinstance(self.clustering, Nifti1Image) or os.path.isfile(
-                self.clustering
-            ):
-                # check that clustering provided fills the mask, if not, reduce the mask
-                if 0 in self.masker_.transform(self.clustering):
-                    reduced_mask = _intersect_clustering_mask(
-                        self.clustering, self.masker_.mask_img
-                    )
-                    self.mask = reduced_mask
-                    self.masker_ = check_embedded_masker(self)
-                    self.masker_.n_jobs = self.n_jobs
-                    self.masker_.fit()
-                    warnings.warn(
-                        "Mask used was bigger than clustering provided. "
-                        + "Its intersection with the clustering was used instead."
-                    )
-        else:
-            self.masker_.fit(imgs)
+        # Check that the mask is not bigger than the clustering img
+        if isinstance(self.clustering, Nifti1Image):
+            # check that clustering provided fills the mask, if not, reduce the mask
+            if 0 in self.masker.transform(self.clustering):
+                reduced_mask = _intersect_clustering_mask(
+                    self.clustering, self.masker.mask_img
+                )
+                self.mask = reduced_mask
+                self.masker = check_embedded_masker(self)
+                self.masker.n_jobs = self.n_jobs
+                self.masker.fit()
+                warnings.warn(
+                    "Mask used was bigger than clustering provided. "
+                    + "Its intersection with the clustering was used instead."
+                )
 
     def _one_parcellation(self, imgs):
         """Compute one parcellation for all images."""
@@ -179,7 +189,7 @@ class ParcellationMasker(BaseEstimator, TransformerMixin):
             imgs,
             self.clustering,
             self.n_pieces,
-            self.masker_,
+            self.masker,
             smoothing_fwhm=self.smoothing_fwhm,
             verbose=self.verbose,
         )
@@ -202,8 +212,7 @@ class ParcellationMasker(BaseEstimator, TransformerMixin):
         """
         if self.labels is None:
             raise ValueError(
-                "Labels have not been computed yet,"
-                "call fit before get_labels."
+                "Labels have not been computed yet,call fit before get_labels."
             )
         return self.labels
 
@@ -215,7 +224,7 @@ class ParcellationMasker(BaseEstimator, TransformerMixin):
         parcellation : `nibabel.Nifti1Image`
             Parcellation image.
         """
-        return self.masker_.inverse_transform(self.get_labels())
+        return self.masker.inverse_transform(self.get_labels())
 
     def fit(self, imgs, y=None):
         """Fit the masker and compute the parcellation.
@@ -229,6 +238,7 @@ class ParcellationMasker(BaseEstimator, TransformerMixin):
             scikit-learn compatibility.
 
         """
+        imgs = _check_imgs(imgs)
         self._fit_masker(imgs)
         self._one_parcellation(imgs)
         return self
@@ -253,7 +263,7 @@ class ParcellationMasker(BaseEstimator, TransformerMixin):
         parceled_data = Parallel(n_jobs=self.n_jobs)(
             delayed(_img_to_parceled_data)(
                 img,
-                self.masker_,
+                self.masker,
                 self.labels,
             )
             for img in imgs
