@@ -99,15 +99,7 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
         srm,
         n_pieces=1,
         clustering="kmeans",
-        mask=None,
-        smoothing_fwhm=None,
-        standardize=False,
-        detrend=None,
-        target_affine=None,
-        target_shape=None,
-        low_pass=None,
-        high_pass=None,
-        t_r=None,
+        masker=None,
         n_jobs=1,
         verbose=0,
         reshape=True,
@@ -127,35 +119,12 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
             passed to nilearn.regions.parcellations
             If 3D Niimg, image used as predefined clustering,
             n_pieces is then ignored.
-        mask: Niimg-like object, instance of NiftiMasker or
-                                MultiNiftiMasker, optional (default = None)
-            Mask to be used on data. If an instance of masker is passed, then its
-            mask will be used. If no mask is given, it will be computed
-            automatically by a MultiNiftiMasker with default parameters.
-        smoothing_fwhm: float, optional (default = None)
-            If smoothing_fwhm is not None, it gives the size in millimeters
-            of the spatial smoothing to apply to the signal.
-        standardize: boolean, optional (default = None)
-            If standardize is True, the time-series are centered and normed:
-            their variance is put to 1 in the time dimension.
-        detrend: boolean, optional (default = None)
-            This parameter is passed to nilearn.signal.clean.
-            Please see the related documentation for details
-        target_affine: 3x3 or 4x4 matrix, optional (default = None)
-            This parameter is passed to nilearn.image.resample_img.
-            Please see the related documentation for details.
-        target_shape: 3-tuple of integers, optional (default = None)
-            This parameter is passed to nilearn.image.resample_img.
-            Please see the related documentation for details.
-        low_pass: None or float, optional (default = None)
-            This parameter is passed to nilearn.signal.clean.
-            Please see the related documentation for details.
-        high_pass: None or float, optional (default = None)
-            This parameter is passed to nilearn.signal.clean.
-            Please see the related documentation for details.
-        t_r: float, optional (default = None)
-            This parameter is passed to nilearn.signal.clean.
-            Please see the related documentation for details.
+        masker : None or :class:`~nilearn.maskers.NiftiMasker` or \
+                :class:`~nilearn.maskers.MultiNiftiMasker`, or \
+                :class:`~nilearn.maskers.SurfaceMasker` , optional
+            A mask to be used on the data. If provided, the mask
+            will be used to extract the data. If None, a mask will
+            be computed automatically with default parameters.
         n_jobs: integer, optional (default = 1)
             The number of CPUs to use to do the computation. -1 means
             'all CPUs', -2 'all CPUs but one', and so on.
@@ -165,18 +134,8 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
         self.srm = srm
         self.n_pieces = n_pieces
         self.clustering = clustering
-        self.mask = mask
-        self.smoothing_fwhm = smoothing_fwhm
-        self.standardize = standardize
-        self.detrend = detrend
-        self.target_affine = target_affine
-        self.target_shape = target_shape
-        self.low_pass = low_pass
-        self.high_pass = high_pass
-        self.t_r = t_r
+        self.masker = masker
         self.n_jobs = n_jobs
-        self.memory = None
-        self.memory_level = 0
         self.verbose = verbose
         self.reshape = reshape
 
@@ -203,23 +162,14 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
         self.parcel_masker = ParcellationMasker(
             n_pieces=self.n_pieces,
             clustering=self.clustering,
-            mask=self.mask,
-            smoothing_fwhm=self.smoothing_fwhm,
-            standardize=self.standardize,
-            detrend=self.detrend,
-            low_pass=self.low_pass,
-            high_pass=self.high_pass,
-            t_r=self.t_r,
-            target_affine=self.target_affine,
-            target_shape=self.target_shape,
-            memory=self.memory,
-            memory_level=self.memory_level,
+            masker=self.masker,
+            memory=None,
+            memory_level=0,
             n_jobs=self.n_jobs,
             verbose=self.verbose,
         )
         parceled_data = self.parcel_masker.fit_transform(imgs)
-        self.masker_ = self.parcel_masker.masker_
-        self.mask = self.parcel_masker.masker_.mask_img_
+        self.masker = self.parcel_masker.masker
         self.labels_ = self.parcel_masker.labels
         self.n_pieces = self.parcel_masker.n_pieces
 
@@ -310,7 +260,7 @@ class PiecewiseModel(BaseEstimator, TransformerMixin):
                 )
 
         basis_imgs = [
-            self.masker_.inverse_transform(full_basis.T)
+            self.masker.inverse_transform(full_basis.T)
             for full_basis in full_basis_list
         ]
         return basis_imgs
