@@ -128,7 +128,7 @@ target_test_masked = np.array(masked_imgs)[:, test_index, :]
 
 
 parcels = compute_parcels(
-    niimg=template_train[0], masker=masker, n_parcels=100, n_jobs=5
+    niimg=template_train[0], mask=masker, n_parcels=100, n_jobs=5
 )
 denoiser = PiecewiseAlignment(n_jobs=5)
 denoised_signal = denoiser.fit_transform(X=denoising_data, regions=parcels)
