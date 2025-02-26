@@ -44,7 +44,7 @@ def test_reconstruct_template():
     parcel_masker = ParcellationMasker(n_pieces=n_pieces)
     subjects_parcels = parcel_masker.fit_transform(imgs)
     parcels_subjects = _index_by_parcel(subjects_parcels)
-    masker = parcel_masker.masker_
+    masker = parcel_masker.masker
     labels = parcel_masker.labels
 
     fit = [
@@ -119,21 +119,16 @@ def test_template_identity():
     subs = [sub_1, sub_2, sub_3]
 
     # test different fit() accept list of list of 3D Niimgs as input.
-    algo = TemplateAlignment(alignment_method="identity", mask=masker)
+    algo = TemplateAlignment(alignment_method="identity", masker=masker)
     algo.fit([concat_imgs(n * [im])] * 3)
     # test template
     assert_array_almost_equal(sub_1.get_fdata(), algo.template.get_fdata())
 
     # test fit() transform() with 4D Niimgs input for several params set
     args_list = [
-        {"alignment_method": "identity", "mask": masker},
-        {"alignment_method": "identity", "mask": masker, "n_jobs": 2},
-        {"alignment_method": "identity", "n_pieces": 3, "mask": masker},
-        {
-            "alignment_method": "identity",
-            "n_pieces": 3,
-            "mask": masker,
-        },
+        {"alignment_method": "identity", "masker": masker},
+        {"alignment_method": "identity", "masker": masker, "n_jobs": 2},
+        {"alignment_method": "identity", "n_pieces": 3, "masker": masker},
     ]
 
     for args in args_list:
@@ -171,7 +166,7 @@ def test_template_diagonal():
     subs = [sub_1, sub_2, sub_3]
 
     # Test without subject_index
-    algo = TemplateAlignment(alignment_method="diagonal", mask=masker)
+    algo = TemplateAlignment(alignment_method="diagonal", masker=masker)
     algo.fit(subs)
     predicted_imgs = algo.transform(sub_1, subject_index=None)
     assert_array_almost_equal(
@@ -215,7 +210,7 @@ def test_template_closer_to_target():
         algo = TemplateAlignment(
             alignment_method=alignment_method,
             n_pieces=3,
-            mask=masker,
+            masker=masker,
         )
         # Learn template
         algo.fit(subs)

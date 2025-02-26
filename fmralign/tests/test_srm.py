@@ -70,7 +70,7 @@ def test_output_no_clustering(algo):
             "identity",
             n_pieces=n_pieces,
             clustering="kmeans",
-            mask=masker,
+            masker=masker,
             n_jobs=-1,
         )
         algo = Identity()
@@ -80,7 +80,7 @@ def test_output_no_clustering(algo):
             algo,
             n_pieces=n_pieces,
             clustering="kmeans",
-            mask=masker,
+            masker=masker,
             n_jobs=-1,
         )
     psrm.fit(list(train_data.values())[:-1])
@@ -145,10 +145,12 @@ def test_algo_each_piece(algo):
     cluster = np.array([1, 1, 1, 1, 2, 2, 2, 2])
     niimg_cluster = masker.inverse_transform(cluster)
     if algo == "identity":
-        srm = PiecewiseModel("identity", mask=masker, clustering=niimg_cluster)
+        srm = PiecewiseModel(
+            "identity", masker=masker, clustering=niimg_cluster
+        )
         algo = Identity()
     else:
-        srm = PiecewiseModel(algo, clustering=niimg_cluster, mask=masker)
+        srm = PiecewiseModel(algo, clustering=niimg_cluster, masker=masker)
     S1 = np.array(
         [
             clone(algo).fit_transform(
@@ -181,10 +183,12 @@ def test_wrongshape(algo):
     cluster = np.array([1] * 8 + [2] * 56)
     niimg_cluster = masker.inverse_transform(cluster)
     if algo == "identity":
-        srm = PiecewiseModel("identity", mask=masker, clustering=niimg_cluster)
+        srm = PiecewiseModel(
+            "identity", masker=masker, clustering=niimg_cluster
+        )
         algo = Identity()
     else:
-        srm = PiecewiseModel(algo, clustering=niimg_cluster, mask=masker)
+        srm = PiecewiseModel(algo, clustering=niimg_cluster, masker=masker)
         S1 = np.array(
             [
                 clone(algo).fit_transform(
