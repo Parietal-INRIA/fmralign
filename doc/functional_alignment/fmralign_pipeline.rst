@@ -185,7 +185,7 @@ the correlation of this prediction with the real signal. We also include identit
 >>> methods = ['identity','scaled_orthogonal', 'ridge_cv', 'optimal_transport']
 
 >>> for method in methods:
->>>   alignment_estimator = PairwiseAlignment(alignment_method=method, n_pieces=n_pieces, mask=roi_masker)
+>>>   alignment_estimator = PairwiseAlignment(alignment_method=method, n_pieces=n_pieces, masker=roi_masker)
 >>>   alignment_estimator.fit(source_train, target_train)
 >>>   target_pred = alignment_estimator.transform(source_test)
 >>>   aligned_score = voxelwise_correlation(target_test, target_pred, roi_masker)
