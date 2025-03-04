@@ -284,6 +284,7 @@ sphinx_gallery_conf = {
     "ignore_pattern": r"func_code\.py",
     # "show_memory": not sys.platform.startswith("win"),
     "remove_config_comments": True,
+    "matplotlib_animations": True,
     "nested_sections": True,
     "binder": {
         "org": "nilearn",
