@@ -101,7 +101,7 @@ from fmralign.template_alignment import TemplateAlignment
 template_estim = TemplateAlignment(
     n_pieces=50,
     alignment_method="scaled_orthogonal",
-    mask=masker,
+    masker=masker,
 )
 template_estim.fit(template_train)
 procrustes_template = template_estim.template

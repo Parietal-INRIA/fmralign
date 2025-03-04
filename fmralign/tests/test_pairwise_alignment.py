@@ -18,9 +18,9 @@ from fmralign.tests.utils import (
 
 
 def test_unsupported_alignment():
-    img1, mask_img = random_niimg((8, 7, 6, 10))
+    img1, _ = random_niimg((8, 7, 6, 10))
     img2, _ = random_niimg((7, 6, 8, 5))
-    args = {"alignment_method": "scaled_procrustes", "mask": mask_img}
+    args = {"alignment_method": "scaled_procrustes"}
     algo = PairwiseAlignment(**args)
     with pytest.raises(NotImplementedError):
         algo.fit(img1, img2)
@@ -28,25 +28,20 @@ def test_unsupported_alignment():
 
 def test_pairwise_identity():
     img1, mask_img = random_niimg((8, 7, 6, 10))
-
+    masker = NiftiMasker(mask_img=mask_img).fit()
     args_list = [
-        {"alignment_method": "identity", "mask": mask_img},
-        {"alignment_method": "identity", "n_pieces": 3, "mask": mask_img},
+        {"alignment_method": "identity", "masker": masker},
+        {"alignment_method": "identity", "n_pieces": 3, "masker": masker},
         {
             "alignment_method": "identity",
             "n_pieces": 3,
-            "mask": mask_img,
-        },
-        {
-            "alignment_method": "identity",
-            "n_pieces": 3,
-            "mask": mask_img,
+            "masker": masker,
             "n_jobs": 2,
         },
     ]
     for args in args_list:
         algo = PairwiseAlignment(**args)
-        assert_algo_transform_almost_exactly(algo, img1, img1, mask=mask_img)
+        assert_algo_transform_almost_exactly(algo, img1, img1, masker=masker)
 
     # test intersection of clustering and mask
     data_mask = copy.deepcopy(mask_img.get_fdata())
@@ -62,11 +57,11 @@ def test_pairwise_identity():
         clustering.get_fdata() > 0
     ).sum()
     algo = PairwiseAlignment(
-        alignment_method="identity", mask=mask_img, clustering=clustering
+        alignment_method="identity", masker=masker, clustering=clustering
     )
     with pytest.warns(UserWarning):
         algo.fit(img1, img1)
-    assert (algo.mask.get_fdata() > 0).sum() == (
+    assert (algo.masker.mask_img_.get_fdata() > 0).sum() == (
         clustering.get_fdata() > 0
     ).sum()
 
@@ -79,8 +74,7 @@ def test_pairwise_identity():
 def test_models_against_identity():
     img1, mask_img = random_niimg((7, 6, 8, 10))
     img2, _ = random_niimg((7, 6, 8, 10))
-    masker = NiftiMasker(mask_img=mask_img)
-    masker.fit()
+    masker = NiftiMasker(mask_img=mask_img).fit()
     ground_truth = masker.transform(img2)
     identity_baseline_score = zero_mean_coefficient_determination(
         ground_truth, masker.transform(img1)
@@ -94,7 +88,7 @@ def test_models_against_identity():
         for clustering in ["kmeans", "hierarchical_kmeans"]:
             algo = PairwiseAlignment(
                 alignment_method=alignment_method,
-                mask=masker,
+                masker=masker,
                 clustering=clustering,
                 n_pieces=2,
                 n_jobs=1,

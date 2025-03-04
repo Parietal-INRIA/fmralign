@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 from joblib import Memory
 from nibabel.nifti1 import Nifti1Image
+from nilearn.maskers import NiftiMasker
 
 from fmralign._utils import ParceledData
 from fmralign.preprocessing import ParcellationMasker
@@ -38,7 +39,7 @@ def test_fit_single_image():
     parcel_masker = ParcellationMasker(n_pieces=2)
     parcel_masker.fit(img)
 
-    assert hasattr(parcel_masker, "masker_")
+    assert hasattr(parcel_masker, "masker")
     assert parcel_masker.labels is not None
     assert isinstance(parcel_masker.labels, np.ndarray)
     assert len(np.unique(parcel_masker.labels)) == 2  # n_pieces=2
@@ -50,7 +51,7 @@ def test_fit_multiple_images():
     parcel_masker = ParcellationMasker(n_pieces=2)
     parcel_masker = parcel_masker.fit(imgs)
 
-    assert hasattr(parcel_masker, "masker_")
+    assert hasattr(parcel_masker, "masker")
     assert parcel_masker.labels is not None
 
 
@@ -133,6 +134,27 @@ def test_clustering_with_mask():
         parcel_masker.fit(img)
 
 
+def test_provided_masker():
+    """Test that ParcellationMasker can use an existing masker"""
+    img, mask = random_niimg((8, 7, 6))
+
+    # Test with unfitted masker
+    unfitted_masker = NiftiMasker(mask_img=mask)
+    parcel_masker = ParcellationMasker(masker=unfitted_masker)
+    parcel_masker.fit(img)
+
+    assert hasattr(parcel_masker, "masker")
+    assert parcel_masker.labels is not None
+
+    # Test with fitted masker
+    fitted_masker = NiftiMasker(mask_img=mask).fit(img)
+    parcel_masker = ParcellationMasker(masker=fitted_masker)
+    parcel_masker.fit(img)
+
+    assert hasattr(parcel_masker, "masker")
+    assert parcel_masker.labels is not None
+
+
 def test_memory_caching(tmp_path):
     """Test that ParcellationMasker can use joblib memory caching"""
     img, _ = random_niimg((8, 7, 6))
@@ -189,7 +211,7 @@ def test_one_surface_image():
     parcel_masker = ParcellationMasker(n_pieces=n_pieces)
     parcel_masker.fit(img)
 
-    assert hasattr(parcel_masker, "masker_")
+    assert hasattr(parcel_masker, "masker")
     assert parcel_masker.labels is not None
     assert isinstance(parcel_masker.labels, np.ndarray)
     assert len(np.unique(parcel_masker.labels)) == n_pieces
@@ -204,7 +226,7 @@ def test_multiple_surface_images():
     parcel_masker = ParcellationMasker(n_pieces=n_pieces)
     parcel_masker = parcel_masker.fit(imgs)
 
-    assert hasattr(parcel_masker, "masker_")
+    assert hasattr(parcel_masker, "masker")
     assert parcel_masker.labels is not None
     assert isinstance(parcel_masker.labels, np.ndarray)
     assert len(np.unique(parcel_masker.labels)) == n_pieces
@@ -232,7 +254,7 @@ def test_get_parcellation_img():
     assert isinstance(parcellation_img, Nifti1Image)
     assert parcellation_img.shape == img.shape
 
-    masker = parcel_masker.masker_
+    masker = parcel_masker.masker
     data = masker.transform(parcellation_img)
 
     assert np.allclose(data, labels)

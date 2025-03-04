@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 import torch
 from nibabel.nifti1 import Nifti1Image
+from nilearn.maskers import NiftiMasker
 
 from fmralign.alignment_methods import POTAlignment, SparseUOT
 from fmralign.sparse_template_alignment import (
@@ -128,13 +129,14 @@ def test_parcellation_before_fit():
 def test_consistency_with_dense_templates():
     """Test that SparseTemplateAlignment outputs\n
     consistent templates with TemplateAlignment"""
-    img1, mask = random_niimg((8, 7, 6, 20))
+    img1, mask_img = random_niimg((8, 7, 6, 20))
     img2, _ = random_niimg((8, 7, 6, 20))
     img3, _ = random_niimg((8, 7, 6, 20))
+    masker = NiftiMasker(mask_img=mask_img).fit()
 
     dense_algo = TemplateAlignment(
         n_pieces=3,
-        mask=mask,
+        masker=masker,
         alignment_method=POTAlignment(),
     )
     dense_algo.fit([img1, img2, img3])
@@ -144,7 +146,7 @@ def test_consistency_with_dense_templates():
     masker = dense_algo.masker
     sparse_algo = SparseTemplateAlignment(
         clustering=clustering_img,
-        mask=masker,
+        masker=masker,
     )
     sparse_algo.fit([img1, img2, img3])
 

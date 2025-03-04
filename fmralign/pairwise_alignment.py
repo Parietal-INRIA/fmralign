@@ -4,7 +4,7 @@
 import warnings
 
 import numpy as np
-from joblib import Memory, Parallel, delayed
+from joblib import Parallel, delayed
 from sklearn.base import BaseEstimator, TransformerMixin, clone
 from sklearn.utils.validation import check_is_fitted
 
@@ -87,17 +87,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         alignment_method="identity",
         n_pieces=1,
         clustering="kmeans",
-        mask=None,
-        smoothing_fwhm=None,
-        standardize=False,
-        detrend=False,
-        target_affine=None,
-        target_shape=None,
-        low_pass=None,
-        high_pass=None,
-        t_r=None,
-        memory=Memory(location=None),
-        memory_level=0,
+        masker=None,
         n_jobs=1,
         verbose=0,
     ):
@@ -123,43 +113,12 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
             nilearn.regions.parcellations
             If 3D Niimg, image used as predefined clustering,
             n_pieces is then ignored.
-        mask: Niimg-like object, instance of NiftiMasker or
-                                MultiNiftiMasker, optional (default = None)
-            Mask to be used on data. If an instance of masker is passed,
-            then its mask will be used. If no mask is given,
-            it will be computed automatically by a MultiNiftiMasker
-            with default parameters.
-        smoothing_fwhm: float, optional (default = None)
-            If smoothing_fwhm is not None, it gives the size in millimeters
-            of the spatial smoothing to apply to the signal.
-        standardize: boolean, optional (default = False)
-            If standardize is True, the time-series are centered and normed:
-            their variance is put to 1 in the time dimension.
-        detrend: boolean, optional (default = None)
-            This parameter is passed to nilearn.signal.clean.
-            Please see the related documentation for details
-        target_affine: 3x3 or 4x4 matrix, optional (default = None)
-            This parameter is passed to nilearn.image.resample_img.
-            Please see the related documentation for details.
-        target_shape: 3-tuple of integers, optional (default = None)
-            This parameter is passed to nilearn.image.resample_img.
-            Please see the related documentation for details.
-        low_pass: None or float, optional (default = None)
-            This parameter is passed to nilearn.signal.clean.
-            Please see the related documentation for details.
-        high_pass: None or float, optional (default = None)
-            This parameter is passed to nilearn.signal.clean.
-            Please see the related documentation for details.
-        t_r: float, optional (default = None)
-            This parameter is passed to nilearn.signal.clean.
-            Please see the related documentation for details.
-        memory: instance of joblib.Memory or string (default = None)
-            Used to cache the masking process and results of algorithms.
-            By default, no caching is done. If a string is given, it is the
-            path to the caching directory.
-        memory_level: integer, optional (default = None)
-            Rough estimator of the amount of memory used by caching.
-            Higher value means more memory for caching.
+        masker : None or :class:`~nilearn.maskers.NiftiMasker` or \
+                :class:`~nilearn.maskers.MultiNiftiMasker`, or \
+                :class:`~nilearn.maskers.SurfaceMasker` , optional
+            A mask to be used on the data. If provided, the mask
+            will be used to extract the data. If None, a mask will
+            be computed automatically with default parameters.
         n_jobs: integer, optional (default = 1)
             The number of CPUs to use to do the computation. -1 means
             'all CPUs', -2 'all CPUs but one', and so on.
@@ -169,17 +128,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         self.n_pieces = n_pieces
         self.alignment_method = alignment_method
         self.clustering = clustering
-        self.mask = mask
-        self.smoothing_fwhm = smoothing_fwhm
-        self.standardize = standardize
-        self.detrend = detrend
-        self.low_pass = low_pass
-        self.high_pass = high_pass
-        self.t_r = t_r
-        self.target_affine = target_affine
-        self.target_shape = target_shape
-        self.memory = memory
-        self.memory_level = memory_level
+        self.masker = masker
         self.n_jobs = n_jobs
         self.verbose = verbose
 
@@ -201,17 +150,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         self.parcel_masker = ParcellationMasker(
             n_pieces=self.n_pieces,
             clustering=self.clustering,
-            mask=self.mask,
-            smoothing_fwhm=self.smoothing_fwhm,
-            standardize=self.standardize,
-            detrend=self.detrend,
-            low_pass=self.low_pass,
-            high_pass=self.high_pass,
-            t_r=self.t_r,
-            target_affine=self.target_affine,
-            target_shape=self.target_shape,
-            memory=self.memory,
-            memory_level=self.memory_level,
+            masker=self.masker,
             n_jobs=self.n_jobs,
             verbose=self.verbose,
         )
@@ -219,8 +158,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         parceled_source, parceled_target = self.parcel_masker.fit_transform(
             [X, Y]
         )
-        self.masker = self.parcel_masker.masker_
-        self.mask = self.parcel_masker.masker_.mask_img_
+        self.masker = self.parcel_masker.masker
         self.labels_ = self.parcel_masker.labels
         self.n_pieces = self.parcel_masker.n_pieces
 
