@@ -131,7 +131,6 @@ surf_aligned = alignment_estimator.transform(surf_audio_source)
 from copy import deepcopy
 
 import matplotlib.pyplot as plt
-from IPython.display import HTML
 from matplotlib.animation import FuncAnimation
 
 fsaverage_sulcal = load_fsaverage_data(
