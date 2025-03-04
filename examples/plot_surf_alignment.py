@@ -202,7 +202,5 @@ def update(frame):
     return [fig]
 
 
+# Create the animation
 anim = FuncAnimation(fig, update, frames=range(12), interval=300, blit=True)
-
-# Display in notebook
-HTML(anim.to_jshtml())
