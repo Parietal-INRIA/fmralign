@@ -13,7 +13,7 @@
 <meta name="description" content="In this tutorial, we compare various methods of alignment on a pairwise alignment problem for Individual Brain Charting subjects. For each subject, we have a lot of functional informations in the f..." />
 <link rel="search" title="Search" href="../search.html" /><link rel="next" title="Co-smoothing prediction using the Individual Neural Tuning Model" href="plot_int_alignment.html" /><link rel="prev" title="Pairwise functional alignment on a ROI." href="plot_pairwise_roi_alignment.html" />
 
-    <link rel="shortcut icon" href="../_static/favicon.ico"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+    <link rel="shortcut icon" href="../_static/favicon.ico"/><!-- Generated with Sphinx 8.2.3 and Furo 2024.08.06 -->
         <title>Alignment methods benchmark (pairwise ROI case). - fmralign</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=2da93098" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
@@ -383,7 +383,7 @@ Use &#39;force_resample=True&#39; to suppress this warning.
 /opt/hostedtoolcache/Python/3.11.11/x64/lib/python3.11/site-packages/nilearn/image/resampling.py:805: FutureWarning: From release 0.13.0 onwards, this function will, by default, copy the header of the input image to the output. Currently, the header is reset to the default Nifti1Header. To suppress this warning and use the new behavior, set `copy_header=True`.
   return resample_img(
 
-&lt;nilearn.plotting.displays._slicers.OrthoSlicer object at 0x7f3400a5c810&gt;
+&lt;nilearn.plotting.displays._slicers.OrthoSlicer object at 0x7fadfc9ff590&gt;
 </pre></div>
 </div>
 </section>
@@ -490,7 +490,7 @@ its correlation with the real signal.</p>
 
 <span class="k">for</span> <a href="https://docs.python.org/3.9/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">method</span></a> <span class="ow">in</span> <a href="https://docs.python.org/3.9/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">methods</span></a><span class="p">:</span>
     <span class="n">alignment_estimator</span> <span class="o">=</span> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.base.BaseEstimator.html#sklearn.base.BaseEstimator" title="sklearn.base.BaseEstimator" class="sphx-glr-backref-module-sklearn-base sphx-glr-backref-type-py-class"><span class="n">PairwiseAlignment</span></a><span class="p">(</span>
-        <span class="n">alignment_method</span><span class="o">=</span><a href="https://docs.python.org/3.9/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">method</span></a><span class="p">,</span> <a href="https://docs.python.org/3.9/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n_pieces</span></a><span class="o">=</span><a href="https://docs.python.org/3.9/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n_pieces</span></a><span class="p">,</span> <a href="https://docs.python.org/3.9/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mask</span></a><span class="o">=</span><span class="n">roi_masker</span>
+        <span class="n">alignment_method</span><span class="o">=</span><a href="https://docs.python.org/3.9/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">method</span></a><span class="p">,</span> <a href="https://docs.python.org/3.9/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n_pieces</span></a><span class="o">=</span><a href="https://docs.python.org/3.9/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n_pieces</span></a><span class="p">,</span> <span class="n">masker</span><span class="o">=</span><span class="n">roi_masker</span>
     <span class="p">)</span>
     <span class="n">alignment_estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">source_train</span></a><span class="p">,</span> <a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">target_train</span></a><span class="p">)</span>
     <a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">target_pred</span></a> <span class="o">=</span> <span class="n">alignment_estimator</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">source_test</span></a><span class="p">)</span>
@@ -518,7 +518,26 @@ its correlation with the real signal.</p>
 <li><img src="../_images/sphx_glr_plot_alignment_methods_benchmark_004.png" srcset="../_images/sphx_glr_plot_alignment_methods_benchmark_004.png" alt="plot alignment methods benchmark" class = "sphx-glr-multi-img"/></li>
 <li><img src="../_images/sphx_glr_plot_alignment_methods_benchmark_005.png" srcset="../_images/sphx_glr_plot_alignment_methods_benchmark_005.png" alt="plot alignment methods benchmark" class = "sphx-glr-multi-img"/></li>
 </ul>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[PairwiseAlignment.fit] Resampling mask
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/fmralign/fmralign/fmralign/_utils.py:254: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+Parameter mask_strategy :
+    Masker parameter background - overriding estimator parameter epi
+Parameter smoothing_fwhm :
+    Masker parameter None - overriding estimator parameter 4.0
+
+  parcellation.fit(images_to_parcel)
+/home/runner/work/fmralign/fmralign/fmralign/_utils.py:254: FutureWarning: The nifti_maps_masker_ attribute is deprecated andwill be removed in Nilearn 0.11.3. Please use maps_masker_ instead.
+  parcellation.fit(images_to_parcel)
+/home/runner/work/fmralign/fmralign/fmralign/_utils.py:185: UserWarning:
+ Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
+ parcel 1 : 1725 voxels
+ parcel 15 : 1484 voxels
+ parcel 16 : 1190 voxels
+ parcel 23 : 1048 voxels
+  warnings.warn(warning)
+/home/runner/work/fmralign/fmralign/fmralign/metrics.py:62: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
+  pearsonr(X_gt[:, vox], X_pred[:, vox])[
+/opt/hostedtoolcache/Python/3.11.11/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1416: UserWarning: Non-finite values detected. These values will be replaced with zeros.
+  safe_get_data(stat_map_img, ensure_finite=True),
 /home/runner/work/fmralign/fmralign/fmralign/_utils.py:254: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
 Parameter mask_strategy :
     Masker parameter background - overriding estimator parameter epi
@@ -539,7 +558,6 @@ Parameter smoothing_fwhm :
   pearsonr(X_gt[:, vox], X_pred[:, vox])[
 /opt/hostedtoolcache/Python/3.11.11/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1416: UserWarning: Non-finite values detected. These values will be replaced with zeros.
   safe_get_data(stat_map_img, ensure_finite=True),
-[PairwiseAlignment.fit] Resampling mask
 /home/runner/work/fmralign/fmralign/fmralign/_utils.py:254: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
 Parameter mask_strategy :
     Masker parameter background - overriding estimator parameter epi
@@ -560,28 +578,6 @@ Parameter smoothing_fwhm :
   pearsonr(X_gt[:, vox], X_pred[:, vox])[
 /opt/hostedtoolcache/Python/3.11.11/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1416: UserWarning: Non-finite values detected. These values will be replaced with zeros.
   safe_get_data(stat_map_img, ensure_finite=True),
-[PairwiseAlignment.fit] Resampling mask
-/home/runner/work/fmralign/fmralign/fmralign/_utils.py:254: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
-Parameter mask_strategy :
-    Masker parameter background - overriding estimator parameter epi
-Parameter smoothing_fwhm :
-    Masker parameter None - overriding estimator parameter 4.0
-
-  parcellation.fit(images_to_parcel)
-/home/runner/work/fmralign/fmralign/fmralign/_utils.py:254: FutureWarning: The nifti_maps_masker_ attribute is deprecated andwill be removed in Nilearn 0.11.3. Please use maps_masker_ instead.
-  parcellation.fit(images_to_parcel)
-/home/runner/work/fmralign/fmralign/fmralign/_utils.py:185: UserWarning:
- Some parcels are more than 1000 voxels wide it can slow down alignment,especially optimal_transport :
- parcel 1 : 1725 voxels
- parcel 15 : 1484 voxels
- parcel 16 : 1190 voxels
- parcel 23 : 1048 voxels
-  warnings.warn(warning)
-/home/runner/work/fmralign/fmralign/fmralign/metrics.py:62: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
-  pearsonr(X_gt[:, vox], X_pred[:, vox])[
-/opt/hostedtoolcache/Python/3.11.11/x64/lib/python3.11/site-packages/nilearn/plotting/img_plotting.py:1416: UserWarning: Non-finite values detected. These values will be replaced with zeros.
-  safe_get_data(stat_map_img, ensure_finite=True),
-[PairwiseAlignment.fit] Resampling mask
 /home/runner/work/fmralign/fmralign/fmralign/_utils.py:254: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
 Parameter mask_strategy :
     Masker parameter background - overriding estimator parameter epi
@@ -608,7 +604,7 @@ Parameter smoothing_fwhm :
 (no alignment). Ridge is the best performing method, followed by Optimal
 Transport. If you use Ridge though, be careful about the smooth predictions
 it yields.</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 46.938 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 56.436 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-alignment-methods-benchmark-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/nilearn/nilearn/main?urlpath=lab/tree/notebooks/auto_examples/plot_alignment_methods_benchmark.ipynb"><img alt="Launch binder" src="../_images/binder_badge_logo.svg" style="width: 150px;" />

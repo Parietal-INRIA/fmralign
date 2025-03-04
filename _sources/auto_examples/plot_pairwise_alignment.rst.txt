@@ -598,7 +598,7 @@ common model proposed in the literature:
     from fmralign.pairwise_alignment import PairwiseAlignment
 
     alignment_estimator = PairwiseAlignment(
-        alignment_method="scaled_orthogonal", n_pieces=150, mask=masker
+        alignment_method="scaled_orthogonal", n_pieces=150, masker=masker
     )
     # Learn alignment operator from subject 1 to subject 2 on training data
     alignment_estimator.fit(source_train, target_train)
@@ -613,7 +613,6 @@ common model proposed in the literature:
 
  .. code-block:: none
 
-    [PairwiseAlignment.fit] Resampling mask
     /home/runner/work/fmralign/fmralign/fmralign/_utils.py:254: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
     Parameter mask_strategy :
         Masker parameter background - overriding estimator parameter epi
@@ -717,7 +716,7 @@ subject data, informed by another subject are greatly improved.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 36.726 seconds)
+   **Total running time of the script:** (0 minutes 40.951 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_pairwise_alignment.py:

@@ -94,7 +94,7 @@ target_test = concat_imgs(
 from fmralign.pairwise_alignment import PairwiseAlignment
 
 alignment_estimator = PairwiseAlignment(
-    alignment_method="scaled_orthogonal", n_pieces=150, mask=masker
+    alignment_method="scaled_orthogonal", n_pieces=150, masker=masker
 )
 # Learn alignment operator from subject 1 to subject 2 on training data
 alignment_estimator.fit(source_train, target_train)

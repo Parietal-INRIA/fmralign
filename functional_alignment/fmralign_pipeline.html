@@ -13,7 +13,7 @@
 <meta name="description" content="As seen in the previous section, functional alignment searches for a transform between images of two or several subjects in order to match voxels which have similar profile of activation. This sect..." />
 <link rel="search" title="Search" href="../search.html" /><link rel="next" title="3. Reference documentation: all fmralign functions" href="../modules/reference.html" /><link rel="prev" title="2.1. An introduction to functional alignment" href="introduction.html" />
 
-    <link rel="shortcut icon" href="../_static/favicon.ico"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+    <link rel="shortcut icon" href="../_static/favicon.ico"/><!-- Generated with Sphinx 8.2.3 and Furo 2024.08.06 -->
         <title>2.2. Functional alignment pipeline - fmralign</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=2da93098" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
@@ -496,7 +496,7 @@ the correlation of this prediction with the real signal. We also include identit
 </pre></div>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">methods</span><span class="p">:</span>
-<span class="gp">&gt;&gt;&gt; </span>  <span class="n">alignment_estimator</span> <span class="o">=</span> <span class="n">PairwiseAlignment</span><span class="p">(</span><span class="n">alignment_method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">n_pieces</span><span class="o">=</span><span class="n">n_pieces</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">roi_masker</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>  <span class="n">alignment_estimator</span> <span class="o">=</span> <span class="n">PairwiseAlignment</span><span class="p">(</span><span class="n">alignment_method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">n_pieces</span><span class="o">=</span><span class="n">n_pieces</span><span class="p">,</span> <span class="n">masker</span><span class="o">=</span><span class="n">roi_masker</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span>  <span class="n">alignment_estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">source_train</span><span class="p">,</span> <span class="n">target_train</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span>  <span class="n">target_pred</span> <span class="o">=</span> <span class="n">alignment_estimator</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">source_test</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span>  <span class="n">aligned_score</span> <span class="o">=</span> <span class="n">voxelwise_correlation</span><span class="p">(</span><span class="n">target_test</span><span class="p">,</span> <span class="n">target_pred</span><span class="p">,</span> <span class="n">roi_masker</span><span class="p">)</span>

@@ -277,9 +277,9 @@ For each train subject and for the template, the AP contrasts are sorted from
     [RegionAlignment] Shape of input data:  (6, 53, 46448)
     [ParcelAlignment]Computing global template M ...
     [Parallel(n_jobs=5)]: Using backend LokyBackend with 5 concurrent workers.
-    [Parallel(n_jobs=5)]: Done  40 tasks      | elapsed:    1.8s
-    [Parallel(n_jobs=5)]: Done 100 out of 100 | elapsed:    2.1s finished
-    [Parallel(n_jobs=1)]: Done  49 tasks      | elapsed:    5.4s
+    [Parallel(n_jobs=5)]: Done  40 tasks      | elapsed:    1.9s
+    [Parallel(n_jobs=5)]: Done 100 out of 100 | elapsed:    2.3s finished
+    [Parallel(n_jobs=1)]: Done  49 tasks      | elapsed:    6.1s
 
 
 
@@ -391,7 +391,7 @@ the average activations of subjects.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 20.164 seconds)
+   **Total running time of the script:** (1 minutes 27.213 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_int_alignment.py:

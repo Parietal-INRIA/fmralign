@@ -111,7 +111,7 @@ We align the whole brain through multiple local alignment, each applied on a pie
 
 >>> from fmralign.pairwise_alignment import PairwiseAlignment
 >>> alignement_estimator = PairwiseAlignment(alignment_method='scaled_orthogonal',
->>>                                                   n_pieces=150, mask=masker)
+>>>                                                   n_pieces=150, masker=masker)
 
 We learn alignment operator from subject 1 to subject 2 on 'AP' data.
 
