@@ -49,7 +49,7 @@ def get_laplacian_features(
     )
     eigenvectors = torch.tensor(
         eigenvectors, dtype=torch.float32, device=device
-    )
+    ).contiguous()
     return eigenvectors
 
 
