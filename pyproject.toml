@@ -23,7 +23,8 @@ dependencies = [
     "POT",
     "fastsrm",
     "fugw>=0.1.1",
-    "torch"
+    "torch",
+    "pykeops"
 ]
 description = "Functional alignment for fMRI"
 dynamic = ["version"]
@@ -71,13 +72,13 @@ allow-direct-references = true
 source = "vcs"
 
 [tool.ruff]
-target-version = "py311"
 extend-exclude = [
     "doc/auto_examples/*"
 ]
 include = ["pyproject.toml", "fmralign/**/*.py", "examples/**/*.py", "doc/**/*.py"]
 indent-width = 4
 line-length = 79
+target-version = "py311"
 
 [tool.ruff.format]
 docstring-code-format = true
@@ -89,24 +90,24 @@ skip-magic-trailing-comma = false
 
 [tool.ruff.lint]
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+fixable = ["ALL"]
+ignore = [
+    "E501"  # Line too long
+]
 select = [
     "E",  # pycodestyle
-    "F",  # pyflakes
+    "F"  # pyflakes
 ]
-ignore = [
-    "E501" # Line too long
-]
-fixable = ["ALL"]
 unfixable = []
 
 [tool.ruff.lint.mccabe]
 max-complexity = 41
 
 [tool.ruff.lint.per-file-ignores]
-"{doc}/*" = ["D103"]
-"{examples}/*" = ["B018", "D103", "D400", "E402"]
 "*/{tests}/*" = ["D100", "D101", "D102", "D103", "D104", "D205", "D400", "D401"]
 "__init__.py" = ["D104", "E402"]
+"{doc}/*" = ["D103"]
+"{examples}/*" = ["B018", "D103", "D400", "E402"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
