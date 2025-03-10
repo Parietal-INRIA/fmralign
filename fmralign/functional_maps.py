@@ -2,6 +2,7 @@ from copy import deepcopy
 
 import igl
 import numpy as np
+import ot
 import scipy as sp
 import torch
 from nilearn.maskers import SurfaceMasker
@@ -53,7 +54,7 @@ def get_laplacian_features(
     return eigenvectors
 
 
-def composite_cost(
+def lazy_cost(
     source_features: torch.Tensor,
     target_features: torch.Tensor,
     geom: torch.Tensor,
@@ -68,7 +69,22 @@ def composite_cost(
     return alpha * cost_functional + (1 - alpha) * cost_geometric
 
 
-def sinkhorn_loop(
+def explicit_cost(
+    source_features: torch.Tensor,
+    target_features: torch.Tensor,
+    geom: torch.Tensor,
+    alpha: float,
+) -> torch.Tensor:
+    f_i = source_features[:, None]
+    f_j = target_features[None, :]
+    l_i = geom[:, None]
+    l_j = geom[None, :]
+    cost_functional = ((f_i - f_j) ** 2).sum(-1)
+    cost_geometric = ((l_i - l_j) ** 2).sum(-1)
+    return alpha * cost_functional + (1 - alpha) * cost_geometric
+
+
+def lazy_sinkhorn(
     C_ij: LazyTensor,
     a_i: torch.Tensor,
     b_j: torch.Tensor,
@@ -95,8 +111,8 @@ def sinkhorn_loop(
         U_i = -(-C_ij / eps + (V_j + logb_j)).logsumexp(dim=1)[:, None, :]
         V_j = -(-C_ij / eps + (U_i + loga_i)).logsumexp(dim=0)[None, :, :]
 
-    # Optimal plan
-    P_ij = (-C_ij / eps + U_i + V_j).exp()
+    # Optimal plan (supposed square) ------------------------------------------
+    P_ij = (-C_ij / eps + U_i + V_j).exp() / C_ij.shape[0] ** 2
 
     return P_ij
 
@@ -112,7 +128,8 @@ def fit_one_hemi(
     reg: float,
     device: str,
     verbose: bool,
-) -> LazyTensor:
+    backend: str = "keops",
+) -> torch.Tensor | LazyTensor:
     source_features = get_functional_features(
         source_image, masker, hemi, device
     )
@@ -122,23 +139,48 @@ def fit_one_hemi(
 
     geom = get_laplacian_features(source_image, hemi, n_lb, device)
 
-    lazy_cost = composite_cost(
-        source_features,
-        target_features,
-        geom,
-        alpha,
-    )
-
     n_vertices = geom.shape[0]
     weights = (
         torch.ones(n_vertices, dtype=torch.float32, device=device) / n_vertices
     )
 
-    lazy_plan = sinkhorn_loop(
-        lazy_cost, weights, weights, eps=reg, nits=n_iter, verbose=verbose
-    )
+    if backend == "keops":
+        cost = lazy_cost(
+            source_features,
+            target_features,
+            geom,
+            alpha,
+        )
+        plan = lazy_sinkhorn(
+            cost,
+            weights,
+            weights,
+            eps=reg,
+            nits=n_iter,
+            verbose=verbose,
+        )
+    elif backend == "pot":
+        cost = explicit_cost(
+            source_features,
+            target_features,
+            geom,
+            alpha,
+        )
+        plan = ot.sinkhorn(
+            weights,
+            weights,
+            cost,
+            reg,
+            method="sinkhorn",
+            verbose=verbose,
+        )
+    else:
+        raise ValueError(
+            f"Unknown backend {backend}, available backends are",
+            "'keops' and 'pot'",
+        )
 
-    return lazy_plan
+    return plan
 
 
 def transform_hemi(
@@ -151,13 +193,13 @@ def transform_hemi(
     data = masker.transform(img)
     source_features = get_functional_features(img, masker, hemi, device)
     projected_features = (
-        lazy_plan.T @ source_features / source_features.shape[0]
+        lazy_plan.T @ source_features * source_features.shape[0]
     )
     data = projected_features.cpu().numpy()
     return data
 
 
-class SurfaceAlignment(BaseEstimator, TransformerMixin):
+class FMAPAlignment(BaseEstimator, TransformerMixin):
     def __init__(
         self,
         masker: SurfaceMasker,
@@ -167,6 +209,7 @@ class SurfaceAlignment(BaseEstimator, TransformerMixin):
         reg: float = 1e-3,
         device: str = "cpu",
         verbose: bool = False,
+        backend: str = "keops",
     ) -> None:
         self.masker = masker
         self.n_lb = n_lb
@@ -175,6 +218,7 @@ class SurfaceAlignment(BaseEstimator, TransformerMixin):
         self.reg = reg
         self.device = device
         self.verbose = verbose
+        self.backend = backend
 
     def fit(
         self, source_image: SurfaceImage, target_image: SurfaceImage
@@ -192,6 +236,7 @@ class SurfaceAlignment(BaseEstimator, TransformerMixin):
                 self.reg,
                 self.device,
                 self.verbose,
+                self.backend,
             )
             dict_plans[hemi] = plan_hemi
         self.dict_plans = dict_plans
