@@ -120,9 +120,7 @@ def fit_one_hemi(
         target_image, masker, hemi, device
     )
 
-    # geom = get_laplacian_features(source_image, hemi, n_lb, device)
-    geom = np.arange(642).reshape(-1, 1)
-    geom = torch.tensor(geom, dtype=torch.float32, device=device)
+    geom = get_laplacian_features(source_image, hemi, n_lb, device)
 
     lazy_cost = composite_cost(
         source_features,
