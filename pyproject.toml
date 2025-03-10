@@ -24,7 +24,8 @@ dependencies = [
     "fastsrm",
     "fugw>=0.1.1",
     "torch",
-    "pykeops"
+    "pykeops",
+    "libigl"
 ]
 description = "Functional alignment for fMRI"
 dynamic = ["version"]
