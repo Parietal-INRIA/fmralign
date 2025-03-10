@@ -22,8 +22,8 @@ def get_functional_features(
         data = data[:, : n_vertices // 2]
     else:
         data = data[:, n_vertices // 2 :]
-    data = torch.tensor(data, dtype=torch.float32, device=device)
-    return data.T
+    data = torch.tensor(data, dtype=torch.float32, device=device).T
+    return data.contiguous()
 
 
 def get_vertices_faces(
