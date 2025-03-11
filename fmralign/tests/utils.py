@@ -1,5 +1,6 @@
 import nibabel
 import numpy as np
+from nilearn.datasets import load_fsaverage
 from nilearn.maskers import NiftiMasker
 from nilearn.surface import InMemoryMesh, PolyMesh, SurfaceImage
 from numpy.random import default_rng
@@ -116,28 +117,41 @@ def sample_parceled_data(n_pieces=1):
 
 
 def _make_mesh():
-    """Create a sample mesh with two parts: left and right, and total of
-    9 vertices and 10 faces.
+    """Create a sample mesh with two parts: left and right, ensuring
+    non-singular elements.
 
     The left part is a tetrahedron with four vertices and four faces.
-    The right part is a pyramid with five vertices and six faces.
+    The right part is a pyramid with five vertices and six faces, adjusted
+    to prevent a singular mass matrix.
     """
     left_coords = np.asarray([[0.0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1]])
     left_faces = np.asarray([[1, 0, 2], [0, 1, 3], [0, 3, 2], [1, 2, 3]])
+
+    # Slightly perturb one of the pyramid base points to ensure it's not perfectly coplanar
     right_coords = (
-        np.asarray([[0.0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0], [0, 0, 1]])
+        np.asarray(
+            [
+                [0.0, 0, 0],
+                [1, 0, 0],
+                [1, 1, 0],
+                [0, 1, 0.01],
+                [0.5, 0.5, 1],
+            ]  # Adjusted base
+        )
         + 2.0
     )
+
     right_faces = np.asarray(
         [
             [0, 1, 4],
-            [0, 3, 1],
-            [1, 3, 2],
             [1, 2, 4],
             [2, 3, 4],
-            [0, 4, 3],
+            [3, 0, 4],
+            [0, 1, 2],  # Base (properly oriented)
+            [2, 3, 0],  # Base split into two triangles
         ]
     )
+
     return PolyMesh(
         left=InMemoryMesh(left_coords, left_faces),
         right=InMemoryMesh(right_coords, right_faces),
@@ -159,6 +173,22 @@ def surf_img(n_samples=1):
             np.arange(np.prod(data_shape)).reshape(data_shape[::-1]) + 1.0
         ) * 10**i
         data[key] = data_part.T
+    return SurfaceImage(mesh, data)
+
+
+def surf_img_fsaverage3(n_samples=1):
+    """Create a sample surface image using the fsaverage3 mesh. # noqa: D202
+    This will add some random data to the vertices of the mesh.
+    The shape of the data will be (n_vertices, n_samples).
+    n_samples by default is 1.
+    """
+    fsaverage3 = load_fsaverage("fsaverage3")
+    mesh = fsaverage3["pial"]
+    data = {
+        "left": np.random.rand(mesh.parts["left"].n_vertices, n_samples),
+        "right": np.random.rand(mesh.parts["right"].n_vertices, n_samples),
+    }
+
     return SurfaceImage(mesh, data)
 
 
