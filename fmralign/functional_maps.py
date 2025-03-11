@@ -1,4 +1,5 @@
 from copy import deepcopy
+from typing import Union
 
 import igl
 import numpy as np
@@ -91,7 +92,7 @@ def lazy_sinkhorn(
     eps: float = 1e-3,
     nits: int = 100,
     verbose: bool = False,
-) -> LazyTensor:  # -> tuple[ComplexLazyTensor | LazyTensor | Any, ComplexLazyTe...:# -> tuple[ComplexLazyTensor | LazyTensor | Any, ComplexLazyTe...:
+) -> LazyTensor:
     """Straightforward implementation of the Sinkhorn-IPFP-SoftAssign loop in the log domain."""
 
     # Compute the logarithm of the weights (needed in the softmin reduction) ---
@@ -129,7 +130,7 @@ def fit_one_hemi(
     device: str,
     verbose: bool,
     backend: str = "keops",
-) -> torch.Tensor | LazyTensor:
+) -> Union[torch.Tensor, LazyTensor]:
     source_features = get_functional_features(
         source_image, masker, hemi, device
     )
