@@ -178,16 +178,18 @@ def test_all_classes_R_and_pred_shape_and_better_than_identity():
 
 
 def test_ot_backend():
-    n_samples, n_features = 100, 20
-    epsilon = 1e-2
+    n_samples, n_features = 20, 100
+    epsilon = 1e-1
     X = np.random.randn(n_samples, n_features)
     Y = np.random.randn(n_samples, n_features)
     X /= np.linalg.norm(X)
     Y /= np.linalg.norm(Y)
-    ott_algo = OptimalTransportAlignment(reg=epsilon)
-    pot_algo = POTAlignment(reg=epsilon)
+    ott_algo = OptimalTransportAlignment(reg=epsilon, tol=0, max_iter=50)
+    pot_algo = POTAlignment(reg=epsilon, tol=0, max_iter=50)
     sparsity_mask = torch.ones(n_features, n_features).to_sparse_coo()
-    torch_algo = SparseUOT(sparsity_mask=sparsity_mask, reg=epsilon)
+    torch_algo = SparseUOT(
+        sparsity_mask=sparsity_mask, reg=epsilon, tol=0, max_iter=50
+    )
     ott_algo.fit(X, Y)
     pot_algo.fit(X, Y)
     torch_algo.fit(
