@@ -9,7 +9,7 @@ import torch
 from fugw.solvers.utils import (
     batch_elementwise_prod_and_sum,
     crow_indices_to_row_indices,
-    solver_sinkhorn_sparse,
+    solver_sinkhorn_eps_scaling_sparse,
 )
 from fugw.utils import _low_rank_squared_l2, _make_csr_matrix
 from joblib import Parallel, delayed
@@ -829,12 +829,13 @@ class SparseUOT(Alignment):
         tuple_weights = (weights, weights, ws_dot_wt)
         train_params = (self.max_iter, self.tol, self.eval_freq)
 
-        _, pi = solver_sinkhorn_sparse(
+        _, pi = solver_sinkhorn_eps_scaling_sparse(
             cost=cost,
             init_duals=init_duals,
             uot_params=uot_params,
             tuple_weights=tuple_weights,
             train_params=train_params,
+            numItermax=self.max_iter,
             verbose=self.verbose,
         )
 
