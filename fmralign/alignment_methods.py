@@ -308,9 +308,9 @@ class POTAlignment(Alignment):
         self,
         solver="sinkhorn_epsilon_scaling",
         metric="euclidean",
-        reg=1,
-        max_iter=1000,
-        tol=1e-3,
+        reg=1e-1,
+        max_iter=100,
+        tol=0,
     ):
         self.solver = solver
         self.metric = metric
@@ -390,7 +390,7 @@ class OptimalTransportAlignment(Alignment):
     """
 
     def __init__(
-        self, metric="euclidean", reg=1, tau=1.0, max_iter=1000, tol=1e-3
+        self, metric="euclidean", reg=1e-1, tau=1.0, max_iter=100, tol=0
     ):
         self.metric = metric
         self.reg = reg
@@ -736,9 +736,9 @@ class SparseUOT(Alignment):
         self,
         sparsity_mask,
         rho=float("inf"),
-        reg=1,
-        max_iter=1000,
-        tol=1e-3,
+        reg=1e-1,
+        max_iter=100,
+        tol=0,
         eval_freq=10,
         device="cpu",
         verbose=False,
