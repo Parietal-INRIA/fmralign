@@ -193,10 +193,8 @@ def test_ot_backend():
         torch.tensor(X, dtype=torch.float32),
         torch.tensor(Y, dtype=torch.float32),
     )
-    assert_array_almost_equal(pot_algo.R, ott_algo.R, decimal=3)
-    assert_array_almost_equal(
-        pot_algo.R, torch_algo.R.to_dense().numpy(), decimal=3
-    )
+    assert_array_almost_equal(pot_algo.R, ott_algo.R)
+    assert_array_almost_equal(pot_algo.R, torch_algo.R.to_dense().numpy())
 
 
 def test_identity_balanced_wasserstein():
@@ -282,3 +280,6 @@ def test_sparseuot():
 
     assert torch.allclose(mass1, torch.tensor(1.0))
     assert mass1 > mass2 > mass3
+
+
+test_ot_backend()
