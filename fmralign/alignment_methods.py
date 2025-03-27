@@ -735,7 +735,6 @@ class SparseUOT(Alignment):
     def __init__(
         self,
         sparsity_mask,
-        rho=float("inf"),
         reg=1e-1,
         max_iter=100,
         tol=0,
@@ -743,7 +742,6 @@ class SparseUOT(Alignment):
         device="cpu",
         verbose=False,
     ):
-        self.rho = rho
         self.reg = reg
         self.sparsity_mask = sparsity_mask
         self.max_iter = max_iter
@@ -751,20 +749,6 @@ class SparseUOT(Alignment):
         self.eval_freq = eval_freq
         self.device = device
         self.verbose = verbose
-
-    def _initialize_weights(self, n, cost):
-        crow_indices, col_indices = cost.crow_indices(), cost.col_indices()
-        row_indices = crow_indices_to_row_indices(crow_indices)
-        weights = torch.ones(n, device=self.device) / n
-        ws_dot_wt_values = weights[row_indices] * weights[col_indices]
-        ws_dot_wt = _make_csr_matrix(
-            crow_indices,
-            col_indices,
-            ws_dot_wt_values,
-            cost.size(),
-            self.device,
-        )
-        return weights, ws_dot_wt
 
     def _initialize_plan(self, n):
         return (
@@ -779,7 +763,7 @@ class SparseUOT(Alignment):
             .to(self.device)
         )
 
-    def _uot_cost(self, init_plan, F, n):
+    def _cost(self, init_plan, F, n):
         crow_indices, col_indices = (
             init_plan.crow_indices(),
             init_plan.col_indices(),
@@ -813,29 +797,20 @@ class SparseUOT(Alignment):
         F = _low_rank_squared_l2(X.T, Y.T)
 
         init_plan = self._initialize_plan(n_features)
-        cost = self._uot_cost(init_plan, F, n_features)
+        cost = self._cost(init_plan, F, n_features)
 
-        weights, ws_dot_wt = self._initialize_weights(n_features, cost)
-
-        uot_params = (
-            torch.tensor([self.rho], device=self.device),
-            torch.tensor([self.rho], device=self.device),
-            torch.tensor([self.reg], device=self.device),
-        )
-        init_duals = (
-            torch.zeros(n_features, device=self.device),
-            torch.zeros(n_features, device=self.device),
-        )
-        tuple_weights = (weights, weights, ws_dot_wt)
-        train_params = (self.max_iter, self.tol, self.eval_freq)
+        ws = torch.ones(n_features, device=self.device) / n_features
+        wt = torch.ones(n_features, device=self.device) / n_features
 
         _, pi = solver_sinkhorn_eps_scaling_sparse(
             cost=cost,
-            init_duals=init_duals,
-            uot_params=uot_params,
-            tuple_weights=tuple_weights,
-            train_params=train_params,
+            ws=ws,
+            wt=wt,
+            eps=self.reg,
             numItermax=self.max_iter,
+            tol=self.tol,
+            eval_freq=self.eval_freq,
+            stabilization_threshold=1e6,
             verbose=self.verbose,
         )
 
