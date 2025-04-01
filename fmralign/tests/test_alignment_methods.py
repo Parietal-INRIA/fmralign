@@ -255,6 +255,6 @@ def test_sparseot():
     assert X_transformed.shape == X.shape
 
     # Test identity transformation
-    algo.R = (torch.eye(n_features)).to_sparse_coo()
+    algo.R = (torch.eye(n_features, dtype=torch.float64)).to_sparse_coo()
     X_transformed = algo.transform(X)
     assert torch.allclose(X_transformed, X)
