@@ -238,7 +238,7 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
             torch.tensor(
                 self.masker.transform(img),
                 device=self.device,
-                dtype=torch.float32,
+                dtype=torch.float64,
             )
             for img in imgs
         ]
@@ -303,7 +303,7 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
             X = torch.tensor(
                 self.masker.transform(img),
                 device=self.device,
-                dtype=torch.float32,
+                dtype=torch.float64,
             )
             sparse_estimator = self.fit_[subject_index]
             X_transformed = sparse_estimator.transform(X).cpu().numpy()

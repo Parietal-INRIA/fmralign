@@ -96,10 +96,10 @@ class SparsePairwiseAlignment(BaseEstimator, TransformerMixin):
         self.n_pieces = self.parcel_masker.n_pieces
 
         X = torch.tensor(
-            self.masker.transform(X), device=self.device, dtype=torch.float32
+            self.masker.transform(X), device=self.device, dtype=torch.float64
         )
         Y = torch.tensor(
-            self.masker.transform(Y), device=self.device, dtype=torch.float32
+            self.masker.transform(Y), device=self.device, dtype=torch.float64
         )
 
         sparsity_mask = _sparse_cluster_matrix(self.labels_)
@@ -136,7 +136,7 @@ class SparsePairwiseAlignment(BaseEstimator, TransformerMixin):
                 "Please call 'fit' before 'transform'."
             )
         X = torch.tensor(
-            self.masker.transform(img), device=self.device, dtype=torch.float32
+            self.masker.transform(img), device=self.device, dtype=torch.float64
         )
         transformed_data = self.fit_.transform(X)
         transformed_img = self.masker.inverse_transform(

@@ -250,7 +250,7 @@ def test_sparseot():
     X_transformed = algo.transform(X)
 
     assert algo.R.shape == (n_features, n_features)
-    assert algo.R.dtype == torch.float32
+    assert algo.R.dtype == torch.float64
     assert isinstance(X_transformed, torch.Tensor)
     assert X_transformed.shape == X.shape
 

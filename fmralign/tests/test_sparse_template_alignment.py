@@ -30,7 +30,7 @@ def test_rescaled_euclidean_mean_torch(scale_average, device):
     with the same shape and dtype as the input tensors"""
     subjects_data_np = sample_subjects_data()
     subjects_data = [
-        torch.tensor(data, device=device, dtype=torch.float32)
+        torch.tensor(data, device=device, dtype=torch.float64)
         for data in subjects_data_np
     ]
     average_data = _rescaled_euclidean_mean_torch(subjects_data)
@@ -49,7 +49,7 @@ def test_align_images_to_template(device):
     aligned data and a list of estimators"""
     subjects_data_np = sample_subjects_data()
     subjects_data = [
-        torch.tensor(data, device=device, dtype=torch.float32)
+        torch.tensor(data, device=device, dtype=torch.float64)
         for data in subjects_data_np
     ]
     sparsity_mask = torch.eye(
@@ -77,7 +77,7 @@ def test_fit_sparse_template(device):
     a list of AlignmentEstimator objects"""
     subjects_data_np = sample_subjects_data()
     subjects_data = [
-        torch.tensor(data, device=device, dtype=torch.float32)
+        torch.tensor(data, device=device, dtype=torch.float64)
         for data in subjects_data_np
     ]
     sparsity_mask = torch.eye(
