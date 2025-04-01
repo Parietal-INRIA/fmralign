@@ -6,7 +6,7 @@ import torch
 from nibabel.nifti1 import Nifti1Image
 from nilearn.maskers import NiftiMasker
 
-from fmralign.alignment_methods import POTAlignment, SparseUOT
+from fmralign.alignment_methods import POTAlignment, SparseOT
 from fmralign.sparse_template_alignment import (
     SparseTemplateAlignment,
     _align_images_to_template,
@@ -56,7 +56,7 @@ def test_align_images_to_template(device):
         subjects_data[0].shape[0], device=device
     ).to_sparse_coo()
     subjects_estimators = [
-        SparseUOT(sparsity_mask, device=device)
+        SparseOT(sparsity_mask, device=device)
         for _ in range(len(subjects_data))
     ]
     template = _rescaled_euclidean_mean_torch(subjects_data)

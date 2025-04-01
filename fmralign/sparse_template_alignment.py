@@ -7,7 +7,7 @@ from sklearn.utils.validation import check_is_fitted
 from fmralign._utils import (
     _sparse_cluster_matrix,
 )
-from fmralign.alignment_methods import SparseUOT
+from fmralign.alignment_methods import SparseOT
 from fmralign.preprocessing import ParcellationMasker
 from fmralign.sparse_pairwise_alignment import SparsePairwiseAlignment
 
@@ -113,7 +113,7 @@ def _fit_sparse_template(
     if alignment_method != "sparse_uot":
         raise ValueError(f"Unknown alignment method: {alignment_method}")
     subjects_estimators = [
-        SparseUOT(sparsity_mask, verbose=verbose, **kwargs)
+        SparseOT(sparsity_mask, verbose=verbose, **kwargs)
         for _ in range(n_subjects)
     ]
     for _ in range(n_iter):
