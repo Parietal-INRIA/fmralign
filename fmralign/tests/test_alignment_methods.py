@@ -13,7 +13,7 @@ from fmralign.alignment_methods import (
     POTAlignment,
     RidgeAlignment,
     ScaledOrthogonalAlignment,
-    SparseUOT,
+    SparseOT,
     _voxelwise_signal_projection,
     scaled_procrustes,
 )
@@ -179,21 +179,17 @@ def test_all_classes_R_and_pred_shape_and_better_than_identity():
 
 def test_ot_backend():
     n_samples, n_features = 20, 100
+    reg = 1e-6  # Test with a small regularization parameter
     X = np.random.randn(n_samples, n_features)
     Y = np.random.randn(n_samples, n_features)
-    X /= np.linalg.norm(X)
-    Y /= np.linalg.norm(Y)
-    ott_algo = OptimalTransportAlignment()
-    pot_algo = POTAlignment()
+    pot_algo = POTAlignment(reg=reg)
     sparsity_mask = torch.ones(n_features, n_features).to_sparse_coo()
-    torch_algo = SparseUOT(sparsity_mask=sparsity_mask)
-    ott_algo.fit(X, Y)
+    torch_algo = SparseOT(sparsity_mask=sparsity_mask, reg=reg)
     pot_algo.fit(X, Y)
     torch_algo.fit(
-        torch.tensor(X, dtype=torch.float32),
-        torch.tensor(Y, dtype=torch.float32),
+        torch.tensor(X, dtype=torch.float64),
+        torch.tensor(Y, dtype=torch.float64),
     )
-    assert_array_almost_equal(pot_algo.R, ott_algo.R)
     assert_array_almost_equal(pot_algo.R, torch_algo.R.to_dense().numpy())
 
 
@@ -243,15 +239,13 @@ def test_tau_effect():
     assert np.sum(algo1.R.sum(axis=1)) > np.sum(algo2.R.sum(axis=1))
 
 
-def test_sparseuot():
+def test_sparseot():
     """Test the sparse version of optimal transport."""
     n_samples, n_features = 100, 20
-    X = torch.randn(n_samples, n_features)
-    Y = torch.randn(n_samples, n_features)
-    X /= torch.norm(X)
-    Y /= torch.norm(Y)
+    X = torch.randn(n_samples, n_features, dtype=torch.float64)
+    Y = torch.randn(n_samples, n_features, dtype=torch.float64)
     sparsity_mask = torch.ones(n_features, n_features).to_sparse_coo()
-    algo = SparseUOT(sparsity_mask=sparsity_mask)
+    algo = SparseOT(sparsity_mask=sparsity_mask)
     algo.fit(X, Y)
     X_transformed = algo.transform(X)
 
@@ -264,22 +258,3 @@ def test_sparseuot():
     algo.R = (torch.eye(n_features)).to_sparse_coo()
     X_transformed = algo.transform(X)
     assert torch.allclose(X_transformed, X)
-
-    # Check the unbalanced case
-    algo = SparseUOT(sparsity_mask=sparsity_mask)
-    algo.fit(X, Y)
-    mass1 = algo.R.sum() / n_features
-
-    algo = SparseUOT(sparsity_mask=sparsity_mask, rho=0.1)
-    algo.fit(X, Y)
-    mass2 = algo.R.sum() / n_features
-
-    algo = SparseUOT(sparsity_mask=sparsity_mask, rho=0.0)
-    algo.fit(X, Y)
-    mass3 = algo.R.sum() / n_features
-
-    assert torch.allclose(mass1, torch.tensor(1.0))
-    assert mass1 > mass2 > mass3
-
-
-test_ot_backend()
