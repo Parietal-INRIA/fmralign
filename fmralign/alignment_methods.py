@@ -699,7 +699,7 @@ class IndividualizedNeuralTuning(Alignment):
         return np.array(reconstructed_signal, dtype=np.float32)
 
 
-class SparseUOT(Alignment):
+class SparseOT(Alignment):
     """
     Compute the unbalanced regularized optimal coupling between X and Y,
     with sparsity constraints inspired by the FUGW package sparse
