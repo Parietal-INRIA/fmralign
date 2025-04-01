@@ -799,8 +799,14 @@ class SparseUOT(Alignment):
         init_plan = self._initialize_plan(n_features)
         cost = self._cost(init_plan, F, n_features)
 
-        ws = torch.ones(n_features, device=self.device) / n_features
-        wt = torch.ones(n_features, device=self.device) / n_features
+        ws = (
+            torch.ones(n_features, dtype=torch.float64, device=self.device)
+            / n_features
+        )
+        wt = (
+            torch.ones(n_features, dtype=torch.float64, device=self.device)
+            / n_features
+        )
 
         _, pi = solver_sinkhorn_eps_scaling_sparse(
             cost=cost,
