@@ -5,6 +5,7 @@ import pytest
 import torch
 from nibabel.nifti1 import Nifti1Image
 from nilearn.maskers import NiftiMasker
+from numpy.testing import assert_array_almost_equal
 
 from fmralign.alignment_methods import POTAlignment, SparseOT
 from fmralign.sparse_template_alignment import (
@@ -21,7 +22,6 @@ if torch.cuda.is_available():
     devices.append(torch.device("cuda:0"))
 
 
-@pytest.mark.skip_if_no_mkl
 @pytest.mark.parametrize(
     "scale_average, device", product([True, False], devices)
 )
@@ -42,7 +42,6 @@ def test_rescaled_euclidean_mean_torch(scale_average, device):
         assert torch.allclose(average_data, euclidean_mean)
 
 
-@pytest.mark.skip_if_no_mkl
 @pytest.mark.parametrize("device", devices)
 def test_align_images_to_template(device):
     """Test that _align_images_to_template returns a list of\n
@@ -70,7 +69,6 @@ def test_align_images_to_template(device):
     assert aligned_data[0].shape == subjects_data[0].shape
 
 
-@pytest.mark.skip_if_no_mkl
 @pytest.mark.parametrize("device", devices)
 def test_fit_sparse_template(device):
     """Test that _fit_sparse_template returns a template and\n
@@ -95,7 +93,6 @@ def test_fit_sparse_template(device):
         assert estimator.device == device
 
 
-@pytest.mark.skip_if_no_mkl
 def test_parcellation_retrieval():
     """Test that SparseTemplateAlignment returns both the\n
     labels and the parcellation image
@@ -112,7 +109,6 @@ def test_parcellation_retrieval():
     assert parcellation_image.shape == imgs[0].shape[:-1]
 
 
-@pytest.mark.skip_if_no_mkl
 def test_parcellation_before_fit():
     """Test that SparseTemplateAlignment raises an error if\n
     the parcellation is retrieved before fitting
@@ -125,13 +121,12 @@ def test_parcellation_before_fit():
         alignment.get_parcellation()
 
 
-@pytest.mark.skip_if_no_mkl
 def test_consistency_with_dense_templates():
     """Test that SparseTemplateAlignment outputs\n
     consistent templates with TemplateAlignment"""
-    img1, mask_img = random_niimg((8, 7, 6, 20))
-    img2, _ = random_niimg((8, 7, 6, 20))
-    img3, _ = random_niimg((8, 7, 6, 20))
+    img1, mask_img = random_niimg((4, 3, 2, 20))
+    img2, _ = random_niimg((4, 3, 2, 20))
+    img3, _ = random_niimg((4, 3, 2, 20))
     masker = NiftiMasker(mask_img=mask_img).fit()
 
     dense_algo = TemplateAlignment(
@@ -152,6 +147,7 @@ def test_consistency_with_dense_templates():
 
     template1 = dense_algo.template
     template2 = sparse_algo.template_img
-    assert np.allclose(
-        masker.transform(template1), masker.transform(template2)
+    assert_array_almost_equal(
+        masker.transform(template1),
+        masker.transform(template2),
     )
