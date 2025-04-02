@@ -2,8 +2,12 @@ import numpy as np
 import pytest
 import torch
 from nibabel.nifti1 import Nifti1Image
+from nilearn.maskers import NiftiMasker
 from nilearn.surface import SurfaceImage
+from numpy.testing import assert_array_almost_equal
 
+from fmralign.alignment_methods import POTAlignment
+from fmralign.pairwise_alignment import PairwiseAlignment
 from fmralign.sparse_pairwise_alignment import SparsePairwiseAlignment
 from fmralign.tests.utils import (
     random_niimg,
@@ -15,7 +19,6 @@ if torch.cuda.is_available():
     devices.append(torch.device("cuda:0"))
 
 
-@pytest.mark.skip_if_no_mkl
 @pytest.mark.parametrize("device", devices)
 def test_fit_method(device):
     """Test various solvers for SparsePairwiseAlignment"""
@@ -26,21 +29,43 @@ def test_fit_method(device):
     assert alignment.device == device
 
 
-@pytest.mark.skip_if_no_mkl
 @pytest.mark.parametrize("device", devices)
 def test_identity_alignment(device):
     """Test the identity alignment for SparsePairwiseAlignment"""
-    alignment = SparsePairwiseAlignment(device=device, reg=1e-4)
+    alignment = SparsePairwiseAlignment(device=device, reg=1e-6)
     img, _ = random_niimg((8, 7, 6, 100))
     alignment.fit(img, img)
     masker = alignment.masker
     img_transformed = alignment.transform(img)
     data = masker.transform(img)
     data_transformed = masker.transform(img_transformed)
-    assert np.allclose(data, data_transformed, atol=1e-5)
+    assert np.allclose(data, data_transformed)
 
 
-@pytest.mark.skip_if_no_mkl
+def test_consistency_with_dense_alignment():
+    """Test SparsePairwiseAlignment against PairwiseAlignment"""
+    img1, mask_img = random_niimg((4, 3, 2, 10))
+    img2, _ = random_niimg((4, 3, 2, 10))
+    masker = NiftiMasker(mask_img=mask_img).fit()
+
+    alignment_sparse = SparsePairwiseAlignment(
+        masker=masker, n_pieces=3, verbose=11
+    )
+    alignment_dense = PairwiseAlignment(
+        masker=masker, alignment_method=POTAlignment(), n_pieces=3, verbose=11
+    )
+    alignment_sparse.fit(img1, img2)
+    alignment_dense.fit(img1, img2)
+
+    # Test that the two alignments give the same result
+    img_sparse_transform = alignment_sparse.transform(img1)
+    img_dense_transform = alignment_dense.transform(img1)
+    data_sparse_transform = masker.transform(img_sparse_transform)
+    data_dense_transform = masker.transform(img_dense_transform)
+    assert img_sparse_transform.shape == img_dense_transform.shape
+    assert_array_almost_equal(data_sparse_transform, data_dense_transform)
+
+
 @pytest.mark.parametrize(
     "device",
     devices,
@@ -50,7 +75,7 @@ def test_surface_alignment(device):
     n_pieces = 3
     img1 = surf_img(20)
     img2 = surf_img(20)
-    alignment = SparsePairwiseAlignment(n_pieces=n_pieces)
+    alignment = SparsePairwiseAlignment(n_pieces=n_pieces, device=device)
 
     # Test fitting
     alignment.fit(img1, img2)
@@ -67,7 +92,6 @@ def test_surface_alignment(device):
     assert isinstance(parcellation_image, SurfaceImage)
 
 
-@pytest.mark.skip_if_no_mkl
 def test_parcellation_retrieval():
     """Test that SparsePairwiseAlignment returns both the\n
     labels and the parcellation image"""
@@ -84,7 +108,6 @@ def test_parcellation_retrieval():
     assert parcellation_image.shape == img1.shape
 
 
-@pytest.mark.skip_if_no_mkl
 def test_parcellation_before_fit():
     """Test that SparsePairwiseAlignment raises an error if\n
     the parcellation is retrieved before fitting"""
