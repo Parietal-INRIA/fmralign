@@ -799,14 +799,14 @@ class SparseOT(Alignment):
         init_plan = self._initialize_plan(n_features)
         cost = self._cost(init_plan, F, n_features)
 
-        ws = (
-            torch.ones(n_features, dtype=torch.float64, device=self.device)
-            / n_features
+        self.mass = (
+            self.sparsity_mask.sum(dim=1)
+            .to_dense()
+            .to(self.device)
+            .type(torch.float64)
         )
-        wt = (
-            torch.ones(n_features, dtype=torch.float64, device=self.device)
-            / n_features
-        )
+        ws = torch.ones_like(self.mass) / self.mass
+        wt = ws.clone()
 
         _, pi = solver_sinkhorn_eps_scaling_sparse(
             cost=cost,
@@ -816,12 +816,19 @@ class SparseOT(Alignment):
             numItermax=self.max_iter,
             tol=self.tol,
             eval_freq=self.eval_freq,
-            stabilization_threshold=1e6,
+            stabilization_threshold=1e3,
             verbose=self.verbose,
         )
 
-        # Convert pi to coo format
-        self.R = pi.to_sparse_coo().detach() * n_features
+        # Coupling matrix is rescaled by the mass
+        self.R = (
+            pi.to_sparse_coo().detach()
+            @ torch.sparse_coo_tensor(
+                torch.stack([torch.arange(n_features)] * 2),
+                self.mass,
+                (n_features, n_features),
+            ).to_sparse_coo()
+        )
 
         if self.R.values().isnan().any():
             raise ValueError(
