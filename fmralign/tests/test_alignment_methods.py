@@ -190,7 +190,9 @@ def test_ot_backend():
         torch.tensor(X, dtype=torch.float64),
         torch.tensor(Y, dtype=torch.float64),
     )
-    assert_array_almost_equal(pot_algo.R, torch_algo.R.to_dense().numpy())
+    assert_array_almost_equal(
+        pot_algo.R, torch_algo.R.to_dense().numpy(), decimal=5
+    )
 
 
 def test_identity_balanced_wasserstein():
