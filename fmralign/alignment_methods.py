@@ -827,6 +827,7 @@ class SparseOT(Alignment):
                 torch.stack([torch.arange(n_features)] * 2),
                 self.mass,
                 (n_features, n_features),
+                device=self.device,
             ).to_sparse_coo()
         )
 
