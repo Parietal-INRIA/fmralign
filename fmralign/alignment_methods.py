@@ -805,8 +805,8 @@ class SparseOT(Alignment):
             .to(self.device)
             .type(torch.float64)
         )
-        ws = torch.ones_like(self.mass) / self.mass
-        wt = ws.clone()
+        ws = torch.ones_like(self.mass).to(self.device) / self.mass
+        wt = ws.clone().to(self.device)
 
         _, pi = solver_sinkhorn_eps_scaling_sparse(
             cost=cost,
