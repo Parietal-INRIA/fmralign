@@ -186,7 +186,7 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
             Indicate the level of verbosity. By default, nothing is printed.
 
         """
-        self.template = None
+        self.template_img = None
         self.template_history = None
         self.alignment_method = alignment_method
         self.n_pieces = n_pieces
@@ -216,7 +216,7 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
 
         Attributes
         ----------
-        self.template: 4D Niimg object
+        self.template_img: 4D Niimg object
             Length : n_samples
 
         """
@@ -258,7 +258,7 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
             template_data.cpu().numpy()
         )
         if self.save_template is not None:
-            self.template.to_filename(self.save_template)
+            self.template_img.to_filename(self.save_template)
 
     def transform(self, img, subject_index=None):
         """
@@ -297,7 +297,7 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
                 n_jobs=self.n_jobs,
                 verbose=self.verbose,
             )
-            alignment_estimator.fit(img, self.template)
+            alignment_estimator.fit(img, self.template_img)
             return alignment_estimator.transform(img)
         else:
             X = torch.tensor(
