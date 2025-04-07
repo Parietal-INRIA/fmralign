@@ -63,13 +63,14 @@ def _align_images_to_template(
         Updated subjects data and alignment estimators.
     """
     n_subjects = len(subjects_data)
+    aligned_data = [None] * n_subjects
     for i in range(n_subjects):
         sparse_estimator = subjects_estimators[i]
         sparse_estimator.fit(subjects_data[i], template)
-        subjects_data[i] = sparse_estimator.transform(subjects_data[i])
+        aligned_data[i] = sparse_estimator.transform(subjects_data[i])
         # Update the estimator in the list
         subjects_estimators[i] = sparse_estimator
-    return subjects_data, subjects_estimators
+    return aligned_data, subjects_estimators
 
 
 def _fit_sparse_template(
@@ -110,6 +111,7 @@ def _fit_sparse_template(
         Unknown alignment method.
     """
     n_subjects = len(subjects_data)
+    aligned_data = subjects_data
     if alignment_method != "sparse_uot":
         raise ValueError(f"Unknown alignment method: {alignment_method}")
     subjects_estimators = [
@@ -117,10 +119,8 @@ def _fit_sparse_template(
         for _ in range(n_subjects)
     ]
     for _ in range(n_iter):
-        template = _rescaled_euclidean_mean_torch(
-            subjects_data, scale_template
-        )
-        subjects_data, subjects_estimators = _align_images_to_template(
+        template = _rescaled_euclidean_mean_torch(aligned_data, scale_template)
+        aligned_data, subjects_estimators = _align_images_to_template(
             subjects_data,
             template,
             subjects_estimators,
