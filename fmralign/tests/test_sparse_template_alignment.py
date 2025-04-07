@@ -136,16 +136,13 @@ def test_consistency_with_dense_templates():
     )
     dense_algo.fit([img1, img2, img3])
 
-    # Do not recompute the masker and the clustering
-    _, clustering_img = dense_algo.get_parcellation()
-    masker = dense_algo.masker
     sparse_algo = SparseTemplateAlignment(
-        clustering=clustering_img,
+        n_pieces=3,
         masker=masker,
     )
     sparse_algo.fit([img1, img2, img3])
 
-    template1 = dense_algo.template
+    template1 = dense_algo.template_img
     template2 = sparse_algo.template_img
     assert_array_almost_equal(
         masker.transform(template1),
