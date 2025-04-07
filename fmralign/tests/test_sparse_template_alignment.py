@@ -144,7 +144,16 @@ def test_consistency_with_dense_templates():
 
     template1 = dense_algo.template_img
     template2 = sparse_algo.template_img
+    img1_dense_transformed = dense_algo.transform(img1, subject_index=0)
+    img1_sparse_transformed = sparse_algo.transform(img1, subject_index=0)
+
+    # Check that the templates are the same
     assert_array_almost_equal(
         masker.transform(template1),
         masker.transform(template2),
+    )
+    # Check that the transformed images are the same
+    assert_array_almost_equal(
+        masker.transform(img1_dense_transformed),
+        masker.transform(img1_sparse_transformed),
     )
