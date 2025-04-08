@@ -158,6 +158,3 @@ def test_consistency_with_dense_templates():
             masker.transform(img_dense_transformed),
             masker.transform(img_sparse_transformed),
         )
-
-
-test_consistency_with_dense_templates()
