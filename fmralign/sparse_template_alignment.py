@@ -187,7 +187,6 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
 
         """
         self.template_img = None
-        self.template_history = None
         self.alignment_method = alignment_method
         self.n_pieces = n_pieces
         self.clustering = clustering
