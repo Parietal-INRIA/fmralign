@@ -5,7 +5,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
 from fmralign._utils import _sparse_cluster_matrix
-from fmralign.alignment_methods import SparseUOT
+from fmralign.alignment_methods import SparseOT
 from fmralign.preprocessing import ParcellationMasker
 
 
@@ -96,15 +96,15 @@ class SparsePairwiseAlignment(BaseEstimator, TransformerMixin):
         self.n_pieces = self.parcel_masker.n_pieces
 
         X = torch.tensor(
-            self.masker.transform(X), device=self.device, dtype=torch.float32
+            self.masker.transform(X), device=self.device, dtype=torch.float64
         )
         Y = torch.tensor(
-            self.masker.transform(Y), device=self.device, dtype=torch.float32
+            self.masker.transform(Y), device=self.device, dtype=torch.float64
         )
 
         sparsity_mask = _sparse_cluster_matrix(self.labels_)
         if self.alignment_method == "sparse_uot":
-            self.fit_ = SparseUOT(
+            self.fit_ = SparseOT(
                 sparsity_mask=sparsity_mask,
                 device=self.device,
                 verbose=True if self.verbose > 0 else False,
@@ -136,7 +136,7 @@ class SparsePairwiseAlignment(BaseEstimator, TransformerMixin):
                 "Please call 'fit' before 'transform'."
             )
         X = torch.tensor(
-            self.masker.transform(img), device=self.device, dtype=torch.float32
+            self.masker.transform(img), device=self.device, dtype=torch.float64
         )
         transformed_data = self.fit_.transform(X)
         transformed_img = self.masker.inverse_transform(

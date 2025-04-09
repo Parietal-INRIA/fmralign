@@ -7,7 +7,7 @@ from sklearn.utils.validation import check_is_fitted
 from fmralign._utils import (
     _sparse_cluster_matrix,
 )
-from fmralign.alignment_methods import SparseUOT
+from fmralign.alignment_methods import SparseOT
 from fmralign.preprocessing import ParcellationMasker
 from fmralign.sparse_pairwise_alignment import SparsePairwiseAlignment
 
@@ -63,13 +63,14 @@ def _align_images_to_template(
         Updated subjects data and alignment estimators.
     """
     n_subjects = len(subjects_data)
+    aligned_data = [None] * n_subjects
     for i in range(n_subjects):
         sparse_estimator = subjects_estimators[i]
         sparse_estimator.fit(subjects_data[i], template)
-        subjects_data[i] = sparse_estimator.transform(subjects_data[i])
+        aligned_data[i] = sparse_estimator.transform(subjects_data[i])
         # Update the estimator in the list
         subjects_estimators[i] = sparse_estimator
-    return subjects_data, subjects_estimators
+    return aligned_data, subjects_estimators
 
 
 def _fit_sparse_template(
@@ -110,17 +111,16 @@ def _fit_sparse_template(
         Unknown alignment method.
     """
     n_subjects = len(subjects_data)
+    aligned_data = subjects_data
     if alignment_method != "sparse_uot":
         raise ValueError(f"Unknown alignment method: {alignment_method}")
     subjects_estimators = [
-        SparseUOT(sparsity_mask, verbose=verbose, **kwargs)
+        SparseOT(sparsity_mask, verbose=verbose, **kwargs)
         for _ in range(n_subjects)
     ]
     for _ in range(n_iter):
-        template = _rescaled_euclidean_mean_torch(
-            subjects_data, scale_template
-        )
-        subjects_data, subjects_estimators = _align_images_to_template(
+        template = _rescaled_euclidean_mean_torch(aligned_data, scale_template)
+        aligned_data, subjects_estimators = _align_images_to_template(
             subjects_data,
             template,
             subjects_estimators,
@@ -186,8 +186,7 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
             Indicate the level of verbosity. By default, nothing is printed.
 
         """
-        self.template = None
-        self.template_history = None
+        self.template_img = None
         self.alignment_method = alignment_method
         self.n_pieces = n_pieces
         self.clustering = clustering
@@ -216,7 +215,7 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
 
         Attributes
         ----------
-        self.template: 4D Niimg object
+        self.template_img: 4D Niimg object
             Length : n_samples
 
         """
@@ -238,7 +237,7 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
             torch.tensor(
                 self.masker.transform(img),
                 device=self.device,
-                dtype=torch.float32,
+                dtype=torch.float64,
             )
             for img in imgs
         ]
@@ -258,7 +257,7 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
             template_data.cpu().numpy()
         )
         if self.save_template is not None:
-            self.template.to_filename(self.save_template)
+            self.template_img.to_filename(self.save_template)
 
     def transform(self, img, subject_index=None):
         """
@@ -297,13 +296,13 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
                 n_jobs=self.n_jobs,
                 verbose=self.verbose,
             )
-            alignment_estimator.fit(img, self.template)
+            alignment_estimator.fit(img, self.template_img)
             return alignment_estimator.transform(img)
         else:
             X = torch.tensor(
                 self.masker.transform(img),
                 device=self.device,
-                dtype=torch.float32,
+                dtype=torch.float64,
             )
             sparse_estimator = self.fit_[subject_index]
             X_transformed = sparse_estimator.transform(X).cpu().numpy()

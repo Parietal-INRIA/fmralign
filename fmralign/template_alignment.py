@@ -261,7 +261,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             Indicate the level of verbosity. By default, nothing is printed.
 
         """
-        self.template = None
+        self.template_img = None
         self.template_history = None
         self.alignment_method = alignment_method
         self.n_pieces = n_pieces
@@ -289,7 +289,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
 
         Attributes
         ----------
-        self.template: 4D Niimg object
+        self.template_img: 4D Niimg object
             Length : n_samples
 
         """
@@ -320,11 +320,11 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             for parcel_i in parcels_data
         )
 
-        self.template, self.template_history = _reconstruct_template(
+        self.template_img, self.template_history = _reconstruct_template(
             self.fit_, self.labels_, self.masker
         )
         if self.save_template is not None:
-            self.template.to_filename(self.save_template)
+            self.template_img.to_filename(self.save_template)
 
     def transform(self, img, subject_index=None):
         """
@@ -363,7 +363,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
                 n_jobs=self.n_jobs,
                 verbose=self.verbose,
             )
-            alignment_estimator.fit(img, self.template)
+            alignment_estimator.fit(img, self.template_img)
             return alignment_estimator.transform(img)
         else:
             parceled_data_list = self.parcel_masker.transform(img)

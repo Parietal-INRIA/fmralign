@@ -9,7 +9,8 @@ import torch
 from fugw.solvers.utils import (
     batch_elementwise_prod_and_sum,
     crow_indices_to_row_indices,
-    solver_sinkhorn_sparse,
+    solver_sinkhorn_stabilized_sparse,
+    solver_sinkhorn_eps_scaling_sparse,
 )
 from fugw.utils import _low_rank_squared_l2, _make_csr_matrix
 from joblib import Parallel, delayed
@@ -308,9 +309,9 @@ class POTAlignment(Alignment):
         self,
         solver="sinkhorn_epsilon_scaling",
         metric="euclidean",
-        reg=1,
-        max_iter=1000,
-        tol=1e-3,
+        reg=1e-1,
+        max_iter=100,
+        tol=0,
     ):
         self.solver = solver
         self.metric = metric
@@ -390,7 +391,7 @@ class OptimalTransportAlignment(Alignment):
     """
 
     def __init__(
-        self, metric="euclidean", reg=1, tau=1.0, max_iter=1000, tol=1e-3
+        self, metric="euclidean", reg=1e-1, tau=1.0, max_iter=100, tol=0
     ):
         self.metric = metric
         self.reg = reg
@@ -699,7 +700,7 @@ class IndividualizedNeuralTuning(Alignment):
         return np.array(reconstructed_signal, dtype=np.float32)
 
 
-class SparseUOT(Alignment):
+class SparseOT(Alignment):
     """
     Compute the unbalanced regularized optimal coupling between X and Y,
     with sparsity constraints inspired by the FUGW package sparse
@@ -735,36 +736,22 @@ class SparseUOT(Alignment):
     def __init__(
         self,
         sparsity_mask,
-        rho=float("inf"),
-        reg=1,
-        max_iter=1000,
-        tol=1e-3,
+        solver="sinkhorn_epsilon_scaling",
+        reg=1e-1,
+        max_iter=100,
+        tol=0,
         eval_freq=10,
         device="cpu",
         verbose=False,
     ):
-        self.rho = rho
         self.reg = reg
         self.sparsity_mask = sparsity_mask
+        self.solver = solver
         self.max_iter = max_iter
         self.tol = tol
         self.eval_freq = eval_freq
         self.device = device
         self.verbose = verbose
-
-    def _initialize_weights(self, n, cost):
-        crow_indices, col_indices = cost.crow_indices(), cost.col_indices()
-        row_indices = crow_indices_to_row_indices(crow_indices)
-        weights = torch.ones(n, device=self.device) / n
-        ws_dot_wt_values = weights[row_indices] * weights[col_indices]
-        ws_dot_wt = _make_csr_matrix(
-            crow_indices,
-            col_indices,
-            ws_dot_wt_values,
-            cost.size(),
-            self.device,
-        )
-        return weights, ws_dot_wt
 
     def _initialize_plan(self, n):
         return (
@@ -779,7 +766,7 @@ class SparseUOT(Alignment):
             .to(self.device)
         )
 
-    def _uot_cost(self, init_plan, F, n):
+    def _cost(self, init_plan, F, n):
         crow_indices, col_indices = (
             init_plan.crow_indices(),
             init_plan.col_indices(),
@@ -813,33 +800,57 @@ class SparseUOT(Alignment):
         F = _low_rank_squared_l2(X.T, Y.T)
 
         init_plan = self._initialize_plan(n_features)
-        cost = self._uot_cost(init_plan, F, n_features)
+        cost = self._cost(init_plan, F, n_features)
 
-        weights, ws_dot_wt = self._initialize_weights(n_features, cost)
-
-        uot_params = (
-            torch.tensor([self.rho], device=self.device),
-            torch.tensor([self.rho], device=self.device),
-            torch.tensor([self.reg], device=self.device),
+        self.mass = (
+            self.sparsity_mask.sum(dim=1)
+            .to_dense()
+            .to(self.device)
+            .type(torch.float64)
         )
-        init_duals = (
-            torch.zeros(n_features, device=self.device),
-            torch.zeros(n_features, device=self.device),
-        )
-        tuple_weights = (weights, weights, ws_dot_wt)
-        train_params = (self.max_iter, self.tol, self.eval_freq)
+        ws = torch.ones_like(self.mass).to(self.device) / self.mass
+        wt = ws.clone().to(self.device)
 
-        _, pi = solver_sinkhorn_sparse(
-            cost=cost,
-            init_duals=init_duals,
-            uot_params=uot_params,
-            tuple_weights=tuple_weights,
-            train_params=train_params,
-            verbose=self.verbose,
-        )
+        if self.solver =="sinkhorn_epsilon_scaling":
+            _, pi = solver_sinkhorn_eps_scaling_sparse(
+                cost=cost,
+                ws=ws,
+                wt=wt,
+                eps=self.reg,
+                numItermax=self.max_iter,
+                tol=self.tol,
+                eval_freq=self.eval_freq,
+                stabilization_threshold=1e6,
+                verbose=self.verbose,
+            )
+        elif self.solver == "sinkhorn_stabilized":
+            _, pi = solver_sinkhorn_stabilized_sparse(
+                cost=cost,
+                ws=ws,
+                wt=wt,
+                eps=self.reg,
+                numItermax=self.max_iter,
+                tol=self.tol,
+                eval_freq=self.eval_freq,
+                stabilization_threshold=1e6,
+                verbose=self.verbose,
+            )
+        else:
+            raise ValueError(
+                f"Solver {self.solver} not recognized. "
+                "Please use 'sinkhorn_epsilon_scaling' or 'sinkhorn_stabilized'."
+            )
 
-        # Convert pi to coo format
-        self.R = pi.to_sparse_coo().detach() * n_features
+        # Coupling matrix is rescaled by the mass
+        self.R = (
+            pi.to_sparse_coo().detach()
+            @ torch.sparse_coo_tensor(
+                torch.stack([torch.arange(n_features)] * 2),
+                self.mass,
+                (n_features, n_features),
+                device=self.device,
+            ).to_sparse_coo()
+        )
 
         if self.R.values().isnan().any():
             raise ValueError(
