@@ -9,6 +9,7 @@ import torch
 from fugw.solvers.utils import (
     batch_elementwise_prod_and_sum,
     crow_indices_to_row_indices,
+    solver_sinkhorn_stabilized_sparse,
     solver_sinkhorn_eps_scaling_sparse,
 )
 from fugw.utils import _low_rank_squared_l2, _make_csr_matrix
@@ -735,6 +736,7 @@ class SparseOT(Alignment):
     def __init__(
         self,
         sparsity_mask,
+        solver="sinkhorn_epsilon_scaling",
         reg=1e-1,
         max_iter=100,
         tol=0,
@@ -744,6 +746,7 @@ class SparseOT(Alignment):
     ):
         self.reg = reg
         self.sparsity_mask = sparsity_mask
+        self.solver = solver
         self.max_iter = max_iter
         self.tol = tol
         self.eval_freq = eval_freq
@@ -808,17 +811,35 @@ class SparseOT(Alignment):
         ws = torch.ones_like(self.mass).to(self.device) / self.mass
         wt = ws.clone().to(self.device)
 
-        _, pi = solver_sinkhorn_eps_scaling_sparse(
-            cost=cost,
-            ws=ws,
-            wt=wt,
-            eps=self.reg,
-            numItermax=self.max_iter,
-            tol=self.tol,
-            eval_freq=self.eval_freq,
-            stabilization_threshold=1e3,
-            verbose=self.verbose,
-        )
+        if self.solver =="sinkhorn_epsilon_scaling":
+            _, pi = solver_sinkhorn_eps_scaling_sparse(
+                cost=cost,
+                ws=ws,
+                wt=wt,
+                eps=self.reg,
+                numItermax=self.max_iter,
+                tol=self.tol,
+                eval_freq=self.eval_freq,
+                stabilization_threshold=1e6,
+                verbose=self.verbose,
+            )
+        elif self.solver == "sinkhorn_stabilized":
+            _, pi = solver_sinkhorn_stabilized_sparse(
+                cost=cost,
+                ws=ws,
+                wt=wt,
+                eps=self.reg,
+                numItermax=self.max_iter,
+                tol=self.tol,
+                eval_freq=self.eval_freq,
+                stabilization_threshold=1e6,
+                verbose=self.verbose,
+            )
+        else:
+            raise ValueError(
+                f"Solver {self.solver} not recognized. "
+                "Please use 'sinkhorn_epsilon_scaling' or 'sinkhorn_stabilized'."
+            )
 
         # Coupling matrix is rescaled by the mass
         self.R = (
