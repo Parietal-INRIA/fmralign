@@ -83,15 +83,13 @@ def assert_class_align_better_than_identity(algo, X, Y):
     assert algo_score >= identity_baseline_score
 
 
-def assert_algo_transform_almost_exactly(algo, img1, img2, mask=None):
+def assert_algo_transform_almost_exactly(algo, img1, img2, masker):
     """
     Tests that the given algorithm manages to transform (almost exactly)
     Nifti image img1 into Nifti Image img2.
     """
     algo.fit(img1, img2)
     imtest = algo.transform(img1)
-    masker = NiftiMasker(mask_img=mask)
-    masker.fit()
     assert_array_almost_equal(
         masker.transform(img2), masker.transform(imtest), decimal=6
     )
@@ -106,24 +104,6 @@ def random_niimg(shape):
     )
     mask_img = nibabel.Nifti1Image(np.ones(shape[0:3]), np.eye(4))
     return im, mask_img
-
-
-def assert_model_align_better_than_identity(algo, img1, img2, mask=None):
-    """
-    Tests that the given algorithm aligns better than identity.
-    Proficiency is measured through r2 score.
-    """
-    algo.fit(img1, img2)
-    im_test = algo.transform(img1)
-    masker = NiftiMasker(mask)
-    masker.fit()
-    identity_baseline_score = zero_mean_coefficient_determination(
-        masker.transform(img2), masker.transform(img1)
-    )
-    algo_score = zero_mean_coefficient_determination(
-        masker.transform(img2), masker.transform(im_test)
-    )
-    assert algo_score >= identity_baseline_score
 
 
 def sample_parceled_data(n_pieces=1):
