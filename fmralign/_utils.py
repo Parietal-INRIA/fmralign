@@ -5,8 +5,10 @@ from collections import defaultdict
 import nibabel as nib
 import numpy as np
 import torch
+from joblib import Parallel, delayed
 from nilearn._utils.niimg_conversions import check_same_fov
 from nilearn.image import new_img_like, smooth_img
+from nilearn.maskers import NiftiLabelsMasker
 from nilearn.masking import apply_mask_fmri, intersect_masks
 from nilearn.regions.parcellations import Parcellations
 from nilearn.surface import SurfaceImage
@@ -396,3 +398,82 @@ def load_alignment(input_path):
         input_path = max(pkl_files, key=lambda x: x.stat().st_mtime)
 
     return joblib.load(input_path)
+
+
+def connectivity_one_piece(parceled_data, n_jobs=1, verbose=0):
+    if verbose > 0:
+        print("Computing parcel-wise connectivity")
+    return Parallel(n_jobs, prefer="threads", verbose=verbose)(
+        delayed(np.corrcoef)(X_i.T) for X_i in parceled_data.to_list()
+    )
+
+
+def connectivity_one_parcel(connectivity_targets, parcel):
+    """Compute connectivity for a single parcel."""
+    return connectivity_targets.T @ parcel / parcel.shape[0]
+
+
+def get_connectivity_features(
+    subject_parcels,
+    parcelation_img,
+    n_jobs=1,
+    verbose=0,
+):
+    """Compute connectivity features for a single subject."""
+    connectivity_targets = NiftiLabelsMasker(
+        labels_img=parcelation_img
+    ).fit_transform(subject_parcels.to_img())
+    connectivity_parcels = Parallel(n_jobs, prefer="threads", verbose=verbose)(
+        delayed(connectivity_one_parcel)(connectivity_targets, parcel)
+        for parcel in subject_parcels.to_list()
+    )
+    return connectivity_parcels
+
+
+def compute_features_modality(
+    subjects_parcels,
+    parcellation_img=None,
+    modality="response",
+    n_jobs=1,
+    verbose=0,
+):
+    if modality == "response":
+        return [
+            subject_parcels.to_list() for subject_parcels in subjects_parcels
+        ]
+
+    elif modality == "connectivity":
+        subjects_connectivity_features = []
+        for subject_parcels in subjects_parcels:
+            connectivity_parcels = get_connectivity_features(
+                subject_parcels,
+                parcellation_img,
+                n_jobs=n_jobs,
+                verbose=verbose,
+            )
+            subjects_connectivity_features.append(connectivity_parcels)
+        return subjects_connectivity_features
+
+    elif modality == "hybrid":
+        subjects_hybrid_features = []
+        for subject_parcels in subjects_parcels:
+            connectivity_parcels = get_connectivity_features(
+                subject_parcels,
+                parcellation_img,
+                n_jobs=n_jobs,
+                verbose=verbose,
+            )
+            subject_hybrid_features = []
+            for i in range(len(connectivity_parcels)):
+                subject_hybrid_features.append(
+                    np.concatenate(
+                        (subject_parcels[i], connectivity_parcels[i]), axis=0
+                    )
+                )
+            subjects_hybrid_features.append(subject_hybrid_features)
+        return subjects_hybrid_features
+
+    else:
+        raise ValueError(
+            "mode must be 'response', 'connectivity', or 'hybrid'."
+        )
