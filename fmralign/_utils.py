@@ -446,6 +446,10 @@ def get_connectivity_features(
     params = {
         k: v for k, v in masker.get_params().items() if k in allowed_keys
     }
+    if params["standardize"] is False:
+        raise ValueError(
+            "Standardization is required for connectivity features."
+        )
     if isinstance(parcelation_img, SurfaceImage):
         connectivity_targets = SurfaceLabelsMasker(
             labels_img=parcelation_img, **params
