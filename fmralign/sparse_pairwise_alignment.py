@@ -4,7 +4,7 @@ import torch
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
-from fmralign._utils import _sparse_cluster_matrix
+from fmralign._utils import _sparse_cluster_matrix, get_modality_features
 from fmralign.alignment_methods import SparseUOT
 from fmralign.preprocessing import ParcellationMasker
 
@@ -19,6 +19,7 @@ class SparsePairwiseAlignment(BaseEstimator, TransformerMixin):
         n_pieces=1,
         clustering="kmeans",
         masker=None,
+        modality="response",
         device="cpu",
         n_jobs=1,
         verbose=0,
@@ -49,6 +50,15 @@ class SparsePairwiseAlignment(BaseEstimator, TransformerMixin):
             A mask to be used on the data. If provided, the mask
             will be used to extract the data. If None, a mask will
             be computed automatically with default parameters.
+        modality : str, optional (default='response')
+            Specifies the alignment modality to be used:
+            * 'response': Aligns by directly comparing corresponding similar 
+            time points in the source and target images.
+            * 'connectivity': Aligns based on voxel-wise connectivity features 
+            within each parcel, comparing how each voxel relates to others in 
+            the same region.
+            * 'hybrid': Combines both time series and connectivity information 
+            to perform the alignment.
         device: string, optional (default = 'cpu')
             Device on which the computation will be done. If 'cuda', the
             computation will be done on the GPU if available.
@@ -62,6 +72,7 @@ class SparsePairwiseAlignment(BaseEstimator, TransformerMixin):
         self.alignment_method = alignment_method
         self.clustering = clustering
         self.masker = masker
+        self.modality = modality
         self.n_jobs = n_jobs
         self.device = device
         self.verbose = verbose
@@ -94,12 +105,18 @@ class SparsePairwiseAlignment(BaseEstimator, TransformerMixin):
         self.masker = self.parcel_masker.masker
         self.labels_ = self.parcel_masker.labels
         self.n_pieces = self.parcel_masker.n_pieces
+        parcellation_img = self.parcel_masker.get_parcellation_img()
 
-        X = torch.tensor(
-            self.masker.transform(X), device=self.device, dtype=torch.float32
+        # Add new features based on the modality
+        X_, Y_ = get_modality_features(
+            [X, Y], parcellation_img, self.masker, self.modality
         )
-        Y = torch.tensor(
-            self.masker.transform(Y), device=self.device, dtype=torch.float32
+
+        source_features = torch.tensor(
+            self.masker.transform(X_), device=self.device, dtype=torch.float32
+        )
+        target_features = torch.tensor(
+            self.masker.transform(Y_), device=self.device, dtype=torch.float32
         )
 
         sparsity_mask = _sparse_cluster_matrix(self.labels_)
@@ -109,7 +126,7 @@ class SparsePairwiseAlignment(BaseEstimator, TransformerMixin):
                 device=self.device,
                 verbose=True if self.verbose > 0 else False,
                 **self.kwargs,
-            ).fit(X, Y)
+            ).fit(source_features, target_features)
         else:
             raise ValueError(
                 f"Unknown alignment method: {self.alignment_method}"
