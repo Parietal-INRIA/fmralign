@@ -10,11 +10,16 @@ from joblib import Parallel, delayed
 from nibabel import Nifti1Image
 from nilearn._utils.niimg_conversions import check_same_fov
 from nilearn.image import concat_imgs, new_img_like, smooth_img
-from nilearn.maskers import NiftiLabelsMasker, NiftiMasker, SurfaceLabelsMasker
+from nilearn.maskers import (
+    NiftiLabelsMasker,
+    NiftiMasker,
+    SurfaceLabelsMasker,
+    SurfaceMasker,
+)
 from nilearn.maskers._utils import concatenate_surface_images
 from nilearn.masking import apply_mask_fmri, intersect_masks
 from nilearn.regions.parcellations import Parcellations
-from nilearn.surface import SurfaceImage, SurfaceMasker
+from nilearn.surface import SurfaceImage
 from pathlib import Path
 import joblib
 import datetime
