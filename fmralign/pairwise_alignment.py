@@ -178,7 +178,9 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         )
 
         # Parcelate the data
-        parceled_source, parceled_target = self.parcel_masker.transform([X, Y])
+        parceled_source, parceled_target = self.parcel_masker.transform(
+            [X_, Y_]
+        )
 
         self.fit_ = Parallel(
             self.n_jobs, prefer="threads", verbose=self.verbose
