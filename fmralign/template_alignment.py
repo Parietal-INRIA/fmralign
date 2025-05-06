@@ -11,7 +11,11 @@ from joblib import Parallel, delayed
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
-from fmralign._utils import _parcels_to_array, _transform_one_img
+from fmralign._utils import (
+    _parcels_to_array,
+    _transform_one_img,
+    get_modality_features,
+)
 from fmralign.pairwise_alignment import PairwiseAlignment, fit_one_piece
 from fmralign.preprocessing import ParcellationMasker
 
@@ -216,6 +220,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         n_iter=2,
         save_template=None,
         masker=None,
+        modality="response",
         n_jobs=1,
         verbose=0,
     ):
@@ -254,6 +259,15 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             A mask to be used on the data. If provided, the mask
             will be used to extract the data. If None, a mask will
             be computed automatically with default parameters.
+        modality : str, optional (default='response')
+            Specifies the alignment modality to be used:
+            * 'response': Aligns by directly comparing corresponding similar 
+            time points in the source and target images.
+            * 'connectivity': Aligns based on voxel-wise connectivity features 
+            within each parcel, comparing how each voxel relates to others in 
+            the same region.
+            * 'hybrid': Combines both time series and connectivity information 
+            to perform the alignment.        
         n_jobs: integer, optional (default = 1)
             The number of CPUs to use to do the computation. -1 means
             'all CPUs', -2 'all CPUs but one', and so on.
@@ -270,6 +284,7 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         self.scale_template = scale_template
         self.save_template = save_template
         self.masker = masker
+        self.modality = modality
         self.n_jobs = n_jobs
         self.verbose = verbose
 
@@ -302,11 +317,20 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             verbose=self.verbose,
         )
 
-        subjects_parcels = self.parcel_masker.fit_transform(imgs)
-        parcels_data = _index_by_parcel(subjects_parcels)
+        subjects_parcels = self.parcel_masker.fit(imgs)
         self.masker = self.parcel_masker.masker
         self.labels_ = self.parcel_masker.labels
         self.n_pieces = self.parcel_masker.n_pieces
+        parcellation_img = self.parcel_masker.get_parcellation_img()
+
+        # Add new features based on the modality
+        imgs_ = get_modality_features(
+            imgs, parcellation_img, self.masker, self.modality
+        )
+
+        # Parcelate the data
+        subjects_parcels = self.parcel_masker.transform(imgs_)
+        parcels_data = _index_by_parcel(subjects_parcels)
 
         self.fit_ = Parallel(
             self.n_jobs, prefer="threads", verbose=self.verbose
@@ -325,6 +349,8 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
         )
         if self.save_template is not None:
             self.template.to_filename(self.save_template)
+
+        return self
 
     def transform(self, img, subject_index=None):
         """
@@ -355,15 +381,19 @@ class TemplateAlignment(BaseEstimator, TransformerMixin):
             )
 
         if subject_index is None:
+            img_ = get_modality_features(
+                [img], self.get_parcellation()[1], self.masker, self.modality
+            )[0]
             alignment_estimator = PairwiseAlignment(
                 n_pieces=self.n_pieces,
                 alignment_method=self.alignment_method,
                 clustering=self.parcel_masker.get_parcellation_img(),
+                modality="response",  # self.template already includes the modality
                 masker=self.masker,
                 n_jobs=self.n_jobs,
                 verbose=self.verbose,
             )
-            alignment_estimator.fit(img, self.template)
+            alignment_estimator.fit(img_, self.template)
             return alignment_estimator.transform(img)
         else:
             parceled_data_list = self.parcel_masker.transform(img)
