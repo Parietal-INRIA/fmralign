@@ -6,7 +6,6 @@ from typing import Iterable
 import nibabel as nib
 import numpy as np
 import torch
-from joblib import Parallel, delayed
 from nibabel import Nifti1Image
 from nilearn._utils.niimg_conversions import check_same_fov
 from nilearn.image import concat_imgs, new_img_like, smooth_img
