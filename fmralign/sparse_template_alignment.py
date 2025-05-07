@@ -4,9 +4,7 @@ import torch
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
-from fmralign._utils import (
-    _sparse_cluster_matrix,
-)
+from fmralign._utils import _sparse_cluster_matrix, get_modality_features
 from fmralign.alignment_methods import SparseUOT
 from fmralign.preprocessing import ParcellationMasker
 from fmralign.sparse_pairwise_alignment import SparsePairwiseAlignment
@@ -145,6 +143,7 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
         n_iter=2,
         save_template=None,
         masker=None,
+        modality="response",
         device="cpu",
         n_jobs=1,
         verbose=0,
@@ -176,6 +175,21 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
            the template is simply the mean of the input images.
         save_template: None or string(optional)
             If not None, path to which the template will be saved.
+        masker : None or :class:`~nilearn.maskers.NiftiMasker` or \
+                :class:`~nilearn.maskers.MultiNiftiMasker`, or \
+                :class:`~nilearn.maskers.SurfaceMasker` , optional
+            A mask to be used on the data. If provided, the mask
+            will be used to extract the data. If None, a mask will
+            be computed automatically with default parameters.
+        modality : str, optional (default='response')
+            Specifies the alignment modality to be used:
+            * 'response': Aligns by directly comparing corresponding similar 
+            time points in the source and target images.
+            * 'connectivity': Aligns based on voxel-wise connectivity features 
+            within each parcel, comparing how each voxel relates to others in 
+            the same region.
+            * 'hybrid': Combines both time series and connectivity information 
+            to perform the alignment.
         device: string, optional (default = 'cpu')
             Device on which the computation will be done. If 'cuda', the
             computation will be done on the GPU if available.
@@ -195,6 +209,7 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
         self.scale_template = scale_template
         self.save_template = save_template
         self.masker = masker
+        self.modality = modality
         self.device = device
         self.n_jobs = n_jobs
         self.verbose = verbose
@@ -233,6 +248,12 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
         self.masker = self.parcel_masker.masker
         self.labels_ = self.parcel_masker.labels
         self.n_pieces = self.parcel_masker.n_pieces
+        parcellation_img = self.parcel_masker.get_parcellation_img()
+
+        # Add new features based on the modality
+        imgs_ = get_modality_features(
+            imgs, parcellation_img, self.masker, self.modality
+        )
 
         subjects_data = [
             torch.tensor(
@@ -240,7 +261,7 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
                 device=self.device,
                 dtype=torch.float32,
             )
-            for img in imgs
+            for img in imgs_
         ]
         sparsity_mask = _sparse_cluster_matrix(self.labels_).to(self.device)
         template_data, self.fit_ = _fit_sparse_template(
@@ -254,7 +275,7 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
             **self.kwargs,
         )
 
-        self.template_img = self.masker.inverse_transform(
+        self.template = self.masker.inverse_transform(
             template_data.cpu().numpy()
         )
         if self.save_template is not None:
@@ -289,15 +310,19 @@ class SparseTemplateAlignment(BaseEstimator, TransformerMixin):
             )
 
         if subject_index is None:
+            img_ = get_modality_features(
+                [img], self.get_parcellation()[1], self.masker, self.modality
+            )[0]
             alignment_estimator = SparsePairwiseAlignment(
                 n_pieces=self.n_pieces,
                 alignment_method=self.alignment_method,
                 clustering=self.parcel_masker.get_parcellation_img(),
                 masker=self.masker,
+                modality="response",  # self.template already includes the modality
                 n_jobs=self.n_jobs,
                 verbose=self.verbose,
             )
-            alignment_estimator.fit(img, self.template)
+            alignment_estimator.fit(img_, self.template)
             return alignment_estimator.transform(img)
         else:
             X = torch.tensor(
