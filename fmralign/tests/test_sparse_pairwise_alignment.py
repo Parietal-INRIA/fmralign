@@ -1,9 +1,10 @@
+from itertools import product
+
 import numpy as np
 import pytest
 import torch
 from nibabel.nifti1 import Nifti1Image
 from nilearn.surface import SurfaceImage
-from itertools import product
 
 from fmralign.sparse_pairwise_alignment import SparsePairwiseAlignment
 from fmralign.tests.utils import (
