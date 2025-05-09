@@ -1,20 +1,13 @@
 # -*- coding: utf-8 -*-
 import warnings
 from collections import defaultdict
-from typing import Iterable
 
 import nibabel as nib
 import numpy as np
 import torch
-from nibabel import Nifti1Image
 from nilearn._utils.niimg_conversions import check_same_fov
 from nilearn.image import concat_imgs, new_img_like, smooth_img
-from nilearn.maskers import (
-    NiftiLabelsMasker,
-    NiftiMasker,
-    SurfaceLabelsMasker,
-    SurfaceMasker,
-)
+from nilearn.maskers import NiftiLabelsMasker, SurfaceLabelsMasker
 from nilearn.maskers._utils import concatenate_surface_images
 from nilearn.masking import apply_mask_fmri, intersect_masks
 from nilearn.regions.parcellations import Parcellations
@@ -407,11 +400,7 @@ def load_alignment(input_path):
     return joblib.load(input_path)
 
 
-def get_connectivity_features(
-    img: Nifti1Image | SurfaceImage,
-    parcelation_img: Nifti1Image | SurfaceImage,
-    masker: NiftiMasker | SurfaceMasker,
-) -> Nifti1Image:
+def get_connectivity_features(img, parcelation_img, masker):
     """Compute connectivity features for a single subject.
 
     Parameters
@@ -466,12 +455,7 @@ def get_connectivity_features(
     return masker.inverse_transform(correlation_features)
 
 
-def get_modality_features(
-    imgs: Iterable[Nifti1Image | SurfaceImage],
-    parcellation_img: Nifti1Image | SurfaceImage,
-    masker: NiftiMasker | SurfaceMasker,
-    modality: str = "response",
-) -> Iterable[Nifti1Image]:
+def get_modality_features(imgs, parcellation_img, masker, modality="response"):
     """Compute alignment features for the given modality.
 
     Parameters
