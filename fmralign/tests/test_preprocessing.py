@@ -16,7 +16,7 @@ def test_init_default_params():
     assert parcel_masker.clustering == "kmeans"
     assert parcel_masker.mask is None
     assert parcel_masker.smoothing_fwhm is None
-    assert parcel_masker.standardize is False
+    assert parcel_masker.standardize == "zscore_sample"
     assert parcel_masker.detrend is False
     assert parcel_masker.labels is None
 
@@ -264,9 +264,9 @@ def test_get_parcellation_img():
 def test_clustering_surf():
     """Test that ParcellationMasker can use surface images as clustering"""
     img = surf_img(20)
-    clustering_surf_img = surf_img(20)
-    clustering_surf_img.data.parts["left"] = np.zeros((4, 20))
-    clustering_surf_img.data.parts["right"] = np.ones((5, 20))
+    clustering_surf_img = surf_img(1)
+    clustering_surf_img.data.parts["left"] = np.zeros((4, 1))
+    clustering_surf_img.data.parts["right"] = np.ones((5, 1))
 
     parcel_masker = ParcellationMasker(clustering=clustering_surf_img)
     parcel_masker.fit(img)
