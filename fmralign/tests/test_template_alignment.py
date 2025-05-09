@@ -306,11 +306,10 @@ def test_surface_template(modality):
     # Test transformation on real subject
     img_transformed = alignment.transform(img1, subject_index=0)
     assert isinstance(img_transformed, SurfaceImage)
-    for hemi in ["left", "right"]:
-        assert np.allclose(
-            img_transformed.data.parts[hemi],
-            img1.data.parts[hemi],
-        )
+    masker = alignment.masker
+    assert np.allclose(
+        masker.transform(img_transformed), masker.transform(img1)
+    )
 
     # Test parcellation retrieval
     labels, parcellation_image = alignment.get_parcellation()
