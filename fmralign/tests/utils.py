@@ -153,12 +153,10 @@ def surf_img(n_samples=1):
 
     mesh = _make_mesh()
     data = {}
-    for i, (key, val) in enumerate(mesh.parts.items()):
+    for key, val in mesh.parts.items():
         data_shape = (val.n_vertices, n_samples)
-        data_part = (
-            np.arange(np.prod(data_shape)).reshape(data_shape[::-1]) + 1.0
-        ) * 10**i
-        data[key] = data_part.T
+        data_part = np.random.randn(*data_shape)
+        data[key] = data_part
     return SurfaceImage(mesh, data)
 
 
