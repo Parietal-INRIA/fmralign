@@ -232,7 +232,16 @@ def _make_parcellation(
         labels = apply_mask_fmri(clustering, masker.mask_img_).astype(int)
 
     elif isinstance(clustering, SurfaceImage):
-        labels = masker.transform(clustering)[0].astype(int)
+        labels = (
+            np.vstack(
+                [
+                    clustering.data.parts["left"],
+                    clustering.data.parts["right"],
+                ]
+            )
+            .astype(int)
+            .ravel()
+        )
 
     # otherwise check it's needed, if not return 1 everywhere
     elif n_pieces == 1:
