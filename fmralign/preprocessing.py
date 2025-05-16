@@ -173,7 +173,7 @@ class ParcellationMasker(BaseEstimator, TransformerMixin):
             # check that clustering provided fills the mask, if not, reduce the mask
             if 0 in self.masker.transform(self.clustering):
                 reduced_mask = _intersect_clustering_mask(
-                    self.clustering, self.masker.mask_img
+                    self.clustering, self.masker.mask_img_
                 )
                 self.mask = reduced_mask
                 self.masker = check_embedded_masker(self)
