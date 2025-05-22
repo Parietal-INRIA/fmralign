@@ -127,12 +127,30 @@ def test_parcellation_before_fit():
         alignment.get_parcellation()
 
 
-def test_surface_alignment():
+@pytest.mark.parametrize("modality", ["response", "connectivity", "hybrid"])
+def test_various_modalities(modality):
+    """Test all modalities with Nifti images"""
+    n_pieces = 3
+    img1, _ = random_niimg((8, 7, 6, 10))
+    img2, _ = random_niimg((8, 7, 6, 10))
+    alignment = PairwiseAlignment(n_pieces=n_pieces, modality=modality)
+
+    # Test fitting
+    alignment.fit(img1, img2)
+
+    # Test transformation
+    img_transformed = alignment.transform(img1)
+    assert img_transformed.shape == img1.shape
+    assert isinstance(img_transformed, Nifti1Image)
+
+
+@pytest.mark.parametrize("modality", ["response", "connectivity", "hybrid"])
+def test_surface_alignment(modality):
     """Test compatibility with `SurfaceImage`"""
     n_pieces = 3
     img1 = surf_img(20)
     img2 = surf_img(20)
-    alignment = PairwiseAlignment(n_pieces=n_pieces)
+    alignment = PairwiseAlignment(n_pieces=n_pieces, modality=modality)
 
     # Test fitting
     alignment.fit(img1, img2)

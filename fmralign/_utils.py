@@ -6,7 +6,9 @@ import nibabel as nib
 import numpy as np
 import torch
 from nilearn._utils.niimg_conversions import check_same_fov
-from nilearn.image import new_img_like, smooth_img
+from nilearn.image import concat_imgs, new_img_like, smooth_img
+from nilearn.maskers import NiftiLabelsMasker, SurfaceLabelsMasker
+from nilearn.maskers._utils import concatenate_surface_images
 from nilearn.masking import apply_mask_fmri, intersect_masks
 from nilearn.regions.parcellations import Parcellations
 from nilearn.surface import SurfaceImage
@@ -230,7 +232,16 @@ def _make_parcellation(
         labels = apply_mask_fmri(clustering, masker.mask_img_).astype(int)
 
     elif isinstance(clustering, SurfaceImage):
-        labels = masker.transform(clustering)[0].astype(int)
+        labels = (
+            np.vstack(
+                [
+                    clustering.data.parts["left"],
+                    clustering.data.parts["right"],
+                ]
+            )
+            .astype(int)
+            .ravel()
+        )
 
     # otherwise check it's needed, if not return 1 everywhere
     elif n_pieces == 1:
@@ -396,3 +407,127 @@ def load_alignment(input_path):
         input_path = max(pkl_files, key=lambda x: x.stat().st_mtime)
 
     return joblib.load(input_path)
+
+
+def get_connectivity_features(img, parcelation_img, masker):
+    """Compute connectivity features for a single subject.
+
+    Parameters
+    ----------
+    img : Nifti1Image | SurfaceImage
+        Input subject image.
+    parcelation_img : Nifti1Image | SurfaceImage
+        Labels image for connectivity seeds.
+    masker : NiftiMasker | SurfaceMasker
+        Masker used to transform the data.
+
+    Returns
+    -------
+    Nifti1Image | SurfaceImage
+        Connectivity features image.
+    """
+
+    # Generate a LabelsMasker with the same parameters as the original masker
+    allowed_keys = {
+        "smoothing_fwhm",
+        "standardize",
+        "standardize_confounds",
+        "detrend",
+        "low_pass",
+        "high_pass",
+        "t_r",
+        "memory",
+        "memory_level",
+        "verbose",
+    }
+    params = {
+        k: v for k, v in masker.get_params().items() if k in allowed_keys
+    }
+    if params["standardize"] is False:
+        raise ValueError(
+            "Standardization is required for connectivity features."
+        )
+    if isinstance(parcelation_img, SurfaceImage):
+        connectivity_targets = SurfaceLabelsMasker(
+            labels_img=parcelation_img, **params
+        ).fit_transform(img)
+    else:
+        connectivity_targets = NiftiLabelsMasker(
+            labels_img=parcelation_img, **params
+        ).fit_transform(img)
+
+    # Compute the correlation features (n_targets x n_voxels)
+    data = masker.transform(img)
+    correlation_features = (
+        connectivity_targets.T @ data / connectivity_targets.shape[0]
+    )
+    return masker.inverse_transform(correlation_features)
+
+
+def get_modality_features(imgs, parcellation_img, masker, modality="response"):
+    """Compute alignment features for the given modality.
+
+    Parameters
+    ----------
+    imgs : Iterable[Nifti1Image  |  SurfaceImage]
+        Iterable of images to be aligned.
+    parcelation_img : Nifti1Image | SurfaceImage
+        Labels image for connectivity seeds.
+    masker : NiftiMasker | SurfaceMasker
+        Masker used to transform the data.
+    modality : str, optional
+        modality : str, optional (default='response')
+        Specifies the alignment modality to be used:
+        * 'response': Aligns by directly comparing corresponding similar
+        time points in the source and target images.
+        * 'connectivity': Aligns based on voxel-wise connectivity features
+        within each parcel, comparing how each voxel relates to others in
+        the same region.
+        * 'hybrid': Combines both time series and connectivity information
+        to perform the alignment.
+
+    Returns
+    -------
+    Iterable[Nifti1Image]
+        List of images with additional features for alignment based on the
+        specified modality.
+        If modality is 'response', the original images are returned.
+        If modality is 'connectivity', the connectivity features are returned.
+        If modality is 'hybrid', the original images and connectivity features
+        are concatenated and returned.
+
+    Raises
+    ------
+    ValueError
+        If the modality is not one of 'response', 'connectivity', or 'hybrid'.
+    """
+    if modality == "response":
+        return imgs
+
+    elif modality == "connectivity":
+        connectivity_imgs = []
+        for img in imgs:
+            connectivity_imgs.append(
+                get_connectivity_features(img, parcellation_img, masker)
+            )
+        return connectivity_imgs
+
+    elif modality == "hybrid":
+        hybrid_imgs = []
+        for img in imgs:
+            connectivity_img = get_connectivity_features(
+                img, parcellation_img, masker
+            )
+            if isinstance(img, SurfaceImage):
+                hybrid_img = concatenate_surface_images(
+                    [img, connectivity_img]
+                )
+            else:
+                hybrid_img = concat_imgs([img, connectivity_img])
+            hybrid_imgs.append(hybrid_img)
+        return hybrid_imgs
+
+    else:
+        raise ValueError(
+            "mode must be 'response', 'connectivity', or 'hybrid'."
+        )

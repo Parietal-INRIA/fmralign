@@ -1,3 +1,5 @@
+from itertools import product
+
 import numpy as np
 import pytest
 import torch
@@ -10,16 +12,19 @@ from fmralign.tests.utils import (
     surf_img,
 )
 
+modalities = ["response", "connectivity", "hybrid"]
 devices = [torch.device("cpu")]
 if torch.cuda.is_available():
     devices.append(torch.device("cuda:0"))
 
 
 @pytest.mark.skip_if_no_mkl
-@pytest.mark.parametrize("device", devices)
-def test_fit_method(device):
+@pytest.mark.parametrize("modality,device", product(modalities, devices))
+def test_fit_method(modality, device):
     """Test various solvers for SparsePairwiseAlignment"""
-    alignment = SparsePairwiseAlignment(n_pieces=3, device=device)
+    alignment = SparsePairwiseAlignment(
+        n_pieces=3, modality=modality, device=device
+    )
     img1, _ = random_niimg((8, 7, 6, 10))
     img2, _ = random_niimg((8, 7, 6, 10))
     alignment.fit(img1, img2)
@@ -42,15 +47,17 @@ def test_identity_alignment(device):
 
 @pytest.mark.skip_if_no_mkl
 @pytest.mark.parametrize(
-    "device",
-    devices,
+    "modality,device",
+    product(modalities, devices),
 )
-def test_surface_alignment(device):
+def test_surface_alignment(modality, device):
     """Test compatibility with `SurfaceImage`"""
     n_pieces = 3
     img1 = surf_img(20)
     img2 = surf_img(20)
-    alignment = SparsePairwiseAlignment(n_pieces=n_pieces)
+    alignment = SparsePairwiseAlignment(
+        n_pieces=n_pieces, modality=modality, device=device
+    )
 
     # Test fitting
     alignment.fit(img1, img2)

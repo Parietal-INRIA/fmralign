@@ -254,13 +254,45 @@ def test_parcellation_before_fit():
         alignment.get_parcellation()
 
 
-def test_surface_template():
+@pytest.mark.parametrize("modality", ["response", "connectivity", "hybrid"])
+def test_various_modalities(modality):
+    """Test all modalities with Nifti images"""
+    n_pieces = 3
+    img1, _ = random_niimg((8, 7, 6, 10))
+    img2, _ = random_niimg((8, 7, 6, 10))
+    img3, _ = random_niimg((8, 7, 6, 10))
+    alignment = TemplateAlignment(n_pieces=n_pieces, modality=modality)
+
+    # Test fitting
+    alignment.fit([img1, img2, img3])
+    assert isinstance(alignment.template, Nifti1Image)
+    if modality == "response":
+        assert alignment.template.shape == img1.shape
+    elif modality == "connectivity":
+        assert alignment.template.shape[-1] == n_pieces
+    elif modality == "hybrid":
+        assert alignment.template.shape[-1] == n_pieces + img1.shape[-1]
+
+    # Test transformation on existing subject
+    img_transformed = alignment.transform(img1, subject_index=0)
+    assert isinstance(img_transformed, Nifti1Image)
+    assert img_transformed.shape == img1.shape
+
+    # Test transformation on new subject
+    new_img, _ = random_niimg((8, 7, 6, 10))
+    img_transformed = alignment.transform(new_img)
+    assert isinstance(img_transformed, Nifti1Image)
+    assert img_transformed.shape == img1.shape
+
+
+@pytest.mark.parametrize("modality", ["response", "connectivity", "hybrid"])
+def test_surface_template(modality):
     """Test compatibility with `SurfaceImage`"""
     n_pieces = 3
     img1 = surf_img(20)
     img2 = surf_img(20)
     img3 = surf_img(20)
-    alignment = TemplateAlignment(n_pieces=n_pieces)
+    alignment = TemplateAlignment(n_pieces=n_pieces, modality=modality)
 
     # Test fitting
     alignment.fit([img1, img2, img3])
@@ -274,11 +306,10 @@ def test_surface_template():
     # Test transformation on real subject
     img_transformed = alignment.transform(img1, subject_index=0)
     assert isinstance(img_transformed, SurfaceImage)
-    for hemi in ["left", "right"]:
-        assert np.allclose(
-            img_transformed.data.parts[hemi],
-            img1.data.parts[hemi],
-        )
+    masker = alignment.masker
+    assert np.allclose(
+        masker.transform(img_transformed), masker.transform(img1)
+    )
 
     # Test parcellation retrieval
     labels, parcellation_image = alignment.get_parcellation()

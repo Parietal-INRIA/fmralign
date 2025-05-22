@@ -9,7 +9,7 @@ from sklearn.base import BaseEstimator, TransformerMixin, clone
 from sklearn.utils.validation import check_is_fitted
 
 from fmralign import alignment_methods
-from fmralign._utils import _transform_one_img
+from fmralign._utils import _transform_one_img, get_modality_features
 from fmralign.preprocessing import ParcellationMasker
 
 
@@ -88,6 +88,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         n_pieces=1,
         clustering="kmeans",
         masker=None,
+        modality="response",
         n_jobs=1,
         verbose=0,
     ):
@@ -119,6 +120,15 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
             A mask to be used on the data. If provided, the mask
             will be used to extract the data. If None, a mask will
             be computed automatically with default parameters.
+        modality : str, optional (default='response')
+            Specifies the alignment modality to be used:
+            * 'response': Aligns by directly comparing corresponding similar 
+            time points in the source and target images.
+            * 'connectivity': Aligns based on voxel-wise connectivity features 
+            within each parcel, comparing how each voxel relates to others in 
+            the same region.
+            * 'hybrid': Combines both time series and connectivity information 
+            to perform the alignment.
         n_jobs: integer, optional (default = 1)
             The number of CPUs to use to do the computation. -1 means
             'all CPUs', -2 'all CPUs but one', and so on.
@@ -129,6 +139,7 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
         self.alignment_method = alignment_method
         self.clustering = clustering
         self.masker = masker
+        self.modality = modality
         self.n_jobs = n_jobs
         self.verbose = verbose
 
@@ -155,12 +166,21 @@ class PairwiseAlignment(BaseEstimator, TransformerMixin):
             verbose=self.verbose,
         )
 
-        parceled_source, parceled_target = self.parcel_masker.fit_transform(
-            [X, Y]
-        )
+        self.parcel_masker.fit([X, Y])
         self.masker = self.parcel_masker.masker
         self.labels_ = self.parcel_masker.labels
         self.n_pieces = self.parcel_masker.n_pieces
+        parcellation_img = self.parcel_masker.get_parcellation_img()
+
+        # Add new features based on the modality
+        X_, Y_ = get_modality_features(
+            [X, Y], parcellation_img, self.masker, self.modality
+        )
+
+        # Parcelate the data
+        parceled_source, parceled_target = self.parcel_masker.transform(
+            [X_, Y_]
+        )
 
         self.fit_ = Parallel(
             self.n_jobs, prefer="threads", verbose=self.verbose

@@ -16,6 +16,7 @@ from fmralign.sparse_template_alignment import (
 from fmralign.template_alignment import TemplateAlignment
 from fmralign.tests.utils import random_niimg, sample_subjects_data
 
+modalities = ["response", "connectivity", "hybrid"]
 devices = [torch.device("cpu")]
 if torch.cuda.is_available():
     devices.append(torch.device("cuda:0"))
@@ -151,7 +152,44 @@ def test_consistency_with_dense_templates():
     sparse_algo.fit([img1, img2, img3])
 
     template1 = dense_algo.template
-    template2 = sparse_algo.template_img
+    template2 = sparse_algo.template
     assert np.allclose(
         masker.transform(template1), masker.transform(template2)
     )
+
+
+@pytest.mark.skip_if_no_mkl
+@pytest.mark.parametrize(
+    "modality, device",
+    product(modalities, devices),
+)
+def test_various_modalities(modality, device):
+    """Test all modalities with Nifti images"""
+    n_pieces = 3
+    img1, _ = random_niimg((8, 7, 6, 10))
+    img2, _ = random_niimg((8, 7, 6, 10))
+    img3, _ = random_niimg((8, 7, 6, 10))
+    alignment = SparseTemplateAlignment(
+        n_pieces=n_pieces, modality=modality, device=device
+    )
+
+    # Test fitting
+    alignment.fit([img1, img2, img3])
+    assert isinstance(alignment.template, Nifti1Image)
+    if modality == "response":
+        assert alignment.template.shape == img1.shape
+    elif modality == "connectivity":
+        assert alignment.template.shape[-1] == n_pieces
+    elif modality == "hybrid":
+        assert alignment.template.shape[-1] == n_pieces + img1.shape[-1]
+
+    # Test transformation on existing subject
+    img_transformed = alignment.transform(img1, subject_index=0)
+    assert isinstance(img_transformed, Nifti1Image)
+    assert img_transformed.shape == img1.shape
+
+    # Test transformation on new subject
+    new_img, _ = random_niimg((8, 7, 6, 10))
+    img_transformed = alignment.transform(new_img)
+    assert isinstance(img_transformed, Nifti1Image)
+    assert img_transformed.shape == img1.shape

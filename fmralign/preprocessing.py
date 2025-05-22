@@ -79,7 +79,7 @@ class ParcellationMasker(BaseEstimator, TransformerMixin):
     smoothing_fwhm: float, optional (default = None)
         If smoothing_fwhm is not None, it gives the size in millimeters
         of the spatial smoothing to apply to the signal.
-    standardize: boolean, optional (default = False)
+    standardize: boolean, optional (default = "zscore_sample")
         If standardize is True, the time-series are centered and normed:
         their variance is put to 1 in the time dimension.
     detrend: boolean, optional (default = None)
@@ -123,7 +123,7 @@ class ParcellationMasker(BaseEstimator, TransformerMixin):
         masker=None,
         mask=None,
         smoothing_fwhm=None,
-        standardize=False,
+        standardize="zscore_sample",
         detrend=False,
         target_affine=None,
         target_shape=None,
@@ -173,7 +173,7 @@ class ParcellationMasker(BaseEstimator, TransformerMixin):
             # check that clustering provided fills the mask, if not, reduce the mask
             if 0 in self.masker.transform(self.clustering):
                 reduced_mask = _intersect_clustering_mask(
-                    self.clustering, self.masker.mask_img
+                    self.clustering, self.masker.mask_img_
                 )
                 self.mask = reduced_mask
                 self.masker = check_embedded_masker(self)
