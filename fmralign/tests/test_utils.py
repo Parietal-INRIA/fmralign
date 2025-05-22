@@ -10,8 +10,12 @@ from fmralign._utils import (
     ParceledData,
     _make_parcellation,
     _sparse_cluster_matrix,
+    load_alignment,
+    save_alignment,
 )
 from fmralign.tests.utils import random_niimg, sample_parceled_data
+from fmralign.pairwise_alignment import PairwiseAlignment
+from sklearn.exceptions import NotFittedError
 
 
 def test_make_parcellation():
@@ -215,3 +219,28 @@ def test_sparse_cluster_matrix():
     assert sparse_matrix.shape == (5, 5)
     assert sparse_matrix.dtype == torch.bool
     assert torch.allclose(sparse_matrix.to_dense(), expected)
+
+
+def test_saving_and_loading(tmp_path):
+    """Test saving and loading utilities."""
+    img1, _ = random_niimg((7, 6, 8, 5))
+    img2, _ = random_niimg((7, 6, 8, 5))
+
+    algo = PairwiseAlignment()
+
+    # Check that there is an error when trying to save without fitting
+    with pytest.raises(NotFittedError):
+        save_alignment(algo, tmp_path)
+
+    # Fit the model
+    algo.fit(img1, img2)
+    # Save the model
+    save_alignment(algo, tmp_path)
+    # Load the model
+    loaded_model = load_alignment(tmp_path)
+
+    # Check that the transformed images are the same
+    transformed_img1 = loaded_model.transform(img1)
+    assert_array_almost_equal(
+        transformed_img1.get_fdata(), algo.transform(img1).get_fdata()
+    )
