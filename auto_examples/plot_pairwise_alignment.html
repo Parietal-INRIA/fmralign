@@ -7,10 +7,10 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://nilearn.github.io/auto_examples/plot_pairwise_alignment.html" />
 <meta property="og:site_name" content="Nilearn" />
-<meta property="og:description" content="In this tutorial, we show how to better predict new contrasts for a target subject using source subject corresponding contrasts and data in common. We mostly rely on python common packages and on n..." />
+<meta property="og:description" content="This is a comment In this tutorial, we show how to better predict new contrasts for a target subject using source subject corresponding contrasts and data in common. We mostly rely on python common..." />
 <meta property="og:image" content="https://nilearn.github.io/_static/nilearn-logo.png" />
 <meta property="og:image:alt" content="Nilearn" />
-<meta name="description" content="In this tutorial, we show how to better predict new contrasts for a target subject using source subject corresponding contrasts and data in common. We mostly rely on python common packages and on n..." />
+<meta name="description" content="This is a comment In this tutorial, we show how to better predict new contrasts for a target subject using source subject corresponding contrasts and data in common. We mostly rely on python common..." />
 <link rel="search" title="Search" href="../search.html" /><link rel="next" title="Pairwise functional alignment on a ROI." href="plot_pairwise_roi_alignment.html" /><link rel="prev" title="Template-based prediction." href="plot_template_alignment.html" />
 
     <link rel="shortcut icon" href="../_static/favicon.ico"/><!-- Generated with Sphinx 8.2.3 and Furo 2024.08.06 -->
@@ -326,7 +326,8 @@ to download the full example code. or to run this example in your browser via Bi
 </div>
 <section class="sphx-glr-example-title" id="pairwise-functional-alignment">
 <span id="sphx-glr-auto-examples-plot-pairwise-alignment-py"></span><h1>Pairwise functional alignment.<a class="headerlink" href="#pairwise-functional-alignment" title="Link to this heading">¶</a></h1>
-<p>In this tutorial, we show how to better predict new contrasts for a target
+<p>This is a comment
+In this tutorial, we show how to better predict new contrasts for a target
 subject using source subject corresponding contrasts and data in common.</p>
 <p>We mostly rely on python common packages and on nilearn to handle functional
 data in a clean fashion.</p>
@@ -850,14 +851,14 @@ common model proposed in the literature:
 <a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">target_pred</span></a> <span class="o">=</span> <span class="n">alignment_estimator</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><a href="https://nipy.org/nibabel/reference/nibabel.nifti1.html#nibabel.nifti1.Nifti1Image" title="nibabel.nifti1.Nifti1Image" class="sphx-glr-backref-module-nibabel-nifti1 sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">source_test</span></a><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/fmralign/fmralign/fmralign/_utils.py:254: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/fmralign/fmralign/fmralign/_utils.py:258: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
 Parameter mask_strategy :
     Masker parameter background - overriding estimator parameter epi
 Parameter smoothing_fwhm :
     Masker parameter None - overriding estimator parameter 4.0
 
   parcellation.fit(images_to_parcel)
-/home/runner/work/fmralign/fmralign/fmralign/_utils.py:254: FutureWarning: The nifti_maps_masker_ attribute is deprecated andwill be removed in Nilearn 0.11.3. Please use maps_masker_ instead.
+/home/runner/work/fmralign/fmralign/fmralign/_utils.py:258: FutureWarning: The nifti_maps_masker_ attribute is deprecated andwill be removed in Nilearn 0.11.3. Please use maps_masker_ instead.
   parcellation.fit(images_to_parcel)
 </pre></div>
 </div>
@@ -903,7 +904,7 @@ to see if alignment was able to predict a signal more alike the ground truth.</p
 </ul>
 <p>We can see on the plot that after alignment the prediction made for one
 subject data, informed by another subject are greatly improved.</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 40.951 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 37.645 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-pairwise-alignment-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/nilearn/nilearn/main?urlpath=lab/tree/notebooks/auto_examples/plot_pairwise_alignment.ipynb"><img alt="Launch binder" src="../_images/binder_badge_logo.svg" style="width: 150px;" />

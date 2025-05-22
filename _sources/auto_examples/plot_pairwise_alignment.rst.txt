@@ -20,7 +20,7 @@
 
 Pairwise functional alignment.
 ==============================
-
+This is a comment
 In this tutorial, we show how to better predict new contrasts for a target
 subject using source subject corresponding contrasts and data in common.
 
@@ -613,14 +613,14 @@ common model proposed in the literature:
 
  .. code-block:: none
 
-    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:254: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
+    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:258: UserWarning: Overriding provided-default estimator parameters with provided masker parameters :
     Parameter mask_strategy :
         Masker parameter background - overriding estimator parameter epi
     Parameter smoothing_fwhm :
         Masker parameter None - overriding estimator parameter 4.0
 
       parcellation.fit(images_to_parcel)
-    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:254: FutureWarning: The nifti_maps_masker_ attribute is deprecated andwill be removed in Nilearn 0.11.3. Please use maps_masker_ instead.
+    /home/runner/work/fmralign/fmralign/fmralign/_utils.py:258: FutureWarning: The nifti_maps_masker_ attribute is deprecated andwill be removed in Nilearn 0.11.3. Please use maps_masker_ instead.
       parcellation.fit(images_to_parcel)
 
 
@@ -716,7 +716,7 @@ subject data, informed by another subject are greatly improved.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 40.951 seconds)
+   **Total running time of the script:** (0 minutes 37.645 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_pairwise_alignment.py:

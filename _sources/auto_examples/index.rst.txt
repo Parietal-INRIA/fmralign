@@ -38,7 +38,7 @@ Examples
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="In this tutorial, we show how to better predict new contrasts for a target subject using source subject corresponding contrasts and data in common.">
+    <div class="sphx-glr-thumbcontainer" tooltip="We mostly rely on python common packages and on nilearn to handle functional data in a clean fashion.">
 
 .. only:: html
 
